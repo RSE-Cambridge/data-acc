@@ -19,3 +19,9 @@ You can build the images like this:
       --add-host linux0 openhpc-slurm-compute:v0.1
 
   docker exec -it slurm-master /bin/bash
+
+  docker image build -t openhpc-slurm-build:v0.1 ./docker/openhpc-slurm-build
+  docker run -dt --privileged --name slurm-build \
+      --network slurm -v /sys/fs/cgroup:/sys/fs/cgroup \
+      openhpc-slurm-build:v0.1
+  docker exec -it slurm-build /bin/bash
