@@ -33,6 +33,18 @@ RUN yum makecache fast \
 RUN pip install Cython nose \
     && pip3 install Cython nose
 
+
+RUN yum -y install \
+           json-c-devel \
+           cray-libalpscomm_cn-devel \
+           cray-libalpscomm_sn-devel \
+           libnuma-devel \
+           libhwloc-devel \
+           cray-libjob-devel \
+           gtk2-devel \
+           glib2-devel \
+           pkg-config
+
 RUN set -x \
     && wget -O slurm.tar.bz2 "$SLURM_DOWNLOAD_URL" \
     && echo "$SLURM_DOWNLOAD_MD5" slurm.tar.bz2 | md5sum -c - \
@@ -43,7 +55,7 @@ RUN set -x \
 
 RUN cd /usr/local/src/slurm \
     && ./configure --enable-debug --prefix=/usr --sysconfdir=/etc/slurm \
-        --with-mysql_config=/usr/bin  --libdir=/usr/lib64 \
+        --with-mysql_config=/usr/bin --libdir=/usr/lib64 \
     && make install \
     && install -D -m644 etc/cgroup.conf.example /etc/slurm/cgroup.conf.example \
     && install -D -m644 etc/slurm.conf.example /etc/slurm/slurm.conf.example \
