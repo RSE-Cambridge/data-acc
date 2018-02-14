@@ -83,4 +83,7 @@ RUN cd /usr/local/src/slurm \
     && chown -R slurm:slurm /var/*/slurm*
 #    && /sbin/create-munge-key
 
+RUN cd /usr/local/src/slurm/src/plugins/burst_buffer/cray \
+    && make install
+
 CMD ["/usr/sbin/init"]
