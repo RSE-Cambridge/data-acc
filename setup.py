@@ -54,6 +54,7 @@ setup(
             'show_sessions = burstbuffer.cmd.fakewarp_commands:ShowSessions',
             'teardown = burstbuffer.cmd.fakewarp_commands:Teardown',
             'job_process = burstbuffer.cmd.fakewarp_commands:JobProcess',
+            'setup = burstbuffer.cmd.fakewarp_commands:Setup',
         ],
     },
 

@@ -134,5 +134,33 @@ class JobProcess(Command):
 
         config = job_config_line.strip("#DW jobdw ")
         print(config)
-        # the next step involves waiting for buffer to appear in output
-        # then "setup" then "data_in" is called
+        # this validates the buffer script, next step is calling "setup"
+        # once there is enough available bust buffer space
+
+
+class Setup(Command):
+    """Create the burst buffer, ready to start the data stage_in"""
+
+    def get_parser(self, prog_name):
+        parser = super(Setup, self).get_parser(prog_name)
+        parser.add_argument('--token', type=str, dest="job_id",
+                            help="Job ID")
+        parser.add_argument('--job', type=str, dest="buffer_script",
+                            help="Path to burst buffer script file.")
+        parser.add_argument('--caller', type=str,
+                            help="Caller, i.e. SLURM")
+        parser.add_argument('--user', type=int,
+                            help="User id, i.e. 1001")
+        parser.add_argument('--groupid', type=int,
+                            help="Group id, i.e. 1001")
+        parser.add_argument('--capacity', type=str,
+                            help="The pool and capacity, i.e. dwcache:1GiB")
+        return parser
+
+    def take_action(self, parsed_args):
+        # this should add the burst buffer in the DB, so real_size works
+        print(parsed_args.job_id)
+        print(parsed_args.buffer_script)
+        print(parsed_args.capacity)
+        print("pool: %s, capacity: %s" % tuple(
+            parsed_args.capacity.split(":")))
