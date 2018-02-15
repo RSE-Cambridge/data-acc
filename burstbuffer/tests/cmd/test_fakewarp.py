@@ -11,7 +11,6 @@
 # under the License.
 
 import fixtures
-import mock
 import testtools
 
 from burstbuffer.cmd import fakewarp
