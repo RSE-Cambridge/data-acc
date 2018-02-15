@@ -26,10 +26,18 @@ class TestFakeWarp(testtools.TestCase):
         self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
 
     def test_pools(self):
-        fakewarp.main(["--function", "pools"])
+        result = fakewarp.main(["--function", "pools"])
+        self.assertEqual(0, result)
 
     def test_show_instances(self):
-        fakewarp.main(["--function", "show_instances"])
+        result = fakewarp.main(["--function", "show_instances"])
+        self.assertEqual(0, result)
 
     def test_show_sessions(self):
-        fakewarp.main(["--function", "show_sessions"])
+        result = fakewarp.main(["--function", "show_sessions"])
+        self.assertEqual(0, result)
+
+    def test_show_teardown(self):
+        cmdline = "--function teardown --token 347 --job /tmp/fakescript"
+        result = fakewarp.main(cmdline.split(" "))
+        self.assertEqual(0, result)

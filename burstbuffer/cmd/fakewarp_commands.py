@@ -12,13 +12,12 @@
 # under the License.
 
 import json
-import sys
 
 from cliff.command import Command
 
 
-def _output_as_json(output):
-    json.dump(output, sys.stdout, sort_keys=True, indent=4)
+def _output_as_json(cmd, output):
+    json.dump(output, cmd.app.stdout, sort_keys=True, indent=4)
 
 
 class Pools(Command):
@@ -33,7 +32,7 @@ class Pools(Command):
                  "quantity": 2048, "free": 2048}
             ]
         }
-        _output_as_json(fake_pools)
+        _output_as_json(self, fake_pools)
 
 
 class ShowInstances(Command):
@@ -67,7 +66,7 @@ class ShowInstances(Command):
                 "mixed": False, "transitioning": False}},
         ]
         fake_instances = {"instances": fake_instances}
-        _output_as_json(fake_instances)
+        _output_as_json(self, fake_instances)
 
 
 class ShowSessions(Command):
@@ -93,4 +92,20 @@ class ShowSessions(Command):
              "token": "347"},
         ]
         fake_sessions = {"sessions": fake_sessions}
-        _output_as_json(fake_sessions)
+        _output_as_json(self, fake_sessions)
+
+
+class Teardown(Command):
+    """Start the teardown of the given burst buffer"""
+
+    def get_parser(self, prog_name):
+        parser = super(Teardown, self).get_parser(prog_name)
+        parser.add_argument('--token', type=str, dest="job_id",
+                            help="Job ID")
+        parser.add_argument('--job', type=str, dest="buffer_script",
+                            help="Path to burst buffer script file.")
+        return parser
+
+    def take_action(self, parsed_args):
+        print(parsed_args.job_id)
+        print(parsed_args.buffer_script)
