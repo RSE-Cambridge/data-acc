@@ -49,7 +49,9 @@ setup(
             'fakewarp = burstbuffer.cmd.fakewarp:main',
         ],
         'burstbuffer.fakewarp': [
-            'pools = burstbuffer.cmd.fakewarp_commands:Pools'
+            'pools = burstbuffer.cmd.fakewarp_commands:Pools',
+            'show_instances = burstbuffer.cmd.fakewarp_commands:ShowInstances',
+            'show_sessions = burstbuffer.cmd.fakewarp_commands:ShowSessions'
         ],
     },
 

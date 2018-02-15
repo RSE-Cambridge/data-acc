@@ -22,7 +22,9 @@ class FakeWarpApp(App):
         super(FakeWarpApp, self).__init__(
             description='FakeWarp Command Line Interface (CLI)',
             version='0.1',
-            command_manager=CommandManager('burstbuffer.fakewarp'),
+            command_manager=CommandManager(
+                'burstbuffer.fakewarp',
+                convert_underscores=False),
             deferred_help=True,
             )
 

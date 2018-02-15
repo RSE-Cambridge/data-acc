@@ -17,6 +17,10 @@ import sys
 from cliff.command import Command
 
 
+def _output_as_json(output):
+    json.dump(output, sys.stdout, sort_keys=True, indent=4)
+
+
 class Pools(Command):
     """Output burst buffer pools"""
 
@@ -29,4 +33,45 @@ class Pools(Command):
                  "quantity": 2048, "free": 2048}
             ]
         }
-        json.dump(fake_pools, sys.stdout, sort_keys=True, indent=4)
+        _output_as_json(fake_pools)
+
+
+class ShowInstances(Command):
+    """Show burst buffers instances"""
+
+    def take_action(self, parsed_args):
+        fake_instances = [
+                {"capacity": {
+                "bytes": 1099511627776, "nodes": 2},
+             "created": 1478231657, "expiration": 0, "expired": False,
+             "id": 74, "intact": True, "label": "alpha",
+             "limits": {
+                 "write_window_length": 86400, "write_window_multiplier": 10},
+             "links": {
+                 "configurations": [72], "session": 74},
+             "public": True,
+             "state": {
+                 "actualized": True, "fuse_blown": False, "goal": "create",
+                 "mixed": False, "transitioning": False}},
+            {"capacity": {
+                "bytes": 1099511627776, "nodes": 2},
+             "created": 1478232104, "expiration": 0, "expired": False,
+             "id": 75, "intact": True, "label": "I75-0",
+             "limits": {
+                "write_window_length": 86400, "write_window_multiplier": 10},
+             "links": {
+                "configurations": [73], "session": 75},
+             "public": False,
+             "state": {
+                "actualized": True, "fuse_blown": False, "goal": "create",
+                "mixed": False, "transitioning": False}},
+        ]
+        fake_instances = {"instances": fake_instances}
+        _output_as_json(fake_instances)
+
+
+class ShowSessions(Command):
+    """Show burst buffers sessions"""
+
+    def take_action(self, parsed_args):
+        pass
