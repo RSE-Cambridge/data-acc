@@ -235,7 +235,7 @@ class PreRun(Command):
 
     def take_action(self, parsed_args):
         with open(parsed_args.nodehostnamefile) as f:
-            print("\n".join(f.readlines()))
+            print("".join(f.readlines()))
 
 
 class PostRun(Command):
