@@ -12,6 +12,7 @@
 # under the License.
 
 import json
+import time
 
 from cliff.command import Command
 
@@ -182,3 +183,20 @@ class RealSize(Command):
             "units": "bytes"
         }
         _output_as_json(self, fake_size)
+
+
+class DataIn(Command):
+    """Start copy of data into the burst buffer"""
+
+    def get_parser(self, prog_name):
+        parser = super(DataIn, self).get_parser(prog_name)
+        parser.add_argument('--token', type=str, dest="job_id",
+                            help="Job ID")
+        parser.add_argument('--job', type=str, dest="buffer_script",
+                            help="Path to burst buffer script file.")
+        return parser
+
+    def take_action(self, parsed_args):
+        # although I think this is async...
+        time.sleep(10)
+        # "No matching session" if there is no matching job found

@@ -11,6 +11,7 @@
 # under the License.
 
 import io
+import mock
 import tempfile
 
 import fixtures
@@ -75,5 +76,11 @@ class TestFakeWarp(testtools.TestCase):
 
     def test_real_size(self):
         cmdline = "--function real_size --token 13"
+        result = fakewarp.main(cmdline.split(" "))
+        self.assertEqual(0, result)
+
+    @mock.patch("time.sleep")
+    def test_data_in(self, mock_sleep):
+        cmdline = "--function data_in --token 15 --job /tmp/jobscript"
         result = fakewarp.main(cmdline.split(" "))
         self.assertEqual(0, result)
