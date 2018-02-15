@@ -106,7 +106,7 @@ To create a burst buffer you need to be the slurm user, not root:
 
 ```console
 su slurm
-srun --bb="Capacity=1G" hostname
+srun --bb="capacity=1G" hostname
 ```
 
 ## Stopping and Restarting the Cluster
