@@ -95,7 +95,7 @@ class TestFakeWarp(testtools.TestCase):
 
     def test_pre_run(self):
         with tempfile.NamedTemporaryFile() as f:
-            f.write(b"c1")
+            f.write(b"somecomputehostname")
             f.flush()
             cmdline = "pre_run --token 19 --job /tmp/script "
             cmdline += "--nodehostnamefile %s" % f.name
@@ -103,3 +103,8 @@ class TestFakeWarp(testtools.TestCase):
             result = fakewarp.main(cmdline.split(" "))
 
             self.assertEqual(0, result)
+
+    def test_post_run(self):
+        cmdline = "post_run --token 27 --job /tmp/script"
+        result = fakewarp.main(cmdline.split(" "))
+        self.assertEqual(0, result)

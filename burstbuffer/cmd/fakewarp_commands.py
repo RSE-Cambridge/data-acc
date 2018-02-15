@@ -222,6 +222,7 @@ class Paths(Command):
 
 
 class PreRun(Command):
+    """Do setup on compute nodes prior to running job"""
     def get_parser(self, prog_name):
         parser = super(PreRun, self).get_parser(prog_name)
         parser.add_argument('--token', type=str, dest="job_id",
@@ -235,3 +236,17 @@ class PreRun(Command):
     def take_action(self, parsed_args):
         with open(parsed_args.nodehostnamefile) as f:
             print("\n".join(f.readlines()))
+
+
+class PostRun(Command):
+    """Do post run cleanup, before data stage out."""
+    def get_parser(self, prog_name):
+        parser = super(PostRun, self).get_parser(prog_name)
+        parser.add_argument('--token', type=str, dest="job_id",
+                            help="Job ID")
+        parser.add_argument('--job', type=str, dest="buffer_script",
+                            help="Path to burst buffer script file.")
+        return parser
+
+    def take_action(self, parsed_args):
+        print(parsed_args.job_id)
