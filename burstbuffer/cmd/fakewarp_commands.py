@@ -41,7 +41,7 @@ class ShowInstances(Command):
 
     def take_action(self, parsed_args):
         fake_instances = [
-                {"capacity": {
+            {"capacity": {
                 "bytes": 1099511627776, "nodes": 2},
              "created": 1478231657, "expiration": 0, "expired": False,
              "id": 74, "intact": True, "label": "alpha",
@@ -74,4 +74,23 @@ class ShowSessions(Command):
     """Show burst buffers sessions"""
 
     def take_action(self, parsed_args):
-        pass
+        fake_sessions = [
+            {"created": 1478231657, "creator": "CLI", "expiration": 0,
+             "expired": False, "id": 74,
+             "links": {"client_nodes": []},
+             "owner": 1001,
+             "state": {
+                 "actualized": True, "fuse_blown": False, "goal": "create",
+                 "mixed": False, "transitioning": False},
+             "token": "alpha"},
+            {"created": 1478232104, "creator": "SLURM", "expiration": 0,
+             "expired": False, "id": 75,
+             "links": {"client_nodes": ["nid00039"]},
+             "owner": 1001,
+             "state": {
+                 "actualized": True, "fuse_blown": False, "goal": "create",
+                 "mixed": False, "transitioning": False},
+             "token": "347"},
+        ]
+        fake_sessions = {"sessions": fake_sessions}
+        _output_as_json(fake_sessions)
