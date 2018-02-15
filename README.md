@@ -30,8 +30,30 @@ https://github.com/giovtorres/slurm-docker-cluster
 
 ## Installation
 
-TODO.
+```Console
+virtualenv .venv
+. .venv/bin/activate
+pip install -U pip
+pip install .
+```
+
+## Usage
+
+Try out the fake pools example:
+```Console
+fakewarp --fuction pools
+```
 
 ## Running tests
 
-TODO.
+To run unit tests:
+
+```Console
+tox -epy35
+```
+
+To check the style:
+
+```Console
+tox -epep8
+```
