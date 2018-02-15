@@ -200,3 +200,21 @@ class DataIn(Command):
         # although I think this is async...
         time.sleep(10)
         # "No matching session" if there is no matching job found
+
+
+class Paths(Command):
+    """Start copy of data into the burst buffer"""
+
+    def get_parser(self, prog_name):
+        parser = super(Paths, self).get_parser(prog_name)
+        parser.add_argument('--token', type=str, dest="job_id",
+                            help="Job ID")
+        parser.add_argument('--job', type=str, dest="buffer_script",
+                            help="Path to burst buffer script file.")
+        parser.add_argument('--pathfile', type=str,
+                            help="Path to write out environment variables.")
+        return parser
+
+    def take_action(self, parsed_args):
+        with open(parsed_args.pathfile, "w") as f:
+            f.write("DW_PATH_TEST=/tmp/dw")

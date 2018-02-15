@@ -84,3 +84,11 @@ class TestFakeWarp(testtools.TestCase):
         cmdline = "--function data_in --token 15 --job /tmp/jobscript"
         result = fakewarp.main(cmdline.split(" "))
         self.assertEqual(0, result)
+
+    def test_paths(self):
+        with tempfile.NamedTemporaryFile() as f:
+            cmdline = "--function paths "
+            cmdline += "--job /tmp/18/scirpt --token 18 --pathfile %s" % f.name
+            result = fakewarp.main(cmdline.split(" "))
+            self.assertEqual(0, result)
+            self.assertEqual(b'DW_PATH_TEST=/tmp/dw', f.readlines()[0])
