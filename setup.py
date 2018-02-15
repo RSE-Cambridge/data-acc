@@ -58,6 +58,7 @@ setup(
             'real_size = burstbuffer.cmd.fakewarp_commands:RealSize',
             'data_in = burstbuffer.cmd.fakewarp_commands:DataIn',
             'paths = burstbuffer.cmd.fakewarp_commands:Paths',
+            'pre_run = burstbuffer.cmd.fakewarp_commands:PreRun',
         ],
     },
 

@@ -203,7 +203,7 @@ class DataIn(Command):
 
 
 class Paths(Command):
-    """Start copy of data into the burst buffer"""
+    """Output paths to share with job in environment file"""
 
     def get_parser(self, prog_name):
         parser = super(Paths, self).get_parser(prog_name)
@@ -216,5 +216,22 @@ class Paths(Command):
         return parser
 
     def take_action(self, parsed_args):
+        # Test with: sbatch --bbf=buffer.txt --wrap="echo $DW_PATH_TEST"
         with open(parsed_args.pathfile, "w") as f:
             f.write("DW_PATH_TEST=/tmp/dw")
+
+
+class PreRun(Command):
+    def get_parser(self, prog_name):
+        parser = super(PreRun, self).get_parser(prog_name)
+        parser.add_argument('--token', type=str, dest="job_id",
+                            help="Job ID")
+        parser.add_argument('--job', type=str, dest="buffer_script",
+                            help="Path to burst buffer script file.")
+        parser.add_argument('--nodehostnamefile', type=str,
+                            help="Path file containing chosen nodes.")
+        return parser
+
+    def take_action(self, parsed_args):
+        with open(parsed_args.nodehostnamefile) as f:
+            print("\n".join(f.readlines()))

@@ -92,3 +92,14 @@ class TestFakeWarp(testtools.TestCase):
             result = fakewarp.main(cmdline.split(" "))
             self.assertEqual(0, result)
             self.assertEqual(b'DW_PATH_TEST=/tmp/dw', f.readlines()[0])
+
+    def test_pre_run(self):
+        with tempfile.NamedTemporaryFile() as f:
+            f.write(b"c1")
+            f.flush()
+            cmdline = "pre_run --token 19 --job /tmp/script "
+            cmdline += "--nodehostnamefile %s" % f.name
+
+            result = fakewarp.main(cmdline.split(" "))
+
+            self.assertEqual(0, result)
