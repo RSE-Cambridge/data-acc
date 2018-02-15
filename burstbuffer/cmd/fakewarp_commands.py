@@ -27,9 +27,9 @@ class Pools(Command):
         fake_pools = {
             "pools": [
                 {"id": "dwcache", "units": "bytes",
-                 "granularity": 1073741824, # 1GB
+                 "granularity": 1073741824,  # 1GB
                  "quantity": 4096,
-                 "free": 4096}, # i.e. 4TB
+                 "free": 4096},  # i.e. 4TB
                 {"id": "test_pool", "units": "bytes", "granularity": 16777216,
                  "quantity": 2048, "free": 2048}
             ]
@@ -106,11 +106,13 @@ class Teardown(Command):
                             help="Job ID")
         parser.add_argument('--job', type=str, dest="buffer_script",
                             help="Path to burst buffer script file.")
+        parser.add_argument('--hurry', action="store_true", default=False)
         return parser
 
     def take_action(self, parsed_args):
         print(parsed_args.job_id)
         print(parsed_args.buffer_script)
+        print(parsed_args.hurry)
 
 
 class JobProcess(Command):

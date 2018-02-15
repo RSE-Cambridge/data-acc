@@ -45,6 +45,12 @@ class TestFakeWarp(testtools.TestCase):
         result = fakewarp.main(cmdline.split(" "))
         self.assertEqual(0, result)
 
+    def test_teardown_with_hurry(self):
+        cmdline = "--function teardown --token 347 --job /tmp/fakescript"
+        cmdline += " --hurry"
+        result = fakewarp.main(cmdline.split(" "))
+        self.assertEqual(0, result)
+
     def test_job_process(self):
         with tempfile.NamedTemporaryFile() as f:
             f.write(b"#!/bin/bash\n")
