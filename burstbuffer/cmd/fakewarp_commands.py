@@ -112,7 +112,7 @@ class Teardown(Command):
 
 
 class JobProcess(Command):
-    """Initial call when job is run to parse buffer script"""
+    """Initial call when job is run to parse buffer script."""
 
     def get_parser(self, prog_name):
         parser = super(JobProcess, self).get_parser(prog_name)
@@ -121,4 +121,14 @@ class JobProcess(Command):
         return parser
 
     def take_action(self, parsed_args):
-        print(parsed_args.buffer_script)
+        job_config_line = None
+        with open(parsed_args.buffer_script) as f:
+            for line in f:
+                if line.startswith("#DW jobdw"):
+                    job_config_line = line
+                    break
+
+        config = job_config_line.strip("#DW jobdw ")
+        print(config)
+        # the next step involves waiting for buffer to appear in output
+        # then "setup" then "data_in" is called

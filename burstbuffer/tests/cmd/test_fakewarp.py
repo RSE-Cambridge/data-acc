@@ -10,6 +10,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import io
+import tempfile
+
 import fixtures
 import testtools
 
@@ -20,10 +23,10 @@ class TestFakeWarp(testtools.TestCase):
 
     def setUp(self):
         super(TestFakeWarp, self).setUp()
-        stdout = self.useFixture(fixtures.StringStream('stdout')).stream
-        self.useFixture(fixtures.MonkeyPatch('sys.stdout', stdout))
-        stderr = self.useFixture(fixtures.StringStream('stderr')).stream
-        self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
+        self.stdout = io.StringIO()
+        self.useFixture(fixtures.MonkeyPatch('sys.stdout', self.stdout))
+        self.stderr = io.StringIO()
+        self.useFixture(fixtures.MonkeyPatch('sys.stderr', self.stderr))
 
     def test_pools(self):
         result = fakewarp.main(["--function", "pools"])
@@ -43,6 +46,13 @@ class TestFakeWarp(testtools.TestCase):
         self.assertEqual(0, result)
 
     def test_job_process(self):
-        cmdline = "--function job_process --job /tmp/fakescript"
-        result = fakewarp.main(cmdline.split(" "))
-        self.assertEqual(0, result)
+        with tempfile.NamedTemporaryFile() as f:
+            f.write(b"#!/bin/bash\n")
+            f.write(b"#DW jobdw capacity=1GiB")
+            f.flush()
+            cmdline = "--function job_process --job %s" % f.name
+
+            result = fakewarp.main(cmdline.split(" "))
+
+            self.assertEqual(0, result)
+            self.assertEqual("capacity=1GiB\n", self.stdout.getvalue())
