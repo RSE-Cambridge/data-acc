@@ -37,7 +37,12 @@ class TestFakeWarp(testtools.TestCase):
         result = fakewarp.main(["--function", "show_sessions"])
         self.assertEqual(0, result)
 
-    def test_show_teardown(self):
+    def test_teardown(self):
         cmdline = "--function teardown --token 347 --job /tmp/fakescript"
+        result = fakewarp.main(cmdline.split(" "))
+        self.assertEqual(0, result)
+
+    def test_job_process(self):
+        cmdline = "--function job_process --job /tmp/fakescript"
         result = fakewarp.main(cmdline.split(" "))
         self.assertEqual(0, result)

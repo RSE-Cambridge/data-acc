@@ -109,3 +109,16 @@ class Teardown(Command):
     def take_action(self, parsed_args):
         print(parsed_args.job_id)
         print(parsed_args.buffer_script)
+
+
+class JobProcess(Command):
+    """Initial call when job is run to parse buffer script"""
+
+    def get_parser(self, prog_name):
+        parser = super(JobProcess, self).get_parser(prog_name)
+        parser.add_argument('--job', type=str, dest="buffer_script",
+                            help="Path to burst buffer script file.")
+        return parser
+
+    def take_action(self, parsed_args):
+        print(parsed_args.buffer_script)
