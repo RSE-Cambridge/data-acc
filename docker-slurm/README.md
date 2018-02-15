@@ -73,6 +73,18 @@ PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
 normal*      up 5-00:00:00      2   idle c[1-2]
 ```
 
+You can check the burst buffer is reporting correctly:
+
+```console
+[root@slurmctld /]# scontrol show burstbuffer
+Name=cray DefaultPool=dwcache Granularity=16MiB TotalSpace=32GiB FreeSpace=32GiB UsedSpace=0
+  AltPoolName[0]=test_pool Granularity=16MiB TotalSpace=32GiB FreeSpace=32GiB UsedSpace=0
+  Flags=EnablePersistent
+  StageInTimeout=30 StageOutTimeout=30 ValidateTimeout=5 OtherTimeout=300
+  AllowUsers=root,slurm
+  GetSysState=/opt/cray/dw_wlm/default/bin/dw_wlm_cli
+```
+
 ## Submitting Jobs
 
 The `slurm_jobdir` named volume is mounted on each Slurm container as `/data`.
@@ -85,8 +97,9 @@ the `/data` directory when on the **slurmctld** container and then submit a job:
 Submitted batch job 2
 [root@slurmctld data]# ls
 slurm-2.out
-[root@slurmctld data]# srun --bb="Capacity=1G" hostname
+[root@slurmctld data]# srun -n2 hostname
 c1
+c2
 ```
 
 To create a burst buffer you need to be the slurm user, not root:
