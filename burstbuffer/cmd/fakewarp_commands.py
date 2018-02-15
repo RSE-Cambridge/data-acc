@@ -164,3 +164,21 @@ class Setup(Command):
         print(parsed_args.capacity)
         print("pool: %s, capacity: %s" % tuple(
             parsed_args.capacity.split(":")))
+
+
+class RealSize(Command):
+    """Report actual size of burst buffer, rounded up for granularity"""
+
+    def get_parser(self, prog_name):
+        parser = super(RealSize, self).get_parser(prog_name)
+        parser.add_argument('--token', type=str, dest="job_id",
+                            help="Job ID")
+        return parser
+
+    def take_action(self, parsed_args):
+        fake_size = {
+            "token": parsed_args.job_id,
+            "capacity": 17592186044416,
+            "units": "bytes"
+        }
+        _output_as_json(self, fake_size)

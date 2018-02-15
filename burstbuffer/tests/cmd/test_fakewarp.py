@@ -72,3 +72,8 @@ class TestFakeWarp(testtools.TestCase):
         cmdline += "--job /var/lib/slurmd/hash.3/job.13/script"
         result = fakewarp.main(cmdline.split(" "))
         self.assertEqual(0, result)
+
+    def test_real_size(self):
+        cmdline = "--function real_size --token 13"
+        result = fakewarp.main(cmdline.split(" "))
+        self.assertEqual(0, result)
