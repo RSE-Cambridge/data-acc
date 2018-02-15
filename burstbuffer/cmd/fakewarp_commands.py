@@ -250,3 +250,17 @@ class PostRun(Command):
 
     def take_action(self, parsed_args):
         print(parsed_args.job_id)
+
+
+class DataOut(Command):
+    """Copy data out of burst buffer."""
+    def get_parser(self, prog_name):
+        parser = super(DataOut, self).get_parser(prog_name)
+        parser.add_argument('--token', type=str, dest="job_id",
+                            help="Job ID")
+        parser.add_argument('--job', type=str, dest="buffer_script",
+                            help="Path to burst buffer script file.")
+        return parser
+
+    def take_action(self, parsed_args):
+        print(parsed_args.job_id)

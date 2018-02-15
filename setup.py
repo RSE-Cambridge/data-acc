@@ -60,6 +60,7 @@ setup(
             'paths = burstbuffer.cmd.fakewarp_commands:Paths',
             'pre_run = burstbuffer.cmd.fakewarp_commands:PreRun',
             'post_run = burstbuffer.cmd.fakewarp_commands:PostRun',
+            'data_out = burstbuffer.cmd.fakewarp_commands:DataOut',
         ],
     },
 
