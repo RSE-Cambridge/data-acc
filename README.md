@@ -1,5 +1,7 @@
 # Generic BurstBuffer
 
+[![Build Status](https://www.travis-ci.org/JohnGarbutt/burstbuffer.svg?branch=master)](https://www.travis-ci.org/JohnGarbutt/burstbuffer)
+
 This project is designed to orchestrate the creation of a burst
 buffer built using commodity hardware. The buffer can be accessed
 by compute nodes using existing parallel file systems.
