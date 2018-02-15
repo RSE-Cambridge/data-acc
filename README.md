@@ -30,12 +30,17 @@ https://github.com/giovtorres/slurm-docker-cluster
 
 ## Installation
 
+For standalone usage, try this:
+
 ```Console
 virtualenv .venv
 . .venv/bin/activate
 pip install -U pip
 pip install .
 ```
+
+For install with Slurm integration [please read the docker-slurm
+README](docker-slurm/README.md)
 
 ## Usage
 
