@@ -109,6 +109,13 @@ su slurm
 srun --bb="capacity=1G" hostname
 ```
 
+To update the burst buffer python code and run a test job run:
+
+```console
+./update_burstbuffer.sh
+docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=1G\" bash -c \"set\"'"
+```
+
 ## Stopping and Restarting the Cluster
 
 ```console
