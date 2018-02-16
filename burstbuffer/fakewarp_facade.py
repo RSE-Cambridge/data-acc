@@ -38,12 +38,31 @@ def get_instances():
     instances = []
     for buff in buffers:
         instance = {
-            "id": buff.id,
+            "id": int(buff.id),
             "capacity": {
-                "bytes": buff.capacity_bytes,
-                "nodes": buff.capacity_slices,
+                "bytes": int(buff.capacity_bytes),
+                "nodes": int(buff.capacity_slices),
             },
-            "links": {"session": buff.id},
+            "links": {"session": int(buff.id)},
         }
         instances.append(instance)
     return {'instances': instances}
+
+
+def get_sessions():
+    buffers = execution_facade.get_all_buffers()
+    sessions = []
+    for buff in buffers:
+        session = {
+            "id": int(buff.id),
+            "created": int(buff.created_at),
+            "owner": int(buff.user_id),
+        }
+        if buff.job_id and not buff.persistent:
+            session['token'] = str(buff.job_id)
+        elif buff.name and buff.persistent:
+            session['token'] = str(buff.name)
+        else:
+            raise Exception("Unable to convert buffer to fakewarp view")
+        sessions.append(session)
+    return {"sessions": sessions}

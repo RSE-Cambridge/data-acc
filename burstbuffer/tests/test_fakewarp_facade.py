@@ -11,6 +11,7 @@
 # under the License.
 
 import mock
+import time
 
 import testtools
 
@@ -55,3 +56,22 @@ class TestFakewarpFacade(testtools.TestCase):
 
         self.assertEqual(2, instances[1]['id'])
         self.assertEqual(4, instances[1]['capacity']['nodes'])
+
+    @mock.patch.object(time, "time")
+    def test_get_sessions(self, mock_time):
+        mock_time.return_value = 123
+
+        result = fakewarp_facade.get_sessions()
+
+        sessions = result['sessions']
+        self.assertEqual(2, len(sessions))
+
+        self.assertEqual(1, sessions[0]['id'])
+        self.assertEqual(123, sessions[0]['created'])
+        self.assertEqual(1001, sessions[0]['owner'])
+        self.assertEqual("42", sessions[0]['token'])
+
+        self.assertEqual(2, sessions[1]['id'])
+        self.assertEqual(123, sessions[1]['created'])
+        self.assertEqual(1001, sessions[1]['owner'])
+        self.assertEqual("testpersistent", sessions[1]['token'])

@@ -26,7 +26,8 @@ class Buffer(object):
     """Buffer is an assignment of io_slices"""
     def __init__(self, id, user_id,
                  pool_name, capacity_slices, capacity_bytes,
-                 job_id=None, name=None, persistent=False):
+                 job_id=None, name=None, persistent=False,
+                 user_agent=None):
         self.created_at = int(time.time())
         self.id = id
         self.user_id = user_id
@@ -38,3 +39,4 @@ class Buffer(object):
         self.job_id = job_id
         self.name = name
         self.persistent = persistent
+        self.user_agent = user_agent  # Often SLURM or CLI
