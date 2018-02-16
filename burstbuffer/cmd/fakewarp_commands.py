@@ -15,6 +15,8 @@ import time
 
 from cliff.command import Command
 
+from burstbuffer import fakewarp_facade
+
 
 def _output_as_json(cmd, output):
     json.dump(output, cmd.app.stdout, sort_keys=True, indent=4)
@@ -34,7 +36,7 @@ class Pools(Command):
                  "quantity": 2048, "free": 2048}
             ]
         }
-        _output_as_json(self, fake_pools)
+        _output_as_json(self, fakewarp_facade.get_pools())
 
 
 class ShowInstances(Command):
