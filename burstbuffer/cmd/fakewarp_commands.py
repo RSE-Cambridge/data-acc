@@ -240,5 +240,8 @@ class CreatePersistent(Command):
 
     def take_action(self, parsed_args):
         print(parsed_args.name)
-        print("pool: %s, capacity: %s" % tuple(
-            parsed_args.capacity.split(":")))
+        pool_name, capacity_bytes = parsed_args.capacity.split(":")
+        fakewarp_facade.add_persistent_buffer(
+            parsed_args.name, parsed_args.caller,
+            pool_name, capacity_bytes,
+            parsed_args.user, parsed_args.access, parsed_args.type)
