@@ -31,3 +31,19 @@ def get_pools():
         }
         pools.append(warp_pool)
     return {"pools": pools}
+
+
+def get_instances():
+    buffers = execution_facade.get_all_buffers()
+    instances = []
+    for buff in buffers:
+        instance = {
+            "id": buff.id,
+            "capacity": {
+                "bytes": buff.capacity_bytes,
+                "nodes": buff.capacity_slices,
+            },
+            "links": {"session": buff.id},
+        }
+        instances.append(instance)
+    return {'instances': instances}

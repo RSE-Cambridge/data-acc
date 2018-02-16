@@ -42,3 +42,16 @@ class TestFakewarpFacade(testtools.TestCase):
         self.assertEqual(2, len(pools))
         self.assertEqual("test1", pools[0]["id"])
         self.assertEqual("test2", pools[1]["id"])
+
+    def test_get_instances(self):
+        result = fakewarp_facade.get_instances()
+
+        instances = result['instances']
+        self.assertEqual(2, len(instances))
+        self.assertEqual(1, instances[0]['id'])
+        self.assertEqual(2, instances[0]['capacity']['nodes'])
+        self.assertEqual(2000000000000, instances[0]['capacity']['bytes'])
+        self.assertEqual(1, instances[0]['links']['session'])
+
+        self.assertEqual(2, instances[1]['id'])
+        self.assertEqual(4, instances[1]['capacity']['nodes'])
