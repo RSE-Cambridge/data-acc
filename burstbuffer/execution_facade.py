@@ -17,7 +17,7 @@ TB_IN_BYTES = 1 * 10 ** 12
 
 def get_all_pool_stats():
     return [
-        model.PoolStats("dedicated_nvme",
+        model.PoolStats("dwcache",  # "dedicated_nvme",
                         total_slices=20, free_slices=10,
                         slice_bytes=TB_IN_BYTES)
     ]
