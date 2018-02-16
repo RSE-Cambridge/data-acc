@@ -10,6 +10,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""
+Presents the execution facade in the form needed by the fakewarp cli,
+to iterate with Slurm burst buffer
+"""
+
 from burstbuffer import execution_facade
 
 

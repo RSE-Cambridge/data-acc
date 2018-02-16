@@ -10,6 +10,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""
+Generic API to access the burst buffer from an execution engine.
+Involves creating, destroying, staging data in and staging data out, etc.
+"""
+
 from burstbuffer import model
 
 TB_IN_BYTES = 1 * 10 ** 12
@@ -23,4 +28,12 @@ def get_all_pool_stats():
         model.PoolStats("dedicated_nvme",
                         total_slices=20, free_slices=10,
                         slice_bytes=TB_IN_BYTES),
+    ]
+
+
+def get_all_buffers():
+    return [
+        model.Buffer(1, 1001, "dedicated_nvme", 2, 2 * 10 ** 12, 42),
+        model.Buffer(2, 1001, "dedicated_nvme", 4, 4 * 10 ** 12,
+                     persistent=True, name="testpersistent"),
     ]

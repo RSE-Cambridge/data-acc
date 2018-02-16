@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import time
+
 
 class PoolStats(object):
     """Pool of buffer storage."""
@@ -18,3 +20,21 @@ class PoolStats(object):
         self.total_slices = total_slices
         self.free_slices = free_slices
         self.slice_bytes = slice_bytes
+
+
+class Buffer(object):
+    """Buffer is an assignment of io_slices"""
+    def __init__(self, id, user_id,
+                 pool_name, capacity_slices, capacity_bytes,
+                 job_id=None, name=None, persistent=False):
+        self.created_at = int(time.time())
+        self.id = id
+        self.user_id = user_id
+
+        self.pool_name = pool_name
+        self.capacity_slices = capacity_slices
+        self.capacity_bytes = capacity_bytes  # TODO(johng) redundant data
+
+        self.job_id = job_id
+        self.name = name
+        self.persistent = persistent
