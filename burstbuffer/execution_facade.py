@@ -17,11 +17,10 @@ GiB_IN_BYTES = 1073741824
 
 
 def get_all_pool_stats():
+    # TODO(johngarbutt) Do we need to model the default pool,
+    # or is that something for Slurm configuration?
     return [
         model.PoolStats("dedicated_nvme",
                         total_slices=20, free_slices=10,
                         slice_bytes=TB_IN_BYTES),
-        model.PoolStats("test_pool",  # "dedicated_nvme",
-                        total_slices=2048, free_slices=2046,
-                        slice_bytes=GiB_IN_BYTES),
     ]

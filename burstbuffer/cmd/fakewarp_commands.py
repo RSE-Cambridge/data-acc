@@ -26,16 +26,6 @@ class Pools(Command):
     """Output burst buffer pools"""
 
     def take_action(self, parsed_args):
-        fake_pools = {
-            "pools": [
-                {"id": "dwcache", "units": "bytes",
-                 "granularity": 1073741824,  # 1GB
-                 "quantity": 4096,
-                 "free": 4096},  # i.e. 4TB
-                {"id": "test_pool", "units": "bytes", "granularity": 16777216,
-                 "quantity": 2048, "free": 2048}
-            ]
-        }
         _output_as_json(self, fakewarp_facade.get_pools())
 
 
