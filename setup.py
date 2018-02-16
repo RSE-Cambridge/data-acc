@@ -63,6 +63,8 @@ setup(
             'data_out = burstbuffer.cmd.fakewarp_commands:DataOut',
             'show_configurations = '
             'burstbuffer.cmd.fakewarp_commands:ShowConfigurations',
+            'create_persistent = '
+            'burstbuffer.cmd.fakewarp_commands:CreatePersistent',
         ],
     },
 

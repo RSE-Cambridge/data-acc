@@ -212,6 +212,33 @@ class DataOut(Command):
 
 
 class ShowConfigurations(Command):
+    """Fake command to keep Slurm plugin happy."""
     def take_action(self, parsed_args):
         # slurm just ignores the output
         _output_as_json(self, {"configurations": []})
+
+
+class CreatePersistent(Command):
+    """Create a persistent burst buffer. Teardown is used to delete buffer."""
+    def get_parser(self, prog_name):
+        parser = super(CreatePersistent, self).get_parser(prog_name)
+        parser.add_argument('--token', '-t', type=str, dest="name",
+                            help="Name of the persistent buffer.")
+        parser.add_argument('--caller', '-c', type=str,
+                            help="Caller of the script, e.g. CLI or SLURM.")
+        parser.add_argument('--capacity', '-C', type=str,
+                            help="Capacity in the form <pool>:<no of bytes>.")
+        parser.add_argument('--user', '-u', type=str,
+                            help="User that owns the buffer.")
+        parser.add_argument('--group', '-g', type=str,
+                            help="Currently ignored, not used by Slurm.")
+        parser.add_argument('--access', '-a', type=str,
+                            help="Access mode, e.g. striped.")
+        parser.add_argument('--type', '-T', type=str,
+                            help="Buffer type, e.g. scratch.")
+        return parser
+
+    def take_action(self, parsed_args):
+        print(parsed_args.name)
+        print("pool: %s, capacity: %s" % tuple(
+            parsed_args.capacity.split(":")))
