@@ -25,4 +25,4 @@ def get_pools():
             "free": pool_stat.free_slices,
         }
         pools.append(warp_pool)
-    return pools
+    return {"pools": pools}
