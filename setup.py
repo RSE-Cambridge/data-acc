@@ -61,6 +61,8 @@ setup(
             'pre_run = burstbuffer.cmd.fakewarp_commands:PreRun',
             'post_run = burstbuffer.cmd.fakewarp_commands:PostRun',
             'data_out = burstbuffer.cmd.fakewarp_commands:DataOut',
+            'show_configurations = '
+            'burstbuffer.cmd.fakewarp_commands:ShowConfigurations',
         ],
     },
 

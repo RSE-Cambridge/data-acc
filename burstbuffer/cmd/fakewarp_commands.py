@@ -255,3 +255,9 @@ class DataOut(Command):
 
     def take_action(self, parsed_args):
         print(parsed_args.job_id)
+
+
+class ShowConfigurations(Command):
+    def take_action(self, parsed_args):
+        # slurm just ignores the output
+        _output_as_json(self, {"configurations": []})
