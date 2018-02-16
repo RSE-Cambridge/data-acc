@@ -60,7 +60,7 @@ class ShowInstances(Command):
                 "mixed": False, "transitioning": False}},
         ]
         fake_instances = {"instances": fake_instances}
-        _output_as_json(self, fake_instances)
+        _output_as_json(self, fakewarp_facade.get_instances())
 
 
 class ShowSessions(Command):
@@ -86,7 +86,7 @@ class ShowSessions(Command):
              "token": "347"},
         ]
         fake_sessions = {"sessions": fake_sessions}
-        _output_as_json(self, fake_sessions)
+        _output_as_json(self, fakewarp_facade.get_sessions())
 
 
 class Teardown(Command):
