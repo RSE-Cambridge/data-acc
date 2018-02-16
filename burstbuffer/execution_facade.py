@@ -13,11 +13,15 @@
 from burstbuffer import model
 
 TB_IN_BYTES = 1 * 10 ** 12
+GiB_IN_BYTES = 1073741824
 
 
 def get_all_pool_stats():
     return [
         model.PoolStats("dwcache",  # "dedicated_nvme",
-                        total_slices=20, free_slices=10,
-                        slice_bytes=TB_IN_BYTES)
+                        total_slices=4096, free_slices=4095,
+                        slice_bytes=GiB_IN_BYTES),
+        model.PoolStats("test_pool",  # "dedicated_nvme",
+                        total_slices=2096, free_slices=2095,
+                        slice_bytes=16777216),
     ]
