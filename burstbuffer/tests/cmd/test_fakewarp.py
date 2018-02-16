@@ -118,3 +118,15 @@ class TestFakeWarp(testtools.TestCase):
         cmdline = "--function show_configurations"
         result = fakewarp.main(cmdline.split(" "))
         self.assertEqual(0, result)
+
+    def test_create_persistent(self):
+        cmdline = "--function create_persistent -c CLI -t alpha -u 995 "
+        cmdline += "-C dedicated_nvme:1000000000000 -a striped -T scratch"
+        result = fakewarp.main(cmdline.split(" "))
+        self.assertEqual(0, result)
+
+    def test_destroy_persistent(self):
+        cmdline = "--function teardown --token alpha "
+        cmdline += "--job /tmp/script --hurry"
+        result = fakewarp.main(cmdline.split(" "))
+        self.assertEqual(0, result)

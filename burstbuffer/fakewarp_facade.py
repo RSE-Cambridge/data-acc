@@ -16,6 +16,7 @@ to iterate with Slurm burst buffer
 """
 
 from burstbuffer import execution_facade
+from burstbuffer import model
 
 
 def get_pools():
@@ -66,3 +67,12 @@ def get_sessions():
             raise Exception("Unable to convert buffer to fakewarp view")
         sessions.append(session)
     return {"sessions": sessions}
+
+
+def add_persistent_buffer(name, caller, pool_name, capacity_bytes, user,
+                          access, buffer_type):
+    # TODO(johng) deal with access and buffer_type later
+    slices = 2  # TODO(johng)
+    buff = model.Buffer(None, user, pool_name, slices, capacity_bytes,
+                        persistent=True, name=name, user_agent=caller)
+    return execution_facade.add_buffer(buff)

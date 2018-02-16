@@ -37,3 +37,10 @@ def get_all_buffers():
         model.Buffer(2, 1001, "dedicated_nvme", 4, 4 * 10 ** 12,
                      persistent=True, name="testpersistent"),
     ]
+
+
+def add_buffer(buff):
+    if buff.id is not None:
+        raise Exception("Buffer already exists")
+    buff.id = 123
+    return buff
