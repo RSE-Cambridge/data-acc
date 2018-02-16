@@ -113,3 +113,8 @@ class TestFakeWarp(testtools.TestCase):
         cmdline = "--function data_out --token 28 --job /tmp/script"
         result = fakewarp.main(cmdline.split(" "))
         self.assertEqual(0, result)
+
+    def test_show_configurations(self):
+        cmdline = "--function show_configurations"
+        result = fakewarp.main(cmdline.split(" "))
+        self.assertEqual(0, result)
