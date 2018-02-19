@@ -110,6 +110,19 @@ RUN cd /usr/local/src \
     && mkdir -p /opt/cray/dw_wlm/default/bin \
     && ln -s /usr/local/src/burstbuffer/.venv/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli
 
+
+ARG ETCD_VERSION=3.3.1
+ARG ETCD_DOWNLOAD_URL="https://github.com/coreos/etcd/releases/download/v$ETCD_VERSION/etcd-v$ETCD_VERSION-linux-amd64.tar.gz"
+
+# Download and install etcd client
+RUN set -x \
+    && wget -O etcd.tar.gz "$ETCD_DOWNLOAD_URL" \
+    && mkdir /usr/local/src/etcd \
+    && tar xf etcd.tar.gz -C /usr/local/src/etcd --strip-components=1 \
+    && install -D -m755 /usr/local/src/etcd/etcdctl /usr/local/bin/etcdctl \
+    && rm etcd.tar.gz \
+    && rm -rf /usr/local/src/etcd
+
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
