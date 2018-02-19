@@ -122,7 +122,7 @@ services:
     scale: 3
     environment:
       - ETCDCTL_API=3
-    command: sh -c "export ETCDCTL_API=3 && etcdctl --endpoints=etcdproxy1:2379 put hosts_with_slices/`hostname` 12 && etcdctl --endpoints=etcdproxy1:2379 watch --prefix buffer -- sh -c 'env | grep ETCD_WATCH_'"
+    command: sh -c "export ETCDCTL_API=3 && etcdctl --endpoints=etcdproxy1:2379 put bufferhosts/capacity/`hostname` 12 && etcdctl --endpoints=etcdproxy1:2379 watch --prefix bufferhosts/slices/`hostname`/ -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
 
