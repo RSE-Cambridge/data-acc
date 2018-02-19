@@ -41,6 +41,7 @@ services:
       - "6817"
     depends_on:
       - "slurmdbd"
+      - etcd3
 
   c1:
     image: slurm-docker-cluster:17.02.9
@@ -72,9 +73,42 @@ services:
     depends_on:
       - "slurmctld"
 
+  etcd1:
+    image: quay.io/coreos/etcd
+    command: etcd --name etcd1 --data-dir=/etcd-data --initial-cluster-state new --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-cluster 'etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380'
+    hostname: etcd1
+    container_name: etcd1
+    volumes:
+      - etcd1_data:/etcd-data
+    #expose:
+    #  - "2379:2379"
+
+  etcd2:
+    image: quay.io/coreos/etcd
+    command: etcd --name etcd2 --data-dir=/etcd-data --initial-cluster-state new --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-cluster 'etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380'
+    hostname: etcd2
+    container_name: etcd2
+    volumes:
+      - etcd2_data:/etcd-data
+    depends_on:
+      - etcd1
+
+  etcd3:
+    image: quay.io/coreos/etcd
+    command: etcd --name etcd3 --data-dir=/etcd-data --initial-cluster-state new --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-cluster 'etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380'
+    hostname: etcd3
+    container_name: etcd3
+    volumes:
+      - etcd3_data:/etcd-data
+    depends_on:
+      - etcd2
+
 volumes:
   etc_munge:
   etc_slurm:
   slurm_jobdir:
   var_lib_mysql:
   var_log_slurm:
+  etcd1_data:
+  etcd2_data:
+  etcd3_data:
