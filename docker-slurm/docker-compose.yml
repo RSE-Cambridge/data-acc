@@ -117,6 +117,15 @@ services:
       - etcd2
       - etcd3
 
+  fakenode:
+    image: quay.io/coreos/etcd
+    scale: 3
+    environment:
+      - ETCDCTL_API=3
+    command: sh -c "export ETCDCTL_API=3 && etcdctl --endpoints=etcdproxy1:2379 put hosts_with_slices/`hostname` 12 && etcdctl --endpoints=etcdproxy1:2379 watch --prefix buffer -- sh -c 'env | grep ETCD_WATCH_'"
+    depends_on:
+      - etcdproxy1
+
 volumes:
   etc_munge:
   etc_slurm:

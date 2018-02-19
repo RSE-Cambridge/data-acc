@@ -51,7 +51,6 @@ def _get_all_with_prefix(prefix):
 def add_new_buffer(buffer_id, buffer_info):
     key = "buffers/%s" % buffer_id
     value = json.dumps(buffer_info)
-    print(value)
 
     put_result = _etcdctl("put '%s' '%s'" % (key, value))
     revision = put_result['header']['revision']
