@@ -48,8 +48,34 @@ def _get_all_with_prefix(prefix):
     return _get("--prefix %s" % prefix)
 
 
-def add_buffer(buffer_id, buffer_info):
-    pass
+def add_new_buffer(buffer_id, buffer_info):
+    key = "buffers/%s" % buffer_id
+    value = json.dumps(buffer_info)
+    print(value)
+
+    put_result = _etcdctl("put '%s' '%s'" % (key, value))
+    revision = put_result['header']['revision']
+
+    get_result = _etcdctl("get %s" % key).get('kvs')
+    version = None
+    if len(get_result) == 1:
+        version = get_result[0]['version']
+    if version != 1:
+        # TODO move to txn...
+        raise Exception("buffer already created")
+
+    return revision
+
+
+def delete_buffer(buffer_id):
+    key = "buffers/%s" % buffer_id
+    del_result = _etcdctl("del '%s'" % key)
+    keys_deleted = del_result.get('deleted', 0)
+    if keys_deleted == 0:
+        raise Exception("Buffer already deleted")
+    if keys_deleted > 1:
+        raise Exception("WARNING: deleted too many buffers!")
+    return del_result['header']['revision']
 
 
 def list_buffers():
@@ -57,4 +83,6 @@ def list_buffers():
 
 
 if __name__ == '__main__':
+    print(add_new_buffer("test", {"persistent": True}))
     print(list_buffers())
+    print(delete_buffer("test"))
