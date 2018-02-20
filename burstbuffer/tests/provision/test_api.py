@@ -133,11 +133,11 @@ class TestProvisionAPI(testtools.TestCase):
             "job_id": None,
             "name": "test",
         }
-        mock_available.return_value = {
-            "fakehost1": ["nvme0n1", "nvme0n2"],
-            "fakehost2": ["nvme0n4", "nvme0n5"],
-            "fakehost3": ["nvme0n1"],
-        }
+        mock_available.return_value = [
+            ("fakehost1", ["nvme0n1", "nvme0n2"]),
+            ("fakehost2", ["nvme0n4", "nvme0n5"]),
+            ("fakehost3", ["nvme0n1"]),
+        ]
 
         api.assign_slices("fakeid")
 
@@ -177,3 +177,58 @@ class TestProvisionAPI(testtools.TestCase):
         }
         mock_update.assert_called_once_with(
             expected_data, ensure_first_version=True)
+
+    @mock.patch.object(api, "_get_all_assigned_slices")
+    @mock.patch.object(api, "_get_all_slices")
+    def test_get_available_slices_by_host(self, mock_all, mock_assigned):
+        mock_all.return_value = [
+            ("host1", "nvme0n1"),
+            ("host1", "nvme1n1"),
+            ("host2", "nvme0n1"),
+            ("host2", "nvme1n1"),
+        ]
+        mock_assigned.return_value = [
+            ("host1", "nvme0n1"),
+            ("host2", "nvme1n1"),
+        ]
+        result = api._get_available_slices_by_host()
+
+        expected = [
+            ('host1', ['nvme1n1']),
+            ('host2', ['nvme0n1']),
+        ]
+        self.assertEqual(expected, result)
+
+    @mock.patch.object(registry, "_get_all_with_prefix")
+    def test_get_all_slices(self, mock_get):
+        mock_get.return_value = {
+            "bufferhosts/all_slices/host1/nvme0n1": 10,
+            "bufferhosts/all_slices/host1/nvme1n1": 10,
+            "bufferhosts/all_slices/host2/nvme0n1": 10,
+            "bufferhosts/all_slices/host2/nvme1n1": 10,
+        }
+
+        result = api._get_all_slices()
+
+        expected = [
+            ("host1", "nvme0n1"),
+            ("host1", "nvme1n1"),
+            ("host2", "nvme0n1"),
+            ("host2", "nvme1n1"),
+        ]
+        self.assertEqual(expected, result)
+
+    @mock.patch.object(registry, "_get_all_with_prefix")
+    def test_get_all_assigned_slices(self, mock_get):
+        mock_get.return_value = {
+            "bufferhosts/assigned_slices/host1/nvme0n1": "buffer1",
+            "bufferhosts/assigned_slices/host2/nvme1n1": "buffer2",
+        }
+
+        result = api._get_all_assigned_slices()
+
+        expected = [
+            ("host1", "nvme0n1"),
+            ("host2", "nvme1n1"),
+        ]
+        self.assertEqual(expected, result)

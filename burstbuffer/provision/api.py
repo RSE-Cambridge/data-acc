@@ -10,13 +10,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import collections
 import os
 import random
 
 from burstbuffer.registry import api as registry
 
-ASSIGNED_SLICES_KEY = "bufferhosts/assigned_slices/%s"
-ALL_SLICES_KEY = "bufferhosts/all_slices/%s/%s"
+ASSIGNED_SLICES_PREFIX = "bufferhosts/assigned_slices/"
+ASSIGNED_SLICES_KEY = ASSIGNED_SLICES_PREFIX + "%s"
+ALL_SLICES_PREFIX = "bufferhosts/all_slices/"
+ALL_SLICES_KEY = ALL_SLICES_PREFIX + "%s/%s"
 
 FAKE_DEVICE_COUNT = 12
 FAKE_DEVICE_ADDRESS = "nvme%sn1"
@@ -99,8 +102,42 @@ def event(hostname):
     return _get_assigned_slices(hostname)
 
 
+def _get_all_slices():
+    raw_slices = registry._get_all_with_prefix(ALL_SLICES_PREFIX)
+    slices = []
+    for key, _ in raw_slices.items():
+        key_parts = key.split("/")
+        host = key_parts[2]
+        device = key_parts[3]
+        slices.append((host, device))
+    slices.sort()
+    return slices
+
+
+def _get_all_assigned_slices():
+    raw_slices = registry._get_all_with_prefix(ASSIGNED_SLICES_PREFIX)
+    slices = []
+    for key, _ in raw_slices.items():
+        key_parts = key.split("/")
+        host = key_parts[2]
+        device = key_parts[3]
+        slices.append((host, device))
+    slices.sort()
+    return slices
+
+
 def _get_available_slices_by_host():
-    raise NotImplementedError("TODO...")
+    all_slices = _get_all_slices()
+    all_assigned_slices = _get_all_assigned_slices()
+
+    slices = collections.defaultdict(list)
+    for host, device in all_slices:
+        if (host, device) not in all_assigned_slices:
+            slices[host].append(device)
+
+    available = list([(host, device) for host, device in slices.items()])
+    available.sort()
+    return available
 
 
 def _set_assignments(buffer_id, assignments):
@@ -139,7 +176,7 @@ def assign_slices(buffer_id):
         raise UnableToAssignSlices("Not enough hosts for %s" % required_slices)
 
     assignments = set()
-    for host, devices in avaliable_slices_by_host.items():
+    for host, devices in avaliable_slices_by_host:
         # avoid some contention by not just picking the first
         device = random.choice(devices)
         assignments.add((host, device))
