@@ -45,7 +45,7 @@ def add_buffer(buff_request):
     id = buff_request.job_id
     if not id:
         id = buff_request.name
-    buff = registry.add_new_buffer(id, buff_request)
+    buff = registry.add_new_buffer(id, buff_request.__dict__)
     assignments = provision.assigned_slices(id)
     # TODO(johngarbutt) need to wait for mountpoint, etc?
     print(assignments)
