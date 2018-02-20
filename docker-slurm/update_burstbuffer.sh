@@ -26,11 +26,11 @@ sleep 5
 echo Assign some burst buffers
 
 docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 del --prefix bufferhosts/assigned_slices"
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode1/nvme0n1 asdf"
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode1/nvme1n1 asdf"
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode2/nvme9n1 asdf"
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode3/nvme9n1 asdf"
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode1/nvme3n1 asdf"
+docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode1/nvme0n1 buffer/fakebuffer1"
+docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode1/nvme1n1 buffer/fakebuffer1"
+docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode2/nvme9n1 buffer/fakebuffer1"
+docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode3/nvme9n1 buffer/fakebuffer1"
+docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode1/nvme3n1 buffer/fakebuffer2"
 
 sleep 5
 
