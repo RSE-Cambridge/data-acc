@@ -57,9 +57,26 @@ def startup(hostname):
     return _get_assigned_slices(hostname)
 
 
+def _get_env():
+    return os.environ
+
+
+def _get_event_info():
+    env = _get_env()
+
+    event_type = env["ETCD_WATCH_EVENT_TYPE"]
+    revision = env["ETCD_WATCH_REVISION"]
+    key = env["ETCD_WATCH_KEY"]
+    value = env['ETCD_WATCH_VALUE']
+
+    return dict(
+        event_type=event_type,
+        revision=revision,
+        key=key,
+        value=value)
+
+
 def event(hostname):
-    for key in os.environ:
-        if key.startswith("ETCD_WATCH_"):
-            short_key = key[len("ETCD_WATCH_"):]
-            print("%s: %s" % (short_key, os.environ[key]))
+    event_info = _get_event_info()
+    print(event_info)
     return _get_assigned_slices(hostname)
