@@ -22,7 +22,7 @@ FAKE_DEVICE_ADDRESS = "nvme%sn1"
 FAKE_DEVICE_SIZE_BYTES = int(1.5 * 2 ** 40)  # 1.5 TB
 
 
-def _get_all_slices():
+def _get_local_hardware():
     fake_devices = []
     for i in range(FAKE_DEVICE_COUNT):
         fake_devices.append(FAKE_DEVICE_ADDRESS % i)
@@ -39,7 +39,7 @@ def _refresh_slices(hostname, slices):
 def _get_assigned_slices(hostname):
     prefix = ASSIGNED_SLICES_KEY % hostname
     raw_assignments = api._get_all_with_prefix(prefix)
-    current_devices = _get_all_slices()
+    current_devices = _get_local_hardware()
 
     assignemnts = {}
     for key in raw_assignments:
@@ -51,7 +51,7 @@ def _get_assigned_slices(hostname):
 
 
 def startup(hostname):
-    all_slices = _get_all_slices()
+    all_slices = _get_local_hardware()
     _refresh_slices(hostname, all_slices)
 
     return _get_assigned_slices(hostname)

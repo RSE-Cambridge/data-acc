@@ -19,15 +19,15 @@ from burstbuffer.provision import api
 class TestProvisionAPI(testtools.TestCase):
     @mock.patch.object(api, "_get_assigned_slices")
     @mock.patch.object(api, "_refresh_slices")
-    @mock.patch.object(api, "_get_all_slices")
-    def test_statup(self, mock_get_all, mock_refresh, mock_assigned):
-        mock_get_all.return_value = "fake_hardware"
+    @mock.patch.object(api, "_get_local_hardware")
+    def test_statup(self, mock_hardware, mock_refresh, mock_assigned):
+        mock_hardware.return_value = "fake_hardware"
         mock_assigned.return_value = "fake"
 
         result = api.startup("test")
 
         self.assertEqual("fake", result)
-        mock_get_all.assert_called_once_with()
+        mock_hardware.assert_called_once_with()
         mock_refresh.assert_called_once_with("test", "fake_hardware")
         mock_assigned.assert_called_once_with("test")
 
