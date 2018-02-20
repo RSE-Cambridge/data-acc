@@ -38,7 +38,7 @@ def _refresh_slices(hostname, hardware):
     slices_info = {}
     for device in hardware:
         key = ALL_SLICES_KEY % (hostname, device)
-        slices[key] = FAKE_DEVICE_SIZE_BYTES
+        slices_info[key] = FAKE_DEVICE_SIZE_BYTES
     _update_data(slices_info)
 
 
