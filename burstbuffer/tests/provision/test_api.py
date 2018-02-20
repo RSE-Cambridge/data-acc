@@ -14,6 +14,7 @@ import mock
 import testtools
 
 from burstbuffer.provision import api
+from burstbuffer.registry import api as registry
 
 
 class TestProvisionAPI(testtools.TestCase):
@@ -69,3 +70,50 @@ class TestProvisionAPI(testtools.TestCase):
 
         self.assertEqual(12, len(result))
         self.assertEqual("nvme1n1", result[1])
+
+    @mock.patch.object(registry, "_etcdctl")
+    def test_update_data(self, mock_etcd):
+        fake_data = dict(key1="value1", key2="value2")
+
+        api._update_data(fake_data)
+
+        mock_etcd.assert_has_calls([
+            mock.call("put 'key1' 'value1'"),
+            mock.call("put 'key2' 'value2'"),
+        ], any_order=True)
+
+    @mock.patch.object(api, "_update_data")
+    def test_refresh_slices(self, mock_update):
+        fake_hardware = ["1", "2"]
+
+        api._refresh_slices("host", fake_hardware)
+
+        expected = {
+            'bufferhosts/all_slices/host/1': 1649267441664,
+            'bufferhosts/all_slices/host/2': 1649267441664,
+        }
+        mock_update.assert_called_once_with(expected)
+
+    @mock.patch.object(registry, "_get_all_with_prefix")
+    def test_get_assigned_slices_fails(self, mock_get):
+        mock_get.return_value = {"foo": "bar"}
+
+        self.assertRaises(api.UnexpectedBufferAssignement,
+                          api._get_assigned_slices, "host")
+
+        mock_get.assert_called_once_with("bufferhosts/assigned_slices/host")
+
+    @mock.patch.object(registry, "_get_all_with_prefix")
+    def test_get_assigned_slices(self, mock_get):
+        mock_get.return_value = {
+            "bufferhosts/assigned_slices/host/nvme2n1": "buffers/fakename1",
+            "bufferhosts/assigned_slices/host/nvme6n1": "buffers/fakename2"
+        }
+
+        result = api._get_assigned_slices("host")
+
+        expected = {
+            'nvme2n1': 'buffers/fakename1',
+            'nvme6n1': 'buffers/fakename2',
+        }
+        self.assertDictEqual(expected, result)

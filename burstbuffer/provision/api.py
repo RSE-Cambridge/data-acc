@@ -12,7 +12,7 @@
 
 import os
 
-from burstbuffer.registry import api
+from burstbuffer.registry import api as registry
 
 ASSIGNED_SLICES_KEY = "bufferhosts/assigned_slices/%s"
 ALL_SLICES_KEY = "bufferhosts/all_slices/%s/%s"
@@ -20,6 +20,10 @@ ALL_SLICES_KEY = "bufferhosts/all_slices/%s/%s"
 FAKE_DEVICE_COUNT = 12
 FAKE_DEVICE_ADDRESS = "nvme%sn1"
 FAKE_DEVICE_SIZE_BYTES = int(1.5 * 2 ** 40)  # 1.5 TB
+
+
+class UnexpectedBufferAssignement(Exception):
+    pass
 
 
 def _get_local_hardware():
@@ -30,8 +34,9 @@ def _get_local_hardware():
 
 
 def _update_data(data):
-    for key, value in data.iter():
-        api._etcdctl("put '%s' '%s'" % (key, value))
+    # TODO(johngarbutt) should be done in a single transaction
+    for key, value in data.items():
+        registry._etcdctl("put '%s' '%s'" % (key, value))
 
 
 def _refresh_slices(hostname, hardware):
@@ -44,14 +49,14 @@ def _refresh_slices(hostname, hardware):
 
 def _get_assigned_slices(hostname):
     prefix = ASSIGNED_SLICES_KEY % hostname
-    raw_assignments = api._get_all_with_prefix(prefix)
+    raw_assignments = registry._get_all_with_prefix(prefix)
     current_devices = _get_local_hardware()
 
     assignemnts = {}
     for key in raw_assignments:
         device = key[(len(prefix) + 1):]
         if device not in current_devices:
-            raise Exception("assignment to unknown device %s!!" % device)
+            raise UnexpectedBufferAssignement(device)
         assignemnts[device] = raw_assignments[key]
     return assignemnts
 
