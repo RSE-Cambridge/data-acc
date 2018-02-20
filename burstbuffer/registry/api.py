@@ -16,8 +16,13 @@ import json
 import os
 import shlex
 import subprocess
+import uuid
 
 ETCD_ENDPOINTS = "http://localhost:2379"
+
+
+class BufferNotFound(Exception):
+    pass
 
 
 def _etcdctl(cmd, parse_json=True):
@@ -82,7 +87,26 @@ def list_buffers():
     return _get_all_with_prefix(prefix="buffers/")
 
 
+def get_buffer(buffer_name):
+    key = "buffers/%s" % buffer_name
+    results = _get(key)
+    if len(results) != 1:
+        raise BufferNotFound()
+    return results[key]
+
+
 if __name__ == '__main__':
-    print(add_new_buffer("test", {"persistent": True}))
+    buffer_id = uuid.uuid4().hex
+    fake_buffer_info = {
+        "id": buffer_id,
+        "persistent": True,
+        "capacity_slices": 3,
+        "job_id": None,
+        "name": "test",
+    }
     print(list_buffers())
-    print(delete_buffer("test"))
+    _etcdctl("del --prefix buffers/")
+    print(add_new_buffer(buffer_id, fake_buffer_info))
+    print(list_buffers())
+    print(get_buffer(buffer_id))
+    # print(delete_buffer(buffer_id))

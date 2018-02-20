@@ -11,6 +11,7 @@
 # under the License.
 
 import os
+import random
 
 from burstbuffer.registry import api as registry
 
@@ -23,6 +24,10 @@ FAKE_DEVICE_SIZE_BYTES = int(1.5 * 2 ** 40)  # 1.5 TB
 
 
 class UnexpectedBufferAssignement(Exception):
+    pass
+
+
+class UnableToAssignSlices(Exception):
     pass
 
 
@@ -52,13 +57,13 @@ def _get_assigned_slices(hostname):
     raw_assignments = registry._get_all_with_prefix(prefix)
     current_devices = _get_local_hardware()
 
-    assignemnts = {}
+    assignments = {}
     for key in raw_assignments:
         device = key[(len(prefix) + 1):]
         if device not in current_devices:
             raise UnexpectedBufferAssignement(device)
-        assignemnts[device] = raw_assignments[key]
-    return assignemnts
+        assignments[device] = raw_assignments[key]
+    return assignments
 
 
 def startup(hostname):
@@ -91,3 +96,42 @@ def event(hostname):
     event_info = _get_event_info()
     print(event_info)
     return _get_assigned_slices(hostname)
+
+
+def _get_available_slices_by_host():
+    raise Exception()
+
+
+def _set_assignments(buffer_id, assignments):
+    data = {}
+    assignments = list(assignments)
+    # stop 0 always being the same host
+    random.shuffle(assignments)
+    for index in range(len(assignments)):
+        host, device = assignments[index]
+        prefix = ASSIGNED_SLICES_KEY % host
+        key = "%s/%s" % (prefix, device)
+        value = "buffers/%s/%s" % (buffer_id, index)
+        data[key] = value
+    # TODO(johngarbutt) ensure all updates were good in a transaction
+    _update_data(data)
+
+
+def assign_slices(buffer_id):
+    buffer_info = registry.get_buffer(buffer_id)
+    required_slices = buffer_info['capacity_slices']
+
+    avaliable_slices_by_host = _get_available_slices_by_host()
+    if len(avaliable_slices_by_host) < required_slices:
+        raise UnableToAssignSlices("Not enough hosts")
+
+    assignments = set()
+    for host, devices in avaliable_slices_by_host.items():
+        # avoid some contention by not just picking the first
+        device = random.choice(devices)
+        assignments.add((host, device))
+
+    _set_assignments(buffer_id, assignments)
+
+    if len(assignments) < required_slices:
+        raise UnableToAssignSlices("Not enough available slices")
