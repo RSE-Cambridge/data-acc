@@ -11,9 +11,12 @@
 # under the License.
 
 import fixtures
+import mock
+import socket
 import testtools
 
 from burstbuffer.cmd import buffernode
+from burstbuffer.provision import api
 
 
 class TestBuffernode(testtools.TestCase):
@@ -25,10 +28,22 @@ class TestBuffernode(testtools.TestCase):
         stderr = self.useFixture(fixtures.StringStream('stderr')).stream
         self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
 
-    def test_startup(self):
-        result = buffernode.main(["startup"])
-        self.assertEqual(0, result)
+    @mock.patch.object(api, "startup")
+    @mock.patch.object(socket, "gethostname")
+    def test_startup(self, mock_hostname, mock_startup):
+        mock_hostname.return_value = "test"
 
-    def test_event(self):
-        result = buffernode.main(["event"])
+        result = buffernode.main(["startup"])
+
         self.assertEqual(0, result)
+        mock_startup.assert_called_once_with("test")
+
+    @mock.patch.object(api, "event")
+    @mock.patch.object(socket, "gethostname")
+    def test_event(self, mock_hostname, mock_event):
+        mock_hostname.return_value = "test"
+
+        result = buffernode.main(["event"])
+
+        self.assertEqual(0, result)
+        mock_event.assert_called_once_with("test")
