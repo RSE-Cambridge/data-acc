@@ -106,6 +106,7 @@ RUN cd /usr/local/src \
     && git clone https://github.com/johngarbutt/burstbuffer \
     && cd burstbuffer \
     && git checkout $BURSTBUFFER_BRANCH \
+    && git checkout $BURSTBUFFER_BRANCH \
     && virtualenv -p python3 .venv \
     && . .venv/bin/activate \
     && pip install -e . \

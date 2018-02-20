@@ -123,7 +123,7 @@ services:
     environment:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=etcdproxy1:2379
-    command: sh -c "buffernode startup && etcdctl --endpoints=etcdproxy1:2379 watch --prefix bufferhosts/slices/`hostname`/ -- buffernode event"
+    command: sh -c "buffernode startup && etcdctl --endpoints=etcdproxy1:2379 watch --prefix bufferhosts/assigned_slices/`hostname`/ -- buffernode event"
     depends_on:
       - etcdproxy1
 
