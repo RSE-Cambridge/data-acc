@@ -55,6 +55,9 @@ def add_buffer(buff_request):
 def delete_buffer(buffer_id):
     try:
         provision.unassign_slices(buffer_id)
+    except Exception as e:
+        print("Ignoring unassign error: %s" % e)
+    try:
         registry.delete_buffer(buffer_id)
     except Exception as e:
-        print("Ignoring delete error: %" % e)
+        print("Ignoring delete buffer error: %s" % e)

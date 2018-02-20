@@ -16,6 +16,8 @@ import time
 import testtools
 
 from burstbuffer import execution_facade
+from burstbuffer.provision import api as provision
+from burstbuffer.registry import api as registry
 
 
 class TestExecutionFacade(testtools.TestCase):
@@ -50,3 +52,14 @@ class TestExecutionFacade(testtools.TestCase):
         self.assertEqual(2, result[1].id)
         self.assertTrue(result[1].persistent)
         self.assertEqual(4, result[1].capacity_slices)
+
+    @mock.patch.object(provision, "unassign_slices")
+    @mock.patch.object(registry, "delete_buffer")
+    def test_delete_buffer(self, mock_delete, mock_unassign):
+        mock_delete.side_effect = Exception
+        mock_unassign.side_effect = Exception
+
+        execution_facade.delete_buffer("bufferid")
+
+        mock_delete.assert_called_once_with("bufferid")
+        mock_unassign.assert_called_once_with("bufferid")
