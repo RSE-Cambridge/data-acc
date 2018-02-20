@@ -69,20 +69,27 @@ def get_sessions():
     return {"sessions": sessions}
 
 
-def add_persistent_buffer(name, caller, pool_name, capacity_bytes, user,
+def _convert_capacity(capacity):
+    if "GiB" in capacity:
+        capacity_bytes = capacity[:-3]
+        return int(capacity_bytes) * 2 ** 30
+    # TODO(johngarbutt) clearly more conversions required here
+    return int(capacity)
+
+
+def add_persistent_buffer(name, caller, pool_name, capacity, user,
                           access, buffer_type):
     # TODO(johng) deal with access and buffer_type later
     slices = 2  # TODO(johng)
+    capacity_bytes = _convert_capacity(capacity)
     buff = model.Buffer(None, user, pool_name, slices, capacity_bytes,
                         persistent=True, name=name, user_agent=caller)
     return execution_facade.add_buffer(buff)
 
 
-def setup_job_buffer(job_id, caller, pool_name, capacity_bytes, user):
+def setup_job_buffer(job_id, caller, pool_name, capacity, user):
     slices = 2  # TODO(johng)
-    if "GiB" in capacity_bytes:
-        capacity_bytes = capacity_bytes[:-3]
-        capacity_bytes = int(capacity_bytes) * 2 ** 30
+    capacity_bytes = _convert_capacity(capacity)
     buff = model.Buffer(None, user, pool_name, slices, capacity_bytes,
                         persistent=False, job_id=job_id, user_agent=caller)
     return execution_facade.add_buffer(buff)

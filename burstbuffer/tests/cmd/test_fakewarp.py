@@ -42,16 +42,14 @@ class TestFakeWarp(testtools.TestCase):
         result = fakewarp.main(["--function", "show_sessions"])
         self.assertEqual(0, result)
 
-    def test_teardown(self):
+    @mock.patch.object(fakewarp_facade, "delete_buffer")
+    def test_teardown(self, mock_delete):
         cmdline = "--function teardown --token 347 --job /tmp/fakescript"
-        result = fakewarp.main(cmdline.split(" "))
-        self.assertEqual(0, result)
 
-    def test_teardown_with_hurry(self):
-        cmdline = "--function teardown --token 347 --job /tmp/fakescript"
-        cmdline += " --hurry"
         result = fakewarp.main(cmdline.split(" "))
+
         self.assertEqual(0, result)
+        mock_delete.assert_called_once_with('347')
 
     def test_job_process(self):
         stdout = io.StringIO()
@@ -125,14 +123,24 @@ class TestFakeWarp(testtools.TestCase):
         result = fakewarp.main(cmdline.split(" "))
         self.assertEqual(0, result)
 
-    def test_create_persistent(self):
+    @mock.patch.object(fakewarp_facade, "add_persistent_buffer")
+    def test_create_persistent(self, mock_add):
         cmdline = "--function create_persistent -c CLI -t alpha -u 995 "
         cmdline += "-C dedicated_nvme:1000000000000 -a striped -T scratch"
-        result = fakewarp.main(cmdline.split(" "))
-        self.assertEqual(0, result)
 
-    def test_destroy_persistent(self):
+        result = fakewarp.main(cmdline.split(" "))
+
+        self.assertEqual(0, result)
+        mock_add.assert_called_once_with(
+            'alpha', 'CLI', 'dedicated_nvme', '1000000000000', '995',
+            'striped', 'scratch')
+
+    @mock.patch.object(fakewarp_facade, "delete_buffer")
+    def test_destroy_persistent(self, mock_delete):
         cmdline = "--function teardown --token alpha "
         cmdline += "--job /tmp/script --hurry"
+
         result = fakewarp.main(cmdline.split(" "))
+
         self.assertEqual(0, result)
+        mock_delete.assert_called_once_with('alpha')

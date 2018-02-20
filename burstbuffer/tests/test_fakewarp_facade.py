@@ -87,8 +87,30 @@ class TestFakewarpFacade(testtools.TestCase):
 
         self.assertEqual("fake", result)
         expected = model.Buffer(
-            None, 995, 'dwcache1', 2, 2 ** 30, persistent=False,
+            None, 995, 'dwcache', 2, 2 ** 30, persistent=False,
             job_id='13', user_agent='SLURM')
 
-        raise Exception("%s %s" % (expected, mock_add.call_args[0][0]))
+        mock_add.assert_called_once_with(expected)
+
+    @mock.patch.object(execution_facade, "delete_buffer")
+    def test_delete_buffer(self, mock_delete):
+        fakewarp_facade.delete_buffer("buffertoken")
+
+        mock_delete.assert_called_once_with("buffertoken")
+
+    @mock.patch.object(time, "time")
+    @mock.patch.object(execution_facade, "add_buffer")
+    def test_add_persistent_buffer(self, mock_add, mock_time):
+        mock_time.return_value = 123
+        mock_add.return_value = "fake"
+
+        result = fakewarp_facade.add_persistent_buffer(
+            'alpha', 'SLURM', 'dwcache', '1GiB', 995,
+            'striped', 'scratch')
+
+        self.assertEqual("fake", result)
+        expected = model.Buffer(
+            None, 995, 'dwcache', 2, 2 ** 30, persistent=True,
+            name='alpha', user_agent='SLURM')
+
         mock_add.assert_called_once_with(expected)
