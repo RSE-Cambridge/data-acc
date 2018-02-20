@@ -117,9 +117,32 @@ services:
       - etcd2
       - etcd3
 
-  fakenode:
+  fakenode1:
     image: slurm-docker-cluster:17.02.9
-    scale: 3
+    hostname: fakenode1
+    container_name: fakenode1
+    environment:
+      - ETCDCTL_API=3
+      - ETCD_ENDPOINTS=etcdproxy1:2379
+    command: sh -c "buffernode startup && etcdctl --endpoints=etcdproxy1:2379 watch --prefix bufferhosts/assigned_slices/`hostname`/ -- buffernode event"
+    depends_on:
+      - etcdproxy1
+
+  fakenode2:
+    image: slurm-docker-cluster:17.02.9
+    hostname: fakenode2
+    container_name: fakenode2
+    environment:
+      - ETCDCTL_API=3
+      - ETCD_ENDPOINTS=etcdproxy1:2379
+    command: sh -c "buffernode startup && etcdctl --endpoints=etcdproxy1:2379 watch --prefix bufferhosts/assigned_slices/`hostname`/ -- buffernode event"
+    depends_on:
+      - etcdproxy1
+
+  fakenode3:
+    image: slurm-docker-cluster:17.02.9
+    hostname: fakenode3
+    container_name: fakenode3
     environment:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=etcdproxy1:2379
