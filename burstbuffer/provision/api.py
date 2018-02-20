@@ -99,6 +99,8 @@ def _get_event_info():
 def event(hostname):
     event_info = _get_event_info()
     print(event_info)
+    # TODO(johngarbutt) write key to say provision worked,
+    # and write out fake mountpoint for slice 0
     return _get_assigned_slices(hostname)
 
 

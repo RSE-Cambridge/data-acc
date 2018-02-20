@@ -16,6 +16,8 @@ Involves creating, destroying, staging data in and staging data out, etc.
 """
 
 from burstbuffer import model
+from burstbuffer.provision import api as provision
+from burstbuffer.registry import api as registry
 
 TB_IN_BYTES = 1 * 10 ** 12
 GiB_IN_BYTES = 1073741824
@@ -39,8 +41,17 @@ def get_all_buffers():
     ]
 
 
-def add_buffer(buff):
-    if buff.id is not None:
-        raise Exception("Buffer already exists")
-    buff.id = 123
+def add_buffer(buff_request):
+    id = buff_request.job_id
+    if not id:
+        id = buff_request.name
+    buff = registry.add_new_buffer(id, buff_request)
+    assignments = provision.assigned_slices(id)
+    # TODO(johngarbutt) need to wait for mountpoint, etc?
+    print(assignments)
     return buff
+
+
+def delete_buffer(buffer_id):
+    provision.unassign_slices(buffer_id)
+    registry.delete_buffer(buffer_id)

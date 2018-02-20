@@ -75,3 +75,20 @@ class TestFakewarpFacade(testtools.TestCase):
         self.assertEqual(123, sessions[1]['created'])
         self.assertEqual(1001, sessions[1]['owner'])
         self.assertEqual("testpersistent", sessions[1]['token'])
+
+    @mock.patch.object(time, "time")
+    @mock.patch.object(execution_facade, "add_buffer")
+    def test_setup_job_buffer(self, mock_add, mock_time):
+        mock_time.return_value = 123
+        mock_add.return_value = "fake"
+
+        result = fakewarp_facade.setup_job_buffer(
+            '13', 'SLURM', 'dwcache', '1GiB', 995)
+
+        self.assertEqual("fake", result)
+        expected = model.Buffer(
+            None, 995, 'dwcache1', 2, 2 ** 30, persistent=False,
+            job_id='13', user_agent='SLURM')
+
+        raise Exception("%s %s" % (expected, mock_add.call_args[0][0]))
+        mock_add.assert_called_once_with(expected)

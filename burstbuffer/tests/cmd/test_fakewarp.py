@@ -18,6 +18,7 @@ import fixtures
 import testtools
 
 from burstbuffer.cmd import fakewarp
+from burstbuffer import fakewarp_facade
 
 
 class TestFakeWarp(testtools.TestCase):
@@ -66,13 +67,18 @@ class TestFakeWarp(testtools.TestCase):
             self.assertEqual(0, result)
             self.assertEqual("capacity=1GiB\n", stdout.getvalue())
 
-    def test_setup(self):
+    @mock.patch.object(fakewarp_facade, "setup_job_buffer")
+    def test_setup(self, mock_setup):
         cmdline = "--function setup "
         cmdline += "--token 13 --caller SLURM --user 995 "
         cmdline += "--groupid 995 --capacity dwcache:1GiB "
         cmdline += "--job /var/lib/slurmd/hash.3/job.13/script"
+
         result = fakewarp.main(cmdline.split(" "))
+
         self.assertEqual(0, result)
+        mock_setup.assert_called_once_with(
+            '13', 'SLURM', 'dwcache', '1GiB', 995)
 
     def test_real_size(self):
         cmdline = "--function real_size --token 13"

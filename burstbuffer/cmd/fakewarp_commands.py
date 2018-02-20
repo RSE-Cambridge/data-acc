@@ -48,21 +48,22 @@ class Teardown(Command):
 
     def get_parser(self, prog_name):
         parser = super(Teardown, self).get_parser(prog_name)
-        parser.add_argument('--token', type=str, dest="job_id",
-                            help="Job ID")
+        parser.add_argument('--token', type=str,
+                            help="Job ID or Buffer name")
         parser.add_argument('--job', type=str, dest="buffer_script",
                             help="Path to burst buffer script file.")
         parser.add_argument('--hurry', action="store_true", default=False)
         return parser
 
     def take_action(self, parsed_args):
-        print(parsed_args.job_id)
+        print(parsed_args.token)
         print(parsed_args.buffer_script)
         print(parsed_args.hurry)
+        fakewarp_facade.delete_buffer(parsed_args.token)
 
 
 class JobProcess(Command):
-    """Initial call when job is run to parse buffer script."""
+    """Initial call to validate buffer script."""
 
     def get_parser(self, prog_name):
         parser = super(JobProcess, self).get_parser(prog_name)
@@ -108,8 +109,11 @@ class Setup(Command):
         print(parsed_args.job_id)
         print(parsed_args.buffer_script)
         print(parsed_args.capacity)
-        print("pool: %s, capacity: %s" % tuple(
-            parsed_args.capacity.split(":")))
+        pool_name, capacity_bytes = parsed_args.capacity.split(":")
+        print("pool: %s, capacity: %s" % (pool_name, capacity_bytes))
+        fakewarp_facade.setup_job_buffer(
+            parsed_args.job_id, parsed_args.caller, pool_name,
+            capacity_bytes, parsed_args.user)
 
 
 class RealSize(Command):

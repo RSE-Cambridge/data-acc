@@ -76,3 +76,17 @@ def add_persistent_buffer(name, caller, pool_name, capacity_bytes, user,
     buff = model.Buffer(None, user, pool_name, slices, capacity_bytes,
                         persistent=True, name=name, user_agent=caller)
     return execution_facade.add_buffer(buff)
+
+
+def setup_job_buffer(job_id, caller, pool_name, capacity_bytes, user):
+    slices = 2  # TODO(johng)
+    if "GiB" in capacity_bytes:
+        capacity_bytes = capacity_bytes[:-3]
+        capacity_bytes = int(capacity_bytes) * 2 ** 30
+    buff = model.Buffer(None, user, pool_name, slices, capacity_bytes,
+                        persistent=False, job_id=job_id, user_agent=caller)
+    return execution_facade.add_buffer(buff)
+
+
+def delete_buffer(token):
+    execution_facade.delete_buffer(token)
