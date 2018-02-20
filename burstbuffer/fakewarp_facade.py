@@ -73,6 +73,9 @@ def _convert_capacity(capacity):
     if "GiB" in capacity:
         capacity_bytes = capacity[:-3]
         return int(capacity_bytes) * 2 ** 30
+    if "TB" in capacity:
+        capacity_bytes = capacity[:-2]
+        return int(capacity_bytes) * 10 ** 12
     # TODO(johngarbutt) clearly more conversions required here
     return int(capacity)
 
