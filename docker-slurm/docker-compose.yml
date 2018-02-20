@@ -41,7 +41,7 @@ services:
       - "6817"
     depends_on:
       - "slurmdbd"
-      - etcd3
+      - etcdproxy1
 
   c1:
     image: slurm-docker-cluster:17.02.9
