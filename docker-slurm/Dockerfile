@@ -111,7 +111,8 @@ RUN cd /usr/local/src \
     && pip install -e . \
     && deactivate \
     && mkdir -p /opt/cray/dw_wlm/default/bin \
-    && ln -s /usr/local/src/burstbuffer/.venv/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli
+    && ln -s /usr/local/src/burstbuffer/.venv/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli \
+    && ln -s /usr/local/src/burstbuffer/.venv/bin/buffernode /usr/local/bin/buffernode
 
 
 ARG ETCD_VERSION=3.3.1

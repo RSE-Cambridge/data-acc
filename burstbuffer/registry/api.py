@@ -21,7 +21,8 @@ ETCD_ENDPOINTS = "http://localhost:2379"
 
 
 def _etcdctl(cmd, parse_json=True):
-    cmd = "etcdctl --endpoints=%s -w json %s" % (ETCD_ENDPOINTS, cmd)
+    endpoints = os.environ.get("ETCD_ENDPOINTS", ETCD_ENDPOINTS)
+    cmd = "etcdctl --endpoints=%s -w json %s" % (endpoints, cmd)
     split = shlex.split(cmd)
     env = dict(os.environ, ETCDCTL_API="3")
 
