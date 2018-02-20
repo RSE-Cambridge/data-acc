@@ -60,7 +60,7 @@ def add_new_buffer(buffer_id, buffer_info):
     if len(get_result) == 1:
         version = get_result[0]['version']
     if version != 1:
-        # TODO move to txn...
+        # TODO(johngarbutt) move to txn...
         raise Exception("buffer already created")
 
     return revision
