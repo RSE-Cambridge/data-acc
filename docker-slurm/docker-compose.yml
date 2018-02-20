@@ -118,11 +118,11 @@ services:
       - etcd3
 
   fakenode:
-    image: quay.io/coreos/etcd
+    image: slurm-docker-cluster:17.02.9
     scale: 3
     environment:
       - ETCDCTL_API=3
-    command: sh -c "export ETCDCTL_API=3 && etcdctl --endpoints=etcdproxy1:2379 put bufferhosts/capacity/`hostname` 12 && etcdctl --endpoints=etcdproxy1:2379 watch --prefix bufferhosts/slices/`hostname`/ -- sh -c 'env | grep ETCD_WATCH_'"
+    command: sh -c "buffernode startup && etcdctl --endpoints=etcdproxy1:2379 watch --prefix bufferhosts/slices/`hostname`/ -- buffernode event"
     depends_on:
       - etcdproxy1
 

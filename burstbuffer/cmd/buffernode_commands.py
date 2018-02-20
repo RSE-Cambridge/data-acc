@@ -10,10 +10,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import os
 import socket
 
 from cliff.command import Command
+
+from burstbuffer.provision import api
 
 
 class Startup(Command):
@@ -22,14 +23,13 @@ class Startup(Command):
     def take_action(self, parsed_args):
         hostname = socket.gethostname()
         self.app.LOG.info("start of day for %s" % hostname)
+        print(api.startup(hostname))
 
 
 class Event(Command):
     """Callback for when a hostslice event occurs"""
 
     def take_action(self, parsed_args):
-        self.app.LOG.info("event occured")
-        for key in os.environ:
-            if key.startswith("ETCD_WATCH_"):
-                short_key = key.trim("ETCD_WATCH_")
-                print("%s: %s" % (short_key, os.environ[key]))
+        hostname = socket.gethostname()
+        self.app.LOG.info("event occured for %s" % hostname)
+        print(api.event(hostname))
