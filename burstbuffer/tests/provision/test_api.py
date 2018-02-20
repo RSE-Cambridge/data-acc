@@ -163,10 +163,17 @@ class TestProvisionAPI(testtools.TestCase):
 
         expected_data = {
             'bufferhosts/assigned_slices/fakehost1/nvme0n1':
-                'buffers/fakeid/0',
+                'buffers/fakeid/slices/0',
             'bufferhosts/assigned_slices/fakehost2/nvme0n4':
-                'buffers/fakeid/1',
+                'buffers/fakeid/slices/1',
             'bufferhosts/assigned_slices/fakehost3/nvme0n1':
-                'buffers/fakeid/2',
+                'buffers/fakeid/slices/2',
+            'buffers/fakeid/slices/0':
+                'bufferhosts/assigned_slices/fakehost1/nvme0n1',
+            'buffers/fakeid/slices/1':
+                'bufferhosts/assigned_slices/fakehost2/nvme0n4',
+            'buffers/fakeid/slices/2':
+                'bufferhosts/assigned_slices/fakehost3/nvme0n1',
         }
-        mock_update.assert_called_once_with(expected_data)
+        mock_update.assert_called_once_with(
+            expected_data, ensure_first_version=True)

@@ -33,3 +33,25 @@ class Event(Command):
         hostname = socket.gethostname()
         self.app.LOG.info("event occured for %s" % hostname)
         print(api.event(hostname))
+
+
+class AssignSlices(Command):
+    """For a given buffer, assign slices to trigger buffer creation."""
+    def get_parser(self, prog_name):
+        parser = super(AssignSlices, self).get_parser(prog_name)
+        parser.add_argument('buffer_id', type=str, help="Buffer ID.")
+        return parser
+
+    def take_action(self, parsed_args):
+        print(api.assign_slices(parsed_args.buffer_id))
+
+
+class UnassignSlices(Command):
+    """For a given buffer, remove slices to trigger buffer destroy."""
+    def get_parser(self, prog_name):
+        parser = super(AssignSlices, self).get_parser(prog_name)
+        parser.add_argument('buffer_id', type=str, help="Buffer ID.")
+        return parser
+
+    def take_action(self, parsed_args):
+        print(api.unassign_slices(parsed_args.buffer_id))

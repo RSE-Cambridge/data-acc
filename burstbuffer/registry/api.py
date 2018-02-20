@@ -91,8 +91,8 @@ def get_buffer(buffer_name):
     key = "buffers/%s" % buffer_name
     results = _get(key)
     if len(results) != 1:
-        raise BufferNotFound()
-    return results[key]
+        raise BufferNotFound("Unable to find buffer: %s" % buffer_name)
+    return json.loads(results[key])
 
 
 if __name__ == '__main__':

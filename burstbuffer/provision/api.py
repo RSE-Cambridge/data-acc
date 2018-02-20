@@ -38,9 +38,10 @@ def _get_local_hardware():
     return fake_devices
 
 
-def _update_data(data):
+def _update_data(data, ensure_first_version=False):
     # TODO(johngarbutt) should be done in a single transaction
     for key, value in data.items():
+        # TODO(johngarbutt) check version is 0 when ensure_first_version
         registry._etcdctl("put '%s' '%s'" % (key, value))
 
 
@@ -99,22 +100,34 @@ def event(hostname):
 
 
 def _get_available_slices_by_host():
-    raise Exception()
+    raise NotImplementedError("TODO...")
 
 
 def _set_assignments(buffer_id, assignments):
-    data = {}
     assignments = list(assignments)
     # stop 0 always being the same host
     random.shuffle(assignments)
+    data = {}
+
     for index in range(len(assignments)):
         host, device = assignments[index]
+
+        # Add buffer to hosts slice assignments
         prefix = ASSIGNED_SLICES_KEY % host
-        key = "%s/%s" % (prefix, device)
-        value = "buffers/%s/%s" % (buffer_id, index)
-        data[key] = value
+        slice_key = "%s/%s" % (prefix, device)
+        slice_value = "buffers/%s/slices/%s" % (buffer_id, index)
+        data[slice_key] = slice_value
+
+        # Add slice host to buffer
+        buffer_key = slice_value
+        data[buffer_key] = slice_key
+
+    # TODO(johngarbutt) Add slices to buffer info
+    for index in range(len(assignments)):
+        host, device = assignments[index]
+
     # TODO(johngarbutt) ensure all updates were good in a transaction
-    _update_data(data)
+    _update_data(data, ensure_first_version=True)
 
 
 def assign_slices(buffer_id):
@@ -123,7 +136,7 @@ def assign_slices(buffer_id):
 
     avaliable_slices_by_host = _get_available_slices_by_host()
     if len(avaliable_slices_by_host) < required_slices:
-        raise UnableToAssignSlices("Not enough hosts")
+        raise UnableToAssignSlices("Not enough hosts for %s" % required_slices)
 
     assignments = set()
     for host, devices in avaliable_slices_by_host.items():
@@ -133,5 +146,8 @@ def assign_slices(buffer_id):
 
     _set_assignments(buffer_id, assignments)
 
-    if len(assignments) < required_slices:
-        raise UnableToAssignSlices("Not enough available slices")
+    return assignments
+
+
+def unassign_slices(buffer_id):
+    raise NotImplementedError("TODO...")
