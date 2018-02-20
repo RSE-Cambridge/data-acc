@@ -63,3 +63,9 @@ class TestProvisionAPI(testtools.TestCase):
             revision="revision",
             value="value")
         self.assertDictEqual(expected, result)
+
+    def test_get_local_hardware(self):
+        result = api._get_local_hardware()
+
+        self.assertEqual(12, len(result))
+        self.assertEqual("nvme1n1", result[1])

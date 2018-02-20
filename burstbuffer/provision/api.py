@@ -29,11 +29,17 @@ def _get_local_hardware():
     return fake_devices
 
 
-def _refresh_slices(hostname, slices):
-    for s in slices:
-        # TODO(johngarbut) check verison for creations, etc
-        key = ALL_SLICES_KEY % (hostname, s)
-        api._etcdctl("put '%s' '%s'" % (key, FAKE_DEVICE_SIZE_BYTES))
+def _update_data(data):
+    for key, value in data.iter():
+        api._etcdctl("put '%s' '%s'" % (key, value))
+
+
+def _refresh_slices(hostname, hardware):
+    slices_info = {}
+    for device in hardware:
+        key = ALL_SLICES_KEY % (hostname, device)
+        slices[key] = FAKE_DEVICE_SIZE_BYTES
+    _update_data(slices_info)
 
 
 def _get_assigned_slices(hostname):

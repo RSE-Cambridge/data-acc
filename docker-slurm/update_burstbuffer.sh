@@ -1,14 +1,13 @@
 #!/bin/bash
-set -e
+set -x
 
-git push
-docker exec slurmctld bash -c "cd /usr/local/src/burstbuffer && . .venv/bin/activate && git remote update && git checkout etcd && git pull && pip install -Ue . && fakewarp help"
+docker build -t slurm-docker-cluster:17.02.9 . --build-arg BURSTBUFFER_BRANCH=`git show HEAD -q | head -1 | cut -c 8-`
 
-docker-compose restart
+#docker exec slurmctld bash -c "cd /usr/local/src/burstbuffer && . .venv/bin/activate && git remote update && git checkout etcd && git pull && pip install -Ue . && fakewarp help"
+
+docker-compose up -d
 
 sleep 2
-
-set -x
 
 docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=1G\" bash -c \"set\"'"
 
@@ -40,5 +39,4 @@ docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdprox
 
 sleep 5
 
-set +x
 kill %1
