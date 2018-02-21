@@ -30,6 +30,8 @@ class Buffer(object):
                  user_agent=None, created_at=None):
         if not created_at:
             self.created_at = int(time.time())
+        else:
+            self.created_at = None
         self.id = id
         self.user_id = user_id
 
