@@ -16,29 +16,13 @@ sleep 5
 
 docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=1G\" bash -c \"set\"'"
 
-sleep 8
+sleep 20
+
 #
 # Use this one to see logs as the job executes
 #
 # sleep 2
 # docker exec slurmctld bash -c "cd /data && su slurm -c 'sbatch -n2 --bbf=buffer.txt --wrap=hostname'"
 # docker logs slurmctld -f
-
-echo Assign some burst buffers
-
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 del --prefix bufferhosts/assigned_slices"
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode1/nvme0n1 buffer/fakebuffer1"
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode1/nvme1n1 buffer/fakebuffer1"
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode2/nvme9n1 buffer/fakebuffer1"
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode3/nvme9n1 buffer/fakebuffer1"
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 put bufferhosts/assigned_slices/fakenode1/nvme3n1 buffer/fakebuffer2"
-
-sleep 5
-
-echo Notice how they are picked up, now we delete them...
-
-docker exec slurmctld bash -c "ETCDCTL_API=3 etcdctl --endpoints=http://etcdproxy1:2379 del --prefix bufferhosts/assigned_slices"
-
-sleep 5
 
 kill %1
