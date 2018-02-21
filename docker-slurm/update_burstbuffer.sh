@@ -10,18 +10,19 @@ docker-compose up -d
 
 sleep 2
 
+docker-compose logs -f &
+
+sleep 5
+
 docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=1G\" bash -c \"set\"'"
 
+sleep 8
 #
 # Use this one to see logs as the job executes
 #
 # sleep 2
 # docker exec slurmctld bash -c "cd /data && su slurm -c 'sbatch -n2 --bbf=buffer.txt --wrap=hostname'"
 # docker logs slurmctld -f
-
-docker-compose logs -f &
-
-sleep 5
 
 echo Assign some burst buffers
 
