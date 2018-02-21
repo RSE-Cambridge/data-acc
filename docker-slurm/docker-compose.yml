@@ -153,6 +153,17 @@ services:
     depends_on:
       - etcdproxy1
 
+  bufferwatcher:
+    image: slurm-docker-cluster:17.02.9
+    hostname: bufferwatcher
+    container_name: bufferwatcher
+    environment:
+      - ETCDCTL_API=3
+      - ETCD_ENDPOINTS=etcdproxy1:2379
+    command: sh -c "etcdctl watch --endpoints=etcdproxy1:2379 --prefix buffers/ -- sh -c 'env | grep ETCD_WATCH_'"
+    depends_on:
+      - etcdproxy1
+
 volumes:
   etc_munge:
   etc_slurm:

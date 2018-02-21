@@ -14,6 +14,7 @@ docker-compose logs -f &
 
 sleep 5
 
+echo For more details run "export ETCDCTL_API=3 watch --prefix buffers/"
 docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=1G\" bash -c \"set\"'"
 
 sleep 15
