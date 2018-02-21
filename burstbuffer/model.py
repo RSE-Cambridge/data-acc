@@ -27,8 +27,9 @@ class Buffer(object):
     def __init__(self, id, user_id,
                  pool_name, capacity_slices, capacity_bytes,
                  job_id=None, name=None, persistent=False,
-                 user_agent=None):
-        self.created_at = int(time.time())
+                 user_agent=None, created_at=None):
+        if not created_at:
+            self.created_at = int(time.time())
         self.id = id
         self.user_id = user_id
 
@@ -61,3 +62,6 @@ class Buffer(object):
 
     def __cmp__(self, other):
         return self.__dict__ == other.__dict__
+
+    def __lt__(self, other):
+        return (self.id or 0) < (other.id or 0)

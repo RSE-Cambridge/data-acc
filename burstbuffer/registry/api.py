@@ -18,6 +18,8 @@ import shlex
 import subprocess
 import uuid
 
+from burstbuffer import model
+
 ETCD_ENDPOINTS = "http://localhost:2379"
 
 
@@ -82,7 +84,13 @@ def delete_buffer(buffer_id):
 
 
 def list_buffers():
-    return _get_all_with_prefix(prefix="buffers/")
+    raw_buffers = _get_all_with_prefix(prefix="buffers/")
+    buffers = []
+    for buffer_id, buffer_str in raw_buffers.items():
+        buffer_dict = json.loads(buffer_str)
+        buffers.append(model.Buffer(**buffer_dict))
+    buffers.sort()
+    return buffers
 
 
 def get_buffer(buffer_name):
@@ -93,7 +101,7 @@ def get_buffer(buffer_name):
     return json.loads(results[key])
 
 
-if __name__ == '__main__':
+def main():
     buffer_id = uuid.uuid4().hex
     fake_buffer_info = {
         "id": buffer_id,
@@ -108,3 +116,7 @@ if __name__ == '__main__':
     print(list_buffers())
     print(get_buffer(buffer_id))
     # print(delete_buffer(buffer_id))
+
+
+if __name__ == '__main__':
+    main()

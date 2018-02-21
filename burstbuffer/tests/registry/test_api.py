@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
 import mock
 import os
 import subprocess
@@ -44,3 +45,24 @@ class TestAPI(testtools.TestCase):
             'etcdctl', '--endpoints=http://localhost:2379', '-w',
             'json', 'get', '--prefix', 'hel'],
             mock_cmd.call_args[0][0])
+
+    @mock.patch.object(api, "_get")
+    def test_list_buffers(self, mock_get):
+        mock_get.return_value = {
+            "buffer/42": json.dumps({
+                "pool_name": "dedicated_nvme", "created_at": 1519172799,
+                "capacity_slices": 2, "capacity_bytes": 2000000000000,
+                "job_id": 42, "user_id": 1001, "user_agent": None,
+                "name": None, "id": "42", "persistent": False}),
+            "buffer/alpha": json.dumps({
+                "pool_name": "dedicated_nvme", "created_at": 1519172799,
+                "capacity_slices": 2, "capacity_bytes": 2000000000000,
+                "job_id": None, "user_id": 1001, "user_agent": None,
+                "name": "alpha", "id": "alpha", "persistent": True}),
+        }
+
+        result = api.list_buffers()
+
+        self.assertEqual(2, len(result))
+        self.assertEqual(42, result[0].job_id)
+        self.assertEqual("alpha", result[1].name)
