@@ -232,3 +232,48 @@ class TestProvisionAPI(testtools.TestCase):
             ("host2", "nvme1n1"),
         ]
         self.assertEqual(expected, result)
+
+    @mock.patch.object(registry, "_get_all_with_prefix")
+    def test_get_buffer_slices(self, mock_get):
+        mock_get.return_value = {
+            'buffers/fakeid/slices/0':
+                'bufferhosts/assigned_slices/fakehost1/nvme0n1',
+            'buffers/fakeid/slices/1':
+                'bufferhosts/assigned_slices/fakehost2/nvme4n1',
+            'buffers/fakeid/slices/2':
+                'bufferhosts/assigned_slices/fakehost3/nvme0n1',
+        }
+
+        result = api._get_buffer_slices("fakeid")
+
+        self.assertEqual(mock_get.return_value, result)
+        mock_get.assert_called_once_with("buffers/fakeid/slices/")
+
+    @mock.patch.object(registry, "_etcdctl")
+    def test_delete_all_keys(self, mock_etcd):
+        api._delete_all_keys(["a", "b"])
+
+        mock_etcd.assert_has_calls([
+            mock.call("del 'a'"),
+            mock.call("del 'b'"),
+        ])
+
+    @mock.patch.object(api, "_delete_all_keys")
+    @mock.patch.object(api, "_get_buffer_slices")
+    def test_unassign_slices(self, mock_get, mock_delete):
+        mock_get.return_value = {
+            'buffers/fakeid/slices/0':
+                'bufferhosts/assigned_slices/fakehost1/nvme0n1',
+            'buffers/fakeid/slices/1':
+                'bufferhosts/assigned_slices/fakehost2/nvme4n1',
+            'buffers/fakeid/slices/2':
+                'bufferhosts/assigned_slices/fakehost3/nvme0n1',
+        }
+
+        api.unassign_slices("fakeid")
+
+        mock_delete.assert_called_once_with([
+            'bufferhosts/assigned_slices/fakehost1/nvme0n1',
+            'bufferhosts/assigned_slices/fakehost2/nvme4n1',
+            'bufferhosts/assigned_slices/fakehost3/nvme0n1',
+        ])

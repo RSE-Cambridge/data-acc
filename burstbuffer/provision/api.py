@@ -188,5 +188,18 @@ def assign_slices(buffer_id):
     return assignments
 
 
+def _get_buffer_slices(buffer_id):
+    return registry._get_all_with_prefix("buffers/%s/slices/" % buffer_id)
+
+
+def _delete_all_keys(keys_to_delete):
+    # Should be in a transaction
+    for key in keys_to_delete:
+        registry._etcdctl("del '%s'" % key)
+
+
 def unassign_slices(buffer_id):
-    raise NotImplementedError("TODO...")
+    slices = _get_buffer_slices(buffer_id)
+    keys_to_delete = list(slices.values())
+    keys_to_delete.sort()
+    _delete_all_keys(keys_to_delete)
