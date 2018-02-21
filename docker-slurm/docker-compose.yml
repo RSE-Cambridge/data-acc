@@ -42,6 +42,9 @@ services:
     depends_on:
       - "slurmdbd"
       - etcdproxy1
+    environment:
+      - ETCDCTL_API=3
+      - ETCD_ENDPOINTS=etcdproxy1:2379
 
   c1:
     image: slurm-docker-cluster:17.02.9
