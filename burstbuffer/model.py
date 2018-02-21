@@ -28,10 +28,10 @@ class Buffer(object):
                  pool_name, capacity_slices, capacity_bytes,
                  job_id=None, name=None, persistent=False,
                  user_agent=None, created_at=None):
-        if not created_at:
+        if created_at is None:
             self.created_at = int(time.time())
         else:
-            self.created_at = None
+            self.created_at = created_at
         self.id = id
         self.user_id = user_id
 
