@@ -16,7 +16,7 @@ sleep 5
 
 docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=1G\" bash -c \"set\"'"
 
-sleep 20
+sleep 15
 
 #
 # Use this one to see logs as the job executes
