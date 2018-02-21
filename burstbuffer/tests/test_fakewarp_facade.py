@@ -79,12 +79,12 @@ class TestFakewarpFacade(testtools.TestCase):
         sessions = result['sessions']
         self.assertEqual(2, len(sessions))
 
-        self.assertEqual(1, sessions[0]['id'])
+        self.assertEqual('1', sessions[0]['id'])
         self.assertEqual(123, sessions[0]['created'])
         self.assertEqual(1001, sessions[0]['owner'])
         self.assertEqual("42", sessions[0]['token'])
 
-        self.assertEqual(2, sessions[1]['id'])
+        self.assertEqual('2', sessions[1]['id'])
         self.assertEqual(123, sessions[1]['created'])
         self.assertEqual(1001, sessions[1]['owner'])
         self.assertEqual("testpersistent", sessions[1]['token'])
@@ -100,7 +100,7 @@ class TestFakewarpFacade(testtools.TestCase):
 
         self.assertEqual("fake", result)
         expected = model.Buffer(
-            None, 995, 'dwcache', 2, 2 ** 30, persistent=False,
+            '13', 995, 'dwcache', 2, 2 ** 30, persistent=False,
             job_id='13', user_agent='SLURM')
 
         mock_add.assert_called_once_with(expected)
@@ -123,7 +123,7 @@ class TestFakewarpFacade(testtools.TestCase):
 
         self.assertEqual("fake", result)
         expected = model.Buffer(
-            None, 995, 'dwcache', 2, 2 ** 30, persistent=True,
+            'alpha', 995, 'dwcache', 2, 2 ** 30, persistent=True,
             name='alpha', user_agent='SLURM')
 
         mock_add.assert_called_once_with(expected)

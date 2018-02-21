@@ -55,7 +55,7 @@ def get_sessions():
     sessions = []
     for buff in buffers:
         session = {
-            "id": int(buff.id),
+            "id": str(buff.id),
             "created": int(buff.created_at),
             "owner": int(buff.user_id),
         }
@@ -85,7 +85,7 @@ def add_persistent_buffer(name, caller, pool_name, capacity, user,
     # TODO(johng) deal with access and buffer_type later
     slices = 2  # TODO(johng)
     capacity_bytes = _convert_capacity(capacity)
-    buff = model.Buffer(None, user, pool_name, slices, capacity_bytes,
+    buff = model.Buffer(name, user, pool_name, slices, capacity_bytes,
                         persistent=True, name=name, user_agent=caller)
     return execution_facade.add_buffer(buff)
 
@@ -93,7 +93,7 @@ def add_persistent_buffer(name, caller, pool_name, capacity, user,
 def setup_job_buffer(job_id, caller, pool_name, capacity, user):
     slices = 2  # TODO(johng)
     capacity_bytes = _convert_capacity(capacity)
-    buff = model.Buffer(None, user, pool_name, slices, capacity_bytes,
+    buff = model.Buffer(str(job_id), user, pool_name, slices, capacity_bytes,
                         persistent=False, job_id=job_id, user_agent=caller)
     return execution_facade.add_buffer(buff)
 
