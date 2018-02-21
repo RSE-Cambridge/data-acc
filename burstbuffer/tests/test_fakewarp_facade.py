@@ -44,7 +44,14 @@ class TestFakewarpFacade(testtools.TestCase):
         self.assertEqual("test1", pools[0]["id"])
         self.assertEqual("test2", pools[1]["id"])
 
-    def test_get_instances(self):
+    @mock.patch.object(execution_facade, "get_all_buffers")
+    def test_get_instances(self, mock_get):
+        mock_get.return_value = [
+            model.Buffer(1, 1001, "dedicated_nvme", 2, 2 * 10 ** 12, 42),
+            model.Buffer(2, 1001, "dedicated_nvme", 4, 4 * 10 ** 12,
+                         persistent=True, name="testpersistent"),
+        ]
+
         result = fakewarp_facade.get_instances()
 
         instances = result['instances']
@@ -57,9 +64,15 @@ class TestFakewarpFacade(testtools.TestCase):
         self.assertEqual(2, instances[1]['id'])
         self.assertEqual(4, instances[1]['capacity']['nodes'])
 
+    @mock.patch.object(execution_facade, "get_all_buffers")
     @mock.patch.object(time, "time")
-    def test_get_sessions(self, mock_time):
+    def test_get_sessions(self, mock_time, mock_get):
         mock_time.return_value = 123
+        mock_get.return_value = [
+            model.Buffer(1, 1001, "dedicated_nvme", 2, 2 * 10 ** 12, 42),
+            model.Buffer(2, 1001, "dedicated_nvme", 4, 4 * 10 ** 12,
+                         persistent=True, name="testpersistent"),
+        ]
 
         result = fakewarp_facade.get_sessions()
 

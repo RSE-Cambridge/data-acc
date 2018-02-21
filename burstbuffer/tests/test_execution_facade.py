@@ -32,27 +32,13 @@ class TestExecutionFacade(testtools.TestCase):
         self.assertEqual(10, all_pool_stats[0].free_slices)
         self.assertEqual(10 ** 12, all_pool_stats[0].slice_bytes)
 
-    @mock.patch.object(time, "time")
-    def test_get_all_buffers(self, mock_time):
-        mock_time.return_value = 123.45
+    @mock.patch.object(registry, "list_buffers")
+    def test_get_all_buffers(self, mock_list):
+        mock_list.return_value = "fake"
 
         result = execution_facade.get_all_buffers()
 
-        self.assertEqual(2, len(result))
-
-        self.assertEqual(1, result[0].id)
-        self.assertEqual(1001, result[0].user_id)
-        self.assertEqual(42, result[0].job_id)
-        self.assertEqual(2000000000000, result[0].capacity_bytes)
-        self.assertEqual(2, result[0].capacity_slices)
-        self.assertEqual(123, result[0].created_at)
-        self.assertEqual("dedicated_nvme", result[0].pool_name)
-        self.assertIsNone(result[0].name)
-        self.assertFalse(result[0].persistent)
-
-        self.assertEqual(2, result[1].id)
-        self.assertTrue(result[1].persistent)
-        self.assertEqual(4, result[1].capacity_slices)
+        self.assertEqual("fake", result)
 
     @mock.patch.object(time, "time")
     @mock.patch.object(provision, "assign_slices")

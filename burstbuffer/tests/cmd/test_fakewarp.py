@@ -34,11 +34,15 @@ class TestFakeWarp(testtools.TestCase):
         result = fakewarp.main(["--function", "pools"])
         self.assertEqual(0, result)
 
-    def test_show_instances(self):
+    @mock.patch.object(fakewarp_facade, "get_instances")
+    def test_show_instances(self, mock_get):
+        mock_get.return_value = {"instances": []}
         result = fakewarp.main(["--function", "show_instances"])
         self.assertEqual(0, result)
 
-    def test_show_sessions(self):
+    @mock.patch.object(fakewarp_facade, "get_sessions")
+    def test_show_sessions(self, mock_get):
+        mock_get.return_value = {"sessions": []}
         result = fakewarp.main(["--function", "show_sessions"])
         self.assertEqual(0, result)
 
