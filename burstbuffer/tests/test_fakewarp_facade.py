@@ -56,12 +56,12 @@ class TestFakewarpFacade(testtools.TestCase):
 
         instances = result['instances']
         self.assertEqual(2, len(instances))
-        self.assertEqual(1, instances[0]['id'])
+        self.assertEqual('1', instances[0]['id'])
         self.assertEqual(2, instances[0]['capacity']['nodes'])
         self.assertEqual(2000000000000, instances[0]['capacity']['bytes'])
-        self.assertEqual(1, instances[0]['links']['session'])
+        self.assertEqual('1', instances[0]['links']['session'])
 
-        self.assertEqual(2, instances[1]['id'])
+        self.assertEqual('2', instances[1]['id'])
         self.assertEqual(4, instances[1]['capacity']['nodes'])
 
     @mock.patch.object(execution_facade, "get_all_buffers")

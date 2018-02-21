@@ -39,12 +39,12 @@ def get_instances():
     instances = []
     for buff in buffers:
         instance = {
-            "id": int(buff.id),
+            "id": str(buff.id),
             "capacity": {
                 "bytes": int(buff.capacity_bytes),
                 "nodes": int(buff.capacity_slices),
             },
-            "links": {"session": int(buff.id)},
+            "links": {"session": str(buff.id)},
         }
         instances.append(instance)
     return {'instances': instances}
