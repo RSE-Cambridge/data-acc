@@ -49,6 +49,8 @@ class TestAPI(testtools.TestCase):
     @mock.patch.object(api, "_get")
     def test_list_buffers(self, mock_get):
         mock_get.return_value = {
+            "buffers/alpha/slices/1":
+                "bufferhosts/assigned_slices/fakenode2/nvme2n1",
             "buffer/42": json.dumps({
                 "pool_name": "dedicated_nvme", "created_at": 1519172799,
                 "capacity_slices": 2, "capacity_bytes": 2000000000000,

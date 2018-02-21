@@ -86,9 +86,12 @@ def delete_buffer(buffer_id):
 def list_buffers():
     raw_buffers = _get_all_with_prefix(prefix="buffers/")
     buffers = []
-    for buffer_id, buffer_str in raw_buffers.items():
-        buffer_dict = json.loads(buffer_str)
-        buffers.append(model.Buffer(**buffer_dict))
+    for key, buffer_str in raw_buffers.items():
+        parts = key.split("/")
+        # ignore slices, just look for buffers
+        if len(parts) == 2:
+            buffer_dict = json.loads(buffer_str)
+            buffers.append(model.Buffer(**buffer_dict))
     buffers.sort()
     return buffers
 
