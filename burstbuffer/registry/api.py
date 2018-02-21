@@ -74,12 +74,10 @@ def add_new_buffer(buffer_id, buffer_info):
 
 def delete_buffer(buffer_id):
     key = "buffers/%s" % buffer_id
-    del_result = _etcdctl("del '%s'" % key)
+    del_result = _etcdctl("del --prefix '%s'" % key)
     keys_deleted = del_result.get('deleted', 0)
     if keys_deleted == 0:
         raise Exception("Buffer already deleted")
-    if keys_deleted > 1:
-        raise Exception("WARNING: deleted too many buffers!")
     return del_result['header']['revision']
 
 
