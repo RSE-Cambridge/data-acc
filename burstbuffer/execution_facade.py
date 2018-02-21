@@ -35,7 +35,7 @@ def get_all_pool_stats():
 
 def get_all_buffers():
     return [
-        # model.Buffer(1, 1001, "dedicated_nvme", 2, 2 * 10 ** 12, 42),
+        model.Buffer(1, 1001, "dedicated_nvme", 2, 2 * 10 ** 12, 42),
         model.Buffer(2, 1001, "dedicated_nvme", 4, 4 * 10 ** 12,
                      persistent=True, name="testpersistent"),
     ]
