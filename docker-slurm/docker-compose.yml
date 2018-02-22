@@ -123,10 +123,10 @@ services:
       - etcd2
       - etcd3
 
-  fakenode1:
+  fakebuffernode1:
     image: slurm-docker-cluster:17.02.9
-    hostname: fakenode1
-    container_name: fakenode1
+    hostname: fakebuffernode1
+    container_name: fakebuffernode1
     environment:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=etcdproxy1:2379
@@ -136,8 +136,8 @@ services:
 
   fakenode2:
     image: slurm-docker-cluster:17.02.9
-    hostname: fakenode2
-    container_name: fakenode2
+    hostname: fakebuffernode2
+    container_name: fakebuffernode2
     environment:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=etcdproxy1:2379
@@ -147,8 +147,8 @@ services:
 
   fakenode3:
     image: slurm-docker-cluster:17.02.9
-    hostname: fakenode3
-    container_name: fakenode3
+    hostname: fakebuffernode3
+    container_name: fakebuffernode3
     environment:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=etcdproxy1:2379
