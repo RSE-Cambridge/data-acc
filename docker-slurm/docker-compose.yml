@@ -39,6 +39,7 @@ services:
       - var_log_slurm:/var/log/slurm
     expose:
       - "6817"
+      - "60001-63000"
     depends_on:
       - "slurmdbd"
       - etcdproxy1
@@ -58,6 +59,7 @@ services:
       - var_log_slurm:/var/log/slurm
     expose:
       - "6818"
+      - "60001-63000"
     depends_on:
       - "slurmctld"
 
@@ -73,6 +75,7 @@ services:
       - var_log_slurm:/var/log/slurm
     expose:
       - "6818"
+      - "60001-63000"
     depends_on:
       - "slurmctld"
 
