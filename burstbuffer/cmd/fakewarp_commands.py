@@ -243,9 +243,10 @@ class CreatePersistent(Command):
         return parser
 
     def take_action(self, parsed_args):
-        print(parsed_args.name)
         pool_name, capacity_bytes = parsed_args.capacity.split(":")
         fakewarp_facade.add_persistent_buffer(
             parsed_args.name, parsed_args.caller,
             pool_name, capacity_bytes,
             parsed_args.user, parsed_args.access, parsed_args.type)
+        # Slurm looks for "created" in response message
+        print("created %s" % parsed_args.name)
