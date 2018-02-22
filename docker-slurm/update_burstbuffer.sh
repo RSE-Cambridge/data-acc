@@ -13,28 +13,38 @@ docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 #BB destroy_persistent name=mytestbuffer" > delete-persistent.sh'
 
-echo ***Show current system state***
+echo "***Show current system state***"
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
 sleep 3
-echo ***Create persistent buffer***
+echo "***Create persistent buffer***"
+docker exec slurmctld bash -c "cd /data && cat create-persistent.sh"
 docker exec slurmctld bash -c "cd /data && su slurm -c 'sbatch create-persistent.sh'"
 
 sleep 5
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
-echo ***Create per job buffer***
-docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=1G\" bash -c \"sleep 10 && echo \$HOSTNAME\"'" &
+echo "***Create per job buffer***"
+echo 'srun --bb="capacity=1G" bash -c "sleep 10 && echo \$HOSTNAME"'
+docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=1G\" bash -c \"sleep 5 && echo \$HOSTNAME\"'" &
 sleep 5
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
 sleep 5
-echo ***Delete peristent buffer***
+echo "***Delete peristent buffer***"
+docker exec slurmctld bash -c "cd /data && cat delete-persistent.sh"
 docker exec slurmctld bash -c "cd /data && su slurm -c 'sbatch delete-persistent.sh'"
 
 sleep 22
-echo ***Show all is cleaned up***
+echo "***Show all is cleaned up***"
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
+
+sleep 5
+docker logs fakenode1
+sleep 5
+docker logs fakenode2
+sleep 5
+docker logs bufferwatcher
 
 #sleep 15
 
