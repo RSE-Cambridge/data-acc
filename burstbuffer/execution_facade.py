@@ -16,6 +16,8 @@ Involves creating, destroying, staging data in and staging data out, etc.
 """
 
 from burstbuffer import model
+from burstbuffer.provision import api as provision
+from burstbuffer.registry import api as registry
 
 TB_IN_BYTES = 1 * 10 ** 12
 GiB_IN_BYTES = 1073741824
@@ -32,15 +34,26 @@ def get_all_pool_stats():
 
 
 def get_all_buffers():
-    return [
-        model.Buffer(1, 1001, "dedicated_nvme", 2, 2 * 10 ** 12, 42),
-        model.Buffer(2, 1001, "dedicated_nvme", 4, 4 * 10 ** 12,
-                     persistent=True, name="testpersistent"),
-    ]
+    return registry.list_buffers()
 
 
-def add_buffer(buff):
-    if buff.id is not None:
-        raise Exception("Buffer already exists")
-    buff.id = 123
+def add_buffer(buff_request):
+    id = buff_request.job_id
+    if not id:
+        id = buff_request.name
+    buff = registry.add_new_buffer(id, buff_request.__dict__)
+    assignments = provision.assign_slices(id)
+    # TODO(johngarbutt) need to wait for mountpoint, etc?
+    print(assignments)
     return buff
+
+
+def delete_buffer(buffer_id):
+    try:
+        provision.unassign_slices(buffer_id)
+    except Exception as e:
+        print("Ignoring unassign error: %s" % e)
+    try:
+        registry.delete_buffer(buffer_id)
+    except Exception as e:
+        print("Ignoring delete buffer error: %s" % e)

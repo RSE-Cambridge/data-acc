@@ -51,6 +51,58 @@ Try out the fake pools example:
 fakewarp --fuction pools
 ```
 
+## Demo
+
+When using the [./update-buffer.sh](docker-slurm/update-buffer.sh) script
+you get the following demo of the burst buffer:
+
+```Console
+***Show current system state***
+Name=cray DefaultPool=dedicated_nvme Granularity=1TB TotalSpace=20TB FreeSpace=10TB UsedSpace=0
+  Flags=EnablePersistent
+  StageInTimeout=30 StageOutTimeout=30 ValidateTimeout=5 OtherTimeout=300
+  AllowUsers=root,slurm
+  GetSysState=/opt/cray/dw_wlm/default/bin/dw_wlm_cli
+***Create persistent buffer***
+#!/bin/bash
+#BB create_persistent name=mytestbuffer capacity=32GB access=striped type=scratch
+Submitted batch job 2
+Name=cray DefaultPool=dedicated_nvme Granularity=1TB TotalSpace=20TB FreeSpace=9TB UsedSpace=1TB
+  Flags=EnablePersistent
+  StageInTimeout=30 StageOutTimeout=30 ValidateTimeout=5 OtherTimeout=300
+  AllowUsers=root,slurm
+  GetSysState=/opt/cray/dw_wlm/default/bin/dw_wlm_cli
+  Allocated Buffers:
+    Name=mytestbuffer CreateTime=2018-02-22T13:41:16 Pool=dedicated_nvme Size=1TB State=allocated UserID=slurm(995)
+  Per User Buffer Use:
+    UserID=slurm(995) Used=1TB
+***Create per job buffer***
+srun --bb="capacity=3TB" bash -c "sleep 10 && echo \$HOSTNAME"
+srun: job 3 queued and waiting for resources
+Name=cray DefaultPool=dedicated_nvme Granularity=1TB TotalSpace=20TB FreeSpace=6TB UsedSpace=4TB
+  Flags=EnablePersistent
+  StageInTimeout=30 StageOutTimeout=30 ValidateTimeout=5 OtherTimeout=300
+  AllowUsers=root,slurm
+  GetSysState=/opt/cray/dw_wlm/default/bin/dw_wlm_cli
+  Allocated Buffers:
+    JobID=3 CreateTime=2018-02-22T13:41:21 Pool=dedicated_nvme Size=3TB State=allocated UserID=slurm(995)
+    Name=mytestbuffer CreateTime=2018-02-22T13:41:16 Pool=dedicated_nvme Size=1TB State=allocated UserID=slurm(995)
+  Per User Buffer Use:
+    UserID=slurm(995) Used=4TB
+***Delete persistent buffer***
+#!/bin/bash
+#BB destroy_persistent name=mytestbuffer
+Submitted batch job 4
+srun: job 3 has been allocated resources
+slurmctld
+***Show all is cleaned up***
+Name=cray DefaultPool=dedicated_nvme Granularity=1TB TotalSpace=20TB FreeSpace=13TB UsedSpace=0
+  Flags=EnablePersistent
+  StageInTimeout=30 StageOutTimeout=30 ValidateTimeout=5 OtherTimeout=300
+  AllowUsers=root,slurm
+  GetSysState=/opt/cray/dw_wlm/default/bin/dw_wlm_cli
+```
+
 ## Running tests
 
 To run unit tests:

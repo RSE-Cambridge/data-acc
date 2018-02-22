@@ -39,12 +39,12 @@ def get_instances():
     instances = []
     for buff in buffers:
         instance = {
-            "id": int(buff.id),
+            "id": str(buff.id),
             "capacity": {
                 "bytes": int(buff.capacity_bytes),
                 "nodes": int(buff.capacity_slices),
             },
-            "links": {"session": int(buff.id)},
+            "links": {"session": str(buff.id)},
         }
         instances.append(instance)
     return {'instances': instances}
@@ -55,7 +55,7 @@ def get_sessions():
     sessions = []
     for buff in buffers:
         session = {
-            "id": int(buff.id),
+            "id": str(buff.id),
             "created": int(buff.created_at),
             "owner": int(buff.user_id),
         }
@@ -69,10 +69,34 @@ def get_sessions():
     return {"sessions": sessions}
 
 
-def add_persistent_buffer(name, caller, pool_name, capacity_bytes, user,
+def _convert_capacity(capacity):
+    if "GiB" in capacity:
+        capacity_bytes = capacity[:-3]
+        return int(capacity_bytes) * 2 ** 30
+    if "TB" in capacity:
+        capacity_bytes = capacity[:-2]
+        return int(capacity_bytes) * 10 ** 12
+    # TODO(johngarbutt) clearly more conversions required here
+    return int(capacity)
+
+
+def add_persistent_buffer(name, caller, pool_name, capacity, user,
                           access, buffer_type):
     # TODO(johng) deal with access and buffer_type later
     slices = 2  # TODO(johng)
-    buff = model.Buffer(None, user, pool_name, slices, capacity_bytes,
+    capacity_bytes = _convert_capacity(capacity)
+    buff = model.Buffer(name, user, pool_name, slices, capacity_bytes,
                         persistent=True, name=name, user_agent=caller)
     return execution_facade.add_buffer(buff)
+
+
+def setup_job_buffer(job_id, caller, pool_name, capacity, user):
+    slices = 2  # TODO(johng)
+    capacity_bytes = _convert_capacity(capacity)
+    buff = model.Buffer(str(job_id), user, pool_name, slices, capacity_bytes,
+                        persistent=False, job_id=job_id, user_agent=caller)
+    return execution_facade.add_buffer(buff)
+
+
+def delete_buffer(token):
+    execution_facade.delete_buffer(token)

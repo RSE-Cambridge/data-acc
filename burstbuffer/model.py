@@ -27,8 +27,11 @@ class Buffer(object):
     def __init__(self, id, user_id,
                  pool_name, capacity_slices, capacity_bytes,
                  job_id=None, name=None, persistent=False,
-                 user_agent=None):
-        self.created_at = int(time.time())
+                 user_agent=None, created_at=None):
+        if created_at is None:
+            self.created_at = int(time.time())
+        else:
+            self.created_at = created_at
         self.id = id
         self.user_id = user_id
 
@@ -40,3 +43,27 @@ class Buffer(object):
         self.name = name
         self.persistent = persistent
         self.user_agent = user_agent  # Often SLURM or CLI
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            user_id=self.user_id,
+            pool_name=self.pool_name,
+            capacity_slices=self.capacity_slices,
+            capacity_bytes=self.capacity_bytes,
+            job_id=self.job_id,
+            name=self.name,
+            persistent=self.persistent,
+            user_agent=self.user_agent)
+
+    def __str__(self):
+        return str(self.__dict__)
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __cmp__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __lt__(self, other):
+        return (self.id or 0) < (other.id or 0)

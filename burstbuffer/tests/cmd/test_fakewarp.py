@@ -18,6 +18,7 @@ import fixtures
 import testtools
 
 from burstbuffer.cmd import fakewarp
+from burstbuffer import fakewarp_facade
 
 
 class TestFakeWarp(testtools.TestCase):
@@ -33,24 +34,26 @@ class TestFakeWarp(testtools.TestCase):
         result = fakewarp.main(["--function", "pools"])
         self.assertEqual(0, result)
 
-    def test_show_instances(self):
+    @mock.patch.object(fakewarp_facade, "get_instances")
+    def test_show_instances(self, mock_get):
+        mock_get.return_value = {"instances": []}
         result = fakewarp.main(["--function", "show_instances"])
         self.assertEqual(0, result)
 
-    def test_show_sessions(self):
+    @mock.patch.object(fakewarp_facade, "get_sessions")
+    def test_show_sessions(self, mock_get):
+        mock_get.return_value = {"sessions": []}
         result = fakewarp.main(["--function", "show_sessions"])
         self.assertEqual(0, result)
 
-    def test_teardown(self):
+    @mock.patch.object(fakewarp_facade, "delete_buffer")
+    def test_teardown(self, mock_delete):
         cmdline = "--function teardown --token 347 --job /tmp/fakescript"
-        result = fakewarp.main(cmdline.split(" "))
-        self.assertEqual(0, result)
 
-    def test_teardown_with_hurry(self):
-        cmdline = "--function teardown --token 347 --job /tmp/fakescript"
-        cmdline += " --hurry"
         result = fakewarp.main(cmdline.split(" "))
+
         self.assertEqual(0, result)
+        mock_delete.assert_called_once_with('347')
 
     def test_job_process(self):
         stdout = io.StringIO()
@@ -66,13 +69,18 @@ class TestFakeWarp(testtools.TestCase):
             self.assertEqual(0, result)
             self.assertEqual("capacity=1GiB\n", stdout.getvalue())
 
-    def test_setup(self):
+    @mock.patch.object(fakewarp_facade, "setup_job_buffer")
+    def test_setup(self, mock_setup):
         cmdline = "--function setup "
         cmdline += "--token 13 --caller SLURM --user 995 "
         cmdline += "--groupid 995 --capacity dwcache:1GiB "
         cmdline += "--job /var/lib/slurmd/hash.3/job.13/script"
+
         result = fakewarp.main(cmdline.split(" "))
+
         self.assertEqual(0, result)
+        mock_setup.assert_called_once_with(
+            '13', 'SLURM', 'dwcache', '1GiB', 995)
 
     def test_real_size(self):
         cmdline = "--function real_size --token 13"
@@ -119,14 +127,24 @@ class TestFakeWarp(testtools.TestCase):
         result = fakewarp.main(cmdline.split(" "))
         self.assertEqual(0, result)
 
-    def test_create_persistent(self):
+    @mock.patch.object(fakewarp_facade, "add_persistent_buffer")
+    def test_create_persistent(self, mock_add):
         cmdline = "--function create_persistent -c CLI -t alpha -u 995 "
         cmdline += "-C dedicated_nvme:1000000000000 -a striped -T scratch"
-        result = fakewarp.main(cmdline.split(" "))
-        self.assertEqual(0, result)
 
-    def test_destroy_persistent(self):
+        result = fakewarp.main(cmdline.split(" "))
+
+        self.assertEqual(0, result)
+        mock_add.assert_called_once_with(
+            'alpha', 'CLI', 'dedicated_nvme', '1000000000000', '995',
+            'striped', 'scratch')
+
+    @mock.patch.object(fakewarp_facade, "delete_buffer")
+    def test_destroy_persistent(self, mock_delete):
         cmdline = "--function teardown --token alpha "
         cmdline += "--job /tmp/script --hurry"
+
         result = fakewarp.main(cmdline.split(" "))
+
         self.assertEqual(0, result)
+        mock_delete.assert_called_once_with('alpha')

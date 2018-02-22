@@ -6,8 +6,8 @@ LABEL org.label-schema.vcs-url="https://github.com/giovtorres/slurm-docker-clust
       org.label-schema.description="Slurm Docker cluster on CentOS 7" \
       maintainer="Giovanni Torres"
 
-ARG SLURM_VERSION=17.02.9
-ARG SLURM_DOWNLOAD_MD5=6bd0b38e6bf08f3426a7dd1e663a2e3c
+ARG SLURM_VERSION=17.11.3-2
+ARG SLURM_DOWNLOAD_MD5=30cb15ae222a142107919383387abbeb
 ARG SLURM_DOWNLOAD_URL=https://download.schedmd.com/slurm/slurm-"$SLURM_VERSION".tar.bz2
 
 ARG GOSU_VERSION=1.10
@@ -96,19 +96,39 @@ COPY slurm.conf /etc/slurm/slurm.conf
 COPY slurmdbd.conf /etc/slurm/slurmdbd.conf
 COPY burst_buffer.conf /etc/slurm/burst_buffer.conf
 
+
+# Download and install etcd client
+ARG ETCD_VERSION=3.3.1
+ARG ETCD_DOWNLOAD_URL="https://github.com/coreos/etcd/releases/download/v$ETCD_VERSION/etcd-v$ETCD_VERSION-linux-amd64.tar.gz"
+
+RUN set -x \
+    && wget -O etcd.tar.gz "$ETCD_DOWNLOAD_URL" \
+    && mkdir /usr/local/src/etcd \
+    && tar xf etcd.tar.gz -C /usr/local/src/etcd --strip-components=1 \
+    && install -D -m755 /usr/local/src/etcd/etcdctl /usr/local/bin/etcdctl \
+    && rm etcd.tar.gz \
+    && rm -rf /usr/local/src/etcd
+
+
 # Install burstbuffer python wrapper
 RUN yum -y install python34 python-pip python-wheel
 RUN pip install -U pip
 RUN pip install virtualenv
+
+ARG BURSTBUFFER_BRANCH=etcd
+
 RUN cd /usr/local/src \
     && git clone https://github.com/johngarbutt/burstbuffer \
     && cd burstbuffer \
+    && git checkout $BURSTBUFFER_BRANCH \
+    && git checkout $BURSTBUFFER_BRANCH \
     && virtualenv -p python3 .venv \
     && . .venv/bin/activate \
     && pip install -e . \
     && deactivate \
     && mkdir -p /opt/cray/dw_wlm/default/bin \
-    && ln -s /usr/local/src/burstbuffer/.venv/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli
+    && ln -s /usr/local/src/burstbuffer/.venv/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli \
+    && ln -s /usr/local/src/burstbuffer/.venv/bin/buffernode /usr/local/bin/buffernode
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

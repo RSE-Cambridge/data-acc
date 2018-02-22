@@ -47,6 +47,7 @@ setup(
     entry_points={
         'console_scripts': [
             'fakewarp = burstbuffer.cmd.fakewarp:main',
+            'buffernode = burstbuffer.cmd.buffernode:main',
         ],
         'burstbuffer.fakewarp': [
             'pools = burstbuffer.cmd.fakewarp_commands:Pools',
@@ -65,6 +66,13 @@ setup(
             'burstbuffer.cmd.fakewarp_commands:ShowConfigurations',
             'create_persistent = '
             'burstbuffer.cmd.fakewarp_commands:CreatePersistent',
+        ],
+        'burstbuffer.buffernode': [
+            'startup = burstbuffer.cmd.buffernode_commands:Startup',
+            'event = burstbuffer.cmd.buffernode_commands:Event',
+            'assign_slices = burstbuffer.cmd.buffernode_commands:AssignSlices',
+            'unassign_slices = '
+            'burstbuffer.cmd.buffernode_commands:UnassignSlices',
         ],
     },
 
