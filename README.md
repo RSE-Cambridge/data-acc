@@ -53,7 +53,7 @@ fakewarp --fuction pools
 
 ## Demo
 
-When using the [./update-buffer.sh](docker-slurm/update-buffer.sh) script
+When using the [./update_burstbuffer.sh](docker-slurm/update_burstbuffer.sh) script
 you get the following demo of the burst buffer:
 
 ```Console
