@@ -154,7 +154,8 @@ def _set_assignments(buffer_id, assignments):
     assignments = list(assignments)
     # stop 0 always being the same host
     random.shuffle(assignments)
-    data = {}
+    slice_data = {}
+    buffer_data = {}
 
     for index in range(len(assignments)):
         host, device = assignments[index]
@@ -163,18 +164,16 @@ def _set_assignments(buffer_id, assignments):
         prefix = ASSIGNED_SLICES_KEY % host
         slice_key = "%s/%s" % (prefix, device)
         slice_value = "buffers/%s/slices/%s" % (buffer_id, index)
-        data[slice_key] = slice_value
+        slice_data[slice_key] = slice_value
 
         # Add slice host to buffer
         buffer_key = slice_value
-        data[buffer_key] = slice_key
-
-    # TODO(johngarbutt) Add slices to buffer info
-    for index in range(len(assignments)):
-        host, device = assignments[index]
+        buffer_data[buffer_key] = slice_key
 
     # TODO(johngarbutt) ensure all updates were good in a transaction
-    _update_data(data, ensure_first_version=True)
+    _update_data(buffer_data, ensure_first_version=True)
+    # for now, ensure buffer written before slice events
+    _update_data(slice_data, ensure_first_version=True)
 
 
 def assign_slices(buffer_id):
