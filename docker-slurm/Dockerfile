@@ -115,7 +115,7 @@ RUN yum -y install python34 python-pip python-wheel
 RUN pip install -U pip
 RUN pip install virtualenv
 
-ARG BURSTBUFFER_BRANCH=etcd
+ARG BURSTBUFFER_BRANCH=master
 
 RUN cd /usr/local/src \
     && git clone https://github.com/johngarbutt/burstbuffer \
