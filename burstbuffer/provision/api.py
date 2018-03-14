@@ -84,10 +84,10 @@ def _get_env():
 def _get_event_info():
     env = _get_env()
 
-    event_type = env["ETCD_WATCH_EVENT_TYPE"]
-    revision = env["ETCD_WATCH_REVISION"]
-    key = env["ETCD_WATCH_KEY"]
-    value = env['ETCD_WATCH_VALUE']
+    event_type = env["ETCD_WATCH_EVENT_TYPE"].strip('"')
+    revision = env["ETCD_WATCH_REVISION"].strip('"')
+    key = env["ETCD_WATCH_KEY"].strip('"')
+    value = env['ETCD_WATCH_VALUE'].strip('"')
 
     return dict(
         event_type=event_type,
@@ -101,6 +101,14 @@ def event(hostname):
     print(event_info)
     # TODO(johngarbutt) write key to say provision worked,
     # and write out fake mountpoint for slice 0
+    if event_info['event_type'] == "PUT":
+        device_name = event_info['key'].split('/')[-1]
+        _, buffer_id, __, slice_id = event_info['value'].split('/')
+        print("device %s for buffer %s slice number %s" % (
+              device_name, buffer_id, slice_id))
+        if int(slice_id) == 0:
+            buffer_slices = _get_buffer_slices(buffer_id)
+            print("TODO: create buffer: %s" % buffer_slices)
     return _get_assigned_slices(hostname)
 
 
