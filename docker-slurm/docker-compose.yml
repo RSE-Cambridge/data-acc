@@ -134,7 +134,7 @@ services:
     depends_on:
       - etcdproxy1
 
-  fakenode2:
+  fakebuffernode2:
     image: slurm-docker-cluster:17.02.9
     hostname: fakebuffernode2
     container_name: fakebuffernode2
@@ -145,7 +145,7 @@ services:
     depends_on:
       - etcdproxy1
 
-  fakenode3:
+  fakebuffernode3:
     image: slurm-docker-cluster:17.02.9
     hostname: fakebuffernode3
     container_name: fakebuffernode3
@@ -167,6 +167,40 @@ services:
     depends_on:
       - etcdproxy1
 
+  glusterserver1:
+    image: gluster/gluster-centos
+    hostname: gluster1
+    container_name: gluster1
+    volumes:
+      - etc_gluster1:/etc/glusterfs:z
+      - var_lib_gluster1:/var/lib/glusterd:z
+      - var_log_gluster1:/var/log/glusterfs:z
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    tmpfs:
+      - /data/glusterfs/nvme1
+      - /data/glusterfs/nvme2
+      - /data/glusterfs/nvme3
+      - /data/glusterfs/nvme4
+      - /data/glusterfs/nvme5
+    privileged: true
+
+  glusterserver2:
+    image: gluster/gluster-centos
+    hostname: gluster2
+    container_name: gluster2
+    volumes:
+      - etc_gluster2:/etc/glusterfs:z
+      - var_lib_gluster2:/var/lib/glusterd:z
+      - var_log_gluster2:/var/log/glusterfs:z
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    tmpfs:
+      - /data/glusterfs/nvme1
+      - /data/glusterfs/nvme2
+      - /data/glusterfs/nvme3
+      - /data/glusterfs/nvme4
+      - /data/glusterfs/nvme5
+    privileged: true
+
 volumes:
   etc_munge:
   etc_slurm:
@@ -176,3 +210,9 @@ volumes:
   etcd1_data:
   etcd2_data:
   etcd3_data:
+  var_lib_gluster1:
+  var_log_gluster1:
+  etc_gluster1:
+  var_lib_gluster2:
+  var_log_gluster2:
+  etc_gluster2:
