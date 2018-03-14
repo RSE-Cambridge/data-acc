@@ -101,6 +101,7 @@ def event(hostname):
     print(event_info)
     # TODO(johngarbutt) write key to say provision worked,
     # and write out fake mountpoint for slice 0
+
     if event_info['event_type'] == "PUT":
         device_name = event_info['key'].split('/')[-1]
         _, buffer_id, __, slice_id = event_info['value'].split('/')
@@ -108,7 +109,20 @@ def event(hostname):
               device_name, buffer_id, slice_id))
         if int(slice_id) == 0:
             buffer_slices = _get_buffer_slices(buffer_id)
-            print("TODO: create buffer: %s" % buffer_slices)
+            slices = {}
+            for buffer_key, slice_key in buffer_slices.items():
+                slice_number = buffer_key.split('/')[-1]
+                slice_info = slice_key.split('/')
+                server = slice_info[-2]
+                device = slice_info[-1]
+                slices[slice_number] = "%s:%s" % (server, device)
+            print("TODO: create buffer: %s" % slices)
+
+    if event_info['event_type'] == "DELETE":
+        device_name = event_info['key'].split('/')[-1]
+        print("TODO: delete brick for %s" % device_name)
+        # TODO(johngarbutt) volume deleted in buffer watcher maybe?
+
     return _get_assigned_slices(hostname)
 
 
