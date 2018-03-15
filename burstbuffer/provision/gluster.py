@@ -55,7 +55,7 @@ def _create_bricks(slices):
         host, device = io_slice.split(":")
         path = BRICK_PATH % device
         _exec_command("mkdir %s" % path, host)
-        bricks.append(path)
+        bricks.append("%s:%s" % (host, path))
     print(bricks)
     return bricks
 
