@@ -49,3 +49,4 @@ docker exec gluster2 bash -c "mkdir -p /root/.ssh && echo $SSH_PUB_KEY > /root/.
 docker exec slurmctld bash -c "ssh -oStrictHostKeyChecking=no -p 2222 gluster2 hostname"
 docker exec gluster3 bash -c "mkdir -p /root/.ssh && echo $SSH_PUB_KEY > /root/.ssh/authorized_keys"
 docker exec slurmctld bash -c "ssh -oStrictHostKeyChecking=no -p 2222 gluster3 hostname"
+echo
