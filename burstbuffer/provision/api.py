@@ -115,8 +115,11 @@ def event(hostname):
                 slice_info = slice_key.split('/')
                 server = slice_info[-2]
                 device = slice_info[-1]
+                server = "gluster" + server[:-1]
                 slices[slice_number] = "%s:%s" % (server, device)
-            print("TODO: create buffer: %s" % slices)
+            slice_list = " ".join(slices)
+            print("ssh gluster1 gluster volume create %s %s" % (
+                  buffer_id, slice_list))
 
     if event_info['event_type'] == "DELETE":
         device_name = event_info['key'].split('/')[-1]
