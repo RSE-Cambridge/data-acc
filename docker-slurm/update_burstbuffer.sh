@@ -49,6 +49,12 @@ echo
 echo "***Show all is cleaned up***"
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
+sleep 2
+echo
+echo "***Check volumes in gluster***"
+echo "gluster volume list"
+docker exec gluster1 bash -c "gluster volume list"
+
 sleep 5
 echo
 docker logs fakebuffernode1
