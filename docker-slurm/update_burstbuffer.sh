@@ -7,6 +7,7 @@ docker build -t slurm-docker-cluster:17.02.9 . --build-arg BURSTBUFFER_BRANCH=`g
 #docker exec slurmctld bash -c "cd /usr/local/src/burstbuffer && . .venv/bin/activate && git remote update && git checkout etcd && git pull && pip install -Ue . && fakewarp help"
 
 docker-compose up -d
+./register_cluster.sh
 
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 #BB create_persistent name=mytestbuffer capacity=32GB access=striped type=scratch" > create-persistent.sh'
