@@ -215,6 +215,30 @@ services:
       - /data/glusterfs/nvme12n1
     privileged: true
 
+  glusterserver3:
+    image: gluster/gluster-centos
+    hostname: gluster3
+    container_name: gluster3
+    volumes:
+      - etc_gluster3:/etc/glusterfs:z
+      - var_lib_gluster3:/var/lib/glusterd:z
+      - var_log_gluster3:/var/log/glusterfs:z
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    tmpfs:
+      - /data/glusterfs/nvme1n1
+      - /data/glusterfs/nvme2n1
+      - /data/glusterfs/nvme3n1
+      - /data/glusterfs/nvme4n1
+      - /data/glusterfs/nvme5n1
+      - /data/glusterfs/nvme6n1
+      - /data/glusterfs/nvme7n1
+      - /data/glusterfs/nvme8n1
+      - /data/glusterfs/nvme9n1
+      - /data/glusterfs/nvme10n1
+      - /data/glusterfs/nvme11n1
+      - /data/glusterfs/nvme12n1
+    privileged: true
+
 volumes:
   etc_munge:
   etc_slurm:
@@ -230,3 +254,6 @@ volumes:
   var_lib_gluster2:
   var_log_gluster2:
   etc_gluster2:
+  var_lib_gluster3:
+  var_log_gluster3:
+  etc_gluster3:

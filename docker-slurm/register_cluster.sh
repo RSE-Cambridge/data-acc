@@ -7,8 +7,10 @@ docker-compose restart slurmdbd slurmctld
 echo
 echo GlusterFS setup
 docker exec gluster1 bash -c "gluster peer probe gluster2"
+docker exec gluster1 bash -c "gluster peer probe gluster3"
 docker exec gluster1 bash -c "gluster pool list"
 docker exec gluster2 bash -c "gluster pool list"
+docker exec gluster3 bash -c "gluster pool list"
 
 echo
 for i in `seq 1 12`;
