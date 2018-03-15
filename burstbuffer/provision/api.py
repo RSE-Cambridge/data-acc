@@ -116,7 +116,7 @@ def event(hostname):
                 device = slice_info[-1]
                 server = "gluster" + server[-1:]
                 slices[slice_number] = "%s:%s" % (server, device)
-            slice_list = " ".join(slices.values())
+            slice_list = slices.values()
             localgluster = "gluster" + hostname[-1:]
             gluster.setup_volume(localgluster, buffer_id, slice_list)
             # TODO(johngarbutt) write out mountpoint

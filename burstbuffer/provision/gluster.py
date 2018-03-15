@@ -80,7 +80,7 @@ def _volume_delete(gluster_host, volume_name):
 
 
 def setup_volume(gluster_host, volume_name, slices):
-    print("start: setup volume %s" % slices)
+    print("start: setup volume")
     bricks = _create_bricks(slices)
     _volume_create(gluster_host, volume_name, bricks)
     _volume_start(gluster_host, volume_name)
