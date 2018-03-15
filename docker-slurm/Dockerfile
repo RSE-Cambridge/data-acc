@@ -109,6 +109,7 @@ RUN set -x \
     && rm etcd.tar.gz \
     && rm -rf /usr/local/src/etcd
 
+RUN mkdir /root/.ssh && ssh-keygen -q -t rsa -N '' -f /root/.ssh/id_rsa
 
 # Install burstbuffer python wrapper
 RUN yum -y install python34 python-pip python-wheel
