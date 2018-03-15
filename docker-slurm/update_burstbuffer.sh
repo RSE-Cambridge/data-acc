@@ -18,6 +18,7 @@ echo "***Show current system state***"
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
 sleep 3
+echo
 echo "***Create persistent buffer***"
 docker exec slurmctld bash -c "cd /data && cat create-persistent.sh"
 docker exec slurmctld bash -c "cd /data && su slurm -c 'sbatch create-persistent.sh'"
@@ -25,22 +26,31 @@ docker exec slurmctld bash -c "cd /data && su slurm -c 'sbatch create-persistent
 sleep 5
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
+echo
 echo "***Create per job buffer***"
 echo 'srun --bb="capacity=3TB" bash -c "sleep 10 && echo \$HOSTNAME"'
 docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=3TB\" bash -c \"sleep 5 && echo \$HOSTNAME\"'" &
 sleep 5
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
+echo
+echo "***Check volumes in gluster***"
+echo "gluster volume list"
+docker exec gluster1 bash -c "gluster volume list"
+
 sleep 5
+echo
 echo "***Delete persistent buffer***"
 docker exec slurmctld bash -c "cd /data && cat delete-persistent.sh"
 docker exec slurmctld bash -c "cd /data && su slurm -c 'sbatch delete-persistent.sh'"
 
 sleep 22
+echo
 echo "***Show all is cleaned up***"
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
 sleep 5
+echo
 docker logs fakebuffernode1
 docker logs fakebuffernode2
 docker logs fakebuffernode3
