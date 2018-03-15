@@ -21,7 +21,7 @@ def _exec_command(command, hostname, port=22, username="root"):
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect('ssh.example.com', port, username, timeout=10)
 
-    stdin, stdout, stderr = client.exec_command('ls -l', timeout=60.0)
+    stdin, stdout, stderr = client.exec_command(command, timeout=60.0)
 
     client.close()
 
@@ -65,7 +65,7 @@ def _volume_delete(gluster_host, volume_name):
 
 
 def setup_volume(gluster_host, volume_name, *slices):
-    bricks = _create_bricks(gluster_host, slices)
+    bricks = _create_bricks(slices)
     _volume_create(gluster_host, volume_name, *bricks)
     _volume_start(gluster_host, volume_name)
 
