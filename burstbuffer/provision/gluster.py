@@ -29,10 +29,17 @@ def _exec_command(command, hostname, port=2222, username="root"):
         print("running command: %s" % command)
         stdin, stdout, stderr = client.exec_command(command, timeout=60.0)
 
+        stdout_lines = stdout.readlines()
+        stderr_lines = stderr.readline()
+
         client.close()
+
+        print("\n".join(stdout_lines))
+        print("\n".join(stderr_lines))
 
         return (stdin, stdout, stderr)
     except Exception:
+        print("uh, oh....")
         traceback.print_exc()
         try:
             client.close()
