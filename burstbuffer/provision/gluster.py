@@ -94,4 +94,4 @@ def volume_remove(gluster_host, volume_name):
 def clean_brick(gluster_host, device_name):
     print("start: clean brick")
     path = BRICK_PATH % device_name
-    _exec_command("rm -rf %s" % path)
+    _exec_command("rm -rf %s" % path, gluster_host)
