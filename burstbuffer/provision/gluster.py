@@ -22,8 +22,10 @@ def _exec_command(command, hostname, port=22, username="root"):
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect('ssh.example.com', port, username, timeout=10)
+        print("connecting to: %s" % hostname)
+        client.connect(hostname, port, username, timeout=10)
 
+        print("running command: %s" % command)
         stdin, stdout, stderr = client.exec_command(command, timeout=60.0)
 
         client.close()

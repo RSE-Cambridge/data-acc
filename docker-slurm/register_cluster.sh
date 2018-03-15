@@ -30,11 +30,11 @@ docker run --privileged --rm --net dockerslurm_default gluster/glusterfs-client 
 docker run --privileged --rm --net dockerslurm_default gluster/glusterfs-client bash -c "mount -t glusterfs gluster1:/buffer1 /mnt && cat /mnt/test"
 
 echo
-for i in `seq 1 12`;
+for i in `seq 1 2`;
 do
   docker exec gluster1 bash -c "rm -rf /data/glusterfs/nvme${i}n1/brick"
 done
-for i in `seq 1 12`;
+for i in `seq 1 2`;
 do
   docker exec gluster2 bash -c "rm -rf /data/glusterfs/nvme${i}n1/brick"
 done
