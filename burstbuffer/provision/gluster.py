@@ -53,7 +53,7 @@ def _create_bricks(slices):
 
 def _volume_create(gluster_host, volume_name, bricks):
     create_base = "gluster volume create %s %s"
-    command = create_base % volume_name, " ".join(bricks)
+    command = create_base % (volume_name, " ".join(bricks))
     _exec_command(command, gluster_host)
 
 
@@ -78,20 +78,20 @@ def _volume_delete(gluster_host, volume_name):
 
 
 def setup_volume(gluster_host, volume_name, slices):
-    print("setup volume start")
+    print("start: setup volume")
     bricks = _create_bricks(slices)
     _volume_create(gluster_host, volume_name, bricks)
     _volume_start(gluster_host, volume_name)
 
 
-def remove_volume(gluster_host, volume_name):
+def volume_remove(gluster_host, volume_name):
     # TODO(johngarbutt) might be cleaner to clean all bricks here?
-    print("remove volume start")
+    print("start: volume remove")
     _volume_stop(gluster_host, volume_name)
     _volume_delete(gluster_host, volume_name)
 
 
 def clean_brick(gluster_host, device_name):
-    print("clean brick start")
+    print("start: clean brick")
     path = BRICK_PATH % device_name
     _exec_command("rm -rf %s" % path)
