@@ -15,6 +15,8 @@ Presents the execution facade in the form needed by the fakewarp cli,
 to iterate with Slurm burst buffer
 """
 
+import math
+
 from burstbuffer import execution_facade
 from burstbuffer import model
 
@@ -80,23 +82,31 @@ def _convert_capacity(capacity):
     return int(capacity)
 
 
+def _get_slices(capacity_bytes, pool_name):
+    default_pool = execution_facade.get_all_pool_stats()[0]
+    if pool_name != default_pool.name:
+        # TODO(johng) terrible hack
+        raise Exception("unknown pool")
+
+    return math.ceil(capacity_bytes / default_pool.slice_bytes)
+
+
 def add_persistent_buffer(name, caller, pool_name, capacity, user,
                           access, buffer_type):
     # TODO(johng) deal with access and buffer_type later
-    slices = 2  # TODO(johng)
     capacity_bytes = _convert_capacity(capacity)
+    slices = _get_slices(capacity_bytes, pool_name)
     buff = model.Buffer(name, user, pool_name, slices, capacity_bytes,
                         persistent=True, name=name, user_agent=caller)
     return execution_facade.add_buffer(buff)
 
 
 def setup_job_buffer(job_id, caller, pool_name, capacity, user):
-    slices = 2  # TODO(johng)
     capacity_bytes = _convert_capacity(capacity)
     if capacity_bytes == 0:
         # no buffer to create
         return
-
+    slices = _get_slices(capacity_bytes, pool_name)
     buff = model.Buffer(str(job_id), user, pool_name, slices, capacity_bytes,
                         persistent=False, job_id=job_id, user_agent=caller)
     return execution_facade.add_buffer(buff)
