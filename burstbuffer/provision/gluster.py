@@ -10,22 +10,32 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import traceback
+
 import paramiko
 
 BRICK_PATH = "/data/glusterfs/%s/brick"
 
 
 def _exec_command(command, hostname, port=22, username="root"):
-    client = paramiko.SSHClient()
-    client.load_system_host_keys()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect('ssh.example.com', port, username, timeout=10)
+    try:
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect('ssh.example.com', port, username, timeout=10)
 
-    stdin, stdout, stderr = client.exec_command(command, timeout=60.0)
+        stdin, stdout, stderr = client.exec_command(command, timeout=60.0)
 
-    client.close()
+        client.close()
 
-    return (stdin, stdout, stderr)
+        return (stdin, stdout, stderr)
+    except Exception:
+        traceback.print_exc()
+        try:
+            client.close()
+        except Exception:
+            pass
+        raise
 
 
 def _create_bricks(slices):
