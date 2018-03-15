@@ -33,8 +33,8 @@ def _exec_command(command, hostname, port=2222, username="root"):
 
         client.close()
 
-        print(stdout_lines)
-        print(stderr_lines)
+        #print(stdout_lines)
+        #print(stderr_lines)
 
         return (stdin, stdout, stderr)
     except Exception:
