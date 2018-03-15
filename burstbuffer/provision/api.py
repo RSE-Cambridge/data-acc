@@ -115,7 +115,7 @@ def event(hostname):
                 slice_info = slice_key.split('/')
                 server = slice_info[-2]
                 device = slice_info[-1]
-                server = "gluster" + server[:-1]
+                server = "gluster" + server[-1:]
                 slices[slice_number] = "%s:%s" % (server, device)
             slice_list = " ".join(slices.values())
             print("ssh gluster1 gluster volume create %s %s" % (
@@ -126,7 +126,7 @@ def event(hostname):
         device_name = event_info['key'].split('/')[-1]
         print("TODO: delete brick for %s" % device_name)
         # TODO(johngarbutt) volume deleted in buffer watcher maybe?
-        server = "gluster" + hostname[:-1]
+        server = "gluster" + hostname[-1:]
         print("ssh %s rm -rf /data/glusterfs/%s" % (server, device_name))
         print("ssh %s mkdir -p /data/glusterfs/%s")
 
