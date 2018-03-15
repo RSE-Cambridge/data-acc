@@ -11,17 +11,17 @@ docker exec gluster1 bash -c "gluster pool list"
 docker exec gluster2 bash -c "gluster pool list"
 
 echo
-for i in `seq 1 5`;
+for i in `seq 1 12`;
 do
-  docker exec gluster1 bash -c "mkdir -p /data/glusterfs/nvme$i/brick"
+  docker exec gluster1 bash -c "mkdir -p /data/glusterfs/nvme${i}n1/brick"
 done
-for i in `seq 1 5`;
+for i in `seq 1 12`;
 do
-  docker exec gluster2 bash -c "mkdir -p /data/glusterfs/nvme$i/brick"
+  docker exec gluster2 bash -c "mkdir -p /data/glusterfs/nvme${i}n1/brick"
 done
 
 echo
-docker exec gluster1 bash -c "gluster volume create buffer1 gluster1:/data/glusterfs/nvme1/brick gluster2:/data/glusterfs/nvme1/brick force" || true
+docker exec gluster1 bash -c "gluster volume create buffer1 gluster1:/data/glusterfs/nvme1n1/brick gluster2:/data/glusterfs/nvme1n1/brick force" || true
 docker exec gluster1 bash -c "gluster volume start buffer1" || true
 echo
 docker run --privileged --rm --net dockerslurm_default gluster/glusterfs-client bash -c "mount -t glusterfs gluster1:/buffer1 /mnt && echo 'We have written to a shared file on `date`' >/mnt/test"

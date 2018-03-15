@@ -177,11 +177,18 @@ services:
       - var_log_gluster1:/var/log/glusterfs:z
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     tmpfs:
-      - /data/glusterfs/nvme1
-      - /data/glusterfs/nvme2
-      - /data/glusterfs/nvme3
-      - /data/glusterfs/nvme4
-      - /data/glusterfs/nvme5
+      - /data/glusterfs/nvme1n1
+      - /data/glusterfs/nvme2n1
+      - /data/glusterfs/nvme3n1
+      - /data/glusterfs/nvme4n1
+      - /data/glusterfs/nvme5n1
+      - /data/glusterfs/nvme6n1
+      - /data/glusterfs/nvme7n1
+      - /data/glusterfs/nvme8n1
+      - /data/glusterfs/nvme9n1
+      - /data/glusterfs/nvme10n1
+      - /data/glusterfs/nvme11n1
+      - /data/glusterfs/nvme12n1
     privileged: true
 
   glusterserver2:
@@ -194,11 +201,18 @@ services:
       - var_log_gluster2:/var/log/glusterfs:z
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     tmpfs:
-      - /data/glusterfs/nvme1
-      - /data/glusterfs/nvme2
-      - /data/glusterfs/nvme3
-      - /data/glusterfs/nvme4
-      - /data/glusterfs/nvme5
+      - /data/glusterfs/nvme1n1
+      - /data/glusterfs/nvme2n1
+      - /data/glusterfs/nvme3n1
+      - /data/glusterfs/nvme4n1
+      - /data/glusterfs/nvme5n1
+      - /data/glusterfs/nvme6n1
+      - /data/glusterfs/nvme7n1
+      - /data/glusterfs/nvme8n1
+      - /data/glusterfs/nvme9n1
+      - /data/glusterfs/nvme10n1
+      - /data/glusterfs/nvme11n1
+      - /data/glusterfs/nvme12n1
     privileged: true
 
 volumes:
