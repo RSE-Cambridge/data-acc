@@ -105,7 +105,7 @@ def buffer_event(hostname):
         key_parts = event_info['key'].split('/')
         if len(key_parts) == 2 and key_parts[0] == "buffers":
             buffer_name = key_parts[1]
-            gluster.remove_volume("gluster1", buffer_name)
+            gluster.volume_remove("gluster1", buffer_name)
 
 
 def slice_event(hostname):
@@ -130,8 +130,11 @@ def slice_event(hostname):
             slice_list = slices.values()
             localgluster = "gluster" + hostname[-1:]
             gluster.setup_volume(localgluster, buffer_id, slice_list)
-            # TODO(johngarbutt) write out mountpoint
-            print("TODO mount -t glusterfs %s %s" % (localgluster, buffer_id))
+
+            # write out mountpoint
+            mount_key = "buffers/%s/mountpoint" % buffer_id
+            mountpoint = "mount -t glusterfs %s %s" % (localgluster, buffer_id)
+            _update_data({mount_key: mountpoint})
 
     elif event_info['event_type'] == "DELETE":
         device_name = event_info['key'].split('/')[-1]
