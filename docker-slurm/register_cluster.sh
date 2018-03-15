@@ -13,11 +13,11 @@ docker exec gluster2 bash -c "gluster pool list"
 docker exec gluster3 bash -c "gluster pool list"
 
 echo
-for i in `seq 1 12`;
+for i in `seq 1 2`;
 do
   docker exec gluster1 bash -c "mkdir -p /data/glusterfs/nvme${i}n1/brick"
 done
-for i in `seq 1 12`;
+for i in `seq 1 2`;
 do
   docker exec gluster2 bash -c "mkdir -p /data/glusterfs/nvme${i}n1/brick"
 done

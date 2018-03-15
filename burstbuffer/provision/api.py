@@ -14,6 +14,7 @@ import collections
 import os
 import random
 
+from burstbuffer.provision import gluster
 from burstbuffer.registry import api as registry
 
 ASSIGNED_SLICES_PREFIX = "bufferhosts/assigned_slices/"
@@ -123,14 +124,14 @@ def event(hostname):
                   localgluster, buffer_id, slice_list))
             print("ssh %s gluster volume start %s" % (
                   localgluster, buffer_id))
+            gluster.setup_volume(localgluster, buffer_id, *slice_list)
 
     elif event_info['event_type'] == "DELETE":
         device_name = event_info['key'].split('/')[-1]
         print("TODO: delete brick for %s" % device_name)
         # TODO(johngarbutt) volume deleted in buffer watcher maybe?
         localgluster = "gluster" + hostname[-1:]
-        print("ssh %s rm -rf /data/glusterfs/%s" % (localgluster, device_name))
-        print("ssh %s mkdir -p /data/glusterfs/%s")
+        gluster.clean_brick(localgluster, device_name)
 
     return _get_assigned_slices(hostname)
 
