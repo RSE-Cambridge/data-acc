@@ -42,7 +42,10 @@ docker exec gluster1 bash -c "gluster --mode=script volume stop buffer1 force"
 docker exec gluster1 bash -c "gluster --mode=script volume delete buffer1"
 
 echo
-docker exec gluster1 bash -c "mkdir -p /root/.ssh && echo `cat ~/.ssh/id_rsa.pub` > /root/.ssh/authorized_keys"
-ssh root@`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' gluster1` -p2222 hostname
-docker exec gluster2 bash -c "mkdir -p /root/.ssh && echo `cat ~/.ssh/id_rsa.pub` > /root/.ssh/authorized_keys"
-ssh root@`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' gluster2` -p2222 hostname
+SSH_PUB_KEY=`docker exec slurmctld bash -c "cat /root/.ssh/id_rsa.pub"`
+docker exec gluster1 bash -c "mkdir -p /root/.ssh && echo $SSH_PUB_KEY > /root/.ssh/authorized_keys"
+docker exec slurmctld bash -c "ssh -p 2222 gluster1 hostname"
+#ssh root@`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' gluster1` -p2222 hostname
+docker exec gluster2 bash -c "mkdir -p /root/.ssh && echo $SSH_PUB_KEY > /root/.ssh/authorized_keys"
+#ssh root@`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' gluster2` -p2222 hostname
+docker exec slurmctld bash -c "ssh -p 2222 gluster2 hostname"

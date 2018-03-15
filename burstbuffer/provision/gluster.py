@@ -17,7 +17,8 @@ import paramiko
 BRICK_PATH = "/data/glusterfs/%s/brick"
 
 
-def _exec_command(command, hostname, port=22, username="root"):
+def _exec_command(command, hostname, port=2222, username="root"):
+    print("starting exec command...")
     try:
         client = paramiko.SSHClient()
         client.load_system_host_keys()
@@ -50,7 +51,7 @@ def _create_bricks(slices):
     return bricks
 
 
-def _volume_create(gluster_host, volume_name, *bricks):
+def _volume_create(gluster_host, volume_name, bricks):
     create_base = "gluster volume create %s %s"
     command = create_base % volume_name, " ".join(bricks)
     _exec_command(command, gluster_host)
@@ -76,18 +77,21 @@ def _volume_delete(gluster_host, volume_name):
     _exec_command(stop_base % volume_name, gluster_host)
 
 
-def setup_volume(gluster_host, volume_name, *slices):
+def setup_volume(gluster_host, volume_name, slices):
+    print("setup volume start")
     bricks = _create_bricks(slices)
-    _volume_create(gluster_host, volume_name, *bricks)
+    _volume_create(gluster_host, volume_name, bricks)
     _volume_start(gluster_host, volume_name)
 
 
 def remove_volume(gluster_host, volume_name):
     # TODO(johngarbutt) might be cleaner to clean all bricks here?
+    print("remove volume start")
     _volume_stop(gluster_host, volume_name)
     _volume_delete(gluster_host, volume_name)
 
 
 def clean_brick(gluster_host, device_name):
+    print("clean brick start")
     path = BRICK_PATH % device_name
     _exec_command("rm -rf %s" % path)

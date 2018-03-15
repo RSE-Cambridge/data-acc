@@ -120,11 +120,9 @@ def event(hostname):
                 slices[slice_number] = "%s:%s" % (server, device)
             slice_list = " ".join(slices.values())
             localgluster = "gluster" + hostname[-1:]
-            print("ssh %s gluster volume create %s %s" % (
-                  localgluster, buffer_id, slice_list))
-            print("ssh %s gluster volume start %s" % (
-                  localgluster, buffer_id))
-            gluster.setup_volume(localgluster, buffer_id, *slice_list)
+            gluster.setup_volume(localgluster, buffer_id, slice_list)
+            # TODO(johngarbutt) write out mountpoint
+            print("TODO mount -t glusterfs %s %s" % (localgluster, buffer_id))
 
     elif event_info['event_type'] == "DELETE":
         device_name = event_info['key'].split('/')[-1]
