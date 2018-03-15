@@ -100,8 +100,6 @@ def _get_event_info():
 def event(hostname):
     event_info = _get_event_info()
     print(event_info)
-    # TODO(johngarbutt) write key to say provision worked,
-    # and write out fake mountpoint for slice 0
 
     if event_info['event_type'] == "PUT":
         device_name = event_info['key'].split('/')[-1]
@@ -126,7 +124,6 @@ def event(hostname):
 
     elif event_info['event_type'] == "DELETE":
         device_name = event_info['key'].split('/')[-1]
-        print("TODO: delete brick for %s" % device_name)
         # TODO(johngarbutt) volume deleted in buffer watcher maybe?
         localgluster = "gluster" + hostname[-1:]
         gluster.clean_brick(localgluster, device_name)

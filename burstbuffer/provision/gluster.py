@@ -42,12 +42,14 @@ def _exec_command(command, hostname, port=2222, username="root"):
 
 
 def _create_bricks(slices):
+    print(slices)
     bricks = []
     for io_slice in slices:
         host, device = io_slice.split(":")
         path = BRICK_PATH % device
         _exec_command("mkdir %s" % path, host)
         bricks.append(path)
+    print(bricks)
     return bricks
 
 
@@ -78,7 +80,7 @@ def _volume_delete(gluster_host, volume_name):
 
 
 def setup_volume(gluster_host, volume_name, slices):
-    print("start: setup volume")
+    print("start: setup volume %s" % slices)
     bricks = _create_bricks(slices)
     _volume_create(gluster_host, volume_name, bricks)
     _volume_start(gluster_host, volume_name)
