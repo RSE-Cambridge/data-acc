@@ -23,12 +23,26 @@ do
 done
 
 echo
-docker exec gluster1 bash -c "gluster volume create buffer1 gluster1:/data/glusterfs/nvme1n1/brick gluster2:/data/glusterfs/nvme1n1/brick force" || true
-docker exec gluster1 bash -c "gluster volume start buffer1" || true
+docker exec gluster1 bash -c "gluster volume create buffer1 gluster1:/data/glusterfs/nvme1n1/brick gluster2:/data/glusterfs/nvme1n1/brick force"
+docker exec gluster1 bash -c "gluster volume start buffer1"
 echo
 docker run --privileged --rm --net dockerslurm_default gluster/glusterfs-client bash -c "mount -t glusterfs gluster1:/buffer1 /mnt && echo 'We have written to a shared file on `date`' >/mnt/test"
 docker run --privileged --rm --net dockerslurm_default gluster/glusterfs-client bash -c "mount -t glusterfs gluster1:/buffer1 /mnt && cat /mnt/test"
 
 echo
+for i in `seq 1 12`;
+do
+  docker exec gluster1 bash -c "rm -rf /data/glusterfs/nvme${i}n1/brick"
+done
+for i in `seq 1 12`;
+do
+  docker exec gluster2 bash -c "rm -rf /data/glusterfs/nvme${i}n1/brick"
+done
+docker exec gluster1 bash -c "gluster --mode=script volume stop buffer1 force"
+docker exec gluster1 bash -c "gluster --mode=script volume delete buffer1"
+
+echo
 docker exec gluster1 bash -c "mkdir -p /root/.ssh && echo `cat ~/.ssh/id_rsa.pub` > /root/.ssh/authorized_keys"
 ssh root@`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' gluster1` -p2222 hostname
+docker exec gluster2 bash -c "mkdir -p /root/.ssh && echo `cat ~/.ssh/id_rsa.pub` > /root/.ssh/authorized_keys"
+ssh root@`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' gluster2` -p2222 hostname
