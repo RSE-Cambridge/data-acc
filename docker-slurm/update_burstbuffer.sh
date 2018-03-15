@@ -42,8 +42,8 @@ docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
 sleep 5
 docker logs fakebuffernode1
-sleep 5
 docker logs fakebuffernode2
+docker logs fakebuffernode3
 sleep 5
 docker logs bufferwatcher
 

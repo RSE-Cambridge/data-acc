@@ -177,6 +177,7 @@ services:
       - var_log_gluster1:/var/log/glusterfs:z
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     tmpfs:
+      - /data/glusterfs/nvme0n1
       - /data/glusterfs/nvme1n1
       - /data/glusterfs/nvme2n1
       - /data/glusterfs/nvme3n1
@@ -201,6 +202,7 @@ services:
       - var_log_gluster2:/var/log/glusterfs:z
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     tmpfs:
+      - /data/glusterfs/nvme0n1
       - /data/glusterfs/nvme1n1
       - /data/glusterfs/nvme2n1
       - /data/glusterfs/nvme3n1
@@ -225,6 +227,7 @@ services:
       - var_log_gluster3:/var/log/glusterfs:z
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     tmpfs:
+      - /data/glusterfs/nvme0n1
       - /data/glusterfs/nvme1n1
       - /data/glusterfs/nvme2n1
       - /data/glusterfs/nvme3n1
