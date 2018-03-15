@@ -209,6 +209,10 @@ def assign_slices(buffer_id):
         device = random.choice(devices)
         assignments.add((host, device))
 
+        # see if we found enough slices yet
+        if len(assignments) == required_slices:
+            break
+
     _set_assignments(buffer_id, assignments)
 
     return assignments
