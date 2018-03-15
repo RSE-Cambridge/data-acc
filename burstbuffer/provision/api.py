@@ -103,7 +103,7 @@ def buffer_event(hostname):
 
     if event_info['event_type'] == "DELETE":
         key_parts = event_info['key'].split('/')
-        if len(key_parts) == 2 and key_parts[0] == "buffer":
+        if len(key_parts) == 2 and key_parts[0] == "buffers":
             buffer_name = key_parts[1]
             gluster.remove_volume("gluster1", buffer_name)
 

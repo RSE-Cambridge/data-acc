@@ -41,7 +41,7 @@ class BufferEvent(Command):
     def take_action(self, parsed_args):
         hostname = socket.gethostname()
         self.app.LOG.info("buffer event occured for %s" % hostname)
-        print(api.buffer_event(hostname))
+        api.buffer_event(hostname)
 
 
 class AssignSlices(Command):
