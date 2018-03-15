@@ -38,6 +38,13 @@ echo "***Check volumes in gluster***"
 echo "gluster volume list"
 docker exec gluster1 bash -c "gluster volume list"
 
+echo
+echo "***Lookup mountpoints in etcd***"
+echo
+docker exec slurmctld etcdctl --endpoints=etcdproxy1:2379 get buffers/mytestbuffer/mountpoint
+echo
+docker exec slurmctld etcdctl --endpoints=etcdproxy1:2379 get buffers/3/mountpoint
+
 sleep 5
 echo
 echo "***Delete persistent buffer***"
