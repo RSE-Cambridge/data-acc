@@ -97,7 +97,18 @@ def _get_event_info():
         value=value)
 
 
-def event(hostname):
+def buffer_event(hostname):
+    event_info = _get_event_info()
+    print(event_info)
+
+    if event_info['event_type'] == "DELETE":
+        key_parts = event_info['key'].split('/')
+        if len(key_parts) == 2 and key_parts[0] == "buffer":
+            buffer_name = key_parts[1]
+            gluster.remove_volume("gluster1", buffer_name)
+
+
+def slice_event(hostname):
     event_info = _get_event_info()
     print(event_info)
 

@@ -26,13 +26,22 @@ class Startup(Command):
         print(api.startup(hostname))
 
 
-class Event(Command):
+class SliceEvent(Command):
     """Callback for when a hostslice event occurs"""
 
     def take_action(self, parsed_args):
         hostname = socket.gethostname()
-        self.app.LOG.info("event occured for %s" % hostname)
-        print(api.event(hostname))
+        self.app.LOG.info("slice event occured for %s" % hostname)
+        print(api.slice_event(hostname))
+
+
+class BufferEvent(Command):
+    """Callback for when a hostslice event occurs"""
+
+    def take_action(self, parsed_args):
+        hostname = socket.gethostname()
+        self.app.LOG.info("buffer event occured for %s" % hostname)
+        print(api.buffer_event(hostname))
 
 
 class AssignSlices(Command):

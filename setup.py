@@ -69,7 +69,8 @@ setup(
         ],
         'burstbuffer.buffernode': [
             'startup = burstbuffer.cmd.buffernode_commands:Startup',
-            'event = burstbuffer.cmd.buffernode_commands:Event',
+            'slice_event = burstbuffer.cmd.buffernode_commands:SliceEvent',
+            'buffer_event = burstbuffer.cmd.buffernode_commands:BufferEvent',
             'assign_slices = burstbuffer.cmd.buffernode_commands:AssignSlices',
             'unassign_slices = '
             'burstbuffer.cmd.buffernode_commands:UnassignSlices',
