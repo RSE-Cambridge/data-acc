@@ -18,6 +18,7 @@ BRICK_PATH = "/data/glusterfs/%s/brick"
 
 
 def _exec_command(command, hostname, port=2222, username="root"):
+    print(hostname)
     try:
         client = paramiko.SSHClient()
         client.load_system_host_keys()
