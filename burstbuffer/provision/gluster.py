@@ -90,8 +90,8 @@ def setup_volume(gluster_host, volume_name, slices):
 def volume_remove(gluster_host, volume_name):
     # TODO(johngarbutt) might be cleaner to clean all bricks here?
     print("start: volume remove")
-    _volume_stop(gluster_host, volume_name)
-    _volume_delete(gluster_host, volume_name)
+    #_volume_stop(gluster_host, volume_name)
+    #_volume_delete(gluster_host, volume_name)
 
 
 def clean_brick(gluster_host, device_name):
