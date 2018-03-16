@@ -31,19 +31,15 @@ def _exec_command(command, hostname, port=2222, username="root"):
         stdout_lines = stdout.readlines()
         stderr_lines = stderr.readline()
 
-        client.close()
-
         #print(stdout_lines)
         #print(stderr_lines)
 
         return (stdin, stdout, stderr)
     except Exception:
+        print("uh oh")
         traceback.print_exc()
-        try:
-            client.close()
-        except Exception:
-            pass
-        raise
+    finally:
+        client.close()
 
 
 def _create_bricks(slices):
