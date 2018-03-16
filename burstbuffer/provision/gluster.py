@@ -71,12 +71,12 @@ def _volume_prefer_local(gluster_host, volume_name):
 
 
 def _volume_stop(gluster_host, volume_name):
-    stop_base = "gluster volume stop %s"
+    stop_base = "gluster --mode=script volume stop %s force"
     _exec_command(stop_base % volume_name, gluster_host)
 
 
 def _volume_delete(gluster_host, volume_name):
-    stop_base = "gluster volume delete %s"
+    stop_base = "gluster --mode=script volume delete %s"
     _exec_command(stop_base % volume_name, gluster_host)
 
 
@@ -91,7 +91,7 @@ def volume_remove(gluster_host, volume_name):
     # TODO(johngarbutt) might be cleaner to clean all bricks here?
     print("start: volume remove")
     _volume_stop(gluster_host, volume_name)
-    #_volume_delete(gluster_host, volume_name)
+    _volume_delete(gluster_host, volume_name)
 
 
 def clean_brick(gluster_host, device_name):
