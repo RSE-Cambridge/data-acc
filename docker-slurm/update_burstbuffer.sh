@@ -35,7 +35,7 @@ docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
 echo
 echo "***Check volumes in gluster***"
-echo "gluster volume list"
+echo "gluster volume info all"
 docker exec gluster1 bash -c "gluster volume info all"
 
 echo
@@ -57,7 +57,7 @@ docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 sleep 2
 echo
 echo "***Check volumes in gluster***"
-echo "gluster volume list"
+echo "gluster volume info all"
 docker exec gluster1 bash -c "gluster volume info all"
 
 sleep 5

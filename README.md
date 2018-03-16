@@ -63,6 +63,7 @@ Name=cray DefaultPool=dedicated_nvme Granularity=1TB TotalSpace=20TB FreeSpace=1
   StageInTimeout=30 StageOutTimeout=30 ValidateTimeout=5 OtherTimeout=300
   AllowUsers=root,slurm
   GetSysState=/opt/cray/dw_wlm/default/bin/dw_wlm_cli
+
 ***Create persistent buffer***
 #!/bin/bash
 #BB create_persistent name=mytestbuffer capacity=32GB access=striped type=scratch
@@ -73,9 +74,10 @@ Name=cray DefaultPool=dedicated_nvme Granularity=1TB TotalSpace=20TB FreeSpace=9
   AllowUsers=root,slurm
   GetSysState=/opt/cray/dw_wlm/default/bin/dw_wlm_cli
   Allocated Buffers:
-    Name=mytestbuffer CreateTime=2018-02-22T13:41:16 Pool=dedicated_nvme Size=1TB State=allocated UserID=slurm(995)
+    Name=mytestbuffer CreateTime=2018-03-16T09:43:23 Pool=dedicated_nvme Size=1TB State=allocated UserID=slurm(995)
   Per User Buffer Use:
     UserID=slurm(995) Used=1TB
+
 ***Create per job buffer***
 srun --bb="capacity=3TB" bash -c "sleep 10 && echo \$HOSTNAME"
 srun: job 3 queued and waiting for resources
@@ -85,22 +87,65 @@ Name=cray DefaultPool=dedicated_nvme Granularity=1TB TotalSpace=20TB FreeSpace=6
   AllowUsers=root,slurm
   GetSysState=/opt/cray/dw_wlm/default/bin/dw_wlm_cli
   Allocated Buffers:
-    JobID=3 CreateTime=2018-02-22T13:41:21 Pool=dedicated_nvme Size=3TB State=allocated UserID=slurm(995)
-    Name=mytestbuffer CreateTime=2018-02-22T13:41:16 Pool=dedicated_nvme Size=1TB State=allocated UserID=slurm(995)
+    JobID=3 CreateTime=2018-03-16T09:43:29 Pool=dedicated_nvme Size=3TB State=allocated UserID=slurm(995)
+    Name=mytestbuffer CreateTime=2018-03-16T09:43:23 Pool=dedicated_nvme Size=1TB State=allocated UserID=slurm(995)
   Per User Buffer Use:
     UserID=slurm(995) Used=4TB
+
+***Check volumes in gluster***
+gluster volume info all
+
+Volume Name: 3
+Type: Distribute
+Volume ID: ae327016-0a19-43cc-b8e0-88d12b727fc7
+Status: Started
+Snapshot Count: 0
+Number of Bricks: 3
+Transport-type: tcp
+Bricks:
+Brick1: gluster2:/data/glusterfs/nvme4n1/brick
+Brick2: gluster3:/data/glusterfs/nvme8n1/brick
+Brick3: gluster1:/data/glusterfs/nvme5n1/brick
+Options Reconfigured:
+transport.address-family: inet
+nfs.disable: on
+
+Volume Name: mytestbuffer
+Type: Distribute
+Volume ID: b14b1197-a7be-47fe-8a60-95f9c5c181ff
+Status: Started
+Snapshot Count: 0
+Number of Bricks: 1
+Transport-type: tcp
+Bricks:
+Brick1: gluster1:/data/glusterfs/nvme11n1/brick
+Options Reconfigured:
+nfs.disable: on
+transport.address-family: inet
+
+***Lookup mountpoints in etcd***
+buffers/mytestbuffer/mountpoint
+mount -t glusterfs gluster1 mytestbuffer
+buffers/3/mountpoint
+mount -t glusterfs gluster2 3
+
 ***Delete persistent buffer***
 #!/bin/bash
 #BB destroy_persistent name=mytestbuffer
 Submitted batch job 4
 srun: job 3 has been allocated resources
 slurmctld
+
 ***Show all is cleaned up***
-Name=cray DefaultPool=dedicated_nvme Granularity=1TB TotalSpace=20TB FreeSpace=13TB UsedSpace=0
+Name=cray DefaultPool=dedicated_nvme Granularity=1TB TotalSpace=20TB FreeSpace=14TB UsedSpace=0
   Flags=EnablePersistent
   StageInTimeout=30 StageOutTimeout=30 ValidateTimeout=5 OtherTimeout=300
   AllowUsers=root,slurm
   GetSysState=/opt/cray/dw_wlm/default/bin/dw_wlm_cli
+
+***Check volumes in gluster***
+gluster volume info all
+No volumes present
 ```
 
 ## Running tests
