@@ -1,6 +1,6 @@
 # Generic BurstBuffer
 
-[![Build Status](https://www.travis-ci.org/JohnGarbutt/burstbuffer.svg?branch=master)](https://www.travis-ci.org/JohnGarbutt/burstbuffer)
+[![Build Status](https://www.travis-ci.org/RSE-Cambridge/burstbuffer.svg?branch=master)](https://www.travis-ci.org/RSE-Cambridge/burstbuffer)
 
 This project is designed to orchestrate the creation of a burst
 buffer built using commodity hardware. The buffer can be accessed
