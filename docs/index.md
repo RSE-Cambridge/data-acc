@@ -1,10 +1,14 @@
-# Generic BurstBuffer
+# The Data Accelerator
 
 [![Build Status](https://www.travis-ci.org/RSE-Cambridge/burstbuffer.svg?branch=master)](https://www.travis-ci.org/RSE-Cambridge/burstbuffer)
 
 This project is designed to orchestrate the creation of a burst
-buffer built using commodity hardware. The buffer can be accessed
-by compute nodes using existing parallel file systems.
+buffer built using commodity hardware. This will be integrated into CSD3 at the University of Cambridge in the coming months. The buffer will be accessible
+from the Skylake compute nodes providing a namespace of fast storage. The GPU system will be able to access the Accelerator in a future release.
+
+This work build on the existing SLURM Burst Buffer plugins, and currently is tested using docker. The final software will be installed into CSD3 to build filesystems on demand for jobs and manage the new accelerator nodes.
+
+This repo contains the current work achieved and will be extended as the system is put into production. 
 
 Users are expected to request a number of I/O slots, which is a
 fixed amount of capacity associated with a fixed amount of
@@ -22,6 +26,8 @@ In addition to orchestrating the creation of the buffer, there is
 also an option to stage in and stage out files to and from an
 existing slower storage tier. For example you might copy from
 spinning disk based Lustre to an NVMe backed burst buffer.
+
+In future upgrades, users should be able to request NVMe Over Fabric attached devices, and other access modes to suite individual workloads.
 
 ## Components
 
