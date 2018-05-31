@@ -17,26 +17,79 @@ func stripFunctionArg(systemArgs []string) []string {
 func main() {
 	app := cli.NewApp()
 	app.Name = "FakeWarp CLI"
-	app.Usage = "This is to integrate data-acc with Slurm's Burst Buffer plugin."
+	app.Usage = "This CLI is used to integrate data-acc with Slurm's Burst Buffer plugin."
 	app.Version = version.VERSION
 
 	app.Commands = []cli.Command{
 		{
-			Name:    "pools",
-			Aliases: []string{"p"},
-			Usage:   "List all the buffer pools",
-			Action:  pools,
+			Name:   "pools",
+			Usage:  "List all the buffer pools",
+			Action: pools,
+		},
+		{
+			Name:  "show_instances",
+			Usage: "List the buffer instances.",
+		},
+		{
+			Name:  "show_sessions",
+			Usage: "List the buffer sessions.",
+		},
+		{
+			Name:  "teardown",
+			Usage: "Destroy the given buffer.",
 			Flags: []cli.Flag{
 				cli.StringFlag{
-					Name:  "lang, l",
-					Value: "english",
-					Usage: "Language for the greeting",
+					Name:  "token, t",
+					Usage: "Job ID or Peristent Buffer name",
 				},
 				cli.StringFlag{
-					Name:  "config, c",
-					Usage: "Load configuration from `FILE`",
+					Name:  "job",
+					Usage: "Path to burst buffer request file.",
+				},
+				cli.BoolFlag{
+					Name: "hurry",
 				},
 			},
+		},
+		{
+			Name:  "job_process",
+			Usage: "Initial call to validate buffer script",
+		},
+		{
+			Name:  "setup",
+			Usage: "Create transient burst buffer, called after waiting for enough free capacity.",
+		},
+		{
+			Name:  "real_size",
+			Usage: "Report actual size of created buffer.",
+		},
+		{
+			Name:  "data_in",
+			Usage: "Copy data into given buffer.",
+		},
+		{
+			Name:  "paths",
+			Usage: "Environment variables describing where the buffer will be mounted.",
+		},
+		{
+			Name:  "pre_run",
+			Usage: "Attach given buffers to compute nodes specified.",
+		},
+		{
+			Name:  "post_run",
+			Usage: "Detach buffers before releasing compute nodes.",
+		},
+		{
+			Name:  "data_out",
+			Usage: "Copy data out of buffer.",
+		},
+		{
+			Name:  "create_persistent",
+			Usage: "Create a persistent buffer.",
+		},
+		{
+			Name:  "show_configuration",
+			Usage: "Returns fake data to keep burst buffer plugin happy.",
 		},
 	}
 
