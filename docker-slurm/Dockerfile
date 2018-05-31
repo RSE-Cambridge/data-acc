@@ -127,8 +127,10 @@ RUN cd /usr/local/src \
     && pip install -e . \
     && deactivate \
     && mkdir -p /opt/cray/dw_wlm/default/bin \
-    && ln -s /usr/local/src/burstbuffer/.venv/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli \
     && ln -s /usr/local/src/burstbuffer/.venv/bin/buffernode /usr/local/bin/buffernode
+
+COPY ../bin/amd64/fakewarp /usr/local/bin/fakewarp
+RUN install -D -m755 /usr/local/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
