@@ -13,13 +13,13 @@
 # limitations under the License.
 
 # The binary to build (just the basename).
-BIN := pfsaccel
+BIN := data-acc
 
 # This repo's root import path (under GOPATH).
-PKG := github.com/JohnGarbutt/pfsaccel
+PKG := github.com/RSE-Cambridge/data-acc
 
 # Where to push the docker image.
-REGISTRY ?= johngarbutt
+REGISTRY ?= rse-cambridge
 
 # Which architecture to build - see $(ALL_ARCH) for options.
 ARCH ?= amd64

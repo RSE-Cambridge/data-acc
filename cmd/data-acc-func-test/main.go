@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/JohnGarbutt/pfsaccel/internal/pkg/oldregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/oldregistry"
 	"os/exec"
 	"runtime"
 	"sync"
