@@ -14,9 +14,9 @@ func stripFunctionArg() []string {
 		}
 		return newArgs
 	}
-	return system[2:]
+	return system
 }
 
 func main() {
-	log.Printf("Hello! %s", stripFunctionArg())
+	log.Printf("Hello! Args: %s", stripFunctionArg()[1:])
 }
