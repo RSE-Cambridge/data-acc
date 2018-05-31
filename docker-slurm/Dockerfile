@@ -1,16 +1,9 @@
 FROM centos:7
 
-LABEL org.label-schema.vcs-url="https://github.com/giovtorres/slurm-docker-cluster" \
-      org.label-schema.docker.cmd="docker-compose up -d" \
+LABEL org.label-schema.docker.cmd="docker-compose up -d" \
       org.label-schema.name="slurm-docker-cluster" \
       org.label-schema.description="Slurm Docker cluster on CentOS 7" \
-      maintainer="Giovanni Torres"
-
-ARG SLURM_VERSION=17.11.5
-ARG SLURM_DOWNLOAD_MD5=21fbe051aee43689dcd7711e47064f89
-ARG SLURM_DOWNLOAD_URL=https://download.schedmd.com/slurm/slurm-"$SLURM_VERSION".tar.bz2
-
-ARG GOSU_VERSION=1.10
+      maintainer="John Garbutt"
 
 RUN yum makecache fast \
     && yum -y install epel-release \
@@ -42,6 +35,8 @@ RUN yum makecache fast \
 RUN pip install Cython nose \
     && pip3 install Cython nose
 
+ARG GOSU_VERSION=1.10
+
 RUN set -x \
     && wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64" \
 #    && wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64" \
@@ -53,6 +48,10 @@ RUN set -x \
     && gosu nobody true
 
 RUN groupadd -r slurm --gid=995 && useradd -r -g slurm --uid=995 slurm
+
+ARG SLURM_VERSION=17.11.7
+ARG SLURM_DOWNLOAD_MD5=6452300949ba375c3898ba7ce7959f05
+ARG SLURM_DOWNLOAD_URL=https://download.schedmd.com/slurm/slurm-"$SLURM_VERSION".tar.bz2
 
 RUN set -x \
     && wget -O slurm.tar.bz2 "$SLURM_DOWNLOAD_URL" \
@@ -115,21 +114,20 @@ RUN yum -y install python34 python-pip python-wheel
 RUN pip install -U pip
 RUN pip install virtualenv
 
-ARG BURSTBUFFER_BRANCH=master
+ARG BURSTBUFFER_BRANCH=python-prototype
 
 RUN cd /usr/local/src \
-    && git clone https://github.com/johngarbutt/burstbuffer \
-    && cd burstbuffer \
-    && git checkout $BURSTBUFFER_BRANCH \
-    && git checkout $BURSTBUFFER_BRANCH \
+    && git clone https://github.com/johngarbutt/data-acc \
+    && cd data-acc \
+    && git checkout python-prototype \
     && virtualenv -p python3 .venv \
     && . .venv/bin/activate \
     && pip install -e . \
     && deactivate \
     && mkdir -p /opt/cray/dw_wlm/default/bin \
-    && ln -s /usr/local/src/burstbuffer/.venv/bin/buffernode /usr/local/bin/buffernode
+    && ln -s /usr/local/src/data-acc/.venv/bin/buffernode /usr/local/bin/buffernode
 
-COPY ../bin/amd64/fakewarp /usr/local/bin/fakewarp
+COPY fakewarp /usr/local/bin/fakewarp
 RUN install -D -m755 /usr/local/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

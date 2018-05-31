@@ -1,6 +1,10 @@
 package main
 
-import "github.com/urfave/cli"
+import (
+	"github.com/urfave/cli"
+	"io"
+	"os"
+)
 
 type pool struct {
 	Id          string `json:"id"`
@@ -15,8 +19,12 @@ func getPools() []pool {
 	return []pool{fakePool}
 }
 
-func pools(_ *cli.Context) error {
+func printPools(writer io.Writer) {
 	message := map[string][]pool{"pools": getPools()}
-	printJson(message)
+	printJson(writer, message)
+}
+
+func pools(_ *cli.Context) error {
+	printPools(os.Stdout)
 	return nil
 }

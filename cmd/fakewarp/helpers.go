@@ -3,11 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"log"
-	"os"
 )
 
-func printJson(message interface{}) {
+func printJson(w io.Writer, message interface{}) {
 	b, error := json.Marshal(message)
 	if error != nil {
 		log.Fatal(error)
@@ -15,7 +15,7 @@ func printJson(message interface{}) {
 	buff := new(bytes.Buffer)
 	buff.Write(b)
 	buff.Write([]byte("\n"))
-	if _, error = buff.WriteTo(os.Stdout); error != nil {
+	if _, error = buff.WriteTo(w); error != nil {
 		log.Fatal(error)
 	}
 }
