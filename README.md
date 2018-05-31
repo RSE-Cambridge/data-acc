@@ -13,10 +13,17 @@ with Lustre over Intel P4600 attached to Dell R730 with 2x100Gb/s OPA.
 
 To try this out, run etcd then fetch the functional test via:
 ```
-go get https://github.com/RSE-Cambridge/cmd/data-acc-func-test
+go get https://github.com/RSE-Cambridge/cmd/fakewarp
 ```
 
-To build it locally:
+To build it locally and run tests:
 ```
 make
+make test
+```
+
+To see end to end demo with Slurm (not currently working):
+```
+cd dcoker-slurm
+./update_burstbuffer.sh
 ```
