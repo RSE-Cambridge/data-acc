@@ -42,7 +42,7 @@ func main() {
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "token, t",
-					Usage: "Job ID or Peristent Buffer name",
+					Usage: "Job ID or Persistent Buffer name",
 				},
 				cli.StringFlag{
 					Name:  "job",
