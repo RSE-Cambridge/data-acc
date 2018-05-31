@@ -32,8 +32,9 @@ func main() {
 			Action: showInstances,
 		},
 		{
-			Name:  "show_sessions",
-			Usage: "List the buffer sessions.",
+			Name:   "show_sessions",
+			Usage:  "List the buffer sessions.",
+			Action: showSessions,
 		},
 		{
 			Name:  "teardown",

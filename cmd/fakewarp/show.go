@@ -38,3 +38,25 @@ func showInstances(_ *cli.Context) error {
 	printInstances(os.Stdout)
 	return nil
 }
+
+type session struct {
+	Id      string `json:"id"`
+	Created uint   `json:"created"`
+	Owner   uint   `json:"owner"`
+	Token   string `json:"token"`
+}
+
+func getSessions() []session {
+	fakeSession := session{"fakebuffer", 12345678, 1001, "fakebuffer"}
+	return []session{fakeSession}
+}
+
+func printSessions(writer io.Writer) {
+	message := map[string][]session{"sessions": getSessions()}
+	printJson(writer, message)
+}
+
+func showSessions(_ *cli.Context) error {
+	printSessions(os.Stdout)
+	return nil
+}
