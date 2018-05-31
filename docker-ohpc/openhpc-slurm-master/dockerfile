@@ -1,7 +1,0 @@
-FROM openhpc-base:v0.1
-
-RUN yum install -y ohpc-slurm-server
-RUN systemctl enable slurmctld
-RUN systemctl enable slurmdbd
-
-CMD ["/usr/sbin/init"]
