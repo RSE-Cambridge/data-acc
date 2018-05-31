@@ -10,9 +10,13 @@ type pool struct {
 	Free        uint   `json:"free"`
 }
 
+func getPools() []pool {
+	fakePool := pool{"fake", "bytes", 214748364800, 40, 3}
+	return []pool{fakePool}
+}
+
 func pools(_ *cli.Context) error {
-	p := pool{"fake", "bytes", 214748364800, 40, 3}
-	m := map[string]pool{"pool": p}
-	printJson(m)
+	message := map[string][]pool{"pools": getPools()}
+	printJson(message)
 	return nil
 }

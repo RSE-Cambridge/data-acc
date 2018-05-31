@@ -8,7 +8,7 @@ import (
 )
 
 func printJson(message interface{}) {
-	b, error := json.MarshalIndent(message, "", "  ")
+	b, error := json.Marshal(message)
 	if error != nil {
 		log.Fatal(error)
 	}
