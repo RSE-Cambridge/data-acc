@@ -5,18 +5,17 @@ import (
 	"os"
 )
 
-func stripFunctionArg() []string {
-	system := os.Args
-	if len(system)>2 && system[1]=="--function" {
-		newArgs := system[0:1]
-		for _, arg := range system[2:] {
+func stripFunctionArg(systemArgs []string) []string {
+	if len(systemArgs) > 2 && systemArgs[1] == "--function" {
+		newArgs := systemArgs[0:1]
+		for _, arg := range systemArgs[2:] {
 			newArgs = append(newArgs, arg)
 		}
 		return newArgs
 	}
-	return system
+	return systemArgs
 }
 
 func main() {
-	log.Printf("Hello! Args: %s", stripFunctionArg()[1:])
+	log.Printf("Hello! Args: %s", stripFunctionArg(os.Args)[1:])
 }
