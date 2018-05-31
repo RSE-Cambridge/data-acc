@@ -1,27 +1,9 @@
 ---
-language: python
-python: "3.5"
-
-addons:
-  apt:
-    packages:
-      - gcc
-      - python-virtualenv
-
-# Create a build matrix for the different test jobs.
-env:
-  matrix:
-    # Run python style checks.
-    - TOX_ENV=pep8
-    # Run python3.5 unit tests.
-    - TOX_ENV=py35
-
-install:
-  # Install tox in a virtualenv to ensure we have an up to date version.
-  - virtualenv venv
-  - venv/bin/pip install -U pip
-  - venv/bin/pip install tox
-
+language: go
+services:
+    - docker
 script:
-  # Run the tox environment.
-  - venv/bin/tox -e ${TOX_ENV}
+    - make build
+    - test -f bin/amd64/fakewarp
+    - make container
+    - make test
