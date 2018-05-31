@@ -8,7 +8,7 @@
 -->
 
 Data Accelerator uses commodity storage to accelerate HPC jobs.
-Currently targeting initial integration with Slurm Burst Buffer plugin,
+Currently targeting initial integration with the Slurm Burst Buffer plugin,
 with Lustre over Intel P4600 attached to Dell R730 with 2x100Gb/s OPA.
 
 To try this out, run etcd then fetch the functional test via:
@@ -24,6 +24,6 @@ make test
 
 To see end to end demo with Slurm (not currently working):
 ```
-cd dcoker-slurm
+cd docker-slurm
 ./update_burstbuffer.sh
 ```
