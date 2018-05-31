@@ -5,7 +5,7 @@ cd ../
 make
 cd docker-slurm
 cp ../bin/amd64/fakewarp fakewarp
-docker build -t slurm-docker-cluster:17.02.9 . --build-arg BURSTBUFFER_BRANCH=`git show HEAD -q | head -1 | cut -c 8-`
+docker build -t slurm-docker-cluster:17.02.9 .
 
 #docker exec slurmctld bash -c "cd /usr/local/src/burstbuffer && . .venv/bin/activate && git remote update && git checkout etcd && git pull && pip install -Ue . && fakewarp help"
 
