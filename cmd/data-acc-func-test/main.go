@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/oldregistry"
 	"os/exec"
-	"runtime"
 	"sync"
+	"runtime"
 )
 
 func main() {
