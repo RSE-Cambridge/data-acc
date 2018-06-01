@@ -9,8 +9,8 @@ type PersistentBufferRequest struct {
 	Token    string
 	Caller   string
 	Capacity string
-	User     string
-	Group    string
+	User     int
+	Group    int
 	Access   string
 	Type     string
 }
@@ -18,12 +18,18 @@ type PersistentBufferRequest struct {
 // Creates a persistent buffer.
 // If it works, we return the name of the buffer, otherwise an error is returned
 func CreatePersistentBuffer(c CliContext) (string, error) {
-	fmt.Printf("--token %s --caller %s --user %d --groupid %d --capacity %s "+
-		"--access %s --type %s\n",
-		c.String("token"), c.String("caller"), c.Int("user"),
-		c.Int("groupid"), c.String("capacity"), c.String("access"), c.String("type"))
-	if c.String("token") == "bob" {
-		return "", errors.New("unable to create buffer")
+	request := PersistentBufferRequest{c.String("token"), c.String("caller"),
+		c.String("capacity"), c.Int("user"),
+		c.Int("groupid"), c.String("access"), c.String("type")}
+	fmt.Printf("--token %s --caller %s --user %d --groupid %d --capacity %s --access %s --type %s\n",
+		request.Token, request.Caller, request.User, request.Group, request.Capacity, request.Access, request.Type)
+	error := processCreatePersistentBuffer(&request)
+	return request.Token, error
+}
+
+func processCreatePersistentBuffer(request *PersistentBufferRequest) error {
+	if request.Token == "bob" {
+		return errors.New("unable to create buffer")
 	}
-	return c.String("name"), nil
+	return nil
 }
