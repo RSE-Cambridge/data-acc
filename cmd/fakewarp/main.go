@@ -52,6 +52,7 @@ func main() {
 					Name: "hurry",
 				},
 			},
+			Action: teardown,
 		},
 		{
 			Name:  "job_process",
