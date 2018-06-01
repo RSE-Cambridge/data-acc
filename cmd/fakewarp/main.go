@@ -19,7 +19,7 @@ var job = cli.StringFlag{
 	Usage: "Path to burst buffer request file.",
 }
 
-func main() {
+func runCli(args []string) error {
 	app := cli.NewApp()
 	app.Name = "FakeWarp CLI"
 	app.Usage = "This CLI is used to integrate data-acc with Slurm's Burst Buffer plugin."
@@ -101,7 +101,11 @@ func main() {
 		},
 	}
 
-	if err := app.Run(stripFunctionArg(os.Args)); err != nil {
+	return app.Run(stripFunctionArg(args))
+}
+
+func main() {
+	if err := runCli(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
