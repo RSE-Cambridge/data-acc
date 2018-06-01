@@ -1,9 +1,4 @@
-package main
-
-import (
-	"fmt"
-	"github.com/urfave/cli"
-)
+package fakewarp
 
 type instanceCapacity struct {
 	Bytes uint `json:"bytes"`
@@ -27,17 +22,12 @@ func (list *instances) String() string {
 	return toJson(message)
 }
 
-func getInstances() *instances {
+func GetInstances() *instances {
 	fakeInstance := instance{
 		"fakebuffer",
 		instanceCapacity{3, 40},
 		instanceLinks{"fakebuffer"}}
 	return &instances{fakeInstance}
-}
-
-func showInstances(_ *cli.Context) error {
-	fmt.Print(getInstances())
-	return nil
 }
 
 type session struct {
@@ -54,12 +44,7 @@ func (list *sessions) String() string {
 	return toJson(message)
 }
 
-func getSessions() *sessions {
+func GetSessions() *sessions {
 	fakeSession := session{"fakebuffer", 12345678, 1001, "fakebuffer"}
 	return &sessions{fakeSession}
-}
-
-func showSessions(_ *cli.Context) error {
-	fmt.Print(getSessions())
-	return nil
 }

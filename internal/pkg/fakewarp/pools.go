@@ -1,9 +1,4 @@
-package main
-
-import (
-	"fmt"
-	"github.com/urfave/cli"
-)
+package fakewarp
 
 type pool struct {
 	Id          string `json:"id"`
@@ -20,12 +15,7 @@ func (list *pools) String() string {
 	return toJson(message)
 }
 
-func getPools() *pools {
+func GetPools() *pools {
 	fakePool := pool{"fake", "bytes", 214748364800, 40, 3}
 	return &pools{fakePool}
-}
-
-func listPools(_ *cli.Context) error {
-	fmt.Print(getPools())
-	return nil
 }
