@@ -1,9 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"github.com/urfave/cli"
-	"io"
-	"os"
 )
 
 type pool struct {
@@ -14,17 +13,19 @@ type pool struct {
 	Free        uint   `json:"free"`
 }
 
-func getPools() []pool {
+type pools []pool
+
+func (list *pools) String() string {
+	message := map[string]pools{"pools": *list}
+	return toJson(message)
+}
+
+func getPools() *pools {
 	fakePool := pool{"fake", "bytes", 214748364800, 40, 3}
-	return []pool{fakePool}
+	return &pools{fakePool}
 }
 
-func printPools(writer io.Writer) {
-	message := map[string][]pool{"pools": getPools()}
-	printJson(writer, message)
-}
-
-func pools(_ *cli.Context) error {
-	printPools(os.Stdout)
+func listPools(_ *cli.Context) error {
+	fmt.Print(getPools())
 	return nil
 }

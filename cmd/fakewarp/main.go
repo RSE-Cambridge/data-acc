@@ -24,7 +24,7 @@ func main() {
 		{
 			Name:   "pools",
 			Usage:  "List all the buffer pools",
-			Action: pools,
+			Action: listPools,
 		},
 		{
 			Name:   "show_instances",

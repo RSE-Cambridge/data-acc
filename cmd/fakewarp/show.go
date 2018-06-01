@@ -1,9 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"github.com/urfave/cli"
-	"io"
-	"os"
 )
 
 type instanceCapacity struct {
@@ -21,21 +20,23 @@ type instance struct {
 	Links    instanceLinks    `json:"links"`
 }
 
-func getInstances() []instance {
+type instances []instance
+
+func (list *instances) String() string {
+	message := map[string]instances{"instances": *list}
+	return toJson(message)
+}
+
+func getInstances() *instances {
 	fakeInstance := instance{
 		"fakebuffer",
 		instanceCapacity{3, 40},
 		instanceLinks{"fakebuffer"}}
-	return []instance{fakeInstance}
-}
-
-func printInstances(writer io.Writer) {
-	message := map[string][]instance{"instances": getInstances()}
-	printJson(writer, message)
+	return &instances{fakeInstance}
 }
 
 func showInstances(_ *cli.Context) error {
-	printInstances(os.Stdout)
+	fmt.Print(getInstances())
 	return nil
 }
 
@@ -46,17 +47,19 @@ type session struct {
 	Token   string `json:"token"`
 }
 
-func getSessions() []session {
-	fakeSession := session{"fakebuffer", 12345678, 1001, "fakebuffer"}
-	return []session{fakeSession}
+type sessions []session
+
+func (list *sessions) String() string {
+	message := map[string]sessions{"sessions": *list}
+	return toJson(message)
 }
 
-func printSessions(writer io.Writer) {
-	message := map[string][]session{"sessions": getSessions()}
-	printJson(writer, message)
+func getSessions() *sessions {
+	fakeSession := session{"fakebuffer", 12345678, 1001, "fakebuffer"}
+	return &sessions{fakeSession}
 }
 
 func showSessions(_ *cli.Context) error {
-	printSessions(os.Stdout)
+	fmt.Print(getSessions())
 	return nil
 }

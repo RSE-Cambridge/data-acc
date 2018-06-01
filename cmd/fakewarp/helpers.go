@@ -3,19 +3,16 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"io"
 	"log"
 )
 
-func printJson(w io.Writer, message interface{}) {
+func toJson(message interface{}) string {
 	b, error := json.Marshal(message)
 	if error != nil {
 		log.Fatal(error)
 	}
-	buff := new(bytes.Buffer)
-	buff.Write(b)
-	buff.Write([]byte("\n"))
-	if _, error = buff.WriteTo(w); error != nil {
-		log.Fatal(error)
-	}
+	buffer := new(bytes.Buffer)
+	buffer.Write(b)
+	buffer.Write([]byte("\n"))
+	return buffer.String()
 }
