@@ -63,4 +63,7 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	if err := runCli([]string{"--function", "data_in", "--token", "a", "--job", "b"}); err != nil {
 		t.Fatal(err)
 	}
+	if err := runCli([]string{"--function", "paths", "--token", "a", "--job", "b", "--pathfile", "c"}); err != nil {
+		t.Fatal(err)
+	}
 }

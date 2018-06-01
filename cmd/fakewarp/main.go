@@ -98,6 +98,13 @@ func runCli(args []string) error {
 		{
 			Name:  "paths",
 			Usage: "Environment variables describing where the buffer will be mounted.",
+			Flags: []cli.Flag{token, job,
+				cli.StringFlag{
+					Name:  "pathfile",
+					Usage: "Path of where to write the enviroment variables file.",
+				},
+			},
+			Action: paths,
 		},
 		{
 			Name:  "pre_run",

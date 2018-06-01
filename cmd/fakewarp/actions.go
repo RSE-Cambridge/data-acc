@@ -72,3 +72,10 @@ func dataIn(c *cli.Context) error {
 	fmt.Printf("--token %s --job %s\n", c.String("token"), c.String("job"))
 	return nil
 }
+
+func paths(c *cli.Context) error {
+	checkRequiredStrings(c, "token", "job", "pathfile")
+	fmt.Printf("--token %s --job %s --pathfile %s\n",
+		c.String("token"), c.String("job"), c.String("pathfile"))
+	return nil
+}
