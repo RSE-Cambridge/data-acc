@@ -90,8 +90,10 @@ func runCli(args []string) error {
 			Action: realSize,
 		},
 		{
-			Name:  "data_in",
-			Usage: "Copy data into given buffer.",
+			Name:   "data_in",
+			Usage:  "Copy data into given buffer.",
+			Flags:  []cli.Flag{token, job},
+			Action: dataIn,
 		},
 		{
 			Name:  "paths",
