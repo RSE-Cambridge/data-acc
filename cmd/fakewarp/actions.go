@@ -79,3 +79,10 @@ func paths(c *cli.Context) error {
 		c.String("token"), c.String("job"), c.String("pathfile"))
 	return nil
 }
+
+func preRun(c *cli.Context) error {
+	checkRequiredStrings(c, "token", "job", "nodehostnamefile")
+	fmt.Printf("--token %s --job %s --nodehostnamefile %s\n",
+		c.String("token"), c.String("job"), c.String("nodehostnamefile"))
+	return nil
+}

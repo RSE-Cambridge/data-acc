@@ -109,6 +109,13 @@ func runCli(args []string) error {
 		{
 			Name:  "pre_run",
 			Usage: "Attach given buffers to compute nodes specified.",
+			Flags: []cli.Flag{token, job,
+				cli.StringFlag{
+					Name:  "nodehostnamefile",
+					Usage: "Path to file containing list of compute nodes.",
+				},
+			},
+			Action: preRun,
 		},
 		{
 			Name:  "post_run",
