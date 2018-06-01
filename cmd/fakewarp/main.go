@@ -14,6 +14,11 @@ func stripFunctionArg(systemArgs []string) []string {
 	return systemArgs
 }
 
+var job = cli.StringFlag{
+	Name:  "job",
+	Usage: "Path to burst buffer request file.",
+}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "FakeWarp CLI"
@@ -44,10 +49,7 @@ func main() {
 					Name:  "token, t",
 					Usage: "Job ID or Persistent Buffer name",
 				},
-				cli.StringFlag{
-					Name:  "job",
-					Usage: "Path to burst buffer request file.",
-				},
+				job,
 				cli.BoolFlag{
 					Name: "hurry",
 				},
@@ -55,8 +57,10 @@ func main() {
 			Action: teardown,
 		},
 		{
-			Name:  "job_process",
-			Usage: "Initial call to validate buffer script",
+			Name:   "job_process",
+			Usage:  "Initial call to validate buffer script",
+			Flags:  []cli.Flag{job},
+			Action: jobProcess,
 		},
 		{
 			Name:  "setup",

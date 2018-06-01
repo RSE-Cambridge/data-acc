@@ -46,3 +46,9 @@ func teardown(c *cli.Context) error {
 		c.String("token"), c.String("job"), c.Bool("hurry"))
 	return nil
 }
+
+func jobProcess(c *cli.Context) error {
+	checkRequiredStrings(c, "job")
+	fmt.Printf("job: %s\n", c.String("job"))
+	return nil
+}
