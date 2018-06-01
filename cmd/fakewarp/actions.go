@@ -20,3 +20,8 @@ func listPools(_ *cli.Context) error {
 	fmt.Print(fakewarp.GetPools())
 	return nil
 }
+
+func showConfigurations(_ *cli.Context) error {
+	fmt.Print(fakewarp.GetConfigurations())
+	return nil
+}

@@ -48,3 +48,14 @@ func GetSessions() *sessions {
 	fakeSession := session{"fakebuffer", 12345678, 1001, "fakebuffer"}
 	return &sessions{fakeSession}
 }
+
+type configurations []string
+
+func (list *configurations) String() string {
+	message := map[string]configurations{"configurations": *list}
+	return toJson(message)
+}
+
+func GetConfigurations() *configurations {
+	return &configurations{}
+}

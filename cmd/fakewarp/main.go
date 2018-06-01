@@ -90,8 +90,9 @@ func main() {
 			Usage: "Create a persistent buffer.",
 		},
 		{
-			Name:  "show_configuration",
-			Usage: "Returns fake data to keep burst buffer plugin happy.",
+			Name:   "show_configurations",
+			Usage:  "Returns fake data to keep burst buffer plugin happy.",
+			Action: showConfigurations,
 		},
 	}
 
