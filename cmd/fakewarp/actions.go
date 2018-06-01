@@ -93,3 +93,10 @@ func postRun(c *cli.Context) error {
 		c.String("token"), c.String("job"))
 	return nil
 }
+
+func dataOut(c *cli.Context) error {
+	checkRequiredStrings(c, "token", "job")
+	fmt.Printf("--token %s --job %s\n",
+		c.String("token"), c.String("job"))
+	return nil
+}

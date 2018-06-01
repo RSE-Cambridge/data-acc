@@ -124,8 +124,10 @@ func runCli(args []string) error {
 			Action: postRun,
 		},
 		{
-			Name:  "data_out",
-			Usage: "Copy data out of buffer.",
+			Name:   "data_out",
+			Usage:  "Copy data out of buffer.",
+			Flags:  []cli.Flag{token, job},
+			Action: dataOut,
 		},
 		{
 			Name:  "create_persistent",
