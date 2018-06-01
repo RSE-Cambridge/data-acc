@@ -52,3 +52,11 @@ func jobProcess(c *cli.Context) error {
 	fmt.Printf("job: %s\n", c.String("job"))
 	return nil
 }
+
+func setup(c *cli.Context) error {
+	checkRequiredStrings(c, "token", "job", "caller", "capacity")
+	fmt.Printf("--token %s --job %s --caller %s --user %d --groupid %d --capacity %s",
+		c.String("token"), c.String("job"), c.String("caller"), c.Int("user"),
+		c.Int("groupid"), c.Int("capacity"))
+	return nil
+}

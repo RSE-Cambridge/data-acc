@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -49,6 +50,11 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := runCli([]string{"--function", "job_process", "--job", "a"}); err != nil {
+		t.Fatal(err)
+	}
+	setup_args := strings.Split(
+		"--fuction setup --token a --job b --caller c --user 1 --groupid 1 --capacity dw:1GiB", " ")
+	if err := runCli(setup_args); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -14,9 +14,29 @@ func stripFunctionArg(systemArgs []string) []string {
 	return systemArgs
 }
 
+var token = cli.StringFlag{
+	Name:  "token, t",
+	Usage: "Job ID or Persistent Buffer name",
+}
 var job = cli.StringFlag{
 	Name:  "job",
 	Usage: "Path to burst buffer request file.",
+}
+var caller = cli.StringFlag{
+	Name:  "caller",
+	Usage: "The system that called the CLI, e.g. Slurm.",
+}
+var user = cli.IntFlag{
+	Name:  "user",
+	Usage: "Linux user id that owns the buffer.",
+}
+var groupid = cli.IntFlag{
+	Name:  "groupid",
+	Usage: "Linux group id that owns the buffer, defaults to match the user.",
+}
+var capacity = cli.StringFlag{
+	Name:  "capacity",
+	Usage: "A request of the form <pool>:<int><units> where units could be GiB or TiB.",
 }
 
 func runCli(args []string) error {
@@ -44,12 +64,7 @@ func runCli(args []string) error {
 		{
 			Name:  "teardown",
 			Usage: "Destroy the given buffer.",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:  "token, t",
-					Usage: "Job ID or Persistent Buffer name",
-				},
-				job,
+			Flags: []cli.Flag{token, job,
 				cli.BoolFlag{
 					Name: "hurry",
 				},
@@ -63,8 +78,10 @@ func runCli(args []string) error {
 			Action: jobProcess,
 		},
 		{
-			Name:  "setup",
-			Usage: "Create transient burst buffer, called after waiting for enough free capacity.",
+			Name:   "setup",
+			Usage:  "Create transient burst buffer, called after waiting for enough free capacity.",
+			Flags:  []cli.Flag{token, job, caller, user, groupid, capacity},
+			Action: setup,
 		},
 		{
 			Name:  "real_size",
