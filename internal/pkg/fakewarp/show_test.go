@@ -18,7 +18,7 @@ func TestGetInstances(t *testing.T) {
 
 func TestGetSessions(t *testing.T) {
 	actual := GetSessions().String()
-	expected := `{"sessions":[{"id":"fakebuffer","created":12345678,"owner":1001,"token":"fakebuffer"}]}`
+	expected := `{"sessions":[{"id":"fakebuffer","created":1234567890,"owner":1001,"token":"fakebuffer"}]}`
 	assert.EqualValues(t, expected, actual[:len(actual)-1])
 	assertNewline(t, actual)
 }

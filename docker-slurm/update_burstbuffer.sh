@@ -11,6 +11,9 @@ docker build -t slurm-docker-cluster:17.02.9 .
 
 docker-compose up -d
 
+sleep 5
+./register_cluster.sh
+
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 #BB create_persistent name=mytestbuffer capacity=32GB access=striped type=scratch" > create-persistent.sh'
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
@@ -28,8 +31,8 @@ sleep 5
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 
 echo "***Create per job buffer***"
-echo 'srun --bb="capacity=3TB" bash -c "sleep 10 && echo \$HOSTNAME"'
-docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=3TB\" bash -c \"sleep 5 && echo \$HOSTNAME\"'" &
+echo 'srun --bb="capacity=1TB" bash -c "sleep 10 && echo \$HOSTNAME"'
+docker exec slurmctld bash -c "cd /data && su slurm -c 'srun --bb=\"capacity=1TB\" bash -c \"sleep 5 && echo \$HOSTNAME\"'" &
 sleep 5
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 

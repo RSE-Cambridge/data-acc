@@ -16,6 +16,7 @@ func (list *pools) String() string {
 }
 
 func GetPools() *pools {
-	fakePool := pool{"fake", "bytes", 214748364800, 40, 3}
+	// Fake pool with 200GiB granularity
+	fakePool := pool{"fake", "bytes", 214748364800, 400, 395}
 	return &pools{fakePool}
 }

@@ -11,19 +11,25 @@ Data Accelerator uses commodity storage to accelerate HPC jobs.
 Currently targeting initial integration with the Slurm Burst Buffer plugin,
 with Lustre over Intel P4600 attached to Dell R730 with 2x100Gb/s OPA.
 
-To try this out, run etcd then fetch the functional test via:
+To see end to end demo with Slurm (not currently working):
+```
+cd docker-slurm
+./update_burstbuffer.sh
+```
+
+To clean up after the demo:
+```
+docker-compose down --vol
+```
+
+To try this out, run etcd then run:
 ```
 go get https://github.com/RSE-Cambridge/cmd/fakewarp
+fakewarp --help
 ```
 
 To build it locally and run tests:
 ```
 make
 make test
-```
-
-To see end to end demo with Slurm (not currently working):
-```
-cd docker-slurm
-./update_burstbuffer.sh
 ```
