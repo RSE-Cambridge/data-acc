@@ -19,23 +19,23 @@ var token = cli.StringFlag{
 	Usage: "Job ID or Persistent Buffer name",
 }
 var job = cli.StringFlag{
-	Name:  "job",
+	Name:  "job, j",
 	Usage: "Path to burst buffer request file.",
 }
 var caller = cli.StringFlag{
-	Name:  "caller",
+	Name:  "caller, c",
 	Usage: "The system that called the CLI, e.g. Slurm.",
 }
 var user = cli.IntFlag{
-	Name:  "user",
+	Name:  "user, u",
 	Usage: "Linux user id that owns the buffer.",
 }
 var groupid = cli.IntFlag{
-	Name:  "groupid",
+	Name:  "groupid, group, g",
 	Usage: "Linux group id that owns the buffer, defaults to match the user.",
 }
 var capacity = cli.StringFlag{
-	Name:  "capacity",
+	Name:  "capacity, C",
 	Usage: "A request of the form <pool>:<int><units> where units could be GiB or TiB.",
 }
 
@@ -132,6 +132,17 @@ func runCli(args []string) error {
 		{
 			Name:  "create_persistent",
 			Usage: "Create a persistent buffer.",
+			Flags: []cli.Flag{token, caller, capacity, user, groupid,
+				cli.StringFlag{
+					Name:  "access, a",
+					Usage: "Access mode, e.g. striped or private.",
+				},
+				cli.StringFlag{
+					Name:  "type, T",
+					Usage: "Type of buffer, e.d. scratch or cache.",
+				},
+			},
+			Action: createPersistent,
 		},
 		{
 			Name:   "show_configurations",

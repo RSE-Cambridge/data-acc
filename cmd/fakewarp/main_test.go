@@ -52,9 +52,9 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	if err := runCli([]string{"--function", "job_process", "--job", "a"}); err != nil {
 		t.Fatal(err)
 	}
-	setup_args := strings.Split(
-		"--fuction setup --token a --job b --caller c --user 1 --groupid 1 --capacity dw:1GiB", " ")
-	if err := runCli(setup_args); err != nil {
+	setupArgs := strings.Split(
+		"--function setup --token a --job b --caller c --user 1 --groupid 1 --capacity dw:1GiB", " ")
+	if err := runCli(setupArgs); err != nil {
 		t.Fatal(err)
 	}
 	if err := runCli([]string{"--function", "real_size", "--token", "a"}); err != nil {
@@ -73,6 +73,17 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := runCli([]string{"--function", "data_out", "--token", "a", "--job", "b"}); err != nil {
+		t.Fatal(err)
+	}
+	createPersistentArgs := strings.Split(
+		"--function create_persistent --token a --caller c --user 1 --groupid 1 --capacity dw:1GiB "+
+			"--access striped --type scratch", " ")
+	if err := runCli(createPersistentArgs); err != nil {
+		t.Fatal(err)
+	}
+	createPersistentArgs = strings.Split(
+		"--function create_persistent -t a -c c -u 1 -g 1 -C dw:1GiB -a striped -T scratch", " ")
+	if err := runCli(createPersistentArgs); err != nil {
 		t.Fatal(err)
 	}
 }

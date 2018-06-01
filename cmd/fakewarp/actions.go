@@ -100,3 +100,12 @@ func dataOut(c *cli.Context) error {
 		c.String("token"), c.String("job"))
 	return nil
 }
+
+func createPersistent(c *cli.Context) error {
+	checkRequiredStrings(c, "token", "caller", "capacity", "user", "access", "type")
+	fmt.Printf("--token %s --caller %s --user %d --groupid %d --capacity %s " +
+		"--access %s --type %s\n",
+		c.String("token"), c.String("caller"), c.Int("user"),
+		c.Int("groupid"), c.String("capacity"), c.String("access"), c.String("type"))
+	return nil
+}
