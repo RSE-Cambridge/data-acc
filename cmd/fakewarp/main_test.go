@@ -57,4 +57,7 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	if err := runCli(setup_args); err != nil {
 		t.Fatal(err)
 	}
+	if err := runCli([]string{"--function", "real_size", "--token", "a"}); err != nil {
+		t.Fatal(err)
+	}
 }

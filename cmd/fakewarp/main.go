@@ -84,8 +84,10 @@ func runCli(args []string) error {
 			Action: setup,
 		},
 		{
-			Name:  "real_size",
-			Usage: "Report actual size of created buffer.",
+			Name:   "real_size",
+			Usage:  "Report actual size of created buffer.",
+			Flags:  []cli.Flag{token},
+			Action: realSize,
 		},
 		{
 			Name:  "data_in",

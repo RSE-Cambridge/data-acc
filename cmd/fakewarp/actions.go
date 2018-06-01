@@ -55,8 +55,14 @@ func jobProcess(c *cli.Context) error {
 
 func setup(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "job", "caller", "capacity")
-	fmt.Printf("--token %s --job %s --caller %s --user %d --groupid %d --capacity %s",
+	fmt.Printf("--token %s --job %s --caller %s --user %d --groupid %d --capacity %s\n",
 		c.String("token"), c.String("job"), c.String("caller"), c.Int("user"),
 		c.Int("groupid"), c.Int("capacity"))
+	return nil
+}
+
+func realSize(c *cli.Context) error {
+	checkRequiredStrings(c, "token")
+	fmt.Printf("--token %s\n", c.String("token"))
 	return nil
 }
