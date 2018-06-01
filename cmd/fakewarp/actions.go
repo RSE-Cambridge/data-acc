@@ -103,11 +103,10 @@ func dataOut(c *cli.Context) error {
 
 func createPersistent(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "caller", "capacity", "user", "access", "type")
-	fmt.Printf("--token %s --caller %s --user %d --groupid %d --capacity %s "+
-		"--access %s --type %s\n",
-		c.String("token"), c.String("caller"), c.Int("user"),
-		c.Int("groupid"), c.String("capacity"), c.String("access"), c.String("type"))
-	// Slurm is looking for the string "created" to know this worked
-	fmt.Printf("created %s\n", c.String("token"))
-	return nil
+	name, error := fakewarp.CreatePersistentBuffer(c)
+	if error == nil {
+		// Slurm is looking for the string "created" to know this worked
+		fmt.Printf("created %s\n", name)
+	}
+	return error
 }
