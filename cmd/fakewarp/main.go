@@ -118,8 +118,10 @@ func runCli(args []string) error {
 			Action: preRun,
 		},
 		{
-			Name:  "post_run",
-			Usage: "Detach buffers before releasing compute nodes.",
+			Name:   "post_run",
+			Usage:  "Detach buffers before releasing compute nodes.",
+			Flags:  []cli.Flag{token, job},
+			Action: postRun,
 		},
 		{
 			Name:  "data_out",

@@ -86,3 +86,10 @@ func preRun(c *cli.Context) error {
 		c.String("token"), c.String("job"), c.String("nodehostnamefile"))
 	return nil
 }
+
+func postRun(c *cli.Context) error {
+	checkRequiredStrings(c, "token", "job")
+	fmt.Printf("--token %s --job %s\n",
+		c.String("token"), c.String("job"))
+	return nil
+}
