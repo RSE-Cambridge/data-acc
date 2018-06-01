@@ -1,4 +1,4 @@
-package oldregistry
+package etcdregistry
 
 import (
 	"context"
@@ -19,7 +19,7 @@ type etcKeystore struct {
 	*clientv3.Client
 }
 
-func NewKeystore() *etcKeystore {
+func NewKeystore() Keystore {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints: []string{"127.0.0.1:2379"},
 	})

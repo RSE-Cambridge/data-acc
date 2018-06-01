@@ -10,6 +10,10 @@ type Registry interface {
 
 	// Update host, or add if not already present
 	UpdateHost(host Host) error
+	BufferRegistry
+}
+
+type BufferRegistry interface {
 	AddBuffer(buffer Buffer) error
 	UpdateBuffer(buffer Buffer) (Buffer, error)
 	RemoveBuffer(buffer Buffer)
