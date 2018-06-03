@@ -57,7 +57,7 @@ func (client *etcKeystore) AtomicAdd(key string, value string) {
 		panic(err)
 	}
 	if !response.Succeeded {
-		panic("oh dear someone has added the key already")
+		panic(fmt.Errorf("oh dear someone has added the key already: %s", key))
 	}
 }
 

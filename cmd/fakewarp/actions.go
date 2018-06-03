@@ -44,7 +44,8 @@ func teardown(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "job")
 	fmt.Printf("token: %s job: %s hurry:%t\n",
 		c.String("token"), c.String("job"), c.Bool("hurry"))
-	return nil
+	error := fakewarp.DeleteBuffer(c)
+	return error
 }
 
 func jobProcess(c *cli.Context) error {
@@ -58,7 +59,8 @@ func setup(c *cli.Context) error {
 	fmt.Printf("--token %s --job %s --caller %s --user %d --groupid %d --capacity %s\n",
 		c.String("token"), c.String("job"), c.String("caller"), c.Int("user"),
 		c.Int("groupid"), c.String("capacity"))
-	return nil
+	error := fakewarp.CreatePerJobBuffer(c)
+	return error
 }
 
 func realSize(c *cli.Context) error {
