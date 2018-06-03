@@ -6,6 +6,8 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/clientv3util"
 	"log"
+	"os"
+	"strings"
 )
 
 type Keystore interface {
@@ -19,9 +21,17 @@ type etcKeystore struct {
 	*clientv3.Client
 }
 
+func getEndpoints() []string {
+	endpoints := os.Getenv("ETCD_ENDPOINTS")
+	if endpoints == "" {
+		log.Fatalf("Must set ETCD_ENDPOINTS environemnt variable, e.g. export ETCD_ENDPOINTS=127.0.0.1:2379")
+	}
+	return strings.Split(endpoints, ",")
+}
+
 func NewKeystore() Keystore {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"127.0.0.1:2379"},
+		Endpoints: getEndpoints(),
 	})
 	if err != nil {
 		log.Fatal(err)

@@ -21,7 +21,7 @@ func NewBufferRegistry(keystore Keystore) registry.BufferRegistry {
 }
 
 func getBufferKey(buffer registry.Buffer) string {
-	return fmt.Sprintf("/buffer/%s", buffer.Name)
+	return fmt.Sprintf("/buffers/%s", buffer.Name)
 }
 
 func getBufferValue(buffer registry.Buffer) string {

@@ -11,7 +11,7 @@ func TestBufferRegistry_AddBuffer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	key := "/buffer/test"
+	key := "/buffers/test"
 	value := "foo"
 	buff := registry.Buffer{Name: "test", Owner: value}
 	mockObj := mock_keystoreregistry.NewMockKeystore(mockCtrl)
@@ -25,7 +25,7 @@ func TestBufferRegistry_RemoveBuffer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	prefix := "/buffer/test"
+	prefix := "/buffers/test"
 	buff := registry.Buffer{Name: "test"}
 	mockObj := mock_keystoreregistry.NewMockKeystore(mockCtrl)
 	mockObj.EXPECT().CleanPrefix(prefix)

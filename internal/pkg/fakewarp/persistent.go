@@ -34,7 +34,7 @@ func processCreatePersistentBuffer(request *PersistentBufferRequest, keystore ke
 	if request.Token == "bob" {
 		return errors.New("unable to create buffer")
 	}
-	r := keystoreregistry.BufferRegistry{keystore}
+	r := keystoreregistry.NewBufferRegistry(keystore)
 	// TODO: lots more validation needed to ensure valid key, etc
 	buf := registry.Buffer{Name: request.Token, Owner: fmt.Sprintf("%d", request.User)}
 	r.AddBuffer(buf)
