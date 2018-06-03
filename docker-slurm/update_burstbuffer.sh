@@ -44,6 +44,7 @@ docker exec slurmctld bash -c "cd /data && su slurm -c 'sbatch delete-persistent
 sleep 22
 echo "***Show all is cleaned up***"
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
+docker exec slurmctld bash -c "cd /data && squeue"
 
 sleep 5
 docker logs fakebuffernode1
