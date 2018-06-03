@@ -162,8 +162,8 @@ services:
     container_name: bufferwatcher
     environment:
       - ETCDCTL_API=3
-      - ETCD_ENDPOINTS=etcdproxy1:2379
-    command: sh -c "etcdctl watch --endpoints=etcdproxy1:2379 --prefix buffers/ -- sh -c 'env | grep ETCD_WATCH_'"
+      - ETCDCTL_ENDPOINTS=etcdproxy1:2379
+    command: sh -c "etcdctl watch --prefix /buffers/ -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
 

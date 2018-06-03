@@ -18,7 +18,7 @@ func processDeleteBuffer(bufferName string, keystore keystoreregistry.Keystore) 
 	r := keystoreregistry.NewBufferRegistry(keystore)
 	// TODO: should do a get buffer before doing a delete
 	buf := registry.Buffer{Name: bufferName}
-	r.AddBuffer(buf)
+	r.RemoveBuffer(buf)
 	return nil
 }
 

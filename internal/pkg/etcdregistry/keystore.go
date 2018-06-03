@@ -22,7 +22,10 @@ type etcKeystore struct {
 }
 
 func getEndpoints() []string {
-	endpoints := os.Getenv("ETCD_ENDPOINTS")
+	endpoints := os.Getenv("ETCDCTL_ENDPOINTS")
+	if endpoints == "" {
+		endpoints = os.Getenv("ETCD_ENDPOINTS")
+	}
 	if endpoints == "" {
 		log.Fatalf("Must set ETCD_ENDPOINTS environemnt variable, e.g. export ETCD_ENDPOINTS=127.0.0.1:2379")
 	}
@@ -44,7 +47,13 @@ func NewKeystore() Keystore {
 func (client *etcKeystore) CleanPrefix(prefix string) {
 	kvc := clientv3.NewKV(client.Client)
 	fmt.Println(kvc.Get(context.Background(), prefix, clientv3.WithPrefix()))
-	kvc.Delete(context.Background(), prefix, clientv3.WithPrefix())
+	response, error := kvc.Delete(context.Background(), prefix, clientv3.WithPrefix())
+	if error != nil {
+		panic(error)
+	}
+	if response.Deleted == 0 {
+		panic(fmt.Errorf("oh dear, nothing to delete for prefix: %s", prefix))
+	}
 }
 
 func (client *etcKeystore) AtomicAdd(key string, value string) {
