@@ -2,15 +2,14 @@ package fakewarp
 
 import (
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 )
 
 // Creates a persistent buffer.
 // If it works, we return the name of the buffer, otherwise an error is returned
-func DeleteBuffer(c CliContext) error {
-	error := processDeleteBuffer(c.String("token"), etcdregistry.NewKeystore())
+func DeleteBuffer(c CliContext, keystore keystoreregistry.Keystore) error {
+	error := processDeleteBuffer(c.String("token"), keystore)
 	return error
 }
 
@@ -22,8 +21,8 @@ func processDeleteBuffer(bufferName string, keystore keystoreregistry.Keystore) 
 	return nil
 }
 
-func CreatePerJobBuffer(c CliContext) error {
-	error := processCreatePerJobBuffer(etcdregistry.NewKeystore(), c.String("token"), c.Int("user"))
+func CreatePerJobBuffer(c CliContext, keystore keystoreregistry.Keystore) error {
+	error := processCreatePerJobBuffer(keystore, c.String("token"), c.Int("user"))
 	return error
 }
 

@@ -3,7 +3,6 @@ package fakewarp
 import (
 	"errors"
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 )
@@ -20,13 +19,13 @@ type PersistentBufferRequest struct {
 
 // Creates a persistent buffer.
 // If it works, we return the name of the buffer, otherwise an error is returned
-func CreatePersistentBuffer(c CliContext) (string, error) {
+func CreatePersistentBuffer(c CliContext, keystore keystoreregistry.Keystore) (string, error) {
 	request := PersistentBufferRequest{c.String("token"), c.String("caller"),
 		c.String("capacity"), c.Int("user"),
 		c.Int("groupid"), c.String("access"), c.String("type")}
 	fmt.Printf("--token %s --caller %s --user %d --groupid %d --capacity %s --access %s --type %s\n",
 		request.Token, request.Caller, request.User, request.Group, request.Capacity, request.Access, request.Type)
-	error := processCreatePersistentBuffer(&request, etcdregistry.NewKeystore())
+	error := processCreatePersistentBuffer(&request, keystore)
 	return request.Token, error
 }
 
