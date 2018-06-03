@@ -24,8 +24,12 @@ func getBufferKey(buffer registry.Buffer) string {
 	return fmt.Sprintf("/buffer/%s", buffer.Name)
 }
 
+func getBufferValue(buffer registry.Buffer) string {
+	return buffer.Owner
+}
+
 func (r *BufferRegistry) AddBuffer(buffer registry.Buffer) error {
-	r.keystore.AtomicAdd(getBufferKey(buffer), buffer.Owner)
+	r.keystore.AtomicAdd(getBufferKey(buffer), getBufferValue(buffer))
 	return nil
 }
 

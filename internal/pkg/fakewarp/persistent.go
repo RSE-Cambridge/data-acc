@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 )
 
 type PersistentBufferRequest struct {
