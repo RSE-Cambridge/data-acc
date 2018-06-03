@@ -1,4 +1,4 @@
-package oldregistry
+package etcdregistry
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/clientv3util"
 	"log"
+	"os"
+	"strings"
 )
 
 type Keystore interface {
@@ -19,9 +21,20 @@ type etcKeystore struct {
 	*clientv3.Client
 }
 
-func NewKeystore() *etcKeystore {
+func getEndpoints() []string {
+	endpoints := os.Getenv("ETCDCTL_ENDPOINTS")
+	if endpoints == "" {
+		endpoints = os.Getenv("ETCD_ENDPOINTS")
+	}
+	if endpoints == "" {
+		log.Fatalf("Must set ETCD_ENDPOINTS environemnt variable, e.g. export ETCD_ENDPOINTS=127.0.0.1:2379")
+	}
+	return strings.Split(endpoints, ",")
+}
+
+func NewKeystore() Keystore {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints: []string{"127.0.0.1:2379"},
+		Endpoints: getEndpoints(),
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -34,7 +47,13 @@ func NewKeystore() *etcKeystore {
 func (client *etcKeystore) CleanPrefix(prefix string) {
 	kvc := clientv3.NewKV(client.Client)
 	fmt.Println(kvc.Get(context.Background(), prefix, clientv3.WithPrefix()))
-	kvc.Delete(context.Background(), prefix, clientv3.WithPrefix())
+	response, error := kvc.Delete(context.Background(), prefix, clientv3.WithPrefix())
+	if error != nil {
+		panic(error)
+	}
+	if response.Deleted == 0 {
+		panic(fmt.Errorf("oh dear, nothing to delete for prefix: %s", prefix))
+	}
 }
 
 func (client *etcKeystore) AtomicAdd(key string, value string) {
@@ -47,7 +66,7 @@ func (client *etcKeystore) AtomicAdd(key string, value string) {
 		panic(err)
 	}
 	if !response.Succeeded {
-		panic("oh dear someone has added the key already")
+		panic(fmt.Errorf("oh dear someone has added the key already: %s", key))
 	}
 }
 

@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/urfave/cli"
 	"log"
 	"strings"
@@ -44,7 +46,8 @@ func teardown(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "job")
 	fmt.Printf("token: %s job: %s hurry:%t\n",
 		c.String("token"), c.String("job"), c.Bool("hurry"))
-	return nil
+	error := fakewarp.DeleteBuffer(c, getKeystore())
+	return error
 }
 
 func jobProcess(c *cli.Context) error {
@@ -58,7 +61,8 @@ func setup(c *cli.Context) error {
 	fmt.Printf("--token %s --job %s --caller %s --user %d --groupid %d --capacity %s\n",
 		c.String("token"), c.String("job"), c.String("caller"), c.Int("user"),
 		c.Int("groupid"), c.String("capacity"))
-	return nil
+	error := fakewarp.CreatePerJobBuffer(c, getKeystore())
+	return error
 }
 
 func realSize(c *cli.Context) error {
@@ -101,13 +105,23 @@ func dataOut(c *cli.Context) error {
 	return nil
 }
 
+var testKeystore keystoreregistry.Keystore
+
+func getKeystore() keystoreregistry.Keystore {
+	// TODO must be a better way to test this, proper factory?
+	keystore := testKeystore
+	if keystore == nil {
+		keystore = etcdregistry.NewKeystore()
+	}
+	return keystore
+}
+
 func createPersistent(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "caller", "capacity", "user", "access", "type")
-	fmt.Printf("--token %s --caller %s --user %d --groupid %d --capacity %s "+
-		"--access %s --type %s\n",
-		c.String("token"), c.String("caller"), c.Int("user"),
-		c.Int("groupid"), c.String("capacity"), c.String("access"), c.String("type"))
-	// Slurm is looking for the string "created" to know this worked
-	fmt.Printf("created %s\n", c.String("token"))
-	return nil
+	name, error := fakewarp.CreatePersistentBuffer(c, getKeystore())
+	if error == nil {
+		// Slurm is looking for the string "created" to know this worked
+		fmt.Printf("created %s\n", name)
+	}
+	return error
 }

@@ -2,6 +2,7 @@ package oldregistry
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 )
 
 type BufferRegistry interface {
@@ -16,11 +17,11 @@ type BufferRegistry interface {
 }
 
 type bufferRegistry struct {
-	keystore Keystore
+	keystore etcdregistry.Keystore
 }
 
 func NewBufferRegistry() BufferRegistry {
-	keystore := NewKeystore()
+	keystore := etcdregistry.NewKeystore()
 	return &bufferRegistry{keystore}
 }
 
