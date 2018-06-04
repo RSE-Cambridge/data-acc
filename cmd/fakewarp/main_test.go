@@ -45,6 +45,7 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	mockKeystore.EXPECT().AtomicAdd("/buffers/a", gomock.Any())
 	mockKeystore.EXPECT().AtomicAdd("/buffers/p1", gomock.Any())
 	mockKeystore.EXPECT().AtomicAdd("/buffers/p2", gomock.Any())
+	mockKeystore.EXPECT().Close().AnyTimes()
 	testKeystore = mockKeystore
 	defer func() {
 		testKeystore = nil

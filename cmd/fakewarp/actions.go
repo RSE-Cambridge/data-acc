@@ -46,7 +46,9 @@ func teardown(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "job")
 	fmt.Printf("token: %s job: %s hurry:%t\n",
 		c.String("token"), c.String("job"), c.Bool("hurry"))
-	error := fakewarp.DeleteBuffer(c, getKeystore())
+	keystore := getKeystore()
+	defer keystore.Close()
+	error := fakewarp.DeleteBuffer(c, keystore)
 	return error
 }
 
@@ -61,7 +63,9 @@ func setup(c *cli.Context) error {
 	fmt.Printf("--token %s --job %s --caller %s --user %d --groupid %d --capacity %s\n",
 		c.String("token"), c.String("job"), c.String("caller"), c.Int("user"),
 		c.Int("groupid"), c.String("capacity"))
-	error := fakewarp.CreatePerJobBuffer(c, getKeystore())
+	keystore := getKeystore()
+	defer keystore.Close()
+	error := fakewarp.CreatePerJobBuffer(c, keystore)
 	return error
 }
 
@@ -118,7 +122,9 @@ func getKeystore() keystoreregistry.Keystore {
 
 func createPersistent(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "caller", "capacity", "user", "access", "type")
-	name, error := fakewarp.CreatePersistentBuffer(c, getKeystore())
+	keystore := getKeystore()
+	defer keystore.Close()
+	name, error := fakewarp.CreatePersistentBuffer(c, keystore)
 	if error == nil {
 		// Slurm is looking for the string "created" to know this worked
 		fmt.Printf("created %s\n", name)

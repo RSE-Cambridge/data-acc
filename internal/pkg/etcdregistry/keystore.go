@@ -17,7 +17,8 @@ type Keystore interface {
 	WatchPutPrefix(prefix string, onPut func(string, string))
 }
 
-type etcKeystore struct {
+// TODO: this should be private, once abstraction finished
+type EtcKeystore struct {
 	*clientv3.Client
 }
 
@@ -32,7 +33,8 @@ func getEndpoints() []string {
 	return strings.Split(endpoints, ",")
 }
 
-func NewKeystore() Keystore {
+// TODO: this should be private
+func NewEtcdClient() *clientv3.Client {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints: getEndpoints(),
 	})
@@ -41,10 +43,15 @@ func NewKeystore() Keystore {
 		fmt.Println("Oh dear failed to create client...")
 		panic(err)
 	}
-	return &etcKeystore{cli}
+	return cli
 }
 
-func (client *etcKeystore) CleanPrefix(prefix string) {
+func NewKeystore() Keystore {
+	cli := NewEtcdClient()
+	return &EtcKeystore{cli}
+}
+
+func (client *EtcKeystore) CleanPrefix(prefix string) {
 	kvc := clientv3.NewKV(client.Client)
 	fmt.Println(kvc.Get(context.Background(), prefix, clientv3.WithPrefix()))
 	response, error := kvc.Delete(context.Background(), prefix, clientv3.WithPrefix())
@@ -56,7 +63,7 @@ func (client *etcKeystore) CleanPrefix(prefix string) {
 	}
 }
 
-func (client *etcKeystore) AtomicAdd(key string, value string) {
+func (client *EtcKeystore) AtomicAdd(key string, value string) {
 	kvc := clientv3.NewKV(client.Client)
 	response, err := kvc.Txn(context.Background()).
 		If(clientv3util.KeyMissing(key)).
@@ -70,7 +77,7 @@ func (client *etcKeystore) AtomicAdd(key string, value string) {
 	}
 }
 
-func (client *etcKeystore) WatchPutPrefix(prefix string, onPut func(key string, value string)) {
+func (client *EtcKeystore) WatchPutPrefix(prefix string, onPut func(key string, value string)) {
 	rch := client.Watch(context.Background(), prefix, clientv3.WithPrefix())
 	for wresp := range rch {
 		for _, ev := range wresp.Events {
