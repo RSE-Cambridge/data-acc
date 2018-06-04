@@ -24,7 +24,7 @@ func getHostname() string {
 }
 
 func getDevices(baseBrickKey string) []string {
-
+	// TODO: check for real devices!
 	devices := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
 	var bricks []string
 	for _, i := range devices {
@@ -34,7 +34,12 @@ func getDevices(baseBrickKey string) []string {
 	return bricks
 }
 
-func startKeepAlive(cli *clientv3.Client, keepaliveKey string) (<-chan *clientv3.LeaseKeepAliveResponse, error) {
+func startKeepAlive(cli *clientv3.Client) (<-chan *clientv3.LeaseKeepAliveResponse, error) {
+	// TODO: move general pattern into Keystore interface, somehow, or just stop keystore registry from being abstract
+	hostname := getHostname()
+	keepaliveKey := fmt.Sprintf("/bufferhost/alive/%s", hostname)
+	log.Println("Adding keepalive key to notify that we have started up: ", keepaliveKey)
+
 	grantResponse, err := cli.Grant(context.TODO(), 5)
 	if err != nil {
 		log.Fatal(err)
@@ -50,13 +55,7 @@ func startKeepAlive(cli *clientv3.Client, keepaliveKey string) (<-chan *clientv3
 	return cli.KeepAlive(context.TODO(), leaseID)
 }
 
-func main() {
-	fmt.Println("Hello from data-acc-host.")
-
-	cli := etcdregistry.NewEtcdClient()
-	keystore := etcdregistry.EtcKeystore{Client: cli}
-	defer keystore.Close()
-
+func addDebugWatches(keystore keystoreregistry.Keystore) {
 	hostname := getHostname()
 
 	baseBrickKey := fmt.Sprintf("/bricks/present/%s", hostname)
@@ -68,22 +67,32 @@ func main() {
 	go keystore.WatchPutPrefix(baseBrickInUse, func(key string, value string) {
 		log.Printf("Added in use brick: %s for: %s\n", key, value)
 	})
+}
 
-	// TODO: should really just check if existing key needs an update
-	cli.Delete(context.Background(), baseBrickKey, clientv3.WithPrefix())
-	defer keystore.CleanPrefix(baseBrickKey)
+func updateDevices(keystore keystoreregistry.Keystore, cli *clientv3.Client) {
+	hostname := getHostname()
+	baseBrickKey := fmt.Sprintf("/bricks/present/%s", hostname)
+
+	// TODO: should do proper update of exiting entries
+	cli.Delete(context.Background(), baseBrickKey, clientv3.WithPrefix()) // don't error if nothing deleted
 	bricks := getDevices(baseBrickKey)
 	for _, brickKey := range bricks {
 		keystore.AtomicAdd(brickKey, FAKE_DEVICE_INFO)
 	}
+}
 
-	// TODO: nasty testing hack
-	cli.Delete(context.Background(), baseBrickInUse, clientv3.WithPrefix())
-	defer keystore.CleanPrefix(baseBrickInUse)
+func main() {
+	cli := etcdregistry.NewEtcdClient()
+	keystore := etcdregistry.EtcKeystore{Client: cli} // TODO: fix this hack, shouldn't need cli and keystore
+	defer keystore.Close()
 
-	keepaliveKey := fmt.Sprintf("/bufferhost/alive/%s", hostname)
-	log.Printf("Adding keepalive key: %s \n", keepaliveKey)
-	ch, err := startKeepAlive(cli, keepaliveKey)
+	addDebugWatches(&keystore)
+	updateDevices(&keystore, cli)
+
+	// TODO: should restore system to expected state, before telling others we are alive
+
+	// Tell system we are ready to configure slices
+	ch, err := startKeepAlive(cli)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,7 +101,7 @@ func main() {
 	time.Sleep(2)
 	buffer := fakewarp.AddFakeBufferAndBricks(&keystore, cli)
 	bufferRegistry := keystoreregistry.NewBufferRegistry(&keystore)
-	defer bufferRegistry.RemoveBuffer(buffer) // TODO remove in-use brick entries
+	defer bufferRegistry.RemoveBuffer(buffer) // TODO remove in-use brick entries?
 
 	for {
 		ka := <-ch
