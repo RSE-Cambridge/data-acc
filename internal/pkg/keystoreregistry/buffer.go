@@ -1,11 +1,11 @@
 package keystoreregistry
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
-	"encoding/json"
 	"log"
-	"bytes"
 )
 
 type Keystore interface {

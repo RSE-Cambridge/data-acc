@@ -12,10 +12,9 @@ func TestBufferRegistry_AddBuffer(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	key := "/buffers/test"
-	value := "foo"
-	buff := registry.Buffer{Name: "test", Owner: value}
+	buff := registry.Buffer{Name: "test"}
 	mockObj := mock_keystoreregistry.NewMockKeystore(mockCtrl)
-	mockObj.EXPECT().AtomicAdd(key, value)
+	mockObj.EXPECT().AtomicAdd(key, gomock.Any())
 
 	reg := NewBufferRegistry(mockObj)
 	reg.AddBuffer(buff)
