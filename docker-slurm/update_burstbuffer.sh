@@ -1,5 +1,5 @@
 #!/bin/bash
-set +x
+set +eux
 
 cd ../
 make
@@ -14,6 +14,9 @@ docker-compose up -d
 
 sleep 5
 ./register_cluster.sh
+
+sleep 5
+docker exec bufferwatcher bash -c "data-acc-host"
 
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 #BB create_persistent name=mytestbuffer capacity=32GB access=striped type=scratch" > create-persistent.sh'

@@ -52,19 +52,65 @@ func startKeepAlive(cli *clientv3.Client, keepaliveKey string) (<-chan *clientv3
 	return cli.KeepAlive(context.TODO(), leaseID)
 }
 
-func getAvailableBricks(cli *clientv3.Client) []registry.Brick {
-	var availableBricks []registry.Brick
-	getResponse, err := cli.Get(context.Background(), "/slices/present", clientv3.WithPrefix())
+func getBricks(cli *clientv3.Client, prefix string) map[string]map[string]registry.Brick {
+	allBricks := make(map[string]map[string]registry.Brick)
+	getResponse, err := cli.Get(context.Background(), prefix, clientv3.WithPrefix())
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, keyValue := range getResponse.Kvs {
-		rawKey := fmt.Sprintf("%s", keyValue.Key)
+		rawKey := fmt.Sprintf("%s", keyValue.Key) // e.g. /slices/present/1aff0f8468ee/nvme7n1
 		key := strings.Split(rawKey, "/")
-		brick := registry.Brick{Name: key[3], Hostname: key[2]}
-		availableBricks = append(availableBricks, brick)
+		brick := registry.Brick{Name: key[4], Hostname: key[3]}
+		_, ok := allBricks[brick.Hostname]
+		if !ok {
+			allBricks[brick.Hostname] = make(map[string]registry.Brick)
+		}
+		allBricks[brick.Hostname][brick.Name] = brick
 	}
-	// TODO exclude inuse bricks...
+	return allBricks
+}
+
+func getAvailableBricks(cli *clientv3.Client) map[string][]registry.Brick {
+	allBricks := getBricks(cli, "/slices/present/")
+	inUseBricks := getBricks(cli, "/slices/inuse/")
+
+	aliveHosts := make(map[string]string)
+	getHostsResponse, err := cli.Get(context.Background(), "/bufferhost/alive/", clientv3.WithPrefix())
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, keyValue := range getHostsResponse.Kvs {
+		rawKey := fmt.Sprintf("%s", keyValue.Key)
+		key := strings.Split(rawKey, "/") // e.g. /bufferhost/alive/afe30ea9f27e
+		host := key[3]
+		aliveHosts[host] = rawKey
+	}
+
+	availableBricks := make(map[string][]registry.Brick)
+
+	for host, allHostBricks := range allBricks {
+		aliveHost, ok := aliveHosts[host]
+		if !ok || aliveHost == "" {
+			continue
+		}
+		inuseHostBricks := inUseBricks[host]
+
+		availableBricks[host] = []registry.Brick{}
+
+		for _, brick := range allHostBricks {
+			inuse := false
+			for _, inUseBrick := range inuseHostBricks {
+				if inUseBrick.Name == brick.Name {
+					inuse = true
+					break
+				}
+			}
+			if !inuse {
+				availableBricks[host] = append(availableBricks[host], brick)
+			}
+		}
+	}
 	return availableBricks
 }
 
@@ -72,17 +118,23 @@ func addFakeBufferAndSlices(keystore keystoreregistry.Keystore, cli *clientv3.Cl
 	log.Println("Add fakebuffer and match to slices")
 	bufferRegistry := keystoreregistry.NewBufferRegistry(keystore)
 	availableBricks := getAvailableBricks(cli)
-
-	log.Println("all bricks:")
-	log.Println(availableBricks)
 	var chosenBricks []registry.Brick
 
 	// pick some of the available bricks
 	s := rand.NewSource(time.Now().Unix())
 	r := rand.New(s) // initialize local pseudorandom generator
-	requestedBricks := 3
-	for retries := 0; len(chosenBricks) < requestedBricks && retries <= (requestedBricks*30); retries++ {
-		candidateBrick := availableBricks[r.Intn(len(availableBricks))]
+	requestedBricks := 2
+
+	var hosts []string
+	for key := range availableBricks {
+		hosts = append(hosts, key)
+	}
+
+	randomWalk := rand.Perm(len(availableBricks))
+	for _, i := range randomWalk {
+		hostBricks := availableBricks[hosts[i]]
+		candidateBrick := hostBricks[r.Intn(len(hostBricks))]
+
 		goodCandidate := true
 		for _, brick := range chosenBricks {
 			if brick == candidateBrick {
@@ -93,10 +145,13 @@ func addFakeBufferAndSlices(keystore keystoreregistry.Keystore, cli *clientv3.Cl
 				goodCandidate = false
 				break
 			}
-			// TODO: check host is alive, etc, etc,...
 		}
 		if goodCandidate {
 			chosenBricks = append(chosenBricks, candidateBrick)
+		}
+
+		if len(chosenBricks) >= requestedBricks {
+			break
 		}
 	}
 	// TODO: check we have enough bricks?
@@ -148,13 +203,15 @@ func main() {
 
 	keepaliveKey := fmt.Sprintf("/bufferhost/alive/%s", hostname)
 	log.Printf("Adding keepalive key: %s \n", keepaliveKey)
-
-	addFakeBufferAndSlices(&keystore, cli)
-
 	ch, err := startKeepAlive(cli, keepaliveKey)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// TODO: hack, lets wait a bit for others to start
+	time.Sleep(2)
+	addFakeBufferAndSlices(&keystore, cli)
+
 	for {
 		ka := <-ch
 		log.Println("Refreshed key. Current ttl:", ka.TTL)
