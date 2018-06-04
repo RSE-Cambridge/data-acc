@@ -7,6 +7,7 @@ type Brick struct {
 	Driver              Driver
 	AssignedBufferName  string
 	AssignedBufferIndex uint
+	Hostname            string
 }
 
 type Driver int
