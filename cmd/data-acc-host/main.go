@@ -114,7 +114,7 @@ func getAvailableBricks(cli *clientv3.Client) map[string][]registry.Brick {
 	return availableBricks
 }
 
-func addFakeBufferAndSlices(keystore keystoreregistry.Keystore, cli *clientv3.Client) {
+func addFakeBufferAndSlices(keystore keystoreregistry.Keystore, cli *clientv3.Client) registry.Buffer {
 	log.Println("Add fakebuffer and match to slices")
 	bufferRegistry := keystoreregistry.NewBufferRegistry(keystore)
 	availableBricks := getAvailableBricks(cli)
@@ -167,7 +167,7 @@ func addFakeBufferAndSlices(keystore keystoreregistry.Keystore, cli *clientv3.Cl
 
 	buffer := registry.Buffer{Name: bufferName, Bricks: chosenBricks}
 	bufferRegistry.AddBuffer(buffer)
-	defer bufferRegistry.RemoveBuffer(buffer)
+	return buffer
 }
 
 func main() {
@@ -210,7 +210,9 @@ func main() {
 
 	// TODO: hack, lets wait a bit for others to start
 	time.Sleep(2)
-	addFakeBufferAndSlices(&keystore, cli)
+	buffer := addFakeBufferAndSlices(&keystore, cli)
+	bufferRegistry := keystoreregistry.NewBufferRegistry(&keystore)
+	defer bufferRegistry.RemoveBuffer(buffer) // TODO remove in-use slice entries
 
 	for {
 		ka := <-ch

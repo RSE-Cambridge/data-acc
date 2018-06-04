@@ -3,6 +3,9 @@ package keystoreregistry
 import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"encoding/json"
+	"log"
+	"bytes"
 )
 
 type Keystore interface {
@@ -24,8 +27,19 @@ func getBufferKey(buffer registry.Buffer) string {
 	return fmt.Sprintf("/buffers/%s", buffer.Name)
 }
 
+func toJson(message interface{}) string {
+	b, error := json.Marshal(message)
+	if error != nil {
+		log.Fatal(error)
+	}
+	buffer := new(bytes.Buffer)
+	buffer.Write(b)
+	buffer.Write([]byte("\n"))
+	return buffer.String()
+}
+
 func getBufferValue(buffer registry.Buffer) string {
-	return buffer.Owner
+	return toJson(buffer)
 }
 
 func (r *BufferRegistry) AddBuffer(buffer registry.Buffer) error {
