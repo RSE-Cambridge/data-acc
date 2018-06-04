@@ -25,15 +25,15 @@ func getHostname() string {
 	return hostname
 }
 
-func getSlices(baseSliceKey string) []string {
+func getDevices(baseBrickKey string) []string {
 
 	devices := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	var slices []string
+	var bricks []string
 	for _, i := range devices {
 		device := fmt.Sprintf(FAKE_DEVICE_ADDRESS, i)
-		slices = append(slices, fmt.Sprintf("%s/%s", baseSliceKey, device))
+		bricks = append(bricks, fmt.Sprintf("%s/%s", baseBrickKey, device))
 	}
-	return slices
+	return bricks
 }
 
 func startKeepAlive(cli *clientv3.Client, keepaliveKey string) (<-chan *clientv3.LeaseKeepAliveResponse, error) {
@@ -59,7 +59,7 @@ func getBricks(cli *clientv3.Client, prefix string) map[string]map[string]regist
 		log.Fatal(err)
 	}
 	for _, keyValue := range getResponse.Kvs {
-		rawKey := fmt.Sprintf("%s", keyValue.Key) // e.g. /slices/present/1aff0f8468ee/nvme7n1
+		rawKey := fmt.Sprintf("%s", keyValue.Key) // e.g. /bricks/present/1aff0f8468ee/nvme7n1
 		key := strings.Split(rawKey, "/")
 		brick := registry.Brick{Name: key[4], Hostname: key[3]}
 		_, ok := allBricks[brick.Hostname]
@@ -72,8 +72,8 @@ func getBricks(cli *clientv3.Client, prefix string) map[string]map[string]regist
 }
 
 func getAvailableBricks(cli *clientv3.Client) map[string][]registry.Brick {
-	allBricks := getBricks(cli, "/slices/present/")
-	inUseBricks := getBricks(cli, "/slices/inuse/")
+	allBricks := getBricks(cli, "/bricks/present/")
+	inUseBricks := getBricks(cli, "/bricks/inuse/")
 
 	aliveHosts := make(map[string]string)
 	getHostsResponse, err := cli.Get(context.Background(), "/bufferhost/alive/", clientv3.WithPrefix())
@@ -114,8 +114,8 @@ func getAvailableBricks(cli *clientv3.Client) map[string][]registry.Brick {
 	return availableBricks
 }
 
-func addFakeBufferAndSlices(keystore keystoreregistry.Keystore, cli *clientv3.Client) registry.Buffer {
-	log.Println("Add fakebuffer and match to slices")
+func addFakeBufferAndBricks(keystore keystoreregistry.Keystore, cli *clientv3.Client) registry.Buffer {
+	log.Println("Add fakebuffer and match to bricks")
 	bufferRegistry := keystoreregistry.NewBufferRegistry(keystore)
 	availableBricks := getAvailableBricks(cli)
 	var chosenBricks []registry.Brick
@@ -161,7 +161,7 @@ func addFakeBufferAndSlices(keystore keystoreregistry.Keystore, cli *clientv3.Cl
 
 	// TODO: should be done in a single transaction, and retry if clash
 	for i, brick := range chosenBricks {
-		chosenKey := fmt.Sprintf("/slices/inuse/%s/%s", brick.Hostname, brick.Name)
+		chosenKey := fmt.Sprintf("/bricks/inuse/%s/%s", brick.Hostname, brick.Name)
 		keystore.AtomicAdd(chosenKey, fmt.Sprintf("%s:%d", bufferName, i))
 	}
 
@@ -179,27 +179,27 @@ func main() {
 
 	hostname := getHostname()
 
-	baseSliceKey := fmt.Sprintf("/slices/present/%s", hostname)
-	go keystore.WatchPutPrefix(baseSliceKey, func(key string, value string) {
-		log.Printf("Added slice: %s with value: %s\n", key, value)
+	baseBrickKey := fmt.Sprintf("/bricks/present/%s", hostname)
+	go keystore.WatchPutPrefix(baseBrickKey, func(key string, value string) {
+		log.Printf("Added brick: %s with value: %s\n", key, value)
 	})
 
-	baseSliceInUse := fmt.Sprintf("/slices/inuse/%s", hostname)
-	go keystore.WatchPutPrefix(baseSliceInUse, func(key string, value string) {
-		log.Printf("Added in use slice: %s with index: %s\n", key, value)
+	baseBrickInUse := fmt.Sprintf("/bricks/inuse/%s", hostname)
+	go keystore.WatchPutPrefix(baseBrickInUse, func(key string, value string) {
+		log.Printf("Added in use brick: %s with index: %s\n", key, value)
 	})
 
 	// TODO: should really just check if existing key needs an update
-	cli.Delete(context.Background(), baseSliceKey, clientv3.WithPrefix())
-	defer keystore.CleanPrefix(baseSliceKey)
-	slices := getSlices(baseSliceKey)
-	for _, sliceKey := range slices {
-		keystore.AtomicAdd(sliceKey, FAKE_DEVICE_INFO)
+	cli.Delete(context.Background(), baseBrickKey, clientv3.WithPrefix())
+	defer keystore.CleanPrefix(baseBrickKey)
+	bricks := getDevices(baseBrickKey)
+	for _, brickKey := range bricks {
+		keystore.AtomicAdd(brickKey, FAKE_DEVICE_INFO)
 	}
 
 	// TODO: nasty testing hack
-	cli.Delete(context.Background(), baseSliceInUse, clientv3.WithPrefix())
-	defer keystore.CleanPrefix(baseSliceInUse)
+	cli.Delete(context.Background(), baseBrickInUse, clientv3.WithPrefix())
+	defer keystore.CleanPrefix(baseBrickInUse)
 
 	keepaliveKey := fmt.Sprintf("/bufferhost/alive/%s", hostname)
 	log.Printf("Adding keepalive key: %s \n", keepaliveKey)
@@ -210,9 +210,9 @@ func main() {
 
 	// TODO: hack, lets wait a bit for others to start
 	time.Sleep(2)
-	buffer := addFakeBufferAndSlices(&keystore, cli)
+	buffer := addFakeBufferAndBricks(&keystore, cli)
 	bufferRegistry := keystoreregistry.NewBufferRegistry(&keystore)
-	defer bufferRegistry.RemoveBuffer(buffer) // TODO remove in-use slice entries
+	defer bufferRegistry.RemoveBuffer(buffer) // TODO remove in-use brick entries
 
 	for {
 		ka := <-ch
