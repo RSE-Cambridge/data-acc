@@ -4,7 +4,8 @@ set +x
 cd ../
 make
 cd docker-slurm
-cp ../bin/amd64/fakewarp fakewarp
+mkdir ./bin
+cp ../bin/amd64/* ./bin
 docker build -t slurm-docker-cluster:17.02.9 .
 
 #docker exec slurmctld bash -c "cd /usr/local/src/burstbuffer && . .venv/bin/activate && git remote update && git checkout etcd && git pull && pip install -Ue . && fakewarp help"

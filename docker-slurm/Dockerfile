@@ -127,8 +127,9 @@ RUN cd /usr/local/src \
     && mkdir -p /opt/cray/dw_wlm/default/bin \
     && ln -s /usr/local/src/data-acc/.venv/bin/buffernode /usr/local/bin/buffernode
 
-COPY fakewarp /usr/local/bin/fakewarp
+COPY bin/fakewarp /usr/local/bin/fakewarp
 RUN install -D -m755 /usr/local/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli
+COPY bin/data-acc-host /usr/local/bin/data-acc-host
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

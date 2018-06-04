@@ -4,4 +4,4 @@
 /.container-*
 /.dockerfile-*
 /.idea/workspace.xml
-/docker-slurm/fakewarp
+/docker-slurm/bin/*

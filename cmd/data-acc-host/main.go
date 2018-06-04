@@ -55,22 +55,29 @@ func main() {
 	defer keystore.Close()
 
 	baseKey := getBaseKey()
-	baseSliceKey := fmt.Sprintf("%s/slices", baseKey)
+	baseSliceKey := fmt.Sprintf("%s/slices/present", baseKey)
 	slices := getSlices(baseSliceKey)
 
+	go keystore.WatchPutPrefix(baseKey, func(key string, value string) {
+		log.Printf("Added key: %s with value: %s\n", key, value)
+	})
+
 	// TODO: should really just check if existing key needs an update
-	keystore.CleanPrefix(baseSliceKey)
+	cli.Delete(context.Background(), baseSliceKey, clientv3.WithPrefix())
+	defer keystore.CleanPrefix(baseSliceKey)
 	for _, sliceKey := range slices {
 		keystore.AtomicAdd(sliceKey, FAKE_DEVICE_INFO)
 	}
 
 	keepaliveKey := fmt.Sprintf("%s/alive", baseSliceKey)
+	log.Printf("Adding keepalive key: %s \n", keepaliveKey)
+
 	ch, err := startKeepAlive(cli, keepaliveKey)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for {
 		ka := <-ch
-		log.Println("ttl:", ka.TTL)
+		log.Println("Refreshed key. Current ttl:", ka.TTL)
 	}
 }
