@@ -103,15 +103,18 @@ func getAvailableBricks(cli *clientv3.Client) map[string][]registry.Brick {
 	return availableBricks
 }
 
-func AddFakeBufferAndBricks(keystore keystoreregistry.Keystore, cli *clientv3.Client) registry.Buffer {
+func getBricksForBuffer(keystore keystoreregistry.Keystore, cli *clientv3.Client,
+					    buffer *registry.Buffer) []registry.Brick {
 	log.Println("Add fakebuffer and match to bricks")
-	bufferRegistry := keystoreregistry.NewBufferRegistry(keystore)
+
 	availableBricks := getAvailableBricks(cli)
 	var chosenBricks []registry.Brick
 
 	// pick some of the available bricks
 	s := rand.NewSource(time.Now().Unix())
 	r := rand.New(s) // initialize local pseudorandom generator
+
+	// TODO: should look at buffer to get number of bricks required
 	requestedBricks := 2
 
 	var hosts []string
@@ -145,16 +148,24 @@ func AddFakeBufferAndBricks(keystore keystoreregistry.Keystore, cli *clientv3.Cl
 	}
 	// TODO: check we have enough bricks?
 
-	bufferName, _ := os.Hostname()
-	log.Printf("For buffer %s selected following bricks: %s\n", bufferName, chosenBricks)
-
 	// TODO: should be done in a single transaction, and retry if clash
 	for i, brick := range chosenBricks {
 		chosenKey := fmt.Sprintf("/bricks/inuse/%s/%s", brick.Hostname, brick.Name)
-		keystore.AtomicAdd(chosenKey, fmt.Sprintf("%s:%d", bufferName, i))
+		keystore.AtomicAdd(chosenKey, fmt.Sprintf("%s:%d", buffer.Name, i))
 	}
 
-	buffer := registry.Buffer{Name: bufferName, Bricks: chosenBricks}
+	return chosenBricks
+}
+
+func AddFakeBufferAndBricks(keystore keystoreregistry.Keystore, cli *clientv3.Client) registry.Buffer {
+	bufferName, _ := os.Hostname()
+	buffer := registry.Buffer{Name: bufferName}
+
+	buffer.Bricks = getBricksForBuffer(keystore, cli, &buffer)
+
+	log.Printf("For buffer %s selected following bricks: %s\n", buffer.Name, buffer.Bricks)
+
+	bufferRegistry := keystoreregistry.NewBufferRegistry(keystore)
 	bufferRegistry.AddBuffer(buffer)
 	return buffer
 }
