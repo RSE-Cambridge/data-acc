@@ -2,7 +2,7 @@ package keystoreregistry
 
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_keystoneregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/oldregistry"
 	"github.com/golang/mock/gomock"
 	"testing"
 )
@@ -12,7 +12,7 @@ func TestBufferRegistry_AddBuffer(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	key := "/buffers/test"
-	buff := registry.Buffer{Name: "test"}
+	buff := oldregistry.Buffer{Name: "test"}
 	mockObj := mock_keystoreregistry.NewMockKeystore(mockCtrl)
 	mockObj.EXPECT().AtomicAdd(key, gomock.Any())
 
@@ -25,7 +25,7 @@ func TestBufferRegistry_RemoveBuffer(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	prefix := "/buffers/test"
-	buff := registry.Buffer{Name: "test"}
+	buff := oldregistry.Buffer{Name: "test"}
 	mockObj := mock_keystoreregistry.NewMockKeystore(mockCtrl)
 	mockObj.EXPECT().CleanPrefix(prefix)
 
