@@ -48,6 +48,9 @@ type PoolRegistry interface {
 
 	// Get information on a specific brick
 	GetBrickInfo(hostname string, device string) (BrickInfo, error)
+
+	// Register for callbacks when allocate or deallocate of a brick on the given host occurs
+	WatchHostBrickAllocations(hostname string, callback func(old BrickAllocation, new BrickAllocation))
 }
 
 type Pool struct {
