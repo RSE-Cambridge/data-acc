@@ -50,7 +50,7 @@ func getBricks(cli *clientv3.Client, prefix string) map[string]map[string]regist
 	for _, keyValue := range getResponse.Kvs {
 		rawKey := fmt.Sprintf("%s", keyValue.Key) // e.g. /bricks/present/1aff0f8468ee/nvme7n1
 		key := strings.Split(rawKey, "/")
-		brick := registry.BrickInfo{Device: key[4], Hostname: key[3]}
+		brick := registry.BrickInfo{Device: key[4], Hostname:key[3]}
 		_, ok := allBricks[brick.Hostname]
 		if !ok {
 			allBricks[brick.Hostname] = make(map[string]registry.BrickInfo)

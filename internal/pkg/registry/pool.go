@@ -19,7 +19,7 @@ type PoolRegistry interface {
 	// When a host is dead non of its bricks will get new volumes assigned,
 	// and no bricks will get cleaned up until the next service start.
 	// Error will be returned if the host info has not yet been written.
-	KeepAliveHost(hostname Hostname) error
+	KeepAliveHost(hostname string) error
 
 	// Update a brick with allocation information.
 	//
@@ -41,19 +41,19 @@ type PoolRegistry interface {
 	DeallocateBrick(allocations []BrickAllocation) error
 
 	// Get all the allocations for bricks associated with the specified hostname
-	GetAllocationsForHost(hostname Hostname) ([]BrickAllocation, error)
+	GetAllocationsForHost(hostname string) ([]BrickAllocation, error)
 
 	// Get all the allocations for bricks associated with the specific volume
 	GetAllocationsForVolume(volume VolumeName) ([]BrickAllocation, error)
 
 	// Get information on a specific brick
-	GetBrickInfo(hostname Hostname, device DeviceName) (BrickInfo, error)
+	GetBrickInfo(hostname string, device string) (BrickInfo, error)
 }
 
 type Pool struct {
 	// The pool is derived from all the reported bricks
 	// It must only contain the characters A-Za-z0-9
-	Name PoolName
+	Name string // TODO: should we create PoolName type?
 
 	// Returns all unallocated bricks in this pool associated with a live host
 	AvailableBricks []BrickInfo
@@ -64,19 +64,30 @@ type Pool struct {
 	// This is the allocation unit for the pool
 	// It is the minimum size of any registered brick
 	GranularityGB uint
+
+	// List of all hosts that report bricks in this pool
+	Hosts []HostInfo
+}
+
+type HostInfo struct {
+	// It must only contain the characters "A-Za-z0-9."
+	Hostname string
+
+	// True if data accelerator process is thought to be running
+	Alive bool
 }
 
 type BrickInfo struct {
 	// Bricks are identified by device and hostname
 	// It must only contain the characters A-Za-z0-9
-	Device DeviceName
+	Device string
 
 	// It must only contain the characters "A-Za-z0-9."
-	Hostname Hostname
+	Hostname string
 
 	// The bool a brick is associated with
 	// It must only contain the characters A-Za-z0-9
-	PoolName PoolName
+	PoolName string
 
 	// Size of the brick, defines the pool granularity
 	CapacityGB uint
@@ -85,10 +96,10 @@ type BrickInfo struct {
 type BrickAllocation struct {
 	// Bricks are identified by device and hostname
 	// It must only contain the characters A-Za-z0-9
-	Device DeviceName
+	Device string
 
 	// It must only contain the characters "A-Za-z0-9."
-	Hostname Hostname
+	Hostname string
 
 	// Name of the volume that owns the brick
 	AllocatedVolume VolumeName
@@ -102,12 +113,3 @@ type BrickAllocation struct {
 	// A host should check for any allocations
 	DeallocateRequested bool
 }
-
-type PoolName string
-
-type Hostname string
-
-type DeviceName string
-
-// TODO: move
-type VolumeName string

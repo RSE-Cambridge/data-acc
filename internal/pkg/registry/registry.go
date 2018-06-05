@@ -1,13 +1,8 @@
 package registry
 
-type Registry interface {
-	PoolRegistry
+import "time"
 
-	BufferRegistry
-
-	Buffers() ([]Buffer, error)
-	Buffer(name string) (Buffer, error)
-}
+// TODO: remove all of this...
 
 type BufferRegistry interface {
 	AddBuffer(buffer Buffer) error
@@ -15,15 +10,22 @@ type BufferRegistry interface {
 	RemoveBuffer(buffer Buffer)
 }
 
-type BufferUpdater interface {
-	ProcessBufferRequest(buffer Buffer) (Buffer, error)
-	ProvisionBuffer(buffer Buffer)
-	StageIn(buffer Buffer)
-	StageOut(buffer Buffer)
-	AttachBuffer(buffer Buffer, hostnames []string)
-}
-
 type BufferWatcher interface {
 	WatchNewBuffers(callback func(buffer Buffer))
 	WatchBuffer(bufferName string, callback func(buffer Buffer))
+}
+
+type Buffer struct {
+	// e.g. Buffer1
+	Name string
+	// e.g. userid 1001
+	Owner string
+	// e.g. SLURM
+	CreatedBy         string
+	CreatedAt         time.Time
+	CapacityGB        uint
+	Pool              Pool
+	Bricks            []BrickInfo // TODO should really be allocations
+	Provisioned       bool
+	DeleteRequested   bool
 }
