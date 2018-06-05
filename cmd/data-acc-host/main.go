@@ -10,6 +10,8 @@ import (
 	"log"
 	"os"
 	"time"
+	"os/signal"
+	"syscall"
 )
 
 const FAKE_DEVICE_ADDRESS = "nvme%dn1"
@@ -103,8 +105,16 @@ func main() {
 	bufferRegistry := keystoreregistry.NewBufferRegistry(&keystore)
 	defer bufferRegistry.RemoveBuffer(buffer) // TODO remove in-use brick entries?
 
-	for {
-		ka := <-ch
-		log.Println("Refreshed key. Current ttl:", ka.TTL)
-	}
+	go func() {
+		for {
+			ka := <-ch
+			log.Println("Refreshed key. Current ttl:", ka.TTL)
+		}
+	}()
+
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGINT)
+	<-c
+	log.Println("I have been asked to shutdown, doing tidy up...")
+	os.Exit(1)
 }
