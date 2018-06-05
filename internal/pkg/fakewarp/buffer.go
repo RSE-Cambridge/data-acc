@@ -104,7 +104,7 @@ func getAvailableBricks(cli *clientv3.Client) map[string][]registry.Brick {
 }
 
 func getBricksForBuffer(keystore keystoreregistry.Keystore, cli *clientv3.Client,
-					    buffer *registry.Buffer) []registry.Brick {
+	buffer *registry.Buffer) []registry.Brick {
 	log.Println("Add fakebuffer and match to bricks")
 
 	availableBricks := getAvailableBricks(cli)
