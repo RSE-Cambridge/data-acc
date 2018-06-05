@@ -82,8 +82,8 @@ type ConfigurationType string
 
 const (
 	Filesytem ConfigurationType = "filesystem"
-	Cache  ConfigurationType = "cache"
-	Swap  ConfigurationType = "swap"
+	Cache     ConfigurationType = "cache"
+	Swap      ConfigurationType = "swap"
 )
 
 type DataCopyRequest struct {
@@ -106,8 +106,7 @@ const (
 )
 
 type Attachment struct {
-	Hostname string
-	Attached bool
+	Hostname        string
+	Attached        bool
 	DetachRequested bool
 }
-

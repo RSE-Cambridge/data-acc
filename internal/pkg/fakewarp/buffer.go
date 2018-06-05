@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/oldregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/coreos/etcd/clientv3"
 	"log"
@@ -23,7 +24,7 @@ func DeleteBuffer(c CliContext, keystore keystoreregistry.Keystore) error {
 func processDeleteBuffer(bufferName string, keystore keystoreregistry.Keystore) error {
 	r := keystoreregistry.NewBufferRegistry(keystore)
 	// TODO: should do a get buffer before doing a delete
-	buf := registry.Buffer{Name: bufferName}
+	buf := oldregistry.Buffer{Name: bufferName}
 	r.RemoveBuffer(buf)
 	return nil
 }
@@ -36,7 +37,7 @@ func CreatePerJobBuffer(c CliContext, keystore keystoreregistry.Keystore) error 
 func processCreatePerJobBuffer(keystore keystoreregistry.Keystore, token string, user int) error {
 	r := keystoreregistry.NewBufferRegistry(keystore)
 	// TODO: lots more validation needed to ensure valid key, etc
-	buf := registry.Buffer{Name: token, Owner: fmt.Sprintf("%d", user)}
+	buf := oldregistry.Buffer{Name: token, Owner: fmt.Sprintf("%d", user)}
 	r.AddBuffer(buf)
 	return nil
 }
@@ -50,7 +51,7 @@ func getBricks(cli *clientv3.Client, prefix string) map[string]map[string]regist
 	for _, keyValue := range getResponse.Kvs {
 		rawKey := fmt.Sprintf("%s", keyValue.Key) // e.g. /bricks/present/1aff0f8468ee/nvme7n1
 		key := strings.Split(rawKey, "/")
-		brick := registry.BrickInfo{Device: key[4], Hostname:key[3]}
+		brick := registry.BrickInfo{Device: key[4], Hostname: key[3]}
 		_, ok := allBricks[brick.Hostname]
 		if !ok {
 			allBricks[brick.Hostname] = make(map[string]registry.BrickInfo)
@@ -104,7 +105,7 @@ func getAvailableBricks(cli *clientv3.Client) map[string][]registry.BrickInfo {
 }
 
 func getBricksForBuffer(keystore keystoreregistry.Keystore, cli *clientv3.Client,
-	buffer *registry.Buffer) []registry.BrickInfo {
+	buffer *oldregistry.Buffer) []registry.BrickInfo {
 	log.Println("Add fakebuffer and match to bricks")
 
 	availableBricks := getAvailableBricks(cli)
@@ -158,16 +159,16 @@ func getBricksForBuffer(keystore keystoreregistry.Keystore, cli *clientv3.Client
 }
 
 // This looks at currently available bricks, and claims those bricks for the supplied buffer.
-func GetBricksForBuffer(keystore keystoreregistry.Keystore, cli *clientv3.Client, buffer *registry.Buffer) {
+func GetBricksForBuffer(keystore keystoreregistry.Keystore, cli *clientv3.Client, buffer *oldregistry.Buffer) {
 	// TODO check correct number of bricks requested, and correct number claimed, retry on failure, etc.
 	buffer.Bricks = getBricksForBuffer(keystore, cli, buffer)
 	log.Printf("For buffer %s selected following bricks: %s\n", buffer.Name, buffer.Bricks)
 }
 
 //
-func AddFakeBufferAndBricks(keystore keystoreregistry.Keystore, cli *clientv3.Client) registry.Buffer {
+func AddFakeBufferAndBricks(keystore keystoreregistry.Keystore, cli *clientv3.Client) oldregistry.Buffer {
 	bufferName, _ := os.Hostname()
-	buffer := registry.Buffer{Name: bufferName}
+	buffer := oldregistry.Buffer{Name: bufferName}
 
 	GetBricksForBuffer(keystore, cli, &buffer)
 

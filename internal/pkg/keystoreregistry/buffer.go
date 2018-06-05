@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/oldregistry"
 	"log"
 )
 
@@ -19,11 +19,11 @@ type BufferRegistry struct {
 	keystore Keystore
 }
 
-func NewBufferRegistry(keystore Keystore) registry.BufferRegistry {
+func NewBufferRegistry(keystore Keystore) oldregistry.BufferRegistry {
 	return &BufferRegistry{keystore}
 }
 
-func getBufferKey(buffer registry.Buffer) string {
+func getBufferKey(buffer oldregistry.Buffer) string {
 	return fmt.Sprintf("/buffers/%s", buffer.Name)
 }
 
@@ -38,19 +38,19 @@ func toJson(message interface{}) string {
 	return buffer.String()
 }
 
-func getBufferValue(buffer registry.Buffer) string {
+func getBufferValue(buffer oldregistry.Buffer) string {
 	return toJson(buffer)
 }
 
-func (r *BufferRegistry) AddBuffer(buffer registry.Buffer) error {
+func (r *BufferRegistry) AddBuffer(buffer oldregistry.Buffer) error {
 	r.keystore.AtomicAdd(getBufferKey(buffer), getBufferValue(buffer))
 	return nil
 }
 
-func (r *BufferRegistry) UpdateBuffer(buffer registry.Buffer) (registry.Buffer, error) {
-	return registry.Buffer{}, nil
+func (r *BufferRegistry) UpdateBuffer(buffer oldregistry.Buffer) (oldregistry.Buffer, error) {
+	return oldregistry.Buffer{}, nil
 }
 
-func (r *BufferRegistry) RemoveBuffer(buffer registry.Buffer) {
+func (r *BufferRegistry) RemoveBuffer(buffer oldregistry.Buffer) {
 	r.keystore.CleanPrefix(getBufferKey(buffer))
 }

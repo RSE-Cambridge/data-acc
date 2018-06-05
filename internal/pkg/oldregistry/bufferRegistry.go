@@ -1,65 +1,32 @@
 package oldregistry
 
 import (
-	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"time"
 )
 
 type BufferRegistry interface {
-	Close() error
-	ClearAllData()
-	AddBuffer(id int)
-	AddSlice(id int, s string)
-	AddMountpoint(id string, mountpoint string)
-	WatchNewBuffer(callback func(string, string))
-	WatchNewSlice(callback func(key string, value string))
-	WatchNewReady(callback func(key string, value string))
+	AddBuffer(buffer Buffer) error
+	UpdateBuffer(buffer Buffer) (Buffer, error)
+	RemoveBuffer(buffer Buffer)
 }
 
-type bufferRegistry struct {
-	keystore etcdregistry.Keystore
+type BufferWatcher interface {
+	WatchNewBuffers(callback func(buffer Buffer))
+	WatchBuffer(bufferName string, callback func(buffer Buffer))
 }
 
-func NewBufferRegistry() BufferRegistry {
-	keystore := etcdregistry.NewKeystore()
-	return &bufferRegistry{keystore}
-}
-
-func (registry *bufferRegistry) Close() error {
-	return registry.keystore.Close()
-}
-
-func (registry *bufferRegistry) ClearAllData() {
-	fmt.Println("Cleanup started")
-	registry.keystore.CleanPrefix("/buffer")
-	registry.keystore.CleanPrefix("/slice")
-	registry.keystore.CleanPrefix("/ready")
-	fmt.Println("Cleanup done")
-}
-
-func (registry *bufferRegistry) AddBuffer(id int) {
-	var key = fmt.Sprintf("/buffer/%d", id)
-	registry.keystore.AtomicAdd(key, "I am a new buffer")
-}
-
-func (registry *bufferRegistry) AddSlice(id int, value string) {
-	var key = fmt.Sprintf("/slice/%d", id)
-	registry.keystore.AtomicAdd(key, value)
-}
-
-// This is a big hack! id should be an int here
-func (registry *bufferRegistry) AddMountpoint(id string, mountpoint string) {
-	registry.keystore.AtomicAdd(fmt.Sprintf("/ready%s", id), mountpoint)
-}
-
-func (registry *bufferRegistry) WatchNewBuffer(callback func(string, string)) {
-	registry.keystore.WatchPutPrefix("/buffer", callback)
-}
-
-func (registry *bufferRegistry) WatchNewSlice(callback func(key string, value string)) {
-	registry.keystore.WatchPutPrefix("/slice", callback)
-}
-
-func (registry *bufferRegistry) WatchNewReady(callback func(key string, value string)) {
-	registry.keystore.WatchPutPrefix("/ready", callback)
+type Buffer struct {
+	// e.g. Buffer1
+	Name string
+	// e.g. userid 1001
+	Owner string
+	// e.g. SLURM
+	CreatedBy       string
+	CreatedAt       time.Time
+	CapacityGB      uint
+	Pool            string
+	Bricks          []registry.BrickInfo // TODO should really be allocations
+	Provisioned     bool
+	DeleteRequested bool
 }

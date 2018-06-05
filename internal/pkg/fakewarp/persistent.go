@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/oldregistry"
 )
 
 type PersistentBufferRequest struct {
@@ -35,7 +35,7 @@ func processCreatePersistentBuffer(request *PersistentBufferRequest, keystore ke
 	}
 	r := keystoreregistry.NewBufferRegistry(keystore)
 	// TODO: lots more validation needed to ensure valid key, etc
-	buf := registry.Buffer{Name: request.Token, Owner: fmt.Sprintf("%d", request.User)}
+	buf := oldregistry.Buffer{Name: request.Token, Owner: fmt.Sprintf("%d", request.User)}
 	r.AddBuffer(buf)
 	return nil
 }
