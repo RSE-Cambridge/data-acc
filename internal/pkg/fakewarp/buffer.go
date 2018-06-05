@@ -157,13 +157,19 @@ func getBricksForBuffer(keystore keystoreregistry.Keystore, cli *clientv3.Client
 	return chosenBricks
 }
 
+// This looks at currently available bricks, and claims those bricks for the supplied buffer.
+func GetBricksForBuffer(keystore keystoreregistry.Keystore, cli *clientv3.Client, buffer *registry.Buffer) {
+	// TODO check correct number of bricks requested, and correct number claimed, retry on failure, etc.
+	buffer.Bricks = getBricksForBuffer(keystore, cli, buffer)
+	log.Printf("For buffer %s selected following bricks: %s\n", buffer.Name, buffer.Bricks)
+}
+
+//
 func AddFakeBufferAndBricks(keystore keystoreregistry.Keystore, cli *clientv3.Client) registry.Buffer {
 	bufferName, _ := os.Hostname()
 	buffer := registry.Buffer{Name: bufferName}
 
-	buffer.Bricks = getBricksForBuffer(keystore, cli, &buffer)
-
-	log.Printf("For buffer %s selected following bricks: %s\n", buffer.Name, buffer.Bricks)
+	GetBricksForBuffer(keystore, cli, &buffer)
 
 	bufferRegistry := keystoreregistry.NewBufferRegistry(keystore)
 	bufferRegistry.AddBuffer(buffer)
