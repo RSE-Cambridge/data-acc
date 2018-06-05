@@ -41,8 +41,8 @@ func processCreatePerJobBuffer(keystore keystoreregistry.Keystore, token string,
 	return nil
 }
 
-func getBricks(cli *clientv3.Client, prefix string) map[string]map[string]registry.Brick {
-	allBricks := make(map[string]map[string]registry.Brick)
+func getBricks(cli *clientv3.Client, prefix string) map[string]map[string]registry.BrickInfo {
+	allBricks := make(map[string]map[string]registry.BrickInfo)
 	getResponse, err := cli.Get(context.Background(), prefix, clientv3.WithPrefix())
 	if err != nil {
 		log.Fatal(err)
@@ -50,17 +50,17 @@ func getBricks(cli *clientv3.Client, prefix string) map[string]map[string]regist
 	for _, keyValue := range getResponse.Kvs {
 		rawKey := fmt.Sprintf("%s", keyValue.Key) // e.g. /bricks/present/1aff0f8468ee/nvme7n1
 		key := strings.Split(rawKey, "/")
-		brick := registry.Brick{Name: key[4], Hostname: key[3]}
+		brick := registry.BrickInfo{Device: key[4], Hostname: key[3]}
 		_, ok := allBricks[brick.Hostname]
 		if !ok {
-			allBricks[brick.Hostname] = make(map[string]registry.Brick)
+			allBricks[brick.Hostname] = make(map[string]registry.BrickInfo)
 		}
-		allBricks[brick.Hostname][brick.Name] = brick
+		allBricks[brick.Hostname][brick.Device] = brick
 	}
 	return allBricks
 }
 
-func getAvailableBricks(cli *clientv3.Client) map[string][]registry.Brick {
+func getAvailableBricks(cli *clientv3.Client) map[string][]registry.BrickInfo {
 	allBricks := getBricks(cli, "/bricks/present/")
 	inUseBricks := getBricks(cli, "/bricks/inuse/")
 
@@ -76,7 +76,7 @@ func getAvailableBricks(cli *clientv3.Client) map[string][]registry.Brick {
 		aliveHosts[host] = rawKey
 	}
 
-	availableBricks := make(map[string][]registry.Brick)
+	availableBricks := make(map[string][]registry.BrickInfo)
 
 	for host, allHostBricks := range allBricks {
 		aliveHost, ok := aliveHosts[host]
@@ -85,12 +85,12 @@ func getAvailableBricks(cli *clientv3.Client) map[string][]registry.Brick {
 		}
 		inuseHostBricks := inUseBricks[host]
 
-		availableBricks[host] = []registry.Brick{}
+		availableBricks[host] = []registry.BrickInfo{}
 
 		for _, brick := range allHostBricks {
 			inuse := false
 			for _, inUseBrick := range inuseHostBricks {
-				if inUseBrick.Name == brick.Name {
+				if inUseBrick.Device == brick.Device {
 					inuse = true
 					break
 				}
@@ -104,11 +104,11 @@ func getAvailableBricks(cli *clientv3.Client) map[string][]registry.Brick {
 }
 
 func getBricksForBuffer(keystore keystoreregistry.Keystore, cli *clientv3.Client,
-	buffer *registry.Buffer) []registry.Brick {
+	buffer *registry.Buffer) []registry.BrickInfo {
 	log.Println("Add fakebuffer and match to bricks")
 
 	availableBricks := getAvailableBricks(cli)
-	var chosenBricks []registry.Brick
+	var chosenBricks []registry.BrickInfo
 
 	// pick some of the available bricks
 	s := rand.NewSource(time.Now().Unix())
@@ -150,7 +150,7 @@ func getBricksForBuffer(keystore keystoreregistry.Keystore, cli *clientv3.Client
 
 	// TODO: should be done in a single transaction, and retry if clash
 	for i, brick := range chosenBricks {
-		chosenKey := fmt.Sprintf("/bricks/inuse/%s/%s", brick.Hostname, brick.Name)
+		chosenKey := fmt.Sprintf("/bricks/inuse/%s/%s", brick.Hostname, brick.Device)
 		keystore.AtomicAdd(chosenKey, fmt.Sprintf("%s:%d", buffer.Name, i))
 	}
 

@@ -12,8 +12,7 @@ type Buffer struct {
 	CreatedAt         time.Time
 	CapacityGB        uint
 	Pool              Pool
-	Bricks            []Brick
-	Controller        Host
+	Bricks            []BrickInfo // TODO should really be allocations
 	Mounts            []Mount
 	Provisioned       bool
 	DeleteRequested   bool

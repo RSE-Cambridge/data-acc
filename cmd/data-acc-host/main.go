@@ -9,9 +9,9 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"log"
 	"os"
-	"time"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 const FAKE_DEVICE_ADDRESS = "nvme%dn1"

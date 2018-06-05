@@ -1,16 +1,12 @@
 package registry
 
 type Registry interface {
+	PoolRegistry
+
+	BufferRegistry
+
 	Buffers() ([]Buffer, error)
 	Buffer(name string) (Buffer, error)
-
-	Pools() ([]Pool, error)
-	Bricks() ([]Brick, error)
-	BricksForHost(host string) ([]Brick, error)
-
-	// Update host, or add if not already present
-	UpdateHost(host Host) error
-	BufferRegistry
 }
 
 type BufferRegistry interface {
@@ -30,13 +26,4 @@ type BufferUpdater interface {
 type BufferWatcher interface {
 	WatchNewBuffers(callback func(buffer Buffer))
 	WatchBuffer(bufferName string, callback func(buffer Buffer))
-}
-
-type BrickWatcher interface {
-	WatchBrick(brickUuid string, callback func(brick Brick))
-}
-
-type HostReporter interface {
-	// Generally run this in a goroutine to signal the host is being actively managed
-	KeepAliveHost(hostname string)
 }
