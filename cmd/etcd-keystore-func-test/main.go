@@ -4,6 +4,8 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"log"
+	"runtime"
+	"time"
 )
 
 func cleanAllKeys(keystore keystoreregistry.Keystore) {
@@ -85,15 +87,23 @@ func main() {
 	keystore := etcdregistry.NewKeystore()
 	defer keystore.Close()
 
-	keystore.WatchPrefix("ke",
-		func(old keystoreregistry.KeyValueVersion, new keystoreregistry.KeyValueVersion) {
-			log.Println("old: ", old)
-			log.Println("new:", new)
-		})
-
 	cleanAllKeys(keystore)
+
+	startedAt := keystore.WatchPrefix("ke",
+		func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion) {
+			log.Println("Watch spotted an update:")
+			log.Println(" new:", new)
+			log.Println(" old:", old)
+		})
+	log.Println("Started watching at:", startedAt)
 
 	testAddValues(keystore)
 	testGet(keystore)
 	testUpdate(keystore)
+	cleanAllKeys(keystore)
+	testAddValues(keystore)
+
+	// Give background things time to finish
+	time.Sleep(2)
+	runtime.Gosched()
 }

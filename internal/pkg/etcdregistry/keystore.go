@@ -108,6 +108,9 @@ func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) 
 }
 
 func getKeyValueVersion(rawKeyValue *mvccpb.KeyValue) *keystoreregistry.KeyValueVersion {
+	if rawKeyValue == nil {
+		return nil
+	}
 	return &keystoreregistry.KeyValueVersion{
 		Key:            string(rawKeyValue.Key),
 		Value:          string(rawKeyValue.Value),
@@ -115,6 +118,7 @@ func getKeyValueVersion(rawKeyValue *mvccpb.KeyValue) *keystoreregistry.KeyValue
 		CreateRevision: rawKeyValue.CreateRevision,
 	}
 }
+
 func (client *EtcKeystore) GetAll(prefix string) ([]keystoreregistry.KeyValueVersion, error) {
 	kvc := clientv3.NewKV(client.Client)
 	response, err := kvc.Get(context.Background(), prefix, clientv3.WithPrefix())
@@ -149,9 +153,26 @@ func (client *EtcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, er
 }
 
 func (client *EtcKeystore) WatchPrefix(prefix string,
-	onUpdate func(old keystoreregistry.KeyValueVersion, new keystoreregistry.KeyValueVersion)) (int64, error) {
-	panic("implement me")
+	onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) int64 {
+	rch := client.Watch(context.Background(), prefix, clientv3.WithPrefix(), clientv3.WithPrevKV())
+	go func() {
+		for wresp := range rch {
+			for _, ev := range wresp.Events {
+				new := getKeyValueVersion(ev.Kv)
+				if new != nil && new.CreateRevision == 0 {
+					// show deleted by returning nil
+					new = nil
+				}
+				old := getKeyValueVersion(ev.PrevKv)
+				onUpdate(old, new)
+			}
+		}
+	}()
+	// TODO: specify watch revision
+	return 0
 }
+
+// TODO... old methods may need removing....
 
 func (client *EtcKeystore) CleanPrefix(prefix string) error {
 	kvc := clientv3.NewKV(client.Client)
@@ -159,7 +180,7 @@ func (client *EtcKeystore) CleanPrefix(prefix string) error {
 	handleError(err)
 
 	if response.Deleted == 0 {
-		return fmt.Errorf("No keys with prefix: %s", prefix)
+		return fmt.Errorf("no keys with prefix: %s", prefix)
 	}
 
 	log.Printf("Cleaned %d keys with prefix: '%s'.\n", response.Deleted, prefix)
