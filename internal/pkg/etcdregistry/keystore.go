@@ -153,7 +153,7 @@ func (client *EtcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, er
 }
 
 func (client *EtcKeystore) WatchPrefix(prefix string,
-	onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) int64 {
+	onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
 	rch := client.Watch(context.Background(), prefix, clientv3.WithPrefix(), clientv3.WithPrevKV())
 	go func() {
 		for wresp := range rch {
@@ -168,8 +168,6 @@ func (client *EtcKeystore) WatchPrefix(prefix string,
 			}
 		}
 	}()
-	// TODO: specify watch revision
-	return 0
 }
 
 // TODO... old methods may need removing....

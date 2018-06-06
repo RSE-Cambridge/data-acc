@@ -89,13 +89,12 @@ func main() {
 
 	cleanAllKeys(keystore)
 
-	startedAt := keystore.WatchPrefix("ke",
+	keystore.WatchPrefix("ke",
 		func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion) {
 			log.Println("Watch spotted an update:")
 			log.Println(" new:", new)
 			log.Println(" old:", old)
 		})
-	log.Println("Started watching at:", startedAt)
 
 	testAddValues(keystore)
 	testGet(keystore)

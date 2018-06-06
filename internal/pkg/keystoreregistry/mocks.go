@@ -107,10 +107,8 @@ func (mr *MockKeystoreMockRecorder) Get(key interface{}) *gomock.Call {
 }
 
 // WatchPrefix mocks base method
-func (m *MockKeystore) WatchPrefix(prefix string, onUpdate func(*KeyValueVersion, *KeyValueVersion)) int64 {
-	ret := m.ctrl.Call(m, "WatchPrefix", prefix, onUpdate)
-	ret0, _ := ret[0].(int64)
-	return ret0
+func (m *MockKeystore) WatchPrefix(prefix string, onUpdate func(*KeyValueVersion, *KeyValueVersion)) {
+	m.ctrl.Call(m, "WatchPrefix", prefix, onUpdate)
 }
 
 // WatchPrefix indicates an expected call of WatchPrefix

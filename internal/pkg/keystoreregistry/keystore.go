@@ -41,7 +41,7 @@ type Keystore interface {
 	// and new.CreateRevision == new.ModRevision
 	// This starts watching from the current version, rather than replaying old events
 	// Returns the revision that the watch is starting on
-	WatchPrefix(prefix string, onUpdate func(old *KeyValueVersion, new *KeyValueVersion)) int64
+	WatchPrefix(prefix string, onUpdate func(old *KeyValueVersion, new *KeyValueVersion))
 
 	// TODO: remove old methods
 	AtomicAdd(key string, value string)
