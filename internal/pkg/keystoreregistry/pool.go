@@ -1,11 +1,11 @@
 package keystoreregistry
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"strings"
-	"encoding/json"
-	"bytes"
 )
 
 func NewPoolRegistry(keystore Keystore) registry.PoolRegistry {
@@ -21,7 +21,11 @@ func (*PoolRegistry) Pools() ([]registry.Pool, error) {
 }
 
 func getBrickInfoKey(hostname string, device string) string {
-	return fmt.Sprintf("/bricks/%s/%s", hostname, device)
+	return fmt.Sprintf("/bricks/registered/%s/%s", hostname, device)
+}
+
+func getBrickAllocationKey(allocation registry.BrickAllocation) string {
+	return fmt.Sprintf("/bricks/allocated/%s/%s", allocation.Hostname, allocation.Device)
 }
 
 func (poolRegistry *PoolRegistry) UpdateHost(bricks []registry.BrickInfo) error {
@@ -35,7 +39,7 @@ func (poolRegistry *PoolRegistry) UpdateHost(bricks []registry.BrickInfo) error 
 		if hostname != brickInfo.Hostname {
 			problems = append(problems, "Only one host to be updated at once")
 		}
-		// TODO: lots more error handing needed, like pool consistency
+		// TODO: lots more error handing needed, like pool consistency, valid keys for etcd
 		values = append(values, KeyValueVersion{
 			Key:   getBrickInfoKey(brickInfo.Hostname, brickInfo.Device),
 			Value: toJson(brickInfo),
@@ -51,8 +55,38 @@ func (*PoolRegistry) KeepAliveHost(hostname string) error {
 	panic("implement me")
 }
 
-func (*PoolRegistry) AllocateBricks(allocations []registry.BrickAllocation) error {
-	panic("implement me")
+func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAllocation) error {
+	var bricks []registry.BrickInfo
+	var hostname string
+	alreadyPrimary := false
+	var raw []KeyValue
+	for _, allocation := range allocations {
+		brick, err := poolRegistry.GetBrickInfo(allocation.Hostname, allocation.Device)
+		if err != nil {
+			return fmt.Errorf("unable to find brick for: %s", allocation)
+		}
+		bricks = append(bricks, brick)
+		if allocation.DeallocateRequested {
+			return fmt.Errorf("should not requeste deallocated: %s", allocation)
+		}
+		if allocation.AllocatedAsPrimary {
+			if alreadyPrimary {
+				return fmt.Errorf("multiple primary requested")
+			}
+		}
+		if hostname == "" {
+			hostname = allocation.Hostname
+		}
+		if hostname != allocation.Hostname {
+			return fmt.Errorf("all allocations must be for same host")
+		}
+		// TODO: this error checking suggest we specify the wrong format here!
+		raw = append(raw, KeyValue{
+			Key:   getBrickAllocationKey(allocation),
+			Value: toJson(allocation),
+		})
+	}
+	return poolRegistry.keystore.Add(raw)
 }
 
 func (*PoolRegistry) DeallocateBrick(allocations []registry.BrickAllocation) error {

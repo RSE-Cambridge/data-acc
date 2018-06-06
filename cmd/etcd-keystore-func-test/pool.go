@@ -55,6 +55,16 @@ func testGetBricks(poolRegistry registry.PoolRegistry) {
 	}
 }
 
+func testAllocateBricks(poolRegistry registry.PoolRegistry) {
+	allocations := []registry.BrickAllocation{
+		{Hostname: "foo", Device: "vbdb1", AllocatedVolume: "vol1"},
+		{Hostname: "foo", Device: "nvme3n1", AllocatedVolume: "vol2"},
+	}
+	if err := poolRegistry.AllocateBricks(allocations); err != nil {
+		log.Fatal(err)
+	}
+}
+
 func TestKeystorePoolRegistry() {
 	log.Println("Testing keystoreregistry.pool")
 	keystore := etcdregistry.NewKeystore()
@@ -64,6 +74,7 @@ func TestKeystorePoolRegistry() {
 	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
 	testUpdateHost(poolRegistry)
 	testGetBricks(poolRegistry)
+	testAllocateBricks(poolRegistry)
 
 	// TODO: update hosts first?
 	testGetPools(poolRegistry)
