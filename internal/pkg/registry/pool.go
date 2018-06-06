@@ -107,9 +107,9 @@ type BrickAllocation struct {
 	// Name of the volume that owns the brick
 	AllocatedVolume VolumeName
 
-	// Any primary brick is responsible for provisioning
-	// the associated volume
-	AllocatedAsPrimary bool
+	// 0 index allocation is the primary brick,
+	// which is responsible for provisioning the associated volume
+	AllocatedIndex uint
 
 	// If any allocation sent to deallocate has a host that isn't
 	// alive, this flag is set rather than have allocations removed.

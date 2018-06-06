@@ -24,8 +24,12 @@ func getBrickInfoKey(hostname string, device string) string {
 	return fmt.Sprintf("/bricks/registered/%s/%s", hostname, device)
 }
 
-func getBrickAllocationKey(allocation registry.BrickAllocation) string {
-	return fmt.Sprintf("/bricks/allocated/%s/%s", allocation.Hostname, allocation.Device)
+func getBrickAllocationKeyHost(allocation registry.BrickAllocation) string {
+	return fmt.Sprintf("/bricks/allocated/host/%s/%s", allocation.Hostname, allocation.Device)
+}
+func getBrickAllocationKeyVolume(allocation registry.BrickAllocation) string {
+	return fmt.Sprintf("/bricks/allocated/volume/%d/%s/%s",
+		allocation.AllocatedIndex, allocation.Hostname, allocation.Device)
 }
 
 func (poolRegistry *PoolRegistry) UpdateHost(bricks []registry.BrickInfo) error {
@@ -58,21 +62,19 @@ func (*PoolRegistry) KeepAliveHost(hostname string) error {
 func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAllocation) error {
 	var bricks []registry.BrickInfo
 	var hostname string
-	alreadyPrimary := false
 	var raw []KeyValue
-	for _, allocation := range allocations {
+	for i, allocation := range allocations {
 		brick, err := poolRegistry.GetBrickInfo(allocation.Hostname, allocation.Device)
 		if err != nil {
 			return fmt.Errorf("unable to find brick for: %s", allocation)
 		}
 		bricks = append(bricks, brick)
+
 		if allocation.DeallocateRequested {
 			return fmt.Errorf("should not requeste deallocated: %s", allocation)
 		}
-		if allocation.AllocatedAsPrimary {
-			if alreadyPrimary {
-				return fmt.Errorf("multiple primary requested")
-			}
+		if allocation.AllocatedIndex != 0 {
+			return fmt.Errorf("should not specify the allocated index")
 		}
 		if hostname == "" {
 			hostname = allocation.Hostname
@@ -81,8 +83,14 @@ func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAll
 			return fmt.Errorf("all allocations must be for same host")
 		}
 		// TODO: this error checking suggest we specify the wrong format here!
+
+		allocation.AllocatedIndex = uint(i)
 		raw = append(raw, KeyValue{
-			Key:   getBrickAllocationKey(allocation),
+			Key:   getBrickAllocationKeyHost(allocation),
+			Value: toJson(allocation),
+		})
+		raw = append(raw, KeyValue{
+			Key:   getBrickAllocationKeyVolume(allocation),
 			Value: toJson(allocation),
 		})
 	}
