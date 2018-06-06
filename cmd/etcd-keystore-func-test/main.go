@@ -29,6 +29,12 @@ func testAddValues(keystore keystoreregistry.Keystore) {
 	}
 }
 
+func testGet(keystore keystoreregistry.Keystore) {
+	keystore.Get("key1")
+	keystore.GetAll("key")
+	keystore.Get("key3")
+}
+
 func main() {
 	log.Println("Creating keystore")
 	keystore := etcdregistry.NewKeystore()
@@ -37,4 +43,5 @@ func main() {
 	cleanAllKeys(keystore)
 
 	testAddValues(keystore)
+	testGet(keystore)
 }
