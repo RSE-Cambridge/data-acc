@@ -58,11 +58,25 @@ func testGetBricks(poolRegistry registry.PoolRegistry) {
 func testAllocateBricks(poolRegistry registry.PoolRegistry) {
 	allocations := []registry.BrickAllocation{
 		{Hostname: "foo", Device: "vbdb1", AllocatedVolume: "vol1"},
-		{Hostname: "foo", Device: "nvme3n1", AllocatedVolume: "vol2"},
+		{Hostname: "foo", Device: "nvme3n1", AllocatedVolume: "vol1"},
 	}
 	if err := poolRegistry.AllocateBricks(allocations); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func testGetAllocations(poolRegistry registry.PoolRegistry) {
+	allocations, err := poolRegistry.GetAllocationsForHost("foo")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(allocations)
+
+	allocations, err = poolRegistry.GetAllocationsForVolume("vol1")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(allocations)
 }
 
 func TestKeystorePoolRegistry() {
@@ -75,6 +89,7 @@ func TestKeystorePoolRegistry() {
 	testUpdateHost(poolRegistry)
 	testGetBricks(poolRegistry)
 	testAllocateBricks(poolRegistry)
+	testGetAllocations(poolRegistry)
 
 	// TODO: update hosts first?
 	testGetPools(poolRegistry)

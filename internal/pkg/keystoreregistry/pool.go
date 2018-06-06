@@ -24,12 +24,21 @@ func getBrickInfoKey(hostname string, device string) string {
 	return fmt.Sprintf("/bricks/registered/%s/%s", hostname, device)
 }
 
+func getPrefixAllocationHost(hostname string) string {
+	return fmt.Sprintf("/bricks/allocated/host/%s/", hostname)
+}
 func getBrickAllocationKeyHost(allocation registry.BrickAllocation) string {
-	return fmt.Sprintf("/bricks/allocated/host/%s/%s", allocation.Hostname, allocation.Device)
+	prefix := getPrefixAllocationHost(allocation.Hostname)
+	return fmt.Sprintf("%s%s", prefix, allocation.Device)
+}
+
+func getPrefixAllocationVolume(volume registry.VolumeName) string {
+	return fmt.Sprintf("/bricks/allocated/volume/%s/", volume)
 }
 func getBrickAllocationKeyVolume(allocation registry.BrickAllocation) string {
-	return fmt.Sprintf("/bricks/allocated/volume/%d/%s/%s",
-		allocation.AllocatedIndex, allocation.Hostname, allocation.Device)
+	prefix := getPrefixAllocationVolume(allocation.AllocatedVolume)
+	return fmt.Sprintf("%s%d/%s/%s",
+		prefix, allocation.AllocatedIndex, allocation.Hostname, allocation.Device)
 }
 
 func (poolRegistry *PoolRegistry) UpdateHost(bricks []registry.BrickInfo) error {
@@ -61,7 +70,7 @@ func (*PoolRegistry) KeepAliveHost(hostname string) error {
 
 func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAllocation) error {
 	var bricks []registry.BrickInfo
-	var hostname string
+	var volume registry.VolumeName
 	var raw []KeyValue
 	for i, allocation := range allocations {
 		brick, err := poolRegistry.GetBrickInfo(allocation.Hostname, allocation.Device)
@@ -76,11 +85,11 @@ func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAll
 		if allocation.AllocatedIndex != 0 {
 			return fmt.Errorf("should not specify the allocated index")
 		}
-		if hostname == "" {
-			hostname = allocation.Hostname
+		if volume == "" {
+			volume = allocation.AllocatedVolume
 		}
-		if hostname != allocation.Hostname {
-			return fmt.Errorf("all allocations must be for same host")
+		if volume != allocation.AllocatedVolume {
+			return fmt.Errorf("all allocations must be for same volume")
 		}
 		// TODO: this error checking suggest we specify the wrong format here!
 
@@ -97,16 +106,30 @@ func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAll
 	return poolRegistry.keystore.Add(raw)
 }
 
-func (*PoolRegistry) DeallocateBrick(allocations []registry.BrickAllocation) error {
+func (poolRegistry *PoolRegistry) DeallocateBrick(allocations []registry.BrickAllocation) error {
 	panic("implement me")
 }
 
-func (*PoolRegistry) GetAllocationsForHost(hostname string) ([]registry.BrickAllocation, error) {
-	panic("implement me")
+func (poolRegistry *PoolRegistry) getAllocations(prefix string) ([]registry.BrickAllocation, error) {
+	raw, err := poolRegistry.keystore.GetAll(prefix)
+	if err != nil {
+		return nil, err
+	}
+	var allocations []registry.BrickAllocation
+	for _, entry := range raw {
+		rawValue := entry.Value
+		var allocation registry.BrickAllocation
+		json.Unmarshal(bytes.NewBufferString(rawValue).Bytes(), &allocation)
+		allocations = append(allocations, allocation)
+	}
+	return allocations, nil
+}
+func (poolRegistry *PoolRegistry) GetAllocationsForHost(hostname string) ([]registry.BrickAllocation, error) {
+	return poolRegistry.getAllocations(getPrefixAllocationHost(hostname))
 }
 
-func (*PoolRegistry) GetAllocationsForVolume(volume registry.VolumeName) ([]registry.BrickAllocation, error) {
-	panic("implement me")
+func (poolRegistry *PoolRegistry) GetAllocationsForVolume(volume registry.VolumeName) ([]registry.BrickAllocation, error) {
+	return poolRegistry.getAllocations(getPrefixAllocationVolume(volume))
 }
 
 func (poolRegistry *PoolRegistry) GetBrickInfo(hostname string, device string) (registry.BrickInfo, error) {
