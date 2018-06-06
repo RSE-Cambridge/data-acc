@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"strings"
+	"encoding/json"
+	"bytes"
 )
 
 func NewPoolRegistry(keystore Keystore) registry.PoolRegistry {
@@ -65,8 +67,11 @@ func (*PoolRegistry) GetAllocationsForVolume(volume registry.VolumeName) ([]regi
 	panic("implement me")
 }
 
-func (*PoolRegistry) GetBrickInfo(hostname string, device string) (registry.BrickInfo, error) {
-	panic("implement me")
+func (poolRegistry *PoolRegistry) GetBrickInfo(hostname string, device string) (registry.BrickInfo, error) {
+	raw, error := poolRegistry.keystore.Get(getBrickInfoKey(hostname, device))
+	var value registry.BrickInfo
+	json.Unmarshal(bytes.NewBufferString(raw.Value).Bytes(), &value)
+	return value, error
 }
 
 func (*PoolRegistry) WatchHostBrickAllocations(hostname string,
