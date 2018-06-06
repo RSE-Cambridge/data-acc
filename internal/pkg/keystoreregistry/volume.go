@@ -49,4 +49,3 @@ func (*VolumeRegistry) WaitForVolumeDataOut(volumeName string) error {
 func (*VolumeRegistry) WaitForVolumeDeleted(volumeName string) error {
 	panic("implement me")
 }
-

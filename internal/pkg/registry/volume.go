@@ -66,12 +66,9 @@ type Volume struct {
 	Paths []string
 
 	// TODO: track state machine...
-	readyForAttach bool
+	readyForAttach  bool
 	dataInRequested bool
-	dataInComplete bool
-
-
-
+	dataInComplete  bool
 }
 
 // TODO: define constants
