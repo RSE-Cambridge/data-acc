@@ -14,10 +14,18 @@ func cleanAllKeys(keystore keystoreregistry.Keystore) {
 
 func testAddValues(keystore keystoreregistry.Keystore) {
 	values := []keystoreregistry.KeyValue{
-		keystoreregistry.KeyValue{},
+		{Key: "key1", Value: "value1"},
+		{Key: "key2", Value: "value2"},
 	}
+
 	if err := keystore.Add(values); err != nil {
 		log.Fatalf("Error with add values")
+	}
+
+	if err := keystore.Add(values); err == nil {
+		log.Fatalf("Expected an error")
+	} else {
+		log.Println(err)
 	}
 }
 

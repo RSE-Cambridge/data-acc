@@ -6,6 +6,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/clientv3util"
+	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	"log"
 	"os"
 	"strings"
@@ -45,8 +46,39 @@ type EtcKeystore struct {
 	*clientv3.Client
 }
 
+func handleError(err error) {
+	if err != nil {
+		switch err {
+		case context.Canceled:
+			log.Printf("ctx is canceled by another routine: %v", err)
+		case context.DeadlineExceeded:
+			log.Printf("ctx is attached with a deadline is exceeded: %v", err)
+		case rpctypes.ErrEmptyKey:
+			log.Printf("client-side error: %v", err)
+		default:
+			log.Printf("bad cluster endpoints, which are not etcd servers: %v", err)
+		}
+		log.Fatal(err)
+	}
+}
+
 func (client *EtcKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
-	panic("implement me")
+	var ifOps []clientv3.Cmp
+	var thenOps []clientv3.Op
+	for _, keyValue := range keyValues {
+		ifOps = append(ifOps, clientv3util.KeyMissing(keyValue.Key))
+		thenOps = append(thenOps, clientv3.OpPut(keyValue.Key, keyValue.Value))
+	}
+
+	kvc := clientv3.NewKV(client.Client)
+	kvc.Txn(context.Background())
+	response, err := kvc.Txn(context.Background()).If(ifOps...).Then(thenOps...).Commit()
+	handleError(err)
+
+	if !response.Succeeded {
+		return fmt.Errorf("unable to add all the key values")
+	}
+	return nil
 }
 
 func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) error {
