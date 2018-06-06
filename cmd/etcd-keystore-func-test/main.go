@@ -49,6 +49,21 @@ func testGet(keystore keystoreregistry.Keystore) {
 	}
 }
 
+func testUpdate(keystore keystoreregistry.Keystore) {
+	values, err := keystore.GetAll("key")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	values[0].Value = "asdf"
+	values[1].Value = "asdf2"
+
+	err = keystore.Update(values)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
 	log.Println("Creating keystore")
 	keystore := etcdregistry.NewKeystore()
@@ -58,4 +73,5 @@ func main() {
 
 	testAddValues(keystore)
 	testGet(keystore)
+	testUpdate(keystore)
 }
