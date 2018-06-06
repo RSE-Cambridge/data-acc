@@ -33,12 +33,13 @@ type PoolRegistry interface {
 	// for a particular volume must be set in a single call
 	AllocateBricks(allocations []BrickAllocation) error
 
-	// Deallocate a brick to it is free to be allocated again
+	// Deallocate all bricks associated with the given volume
 	//
 	// No update is made and an error is returned if any of brick allocations don't match the current state.
 	// If any host associated with one of the bricks is down, an error is returned and the deallocate is
 	// recorded as requested and not executed.
-	DeallocateBrick(allocations []BrickAllocation) error
+	// Note: this returns as soon as deallocate is requested, doesn't wait for cleanup completion
+	DeallocateBricks(volume VolumeName) error
 
 	// Get all the allocations for bricks associated with the specified hostname
 	GetAllocationsForHost(hostname string) ([]BrickAllocation, error)

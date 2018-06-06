@@ -98,6 +98,7 @@ func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAll
 			Key:   getBrickAllocationKeyHost(allocation),
 			Value: toJson(allocation),
 		})
+		// TODO: maybe just point to the other key?? this duplication is terrible
 		raw = append(raw, KeyValue{
 			Key:   getBrickAllocationKeyVolume(allocation),
 			Value: toJson(allocation),
@@ -106,8 +107,42 @@ func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAll
 	return poolRegistry.keystore.Add(raw)
 }
 
-func (poolRegistry *PoolRegistry) DeallocateBrick(allocations []registry.BrickAllocation) error {
-	panic("implement me")
+func (poolRegistry *PoolRegistry) deallocate(raw []KeyValueVersion,
+	updated []KeyValueVersion) ([]KeyValueVersion, []string) {
+	var keys []string
+	for _, entry := range raw {
+		rawValue := entry.Value
+		var allocation registry.BrickAllocation
+		json.Unmarshal(bytes.NewBufferString(rawValue).Bytes(), &allocation)
+
+		allocation.DeallocateRequested = true
+		entry.Value = toJson(&allocation)
+		updated = append(updated, entry)
+		keys = append(keys, getBrickAllocationKeyHost(allocation))
+	}
+	return updated, keys
+}
+
+func (poolRegistry *PoolRegistry) DeallocateBricks(volume registry.VolumeName) error {
+	var updated []KeyValueVersion
+
+	volPrefix := getPrefixAllocationVolume(volume)
+	raw, err := poolRegistry.keystore.GetAll(volPrefix)
+	if err != nil {
+		return nil
+	}
+	updated, keys := poolRegistry.deallocate(raw, updated)
+
+	raw = []KeyValueVersion{}
+	for _, key := range keys {
+		entry, err := poolRegistry.keystore.Get(key)
+		if err != nil {
+			return err
+		}
+		raw = append(raw, entry)
+	}
+	updated, _ = poolRegistry.deallocate(raw, updated)
+	return poolRegistry.keystore.Update(updated)
 }
 
 func (poolRegistry *PoolRegistry) getAllocations(prefix string) ([]registry.BrickAllocation, error) {

@@ -77,6 +77,11 @@ func testGetAllocations(poolRegistry registry.PoolRegistry) {
 		log.Fatal(err)
 	}
 	log.Println(allocations)
+
+	err = poolRegistry.DeallocateBricks("vol1")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func TestKeystorePoolRegistry() {
