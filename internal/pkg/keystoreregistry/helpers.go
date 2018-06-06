@@ -7,8 +7,15 @@ import (
 )
 
 type Keystore interface {
+	// Used to clean up any resources being used
+	// ... such as a connection to etcd
 	Close() error
-	CleanPrefix(prefix string)
+
+	// Removes any key starting with the given prefix
+	// An error is returned if nothing was deleted,
+	// which some users may choose to safely ignore
+	CleanPrefix(prefix string) error
+
 	AtomicAdd(key string, value string)
 	WatchPutPrefix(prefix string, onPut func(string, string))
 }

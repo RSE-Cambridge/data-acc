@@ -12,7 +12,7 @@ import (
 
 type Keystore interface {
 	Close() error
-	CleanPrefix(prefix string)
+	CleanPrefix(prefix string) error
 	AtomicAdd(key string, value string)
 	WatchPutPrefix(prefix string, onPut func(string, string))
 }
@@ -51,7 +51,7 @@ func NewKeystore() Keystore {
 	return &EtcKeystore{cli}
 }
 
-func (client *EtcKeystore) CleanPrefix(prefix string) {
+func (client *EtcKeystore) CleanPrefix(prefix string) error {
 	kvc := clientv3.NewKV(client.Client)
 	fmt.Println(kvc.Get(context.Background(), prefix, clientv3.WithPrefix()))
 	response, error := kvc.Delete(context.Background(), prefix, clientv3.WithPrefix())
@@ -61,6 +61,8 @@ func (client *EtcKeystore) CleanPrefix(prefix string) {
 	if response.Deleted == 0 {
 		panic(fmt.Errorf("oh dear, nothing to delete for prefix: %s", prefix))
 	}
+	// TODO: should return errors rather than panic here
+	return nil
 }
 
 func (client *EtcKeystore) AtomicAdd(key string, value string) {
