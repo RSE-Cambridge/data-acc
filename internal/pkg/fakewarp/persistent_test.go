@@ -2,7 +2,7 @@ package fakewarp
 
 import (
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_keystoregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -21,7 +21,7 @@ func (c *mockCliContext) Int(name string) int {
 func TestCreatePersistentBufferReturnsError(t *testing.T) {
 	c := mockCliContext{}
 	mockCtrl := gomock.NewController(t)
-	mockObj := mock_keystoreregistry.NewMockKeystore(mockCtrl)
+	mockObj := keystoreregistry.NewMockKeystore(mockCtrl)
 	if _, error := CreatePersistentBuffer(&c, mockObj); error != nil {
 		assert.EqualValues(t, "unable to create buffer", fmt.Sprint(error))
 	} else {

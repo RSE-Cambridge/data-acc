@@ -3,24 +3,13 @@ package etcdregistry
 import (
 	"context"
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/clientv3util"
 	"log"
 	"os"
 	"strings"
 )
-
-type Keystore interface {
-	Close() error
-	CleanPrefix(prefix string) error
-	AtomicAdd(key string, value string)
-	WatchPutPrefix(prefix string, onPut func(string, string))
-}
-
-// TODO: this should be private, once abstraction finished
-type EtcKeystore struct {
-	*clientv3.Client
-}
 
 func getEndpoints() []string {
 	endpoints := os.Getenv("ETCDCTL_ENDPOINTS")
@@ -46,9 +35,34 @@ func NewEtcdClient() *clientv3.Client {
 	return cli
 }
 
-func NewKeystore() Keystore {
+func NewKeystore() keystoreregistry.Keystore {
 	cli := NewEtcdClient()
 	return &EtcKeystore{cli}
+}
+
+// TODO: this should be private, once abstraction finished
+type EtcKeystore struct {
+	*clientv3.Client
+}
+
+func (client *EtcKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
+	panic("implement me")
+}
+
+func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) error {
+	panic("implement me")
+}
+
+func (client *EtcKeystore) GetAll(prefix string) ([]keystoreregistry.KeyValueVersion, error) {
+	panic("implement me")
+}
+
+func (client *EtcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, error) {
+	panic("implement me")
+}
+
+func (client *EtcKeystore) WatchPrefix(prefix string, onUpdate func(old keystoreregistry.KeyValueVersion, new keystoreregistry.KeyValueVersion)) (int64, error) {
+	panic("implement me")
 }
 
 func (client *EtcKeystore) CleanPrefix(prefix string) error {

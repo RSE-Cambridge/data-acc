@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_keystoregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/golang/mock/gomock"
 	"strings"
 	"testing"
@@ -39,7 +39,7 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	// TODO: has to be a better way to do this
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockKeystore := mock_keystoreregistry.NewMockKeystore(mockCtrl)
+	mockKeystore := keystoreregistry.NewMockKeystore(mockCtrl)
 	mockKeystore.EXPECT().CleanPrefix("/buffers/a")
 	mockKeystore.EXPECT().CleanPrefix("/buffers/a2")
 	mockKeystore.EXPECT().AtomicAdd("/buffers/a", gomock.Any())
