@@ -22,5 +22,7 @@ func TestKeystorePoolRegistry() {
 	cleanAllKeys(keystore)
 
 	pool := keystoreregistry.NewPoolRegistry(keystore)
+
+	// TODO: update hosts first?
 	testGetPools(pool)
 }
