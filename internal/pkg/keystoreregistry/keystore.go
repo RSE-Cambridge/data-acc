@@ -21,13 +21,21 @@ type Keystore interface {
 	// Error is returned if any key already exists.
 	Add(keyValues []KeyValue) error
 
-	// Update the specifed key values, atmoically
+	// Update the specifed key values, atomically
 	//
 	// If ModRevision is 0, it is ignored.
 	// Otherwise if the revisions of any key doesn't
 	// match the current revision of that key, the update fails.
 	// When update fails an error is returned and no keyValues are updated
 	Update(keyValues []KeyValueVersion) error
+
+	// Delete the specifed key values, atomically
+	//
+	// Similar to update, checks ModRevision matches current key,
+	// ignores ModRevision if not zero.
+	// If any keys are not currently present, the request fails.
+	// Deletes no keys if an error is returned
+	DeleteAll(keyValues []KeyValueVersion) error
 
 	// Get all key values for a given prefix.
 	GetAll(prefix string) ([]KeyValueVersion, error)

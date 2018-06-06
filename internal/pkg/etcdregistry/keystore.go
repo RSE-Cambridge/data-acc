@@ -107,6 +107,10 @@ func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) 
 	return nil
 }
 
+func (client *EtcKeystore) DeleteAll(keyValues []keystoreregistry.KeyValueVersion) error {
+	panic("implement me")
+}
+
 func getKeyValueVersion(rawKeyValue *mvccpb.KeyValue) *keystoreregistry.KeyValueVersion {
 	if rawKeyValue == nil {
 		return nil

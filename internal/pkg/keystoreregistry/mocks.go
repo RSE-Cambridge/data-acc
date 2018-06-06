@@ -80,6 +80,18 @@ func (mr *MockKeystoreMockRecorder) Update(keyValues interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockKeystore)(nil).Update), keyValues)
 }
 
+// DeleteAll mocks base method
+func (m *MockKeystore) DeleteAll(keyValues []KeyValueVersion) error {
+	ret := m.ctrl.Call(m, "DeleteAll", keyValues)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAll indicates an expected call of DeleteAll
+func (mr *MockKeystoreMockRecorder) DeleteAll(keyValues interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAll", reflect.TypeOf((*MockKeystore)(nil).DeleteAll), keyValues)
+}
+
 // GetAll mocks base method
 func (m *MockKeystore) GetAll(prefix string) ([]KeyValueVersion, error) {
 	ret := m.ctrl.Call(m, "GetAll", prefix)

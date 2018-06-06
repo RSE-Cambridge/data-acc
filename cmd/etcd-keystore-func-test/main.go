@@ -82,6 +82,18 @@ func testUpdate(keystore keystoreregistry.Keystore) {
 	}
 }
 
+func testDeleteAll(keystore keystoreregistry.Keystore) {
+	values, err := keystore.GetAll("key")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = keystore.DeleteAll(values)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
 	log.Println("Creating keystore")
 	keystore := etcdregistry.NewKeystore()
@@ -99,8 +111,7 @@ func main() {
 	testAddValues(keystore)
 	testGet(keystore)
 	testUpdate(keystore)
-	cleanAllKeys(keystore)
-	testAddValues(keystore)
+	testDeleteAll(keystore)
 
 	// Give background things time to finish
 	time.Sleep(2)
