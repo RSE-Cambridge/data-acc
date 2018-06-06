@@ -64,14 +64,7 @@ func handleError(err error) {
 	}
 }
 
-func (client *EtcKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
-	var ifOps []clientv3.Cmp
-	var thenOps []clientv3.Op
-	for _, keyValue := range keyValues {
-		ifOps = append(ifOps, clientv3util.KeyMissing(keyValue.Key))
-		thenOps = append(thenOps, clientv3.OpPut(keyValue.Key, keyValue.Value))
-	}
-
+func (client *EtcKeystore) runTransaction(ifOps []clientv3.Cmp, thenOps []clientv3.Op) error {
 	kvc := clientv3.NewKV(client.Client)
 	kvc.Txn(context.Background())
 	response, err := kvc.Txn(context.Background()).If(ifOps...).Then(thenOps...).Commit()
@@ -83,10 +76,19 @@ func (client *EtcKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
 	return nil
 }
 
+func (client *EtcKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
+	var ifOps []clientv3.Cmp
+	var thenOps []clientv3.Op
+	for _, keyValue := range keyValues {
+		ifOps = append(ifOps, clientv3util.KeyMissing(keyValue.Key))
+		thenOps = append(thenOps, clientv3.OpPut(keyValue.Key, keyValue.Value))
+	}
+	return client.runTransaction(ifOps, thenOps)
+}
+
 func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) error {
 	var ifOps []clientv3.Cmp
 	var thenOps []clientv3.Op
-
 	for _, keyValue := range keyValues {
 		ifOps = append(ifOps, clientv3util.KeyExists(keyValue.Key))
 		if keyValue.ModRevision > 0 {
@@ -95,20 +97,21 @@ func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) 
 		}
 		thenOps = append(thenOps, clientv3.OpPut(keyValue.Key, keyValue.Value))
 	}
-
-	kvc := clientv3.NewKV(client.Client)
-	kvc.Txn(context.Background())
-	response, err := kvc.Txn(context.Background()).If(ifOps...).Then(thenOps...).Commit()
-	handleError(err)
-
-	if !response.Succeeded {
-		return fmt.Errorf("unable to update all the key values")
-	}
-	return nil
+	return client.runTransaction(ifOps, thenOps)
 }
 
 func (client *EtcKeystore) DeleteAll(keyValues []keystoreregistry.KeyValueVersion) error {
-	panic("implement me")
+	var ifOps []clientv3.Cmp
+	var thenOps []clientv3.Op
+	for _, keyValue := range keyValues {
+		ifOps = append(ifOps, clientv3util.KeyExists(keyValue.Key))
+		if keyValue.ModRevision > 0 {
+			checkModRev := clientv3.Compare(clientv3.ModRevision(keyValue.Key), "=", keyValue.ModRevision)
+			ifOps = append(ifOps, checkModRev)
+		}
+		thenOps = append(thenOps, clientv3.OpDelete(keyValue.Key))
+	}
+	return client.runTransaction(ifOps, thenOps)
 }
 
 func getKeyValueVersion(rawKeyValue *mvccpb.KeyValue) *keystoreregistry.KeyValueVersion {

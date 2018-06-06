@@ -114,6 +114,6 @@ func main() {
 	testDeleteAll(keystore)
 
 	// Give background things time to finish
-	time.Sleep(2)
+	time.Sleep(time.Millisecond * 100)
 	runtime.Gosched()
 }
