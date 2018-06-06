@@ -1,7 +1,7 @@
 package keystoreregistry
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_keystoneregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_keystoregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/oldregistry"
 	"github.com/golang/mock/gomock"
 	"testing"

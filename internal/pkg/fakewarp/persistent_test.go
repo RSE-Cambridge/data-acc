@@ -2,7 +2,7 @@ package fakewarp
 
 import (
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_keystoneregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_keystoregistry"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
