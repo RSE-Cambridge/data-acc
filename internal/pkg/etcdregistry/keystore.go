@@ -99,14 +99,15 @@ func (client *EtcKeystore) WatchPrefix(prefix string, onUpdate func(old keystore
 
 func (client *EtcKeystore) CleanPrefix(prefix string) error {
 	kvc := clientv3.NewKV(client.Client)
-	fmt.Println(kvc.Get(context.Background(), prefix, clientv3.WithPrefix()))
-	response, error := kvc.Delete(context.Background(), prefix, clientv3.WithPrefix())
-	if error != nil {
-		panic(error)
-	}
+	response, err := kvc.Delete(context.Background(), prefix, clientv3.WithPrefix())
+	handleError(err)
+
 	if response.Deleted == 0 {
-		return fmt.Errorf("oh dear, nothing to delete for prefix: %s", prefix)
+		return fmt.Errorf("No keys with prefix: %s", prefix)
 	}
+
+	log.Printf("Cleaned %d keys with prefix: '%s'.\n", response.Deleted, prefix)
+	// TODO return deleted count
 	return nil
 }
 
