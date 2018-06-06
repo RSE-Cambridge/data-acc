@@ -4,14 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/coreos/etcd/clientv3"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 const FAKE_DEVICE_ADDRESS = "nvme%dn1"
@@ -99,11 +97,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// TODO: hack, lets wait a bit for others to start
-	time.Sleep(2)
+	/* time.Sleep(2) // TODO: hack, lets wait a bit for others to start
 	buffer := fakewarp.AddFakeBufferAndBricks(&keystore, cli)
 	bufferRegistry := keystoreregistry.NewBufferRegistry(&keystore)
 	defer bufferRegistry.RemoveBuffer(buffer) // TODO remove in-use brick entries?
+	*/
 
 	go func() {
 		for {

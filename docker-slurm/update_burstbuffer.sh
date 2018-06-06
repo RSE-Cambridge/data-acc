@@ -12,11 +12,11 @@ docker build -t slurm-docker-cluster:17.02.9 .
 
 docker-compose up -d
 
-sleep 5
+sleep 8
 ./register_cluster.sh
 
-sleep 5
-docker exec bufferwatcher bash -c "data-acc-host"
+#sleep 5
+#docker exec bufferwatcher bash -c "data-acc-host"
 
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 #BB create_persistent name=mytestbuffer capacity=32GB access=striped type=scratch" > create-persistent.sh'
@@ -50,12 +50,12 @@ echo "***Show all is cleaned up***"
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
 docker exec slurmctld bash -c "cd /data && squeue"
 
-sleep 5
-docker logs fakebuffernode1
-sleep 5
-docker logs fakebuffernode2
-sleep 5
+sleep 3
+docker logs dockerslurm_fakebuffernode_1
+sleep 3
 docker logs bufferwatcher
+sleep 3
+docker exec bufferwatcher bash -c "etcdctl get --prefix /"
 
 #sleep 15
 
