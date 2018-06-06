@@ -62,6 +62,22 @@ func testUpdate(keystore keystoreregistry.Keystore) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Error if ModVersion out of sync
+	err = keystore.Update(values)
+	if err == nil {
+		log.Fatal("Failed to raise error")
+	} else {
+		log.Println(err)
+	}
+
+	// Ensure success if told to ignore ModRevision
+	values[0].ModRevision = 0
+	values[1].ModRevision = 0
+	err = keystore.Update(values)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {

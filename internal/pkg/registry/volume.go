@@ -82,7 +82,7 @@ type Configuration struct {
 	// Size of the configuration
 	// 0 means unrestricted, could consume whole volume
 	// >0 means statically allocated space from volume
-	Size uint
+	NamespaceSize uint
 
 	// If true all attachments share the same namespace,
 	// else each attachment gets a dedicated namespace

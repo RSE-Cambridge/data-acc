@@ -84,7 +84,27 @@ func (client *EtcKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
 }
 
 func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) error {
-	panic("implement me")
+	var ifOps []clientv3.Cmp
+	var thenOps []clientv3.Op
+
+	for _, keyValue := range keyValues {
+		ifOps = append(ifOps, clientv3util.KeyExists(keyValue.Key))
+		if keyValue.ModRevision > 0 {
+			checkModRev := clientv3.Compare(clientv3.ModRevision(keyValue.Key), "=", keyValue.ModRevision)
+			ifOps = append(ifOps, checkModRev)
+		}
+		thenOps = append(thenOps, clientv3.OpPut(keyValue.Key, keyValue.Value))
+	}
+
+	kvc := clientv3.NewKV(client.Client)
+	kvc.Txn(context.Background())
+	response, err := kvc.Txn(context.Background()).If(ifOps...).Then(thenOps...).Commit()
+	handleError(err)
+
+	if !response.Succeeded {
+		return fmt.Errorf("unable to update all the key values")
+	}
+	return nil
 }
 
 func getKeyValueVersion(rawKeyValue *mvccpb.KeyValue) *keystoreregistry.KeyValueVersion {
@@ -102,7 +122,7 @@ func (client *EtcKeystore) GetAll(prefix string) ([]keystoreregistry.KeyValueVer
 
 	if response.Count == 0 {
 		return []keystoreregistry.KeyValueVersion{},
-			fmt.Errorf("Unable to find any values for prefix: %s", prefix)
+			fmt.Errorf("unable to find any values for prefix: %s", prefix)
 	}
 	var values []keystoreregistry.KeyValueVersion
 	for _, rawKeyValue := range response.Kvs {
@@ -119,7 +139,7 @@ func (client *EtcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, er
 	value := keystoreregistry.KeyValueVersion{}
 
 	if response.Count == 0 {
-		return value, fmt.Errorf("Unable to find any values for key: %s", key)
+		return value, fmt.Errorf("unable to find any values for key: %s", key)
 	}
 	if response.Count > 1 {
 		panic(errors.New("should never get more than one value for get"))

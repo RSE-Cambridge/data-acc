@@ -23,7 +23,7 @@ type Keystore interface {
 
 	// Update the specifed key values, atmoically
 	//
-	// If any revision is 0, it is ignored.
+	// If ModRevision is 0, it is ignored.
 	// Otherwise if the revisions of any key doesn't
 	// match the current revision of that key, the update fails.
 	// When update fails an error is returned and no keyValues are updated
