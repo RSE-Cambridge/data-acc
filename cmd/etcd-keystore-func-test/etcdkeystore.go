@@ -95,7 +95,7 @@ func testDeleteAll(keystore keystoreregistry.Keystore) {
 }
 
 func TestEtcdKeystore() {
-	log.Println("Creating keystore")
+	log.Println("Testing etcdkeystore...")
 	keystore := etcdregistry.NewKeystore()
 	defer keystore.Close()
 
