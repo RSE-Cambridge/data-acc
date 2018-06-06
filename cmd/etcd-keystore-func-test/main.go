@@ -30,9 +30,23 @@ func testAddValues(keystore keystoreregistry.Keystore) {
 }
 
 func testGet(keystore keystoreregistry.Keystore) {
-	keystore.Get("key1")
-	keystore.GetAll("key")
-	keystore.Get("key3")
+	value, _ := keystore.Get("key1")
+	log.Println(value)
+	_, err := keystore.Get("key3")
+	if err == nil {
+		log.Fatalf("failed to raise error")
+	} else {
+		log.Println(err)
+	}
+
+	values, _ := keystore.GetAll("key")
+	log.Println(values)
+	_, err = keystore.GetAll("key3")
+	if err == nil {
+		log.Fatalf("failed to raise error")
+	} else {
+		log.Println(err)
+	}
 }
 
 func main() {

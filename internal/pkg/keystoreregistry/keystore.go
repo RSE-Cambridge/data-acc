@@ -1,7 +1,6 @@
 package keystoreregistry
 
 import (
-	"bytes"
 	"encoding/json"
 	"log"
 )
@@ -55,9 +54,14 @@ type KeyValue struct {
 }
 
 type KeyValueVersion struct {
-	KeyValue
+	Key            string
+	Value          string
 	CreateRevision int64
 	ModRevision    int64
+}
+
+func (kvv KeyValueVersion) String() string {
+	return toJson(kvv)
 }
 
 func toJson(message interface{}) string {
@@ -65,8 +69,5 @@ func toJson(message interface{}) string {
 	if error != nil {
 		log.Fatal(error)
 	}
-	buffer := new(bytes.Buffer)
-	buffer.Write(b)
-	buffer.Write([]byte("\n"))
-	return buffer.String()
+	return string(b)
 }

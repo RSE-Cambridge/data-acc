@@ -2,11 +2,13 @@ package etcdregistry
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/clientv3util"
 	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
+	"github.com/coreos/etcd/mvcc/mvccpb"
 	"log"
 	"os"
 	"strings"
@@ -85,12 +87,45 @@ func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) 
 	panic("implement me")
 }
 
+func getKeyValueVersion(rawKeyValue *mvccpb.KeyValue) *keystoreregistry.KeyValueVersion {
+	return &keystoreregistry.KeyValueVersion{
+		Key:            string(rawKeyValue.Key),
+		Value:          string(rawKeyValue.Value),
+		ModRevision:    rawKeyValue.ModRevision,
+		CreateRevision: rawKeyValue.CreateRevision,
+	}
+}
 func (client *EtcKeystore) GetAll(prefix string) ([]keystoreregistry.KeyValueVersion, error) {
-	panic("implement me")
+	kvc := clientv3.NewKV(client.Client)
+	response, err := kvc.Get(context.Background(), prefix, clientv3.WithPrefix())
+	handleError(err)
+
+	if response.Count == 0 {
+		return []keystoreregistry.KeyValueVersion{},
+			fmt.Errorf("Unable to find any values for prefix: %s", prefix)
+	}
+	var values []keystoreregistry.KeyValueVersion
+	for _, rawKeyValue := range response.Kvs {
+		values = append(values, *getKeyValueVersion(rawKeyValue))
+	}
+	return values, nil
 }
 
 func (client *EtcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, error) {
-	panic("implement me")
+	kvc := clientv3.NewKV(client.Client)
+	response, err := kvc.Get(context.Background(), key)
+	handleError(err)
+
+	value := keystoreregistry.KeyValueVersion{}
+
+	if response.Count == 0 {
+		return value, fmt.Errorf("Unable to find any values for key: %s", key)
+	}
+	if response.Count > 1 {
+		panic(errors.New("should never get more than one value for get"))
+	}
+
+	return *getKeyValueVersion(response.Kvs[0]), nil
 }
 
 func (client *EtcKeystore) WatchPrefix(prefix string, onUpdate func(old keystoreregistry.KeyValueVersion, new keystoreregistry.KeyValueVersion)) (int64, error) {
