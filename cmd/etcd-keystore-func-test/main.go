@@ -12,9 +12,21 @@ func cleanAllKeys(keystore keystoreregistry.Keystore) {
 	}
 }
 
+func testAddValues(keystore keystoreregistry.Keystore) {
+	values := []keystoreregistry.KeyValue{
+		keystoreregistry.KeyValue{},
+	}
+	if err := keystore.Add(values); err != nil {
+		log.Fatalf("Error with add values")
+	}
+}
+
 func main() {
 	log.Println("Creating keystore")
 	keystore := etcdregistry.NewKeystore()
 	defer keystore.Close()
+
 	cleanAllKeys(keystore)
+
+	testAddValues(keystore)
 }
