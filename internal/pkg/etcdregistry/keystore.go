@@ -31,9 +31,8 @@ func NewEtcdClient() *clientv3.Client {
 		Endpoints: getEndpoints(),
 	})
 	if err != nil {
+		fmt.Println("failed to create client")
 		log.Fatal(err)
-		fmt.Println("Oh dear failed to create client...")
-		panic(err)
 	}
 	return cli
 }
