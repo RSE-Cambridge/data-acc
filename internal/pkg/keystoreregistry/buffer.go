@@ -31,5 +31,8 @@ func (r *BufferRegistry) UpdateBuffer(buffer oldregistry.Buffer) (oldregistry.Bu
 }
 
 func (r *BufferRegistry) RemoveBuffer(buffer oldregistry.Buffer) {
-	r.keystore.CleanPrefix(getBufferKey(buffer))
+	err := r.keystore.CleanPrefix(getBufferKey(buffer))
+	if err != nil {
+		panic(err)
+	}
 }

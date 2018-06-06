@@ -1,9 +1,9 @@
 package main
 
 import (
-	"log"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
+	"log"
 )
 
 func cleanAllKeys(keystore keystoreregistry.Keystore) {
@@ -15,5 +15,6 @@ func cleanAllKeys(keystore keystoreregistry.Keystore) {
 func main() {
 	log.Println("Creating keystore")
 	keystore := etcdregistry.NewKeystore()
+	defer keystore.Close()
 	cleanAllKeys(keystore)
 }

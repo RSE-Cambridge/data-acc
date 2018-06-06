@@ -17,7 +17,7 @@ func getEndpoints() []string {
 		endpoints = os.Getenv("ETCD_ENDPOINTS")
 	}
 	if endpoints == "" {
-		log.Fatalf("Must set ETCD_ENDPOINTS environemnt variable, e.g. export ETCD_ENDPOINTS=127.0.0.1:2379")
+		log.Fatalf("Must set ETCDCTL_ENDPOINTS environemnt variable, e.g. export ETCDCTL_ENDPOINTS=127.0.0.1:2379")
 	}
 	return strings.Split(endpoints, ",")
 }
@@ -73,9 +73,8 @@ func (client *EtcKeystore) CleanPrefix(prefix string) error {
 		panic(error)
 	}
 	if response.Deleted == 0 {
-		panic(fmt.Errorf("oh dear, nothing to delete for prefix: %s", prefix))
+		return fmt.Errorf("oh dear, nothing to delete for prefix: %s", prefix)
 	}
-	// TODO: should return errors rather than panic here
 	return nil
 }
 
