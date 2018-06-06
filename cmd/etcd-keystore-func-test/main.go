@@ -85,6 +85,12 @@ func main() {
 	keystore := etcdregistry.NewKeystore()
 	defer keystore.Close()
 
+	keystore.WatchPrefix("ke",
+		func(old keystoreregistry.KeyValueVersion, new keystoreregistry.KeyValueVersion) {
+			log.Println("old: ", old)
+			log.Println("new:", new)
+		})
+
 	cleanAllKeys(keystore)
 
 	testAddValues(keystore)

@@ -148,7 +148,8 @@ func (client *EtcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, er
 	return *getKeyValueVersion(response.Kvs[0]), nil
 }
 
-func (client *EtcKeystore) WatchPrefix(prefix string, onUpdate func(old keystoreregistry.KeyValueVersion, new keystoreregistry.KeyValueVersion)) (int64, error) {
+func (client *EtcKeystore) WatchPrefix(prefix string,
+	onUpdate func(old keystoreregistry.KeyValueVersion, new keystoreregistry.KeyValueVersion)) (int64, error) {
 	panic("implement me")
 }
 
