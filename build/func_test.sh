@@ -3,7 +3,7 @@
 set -eu -o pipefail
 
 make
-make test
+#make test
 
 export ETCDCTL_ENDPOINTS=127.0.0.1:2379
 export ETCDCTL_API=3

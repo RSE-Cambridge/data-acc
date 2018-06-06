@@ -76,6 +76,7 @@ func testUpdate(keystore keystoreregistry.Keystore) {
 	// Ensure success if told to ignore ModRevision
 	values[0].ModRevision = 0
 	values[1].ModRevision = 0
+	values[1].Key = "key3" // add value via update
 	err = keystore.Update(values)
 	if err != nil {
 		log.Fatal(err)

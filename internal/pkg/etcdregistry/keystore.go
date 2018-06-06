@@ -89,8 +89,8 @@ func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) 
 	var ifOps []clientv3.Cmp
 	var thenOps []clientv3.Op
 	for _, keyValue := range keyValues {
-		ifOps = append(ifOps, clientv3util.KeyExists(keyValue.Key))
 		if keyValue.ModRevision > 0 {
+			ifOps = append(ifOps, clientv3util.KeyExists(keyValue.Key)) // only add new keys if ModRevision == 0
 			checkModRev := clientv3.Compare(clientv3.ModRevision(keyValue.Key), "=", keyValue.ModRevision)
 			ifOps = append(ifOps, checkModRev)
 		}
