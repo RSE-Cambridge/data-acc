@@ -176,6 +176,43 @@ func (client *EtcKeystore) WatchPrefix(prefix string,
 	}()
 }
 
+func (client *EtcKeystore) KeepAliveKey(key string) error {
+	// TODO what about configure timeout and ttl?
+	grantResponse, err := client.Grant(context.Background(), 5)
+	if err != nil {
+		log.Fatal(err)
+	}
+	leaseID := grantResponse.ID
+	log.Println("lease", leaseID)
+
+	kvc := clientv3.NewKV(client.Client)
+	txnResponse, err := kvc.Txn(context.Background()).
+		If(clientv3util.KeyMissing(key)).
+		Then(clientv3.OpPut(key, "keep-alive", clientv3.WithLease(leaseID), clientv3.WithPrevKV())).
+		Commit()
+	handleError(err)
+	if !txnResponse.Succeeded {
+		return fmt.Errorf("unable to create keep-alive key: %s", key)
+	}
+
+	ch, err := client.KeepAlive(context.Background(), leaseID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	go func() {
+		for {
+			ka := <-ch
+			if ka == nil {
+				log.Println("Unable to refresh key", key, "as got nil back. Closed channel?")
+				break  // TODO: raise some error? Seems this is broken!!!
+			} else {
+				log.Println("Refreshed key.", key, "Current ttl:", ka.TTL)
+			}
+		}
+	}()
+	return nil
+}
+
 // TODO... old methods may need removing....
 
 func (client *EtcKeystore) CleanPrefix(prefix string) error {

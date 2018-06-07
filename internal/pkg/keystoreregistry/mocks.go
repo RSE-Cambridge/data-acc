@@ -128,6 +128,18 @@ func (mr *MockKeystoreMockRecorder) WatchPrefix(prefix, onUpdate interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchPrefix", reflect.TypeOf((*MockKeystore)(nil).WatchPrefix), prefix, onUpdate)
 }
 
+// KeepAliveKey mocks base method
+func (m *MockKeystore) KeepAliveKey(key string) error {
+	ret := m.ctrl.Call(m, "KeepAliveKey", key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// KeepAliveKey indicates an expected call of KeepAliveKey
+func (mr *MockKeystoreMockRecorder) KeepAliveKey(key interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KeepAliveKey", reflect.TypeOf((*MockKeystore)(nil).KeepAliveKey), key)
+}
+
 // AtomicAdd mocks base method
 func (m *MockKeystore) AtomicAdd(key, value string) {
 	m.ctrl.Call(m, "AtomicAdd", key, value)

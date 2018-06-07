@@ -8,11 +8,11 @@ import (
 )
 
 func testGetPools(poolRegistry registry.PoolRegistry) {
-	/*if pools, err := poolRegistry.Pools(); err != nil {
+	if pools, err := poolRegistry.Pools(); err != nil {
 		log.Fatal(err)
 	} else {
 		log.Println(pools)
-	}*/
+	}
 }
 
 func testUpdateHost(poolRegistry registry.PoolRegistry) {
@@ -84,6 +84,24 @@ func testGetAllocations(poolRegistry registry.PoolRegistry) {
 	}
 }
 
+func testKeepHostAlive(poolRegistry registry.PoolRegistry) {
+	err := poolRegistry.KeepAliveHost("foo")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = poolRegistry.KeepAliveHost("bar")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = poolRegistry.KeepAliveHost("foo")
+	if err == nil {
+		log.Fatal("expected error")
+	} else {
+		log.Println(err)
+	}
+}
+
 func TestKeystorePoolRegistry() {
 	log.Println("Testing keystoreregistry.pool")
 	keystore := etcdregistry.NewKeystore()
@@ -95,6 +113,7 @@ func TestKeystorePoolRegistry() {
 	testGetBricks(poolRegistry)
 	testAllocateBricks(poolRegistry)
 	testGetAllocations(poolRegistry)
+	testKeepHostAlive(poolRegistry)
 
 	// TODO: update hosts first?
 	testGetPools(poolRegistry)

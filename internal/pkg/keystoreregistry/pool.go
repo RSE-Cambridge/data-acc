@@ -64,8 +64,9 @@ func (poolRegistry *PoolRegistry) UpdateHost(bricks []registry.BrickInfo) error 
 	return poolRegistry.keystore.Update(values)
 }
 
-func (*PoolRegistry) KeepAliveHost(hostname string) error {
-	panic("implement me")
+func (poolRegistry *PoolRegistry) KeepAliveHost(hostname string) error {
+	keepAliveKey := fmt.Sprintf("/host/keepalive/%s", hostname)
+	return poolRegistry.keystore.KeepAliveKey(keepAliveKey)
 }
 
 func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAllocation) error {

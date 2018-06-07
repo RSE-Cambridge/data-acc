@@ -95,6 +95,20 @@ func testDeleteAll(keystore keystoreregistry.Keystore) {
 	}
 }
 
+func testKeepAlive(keystore keystoreregistry.Keystore) {
+	err := keystore.KeepAliveKey("mytesthost")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = keystore.KeepAliveKey("mytesthost")
+	if err == nil {
+		log.Fatal("expected error")
+	} else {
+		log.Println(err)
+	}
+}
+
 func TestEtcdKeystore() {
 	log.Println("Testing etcdkeystore...")
 	keystore := etcdregistry.NewKeystore()
@@ -113,6 +127,7 @@ func TestEtcdKeystore() {
 	testGet(keystore)
 	testUpdate(keystore)
 	testDeleteAll(keystore)
+	testKeepAlive(keystore)
 
 	// Give background things time to finish
 	time.Sleep(time.Millisecond * 100)

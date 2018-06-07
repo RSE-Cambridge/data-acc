@@ -51,6 +51,10 @@ type Keystore interface {
 	// Returns the revision that the watch is starting on
 	WatchPrefix(prefix string, onUpdate func(old *KeyValueVersion, new *KeyValueVersion))
 
+	// Add a key, and remove it when calling process dies
+	// Error is returned if the key already exists
+	KeepAliveKey(key string) error
+
 	// TODO: remove old methods
 	AtomicAdd(key string, value string)
 	WatchPutPrefix(prefix string, onPut func(string, string))
