@@ -1,10 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
+)
 
 func main() {
-	TestEtcdKeystore()
+	keystore := etcdregistry.NewKeystore()
+	defer keystore.Close()
+
+	TestEtcdKeystore(keystore)
 	fmt.Println("")
 
-	TestKeystorePoolRegistry()
+	TestKeystorePoolRegistry(keystore)
 }

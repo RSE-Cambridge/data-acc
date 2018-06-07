@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
+	"time"
 )
 
 func testGetPools(poolRegistry registry.PoolRegistry) {
@@ -102,10 +102,9 @@ func testKeepHostAlive(poolRegistry registry.PoolRegistry) {
 	}
 }
 
-func TestKeystorePoolRegistry() {
+func TestKeystorePoolRegistry(keystore keystoreregistry.Keystore) {
 	log.Println("Testing keystoreregistry.pool")
-	keystore := etcdregistry.NewKeystore()
-	defer keystore.Close()
+
 	cleanAllKeys(keystore)
 
 	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
@@ -115,6 +114,8 @@ func TestKeystorePoolRegistry() {
 	testGetAllocations(poolRegistry)
 	testKeepHostAlive(poolRegistry)
 
+	time.Sleep(time.Second * 5)
+
 	// TODO: update hosts first?
-	testGetPools(poolRegistry)
+	//testGetPools(poolRegistry)
 }

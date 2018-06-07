@@ -178,7 +178,7 @@ func (client *EtcKeystore) WatchPrefix(prefix string,
 
 func (client *EtcKeystore) KeepAliveKey(key string) error {
 	// TODO what about configure timeout and ttl?
-	grantResponse, err := client.Grant(context.Background(), 5)
+	grantResponse, err := client.Grant(context.Background(), 10)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -203,8 +203,9 @@ func (client *EtcKeystore) KeepAliveKey(key string) error {
 		for {
 			ka := <-ch
 			if ka == nil {
-				log.Println("Unable to refresh key", key, "as got nil back. Closed channel?")
-				break  // TODO: raise some error? Seems this is broken!!!
+				log.Println("Refresh stoped for key: ", key)
+				// TODO: optionally make this log a fatal error?
+				break
 			} else {
 				log.Println("Refreshed key.", key, "Current ttl:", ka.TTL)
 			}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"log"
 	"runtime"
@@ -96,12 +95,12 @@ func testDeleteAll(keystore keystoreregistry.Keystore) {
 }
 
 func testKeepAlive(keystore keystoreregistry.Keystore) {
-	err := keystore.KeepAliveKey("mytesthost")
+	err := keystore.KeepAliveKey("/mytesthost")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = keystore.KeepAliveKey("mytesthost")
+	err = keystore.KeepAliveKey("/mytesthost")
 	if err == nil {
 		log.Fatal("expected error")
 	} else {
@@ -109,10 +108,8 @@ func testKeepAlive(keystore keystoreregistry.Keystore) {
 	}
 }
 
-func TestEtcdKeystore() {
+func TestEtcdKeystore(keystore keystoreregistry.Keystore) {
 	log.Println("Testing etcdkeystore...")
-	keystore := etcdregistry.NewKeystore()
-	defer keystore.Close()
 
 	cleanAllKeys(keystore)
 
