@@ -7,10 +7,40 @@ import (
 )
 
 func TestKeystoreVolumeRegistry(keystore keystoreregistry.Keystore) {
+	log.Println("Testing keystoreregistry.volume")
 	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
-	testVolumeCRUD(volumeRegistry)
+
+	testVolumeCRD(volumeRegistry)
 }
 
-func testVolumeCRUD(registry registry.VolumeRegistry) {
-	log.Println(registry.Volume("test"))
+func testVolumeCRD(volRegistry registry.VolumeRegistry) {
+	volume := registry.Volume{Name: "asdf"}
+	volume2 := registry.Volume{Name: "asdf2"}
+	if err := volRegistry.AddVolume(volume); err != nil {
+		log.Fatal(err)
+	}
+	if err := volRegistry.AddVolume(volume); err == nil {
+		log.Fatal("expected an error")
+	} else {
+		log.Println(err)
+	}
+
+	if volume, err := volRegistry.Volume(volume.Name); err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println(volume)
+	}
+
+	if err := volRegistry.DeleteVolume(volume.Name); err != nil {
+		log.Fatal(err)
+	}
+	if err := volRegistry.DeleteVolume(volume.Name); err == nil {
+		log.Fatal("expected error")
+	} else {
+		log.Println(err)
+	}
+
+	// leave around for following tests
+	volRegistry.AddVolume(volume)
+	volRegistry.AddVolume(volume2)
 }

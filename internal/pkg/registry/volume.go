@@ -1,13 +1,15 @@
 package registry
 
+import "encoding/json"
+
 type VolumeRegistry interface {
 	// Get all registered jobs and their volumes
 	Jobs() ([]Job, error)
 
 	// Get information about specific volume
+	AddVolume(volume Volume) error
 	Volume(name VolumeName) (Volume, error)
-
-	DeleteVolume(volume Volume)
+	DeleteVolume(name VolumeName) error
 
 	// Get all callback on all volume changes
 	// If the volume is new, old = nil
@@ -69,6 +71,11 @@ type Volume struct {
 	readyForAttach  bool
 	dataInRequested bool
 	dataInComplete  bool
+}
+
+func (volume Volume) String() string {
+	rawVolume, _ := json.Marshal(volume)
+	return string(rawVolume)
 }
 
 // TODO: define constants

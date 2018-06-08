@@ -1,51 +1,77 @@
 package keystoreregistry
 
-import "github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+)
 
 func NewVolumeRegistry(keystore Keystore) registry.VolumeRegistry {
-	return &VolumeRegistry{keystore}
+	return &volumeRegistry{keystore}
 }
 
-type VolumeRegistry struct {
+type volumeRegistry struct {
 	keystore Keystore
 }
 
-func (*VolumeRegistry) Jobs() ([]registry.Job, error) {
+func getVolumeKey(volumeName string) string {
+	return fmt.Sprintf("/volume/%s", volumeName)
+}
+
+func (volRegistry *volumeRegistry) AddVolume(volume registry.Volume) error {
+	return volRegistry.keystore.Add([]KeyValue{{
+		Key:   getVolumeKey(string(volume.Name)),
+		Value: toJson(volume),
+	}})
+}
+
+func (volRegistry *volumeRegistry) Volume(name registry.VolumeName) (registry.Volume, error) {
+	volume := registry.Volume{}
+	keyValue, err := volRegistry.keystore.Get(getVolumeKey(string(name)))
+	if err != nil {
+		return volume, err
+	}
+	json.Unmarshal(bytes.NewBufferString(keyValue.Value).Bytes(), &volume)
+	return volume, nil
+}
+
+func (volRegistry *volumeRegistry) DeleteVolume(name registry.VolumeName) error {
+	keyValue, err := volRegistry.keystore.Get(getVolumeKey(string(name)))
+	if err != nil {
+		return err
+	}
+	return volRegistry.keystore.DeleteAll([]KeyValueVersion{keyValue})
+}
+
+func (volRegistry *volumeRegistry) Jobs() ([]registry.Job, error) {
 	panic("implement me")
 }
 
-func (*VolumeRegistry) Volume(name registry.VolumeName) (registry.Volume, error) {
+func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string, callback func(old registry.Volume, new registry.Volume)) error {
 	panic("implement me")
 }
 
-func (*VolumeRegistry) DeleteVolume(volume registry.Volume) {
+func (volRegistry *volumeRegistry) WaitForVolumeReady(volume registry.Volume) error {
 	panic("implement me")
 }
 
-func (*VolumeRegistry) WatchVolumeChanges(volumeName string, callback func(old registry.Volume, new registry.Volume)) error {
+func (volRegistry *volumeRegistry) WaitForVolumeDataIn(volumeName string) error {
 	panic("implement me")
 }
 
-func (*VolumeRegistry) WaitForVolumeReady(volume registry.Volume) error {
+func (volRegistry *volumeRegistry) WaitForVolumeAttached(volumeName string) error {
 	panic("implement me")
 }
 
-func (*VolumeRegistry) WaitForVolumeDataIn(volumeName string) error {
+func (volRegistry *volumeRegistry) WaitForVolumeDetached(volumeName string) error {
 	panic("implement me")
 }
 
-func (*VolumeRegistry) WaitForVolumeAttached(volumeName string) error {
+func (volRegistry *volumeRegistry) WaitForVolumeDataOut(volumeName string) error {
 	panic("implement me")
 }
 
-func (*VolumeRegistry) WaitForVolumeDetached(volumeName string) error {
-	panic("implement me")
-}
-
-func (*VolumeRegistry) WaitForVolumeDataOut(volumeName string) error {
-	panic("implement me")
-}
-
-func (*VolumeRegistry) WaitForVolumeDeleted(volumeName string) error {
+func (volRegistry *volumeRegistry) WaitForVolumeDeleted(volumeName string) error {
 	panic("implement me")
 }

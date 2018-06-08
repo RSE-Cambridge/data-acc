@@ -9,10 +9,12 @@ func main() {
 	keystore := etcdregistry.NewKeystore()
 	defer keystore.Close()
 
-	TestEtcdKeystore(keystore)
+	cleanAllKeys(keystore)
+
+	//TestEtcdKeystore(keystore)
 	fmt.Println("")
 
-	TestKeystorePoolRegistry(keystore)
+	//TestKeystorePoolRegistry(keystore)
 	fmt.Println("")
 
 	TestKeystoreVolumeRegistry(keystore)
