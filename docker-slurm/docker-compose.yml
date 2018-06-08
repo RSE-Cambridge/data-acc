@@ -140,7 +140,7 @@ services:
     environment:
       - ETCDCTL_API=3
       - ETCDCTL_ENDPOINTS=etcdproxy1:2379
-    command: sh -c "etcdctl watch --prefix /buffers/ -- sh -c 'env | grep ETCD_WATCH_'"
+    command: sh -c "etcdctl watch --prefix /volume/ -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
 

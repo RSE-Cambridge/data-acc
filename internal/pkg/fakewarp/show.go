@@ -27,10 +27,10 @@ func (list *instances) String() string {
 const bytesInGB = 1073741824
 
 func GetInstances(volRegistry registry.VolumeRegistry) (*instances, error) {
-	var instances instances
+	instances := instances{}
 	volumes, err := volRegistry.AllVolumes()
 	if err != nil {
-		return &instances, err
+		// TODO... normally means there are no instances
 	}
 
 	for _, volume := range volumes {

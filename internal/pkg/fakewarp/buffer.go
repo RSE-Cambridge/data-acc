@@ -38,7 +38,9 @@ func CreatePerJobBuffer(c CliContext, keystore keystoreregistry.Keystore) error 
 	return createVolumesAndJobs(keystore, BufferRequest{
 		Token:c.String("token"),
 		User: c.Int("user"),
-		Capacity: "3", // TODO
+		Group: c.Int("group"),
+		Capacity: c.String("capacity"),
+		Caller: c.String("caller"),
 	})
 }
 

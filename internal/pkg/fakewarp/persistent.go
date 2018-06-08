@@ -6,6 +6,8 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"strconv"
 	"time"
+	"strings"
+	"fmt"
 )
 
 type BufferRequest struct {
@@ -32,12 +34,30 @@ func CreatePersistentBuffer(c CliContext, keystore keystoreregistry.Keystore) (s
 	return request.Token, createVolumesAndJobs(keystore, request)
 }
 
+func parseCapacity(raw string) (string, int, error) {
+	parts := strings.Split(raw, ":")
+	if len(parts) != 2 {
+		return "", 0, errors.New("must format capacity correctly and include pool")
+	}
+	pool := parts[0]
+	rawCapacity := parts[1]
+	capacityParts := strings.Split(rawCapacity, "GiB")
+	if len(capacityParts) != 2 {
+		return "", 0, fmt.Errorf("must format capacity units correctly: %s", rawCapacity)
+	}
+	capacityInt, err := strconv.Atoi(capacityParts[0])
+	if err != nil {
+		return "", 0, fmt.Errorf("must format capacity amount: %s", rawCapacity)
+	}
+	return pool, capacityInt, nil
+}
+
 func createVolumesAndJobs(keystore keystoreregistry.Keystore, request BufferRequest) error {
 	createdAt := uint(time.Now().Unix())
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	capacity, err := strconv.Atoi(request.Capacity) // TODO lots of proper parsing to do here, get poolname, etc
+	pool, capacity, err := parseCapacity(request.Capacity) // TODO lots of proper parsing to do here, get poolname, etc
 	if err != nil {
-		return errors.New("please format capacity correctly")
+		return err
 	}
 	err = volReg.AddVolume(registry.Volume{
 		Name:       registry.VolumeName(request.Token),
@@ -48,7 +68,7 @@ func createVolumesAndJobs(keystore keystoreregistry.Keystore, request BufferRequ
 		Group:      request.Group,
 		SizeGB:     uint(capacity),
 		SizeBricks: 3,         // TODO... check pool granularity
-		Pool:       "default", // TODO....
+		Pool:       pool, // TODO....
 		State:      registry.Registered,
 	})
 	if err != nil {
