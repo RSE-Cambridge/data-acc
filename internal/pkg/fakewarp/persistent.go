@@ -42,10 +42,13 @@ func parseCapacity(raw string) (string, int, error) {
 	pool := parts[0]
 	rawCapacity := parts[1]
 	capacityParts := strings.Split(rawCapacity, "GiB")
-	if len(capacityParts) != 2 {
+	if len(capacityParts) > 2 {
 		return "", 0, fmt.Errorf("must format capacity units correctly: %s", rawCapacity)
 	}
 	capacityInt, err := strconv.Atoi(capacityParts[0])
+	if len(capacityParts) == 1 {
+		capacityInt = capacityInt / bytesInGB
+	}
 	if err != nil {
 		return "", 0, fmt.Errorf("must format capacity amount: %s", rawCapacity)
 	}
