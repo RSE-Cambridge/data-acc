@@ -243,7 +243,6 @@ func (poolRegistry *poolRegistry) Pools() ([]registry.Pool, error) {
 				AvailableBricks: []registry.BrickInfo{},
 				Hosts:           make(map[string]registry.HostInfo),
 			}
-			pools[brick.PoolName] = pool
 		}
 
 		if brick.CapacityGB != pool.GranularityGB {
@@ -260,7 +259,6 @@ func (poolRegistry *poolRegistry) Pools() ([]registry.Pool, error) {
 				Hostname: brick.Hostname,
 				Alive:    hostAlive,
 			}
-			hosts[brick.Hostname] = host
 		}
 
 		if _, ok := pool.Hosts[brick.Hostname]; !ok {
@@ -271,9 +269,13 @@ func (poolRegistry *poolRegistry) Pools() ([]registry.Pool, error) {
 		allocation, ok := allocationLookup[key]
 		if ok {
 			pool.AllocatedBricks = append(pool.AllocatedBricks, allocation)
+			hosts[brick.Hostname] = host
+			pools[brick.PoolName] = pool
 		} else {
 			if host.Alive {
 				pool.AvailableBricks = append(pool.AvailableBricks, brick)
+				hosts[brick.Hostname] = host
+				pools[brick.PoolName] = pool
 			}
 		}
 	}

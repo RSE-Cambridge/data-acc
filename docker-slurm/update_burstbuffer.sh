@@ -18,6 +18,9 @@ sleep 8
 #sleep 5
 #docker exec bufferwatcher bash -c "data-acc-host"
 
+echo "Wait for startup to complete..."
+sleep 10
+
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 #BB create_persistent name=mytestbuffer capacity=32GB access=striped type=scratch" > create-persistent.sh'
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash

@@ -13,6 +13,8 @@ import (
 )
 
 const FakeDeviceAddress = "nvme%dn1"
+const FakeDeviceCapacityGB = 1600
+const FakePoolName = "default"
 
 func getHostname() string {
 	hostname, error := os.Hostname()
@@ -39,8 +41,8 @@ func updateBricks(poolRegistry registry.PoolRegistry, hostname string, devices [
 		bricks = append(bricks, registry.BrickInfo{
 			Device:     device,
 			Hostname:   hostname,
-			CapacityGB: 42,
-			PoolName:   "DefaultPool",
+			CapacityGB: FakeDeviceCapacityGB,
+			PoolName:   FakePoolName,
 		})
 	}
 	err := poolRegistry.UpdateHost(bricks)
@@ -109,10 +111,11 @@ func main() {
 
 	setupBrickEventHandlers(poolRegistry, hostname)
 
-	outputDebugLogs(poolRegistry, hostname)
-
 	log.Println("Notify others we have started:", hostname)
 	notifyStarted(poolRegistry, hostname)
+
+	// Check after the processes have started up
+	outputDebugLogs(poolRegistry, hostname)
 
 	waitForShutdown()
 }
