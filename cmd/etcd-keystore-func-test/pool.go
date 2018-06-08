@@ -117,5 +117,5 @@ func TestKeystorePoolRegistry(keystore keystoreregistry.Keystore) {
 	time.Sleep(time.Second * 5)
 
 	// TODO: update hosts first?
-	//testGetPools(poolRegistry)
+	testGetPools(poolRegistry)
 }

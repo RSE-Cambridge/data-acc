@@ -1,5 +1,10 @@
 package registry
 
+import (
+	"encoding/json"
+	"log"
+)
+
 type PoolRegistry interface {
 	// Returns a summary of the current state of all pools, including the bricks in each pool
 	Pools() ([]Pool, error)
@@ -70,7 +75,15 @@ type Pool struct {
 	GranularityGB uint
 
 	// List of all hosts that report bricks in this pool
-	Hosts []HostInfo
+	Hosts map[string]HostInfo
+}
+
+func (pool Pool) String() string {
+	poolString, err := json.Marshal(pool)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(poolString)
 }
 
 type HostInfo struct {

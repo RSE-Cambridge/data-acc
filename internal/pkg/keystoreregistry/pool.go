@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"log"
 	"strings"
 )
 
@@ -16,17 +17,18 @@ type PoolRegistry struct {
 	keystore Keystore
 }
 
-func (*PoolRegistry) Pools() ([]registry.Pool, error) {
-	panic("implement me")
-}
+const registeredBricksPrefix = "/bricks/registered/"
 
 func getBrickInfoKey(hostname string, device string) string {
-	return fmt.Sprintf("/bricks/registered/%s/%s", hostname, device)
+	return fmt.Sprintf("%s%s/%s/", registeredBricksPrefix, hostname, device)
 }
 
+const allocatedBricksPrefix = "/bricks/allocated/host/"
+
 func getPrefixAllocationHost(hostname string) string {
-	return fmt.Sprintf("/bricks/allocated/host/%s/", hostname)
+	return fmt.Sprintf("%s%s/", allocatedBricksPrefix, hostname)
 }
+
 func getBrickAllocationKeyHost(allocation registry.BrickAllocation) string {
 	prefix := getPrefixAllocationHost(allocation.Hostname)
 	return fmt.Sprintf("%s%s", prefix, allocation.Device)
@@ -64,9 +66,17 @@ func (poolRegistry *PoolRegistry) UpdateHost(bricks []registry.BrickInfo) error 
 	return poolRegistry.keystore.Update(values)
 }
 
+func getKeepAliveKey(hostname string) string {
+	return fmt.Sprintf("/host/keepalive/%s", hostname)
+}
+
 func (poolRegistry *PoolRegistry) KeepAliveHost(hostname string) error {
-	keepAliveKey := fmt.Sprintf("/host/keepalive/%s", hostname)
-	return poolRegistry.keystore.KeepAliveKey(keepAliveKey)
+	return poolRegistry.keystore.KeepAliveKey(getKeepAliveKey(hostname))
+}
+
+func (poolRegistry *PoolRegistry) HostAlive(hostname string) (bool, error) {
+	keyValue, err := poolRegistry.keystore.Get(getKeepAliveKey(hostname))
+	return keyValue.Key != "", err
 }
 
 func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAllocation) error {
@@ -160,6 +170,7 @@ func (poolRegistry *PoolRegistry) getAllocations(prefix string) ([]registry.Bric
 	}
 	return allocations, nil
 }
+
 func (poolRegistry *PoolRegistry) GetAllocationsForHost(hostname string) ([]registry.BrickAllocation, error) {
 	return poolRegistry.getAllocations(getPrefixAllocationHost(hostname))
 }
@@ -178,4 +189,85 @@ func (poolRegistry *PoolRegistry) GetBrickInfo(hostname string, device string) (
 func (*PoolRegistry) WatchHostBrickAllocations(hostname string,
 	callback func(old registry.BrickAllocation, new registry.BrickAllocation)) {
 	panic("implement me")
+}
+
+func (poolRegistry *PoolRegistry) getBricks(prefix string) ([]registry.BrickInfo, error) {
+	raw, err := poolRegistry.keystore.GetAll(prefix)
+	if err != nil {
+		return nil, err
+	}
+	var allocations []registry.BrickInfo
+	for _, entry := range raw {
+		rawValue := entry.Value
+		var allocation registry.BrickInfo
+		json.Unmarshal(bytes.NewBufferString(rawValue).Bytes(), &allocation)
+		allocations = append(allocations, allocation)
+	}
+	return allocations, nil
+}
+
+func (poolRegistry *PoolRegistry) Pools() ([]registry.Pool, error) {
+	allBricks, _ := poolRegistry.getBricks(registeredBricksPrefix)
+	allAllocations, _ := poolRegistry.getAllocations(allocatedBricksPrefix)
+	log.Println(allBricks)
+	log.Println(allAllocations)
+
+	allocationLookup := make(map[string]registry.BrickAllocation)
+	for _, allocation := range allAllocations {
+		key := fmt.Sprintf("%s/%s", allocation.Hostname, allocation.Device)
+		allocationLookup[key] = allocation
+	}
+
+	pools := make(map[string]*registry.Pool)
+	hosts := make(map[string]*registry.HostInfo)
+	for _, brick := range allBricks {
+		pool, ok := pools[brick.PoolName]
+		if !ok {
+			pool = &registry.Pool{
+				Name:            brick.PoolName,
+				GranularityGB:   brick.CapacityGB,
+				AllocatedBricks: []registry.BrickAllocation{},
+				AvailableBricks: []registry.BrickInfo{},
+				Hosts:           make(map[string]registry.HostInfo),
+			}
+			pools[brick.PoolName] = pool
+		}
+
+		if brick.CapacityGB != pool.GranularityGB {
+			log.Printf("brick doesn't match pool granularity: %s\n", brick)
+			if brick.CapacityGB < pool.GranularityGB {
+				pool.GranularityGB = brick.CapacityGB
+			}
+		}
+
+		host, ok := hosts[brick.Hostname]
+		if !ok {
+			hostAlive, _ := poolRegistry.HostAlive(brick.Hostname)
+			host = &registry.HostInfo{
+				Hostname: brick.Hostname,
+				Alive:    hostAlive,
+			}
+			hosts[brick.Hostname] = host
+		}
+
+		if _, ok := pool.Hosts[brick.Hostname]; !ok {
+			pool.Hosts[brick.Hostname] = *host
+		}
+
+		key := fmt.Sprintf("%s/%s", brick.Hostname, brick.Device)
+		allocation, ok := allocationLookup[key]
+		if ok {
+			pool.AllocatedBricks = append(pool.AllocatedBricks, allocation)
+		} else {
+			if host.Alive {
+				pool.AvailableBricks = append(pool.AvailableBricks, brick)
+			}
+		}
+	}
+
+	var poolList []registry.Pool
+	for _, value := range pools {
+		poolList = append(poolList, *value)
+	}
+	return poolList, nil
 }
