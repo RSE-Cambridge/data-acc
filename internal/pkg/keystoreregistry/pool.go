@@ -10,10 +10,10 @@ import (
 )
 
 func NewPoolRegistry(keystore Keystore) registry.PoolRegistry {
-	return &PoolRegistry{keystore}
+	return &poolRegistry{keystore}
 }
 
-type PoolRegistry struct {
+type poolRegistry struct {
 	keystore Keystore
 }
 
@@ -43,7 +43,7 @@ func getBrickAllocationKeyVolume(allocation registry.BrickAllocation) string {
 		prefix, allocation.AllocatedIndex, allocation.Hostname, allocation.Device)
 }
 
-func (poolRegistry *PoolRegistry) UpdateHost(bricks []registry.BrickInfo) error {
+func (poolRegistry *poolRegistry) UpdateHost(bricks []registry.BrickInfo) error {
 	var values []KeyValueVersion
 	var problems []string
 	var hostname string
@@ -70,16 +70,16 @@ func getKeepAliveKey(hostname string) string {
 	return fmt.Sprintf("/host/keepalive/%s", hostname)
 }
 
-func (poolRegistry *PoolRegistry) KeepAliveHost(hostname string) error {
+func (poolRegistry *poolRegistry) KeepAliveHost(hostname string) error {
 	return poolRegistry.keystore.KeepAliveKey(getKeepAliveKey(hostname))
 }
 
-func (poolRegistry *PoolRegistry) HostAlive(hostname string) (bool, error) {
+func (poolRegistry *poolRegistry) HostAlive(hostname string) (bool, error) {
 	keyValue, err := poolRegistry.keystore.Get(getKeepAliveKey(hostname))
 	return keyValue.Key != "", err
 }
 
-func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAllocation) error {
+func (poolRegistry *poolRegistry) AllocateBricks(allocations []registry.BrickAllocation) error {
 	var bricks []registry.BrickInfo
 	var volume registry.VolumeName
 	var raw []KeyValue
@@ -118,7 +118,7 @@ func (poolRegistry *PoolRegistry) AllocateBricks(allocations []registry.BrickAll
 	return poolRegistry.keystore.Add(raw)
 }
 
-func (poolRegistry *PoolRegistry) deallocate(raw []KeyValueVersion,
+func (poolRegistry *poolRegistry) deallocate(raw []KeyValueVersion,
 	updated []KeyValueVersion) ([]KeyValueVersion, []string) {
 	var keys []string
 	for _, entry := range raw {
@@ -134,7 +134,7 @@ func (poolRegistry *PoolRegistry) deallocate(raw []KeyValueVersion,
 	return updated, keys
 }
 
-func (poolRegistry *PoolRegistry) DeallocateBricks(volume registry.VolumeName) error {
+func (poolRegistry *poolRegistry) DeallocateBricks(volume registry.VolumeName) error {
 	var updated []KeyValueVersion
 
 	volPrefix := getPrefixAllocationVolume(volume)
@@ -156,7 +156,7 @@ func (poolRegistry *PoolRegistry) DeallocateBricks(volume registry.VolumeName) e
 	return poolRegistry.keystore.Update(updated)
 }
 
-func (poolRegistry *PoolRegistry) getAllocations(prefix string) ([]registry.BrickAllocation, error) {
+func (poolRegistry *poolRegistry) getAllocations(prefix string) ([]registry.BrickAllocation, error) {
 	raw, err := poolRegistry.keystore.GetAll(prefix)
 	if err != nil {
 		return nil, err
@@ -171,22 +171,22 @@ func (poolRegistry *PoolRegistry) getAllocations(prefix string) ([]registry.Bric
 	return allocations, nil
 }
 
-func (poolRegistry *PoolRegistry) GetAllocationsForHost(hostname string) ([]registry.BrickAllocation, error) {
+func (poolRegistry *poolRegistry) GetAllocationsForHost(hostname string) ([]registry.BrickAllocation, error) {
 	return poolRegistry.getAllocations(getPrefixAllocationHost(hostname))
 }
 
-func (poolRegistry *PoolRegistry) GetAllocationsForVolume(volume registry.VolumeName) ([]registry.BrickAllocation, error) {
+func (poolRegistry *poolRegistry) GetAllocationsForVolume(volume registry.VolumeName) ([]registry.BrickAllocation, error) {
 	return poolRegistry.getAllocations(getPrefixAllocationVolume(volume))
 }
 
-func (poolRegistry *PoolRegistry) GetBrickInfo(hostname string, device string) (registry.BrickInfo, error) {
+func (poolRegistry *poolRegistry) GetBrickInfo(hostname string, device string) (registry.BrickInfo, error) {
 	raw, error := poolRegistry.keystore.Get(getBrickInfoKey(hostname, device))
 	var value registry.BrickInfo
 	json.Unmarshal(bytes.NewBufferString(raw.Value).Bytes(), &value)
 	return value, error
 }
 
-func (poolRegistry *PoolRegistry) WatchHostBrickAllocations(hostname string,
+func (poolRegistry *poolRegistry) WatchHostBrickAllocations(hostname string,
 	callback func(old *registry.BrickAllocation, new *registry.BrickAllocation)) {
 	key := getPrefixAllocationHost(hostname)
 	poolRegistry.keystore.WatchPrefix(key, func(old *KeyValueVersion, new *KeyValueVersion) {
@@ -206,7 +206,7 @@ func (poolRegistry *PoolRegistry) WatchHostBrickAllocations(hostname string,
 	})
 }
 
-func (poolRegistry *PoolRegistry) getBricks(prefix string) ([]registry.BrickInfo, error) {
+func (poolRegistry *poolRegistry) getBricks(prefix string) ([]registry.BrickInfo, error) {
 	raw, err := poolRegistry.keystore.GetAll(prefix)
 	if err != nil {
 		return nil, err
@@ -221,11 +221,9 @@ func (poolRegistry *PoolRegistry) getBricks(prefix string) ([]registry.BrickInfo
 	return allocations, nil
 }
 
-func (poolRegistry *PoolRegistry) Pools() ([]registry.Pool, error) {
+func (poolRegistry *poolRegistry) Pools() ([]registry.Pool, error) {
 	allBricks, _ := poolRegistry.getBricks(registeredBricksPrefix)
 	allAllocations, _ := poolRegistry.getAllocations(allocatedBricksPrefix)
-	log.Println(allBricks)
-	log.Println(allAllocations)
 
 	allocationLookup := make(map[string]registry.BrickAllocation)
 	for _, allocation := range allAllocations {

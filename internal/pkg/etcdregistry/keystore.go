@@ -176,12 +176,12 @@ func (client *etcKeystore) WatchPrefix(prefix string,
 
 func (client *etcKeystore) KeepAliveKey(key string) error {
 	// TODO what about configure timeout and ttl?
-	grantResponse, err := client.Grant(context.Background(), 10)
+	var ttl int64 = 10
+	grantResponse, err := client.Grant(context.Background(), ttl)
 	if err != nil {
 		log.Fatal(err)
 	}
 	leaseID := grantResponse.ID
-	log.Println("lease", leaseID)
 
 	kvc := clientv3.NewKV(client.Client)
 	txnResponse, err := kvc.Txn(context.Background()).
@@ -197,6 +197,8 @@ func (client *etcKeystore) KeepAliveKey(key string) error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	counter := 9
 	go func() {
 		for {
 			ka := <-ch
@@ -205,7 +207,12 @@ func (client *etcKeystore) KeepAliveKey(key string) error {
 				// TODO: optionally make this log a fatal error?
 				break
 			} else {
-				log.Println("Refreshed key.", key, "Current ttl:", ka.TTL)
+				if counter >= 9 {
+					counter = 0
+					log.Println("Still refreshing key:", key)
+				} else {
+					counter ++
+				}
 			}
 		}
 	}()

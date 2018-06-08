@@ -20,8 +20,16 @@ func showSessions(_ *cli.Context) error {
 	return nil
 }
 
-func listPools(_ *cli.Context) error {
-	fmt.Print(fakewarp.GetPools())
+func listPools(context *cli.Context) error {
+	keystore := getKeystore()
+	defer keystore.Close()
+	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
+
+	pools, err := fakewarp.GetPools(poolRegistry)
+	if err != nil {
+		return err
+	}
+	fmt.Print(pools)
 	return nil
 }
 

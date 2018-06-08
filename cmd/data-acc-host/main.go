@@ -33,15 +33,7 @@ func getDevices() []string {
 	return bricks
 }
 
-func main() {
-	keystore := etcdregistry.NewKeystore()
-	defer keystore.Close()
-
-	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
-
-	hostname := getHostname()
-	devices := getDevices()
-
+func updateBricks(poolRegistry registry.PoolRegistry, hostname string, devices []string) {
 	var bricks []registry.BrickInfo
 	for _, device := range devices {
 		bricks = append(bricks, registry.BrickInfo{
@@ -55,12 +47,22 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
 
+func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, hostname string) {
 	poolRegistry.WatchHostBrickAllocations(hostname,
 		func(old *registry.BrickAllocation, new *registry.BrickAllocation) {
 			log.Println("Noticed brick allocation update. Old:", old, "New:", new)
+			if new != nil {
+				if new.AllocatedIndex == 0 {
+					log.Println("Dectected we host primary brick for:",
+						new.AllocatedVolume, "Must check for action.")
+				}
+			}
 		})
+}
 
+func outputDebugLogs(poolRegistry registry.PoolRegistry, hostname string) {
 	allocations, err := poolRegistry.GetAllocationsForHost(hostname)
 	if err != nil {
 		// Ignore errors, we may not have any results when there are no allocations
@@ -74,18 +76,43 @@ func main() {
 		log.Fatalln(err)
 	}
 	log.Println("Current pools:", pools)
+}
 
+func notifyStarted(poolRegistry registry.PoolRegistry, hostname string) {
 	// TODO: if we restart quickly this fails as key is already present, maybe don't check that key doesn't exist?
 	time.Sleep(time.Second * 10)
-	log.Println("Started, now notify others, for:", hostname)
-	err = poolRegistry.KeepAliveHost(hostname)
+
+	err := poolRegistry.KeepAliveHost(hostname)
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
 
+func waitForShutdown() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGINT)
 	<-c
 	log.Println("I have been asked to shutdown, doing tidy up...")
 	os.Exit(1)
+}
+
+func main() {
+	hostname := getHostname()
+	log.Println("Starting data-accelerator host service for:", hostname)
+
+	keystore := etcdregistry.NewKeystore()
+	defer keystore.Close()
+	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
+
+	devices := getDevices()
+	updateBricks(poolRegistry, hostname, devices)
+
+	setupBrickEventHandlers(poolRegistry, hostname)
+
+	outputDebugLogs(poolRegistry, hostname)
+
+	log.Println("Notify others we have started:", hostname)
+	notifyStarted(poolRegistry, hostname)
+
+	waitForShutdown()
 }
