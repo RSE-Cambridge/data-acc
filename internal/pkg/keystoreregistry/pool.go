@@ -186,9 +186,24 @@ func (poolRegistry *PoolRegistry) GetBrickInfo(hostname string, device string) (
 	return value, error
 }
 
-func (*PoolRegistry) WatchHostBrickAllocations(hostname string,
-	callback func(old registry.BrickAllocation, new registry.BrickAllocation)) {
-	panic("implement me")
+func (poolRegistry *PoolRegistry) WatchHostBrickAllocations(hostname string,
+	callback func(old *registry.BrickAllocation, new *registry.BrickAllocation)) {
+	key := getPrefixAllocationHost(hostname)
+	poolRegistry.keystore.WatchPrefix(key, func(old *KeyValueVersion, new *KeyValueVersion) {
+		oldBrick := &registry.BrickAllocation{}
+		newBrick := &registry.BrickAllocation{}
+		if old != nil {
+			if old.Value != "" {
+				json.Unmarshal(bytes.NewBufferString(old.Value).Bytes(), &oldBrick)
+			}
+		}
+		if new != nil {
+			if new.Value != "" {
+				json.Unmarshal(bytes.NewBufferString(new.Value).Bytes(), &newBrick)
+			}
+		}
+		callback(oldBrick, newBrick)
+	})
 }
 
 func (poolRegistry *PoolRegistry) getBricks(prefix string) ([]registry.BrickInfo, error) {

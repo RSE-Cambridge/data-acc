@@ -56,6 +56,13 @@ func testGetBricks(poolRegistry registry.PoolRegistry) {
 }
 
 func testAllocateBricks(poolRegistry registry.PoolRegistry) {
+	poolRegistry.WatchHostBrickAllocations("foo", func(old *registry.BrickAllocation,
+		new *registry.BrickAllocation) {
+		log.Printf("**Allocation update. Old: %s New: %s", old, new)
+		if new.DeallocateRequested {
+			log.Printf("requested clean of: %d:%s", new.AllocatedIndex, new.Device)
+		}
+	})
 	allocations := []registry.BrickAllocation{
 		{Hostname: "foo", Device: "vbdb1", AllocatedVolume: "vol1"},
 		{Hostname: "foo", Device: "nvme3n1", AllocatedVolume: "vol1"},
