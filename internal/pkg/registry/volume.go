@@ -21,17 +21,6 @@ type VolumeRegistry interface {
 	// If the volume is new, old = nil
 	// used by the primary brick to get volume updates
 	WatchVolumeChanges(volumeName string, callback func(old *Volume, new *Volume)) error
-
-	// Creates volume and returns once volume is created
-	// At this point all bricks are assigned and configured
-	// And the list of Paths is ready
-	WaitForVolumeReady(volume Volume) error
-
-	WaitForVolumeDataIn(volumeName string) error
-	WaitForVolumeAttached(volumeName string) error
-	WaitForVolumeDetached(volumeName string) error
-	WaitForVolumeDataOut(volumeName string) error
-	WaitForVolumeDeleted(volumeName string) error
 }
 
 type Job struct {

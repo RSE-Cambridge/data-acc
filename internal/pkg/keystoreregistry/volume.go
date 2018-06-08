@@ -95,27 +95,3 @@ func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
 func (volRegistry *volumeRegistry) Jobs() ([]registry.Job, error) {
 	panic("implement me")
 }
-
-func (volRegistry *volumeRegistry) WaitForVolumeReady(volume registry.Volume) error {
-	panic("implement me")
-}
-
-func (volRegistry *volumeRegistry) WaitForVolumeDataIn(volumeName string) error {
-	panic("implement me")
-}
-
-func (volRegistry *volumeRegistry) WaitForVolumeAttached(volumeName string) error {
-	panic("implement me")
-}
-
-func (volRegistry *volumeRegistry) WaitForVolumeDetached(volumeName string) error {
-	panic("implement me")
-}
-
-func (volRegistry *volumeRegistry) WaitForVolumeDataOut(volumeName string) error {
-	panic("implement me")
-}
-
-func (volRegistry *volumeRegistry) WaitForVolumeDeleted(volumeName string) error {
-	panic("implement me")
-}
