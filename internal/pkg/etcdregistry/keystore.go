@@ -25,8 +25,7 @@ func getEndpoints() []string {
 	return strings.Split(endpoints, ",")
 }
 
-// TODO: this should be private
-func NewEtcdClient() *clientv3.Client {
+func newEtcdClient() *clientv3.Client {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints: getEndpoints(),
 	})
@@ -38,12 +37,11 @@ func NewEtcdClient() *clientv3.Client {
 }
 
 func NewKeystore() keystoreregistry.Keystore {
-	cli := NewEtcdClient()
-	return &EtcKeystore{cli}
+	cli := newEtcdClient()
+	return &etcKeystore{cli}
 }
 
-// TODO: this should be private, once abstraction finished
-type EtcKeystore struct {
+type etcKeystore struct {
 	*clientv3.Client
 }
 
@@ -63,7 +61,7 @@ func handleError(err error) {
 	}
 }
 
-func (client *EtcKeystore) runTransaction(ifOps []clientv3.Cmp, thenOps []clientv3.Op) error {
+func (client *etcKeystore) runTransaction(ifOps []clientv3.Cmp, thenOps []clientv3.Op) error {
 	kvc := clientv3.NewKV(client.Client)
 	kvc.Txn(context.Background())
 	response, err := kvc.Txn(context.Background()).If(ifOps...).Then(thenOps...).Commit()
@@ -75,7 +73,7 @@ func (client *EtcKeystore) runTransaction(ifOps []clientv3.Cmp, thenOps []client
 	return nil
 }
 
-func (client *EtcKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
+func (client *etcKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
 	var ifOps []clientv3.Cmp
 	var thenOps []clientv3.Op
 	for _, keyValue := range keyValues {
@@ -85,7 +83,7 @@ func (client *EtcKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
 	return client.runTransaction(ifOps, thenOps)
 }
 
-func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) error {
+func (client *etcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) error {
 	var ifOps []clientv3.Cmp
 	var thenOps []clientv3.Op
 	for _, keyValue := range keyValues {
@@ -99,7 +97,7 @@ func (client *EtcKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) 
 	return client.runTransaction(ifOps, thenOps)
 }
 
-func (client *EtcKeystore) DeleteAll(keyValues []keystoreregistry.KeyValueVersion) error {
+func (client *etcKeystore) DeleteAll(keyValues []keystoreregistry.KeyValueVersion) error {
 	var ifOps []clientv3.Cmp
 	var thenOps []clientv3.Op
 	for _, keyValue := range keyValues {
@@ -125,7 +123,7 @@ func getKeyValueVersion(rawKeyValue *mvccpb.KeyValue) *keystoreregistry.KeyValue
 	}
 }
 
-func (client *EtcKeystore) GetAll(prefix string) ([]keystoreregistry.KeyValueVersion, error) {
+func (client *etcKeystore) GetAll(prefix string) ([]keystoreregistry.KeyValueVersion, error) {
 	kvc := clientv3.NewKV(client.Client)
 	response, err := kvc.Get(context.Background(), prefix, clientv3.WithPrefix())
 	handleError(err)
@@ -141,7 +139,7 @@ func (client *EtcKeystore) GetAll(prefix string) ([]keystoreregistry.KeyValueVer
 	return values, nil
 }
 
-func (client *EtcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, error) {
+func (client *etcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, error) {
 	kvc := clientv3.NewKV(client.Client)
 	response, err := kvc.Get(context.Background(), key)
 	handleError(err)
@@ -158,7 +156,7 @@ func (client *EtcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, er
 	return *getKeyValueVersion(response.Kvs[0]), nil
 }
 
-func (client *EtcKeystore) WatchPrefix(prefix string,
+func (client *etcKeystore) WatchPrefix(prefix string,
 	onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
 	rch := client.Watch(context.Background(), prefix, clientv3.WithPrefix(), clientv3.WithPrevKV())
 	go func() {
@@ -176,7 +174,7 @@ func (client *EtcKeystore) WatchPrefix(prefix string,
 	}()
 }
 
-func (client *EtcKeystore) KeepAliveKey(key string) error {
+func (client *etcKeystore) KeepAliveKey(key string) error {
 	// TODO what about configure timeout and ttl?
 	grantResponse, err := client.Grant(context.Background(), 10)
 	if err != nil {
@@ -216,7 +214,7 @@ func (client *EtcKeystore) KeepAliveKey(key string) error {
 
 // TODO... old methods may need removing....
 
-func (client *EtcKeystore) CleanPrefix(prefix string) error {
+func (client *etcKeystore) CleanPrefix(prefix string) error {
 	kvc := clientv3.NewKV(client.Client)
 	response, err := kvc.Delete(context.Background(), prefix, clientv3.WithPrefix())
 	handleError(err)
@@ -230,7 +228,7 @@ func (client *EtcKeystore) CleanPrefix(prefix string) error {
 	return nil
 }
 
-func (client *EtcKeystore) AtomicAdd(key string, value string) {
+func (client *etcKeystore) AtomicAdd(key string, value string) {
 	kvc := clientv3.NewKV(client.Client)
 	response, err := kvc.Txn(context.Background()).
 		If(clientv3util.KeyMissing(key)).
@@ -244,7 +242,7 @@ func (client *EtcKeystore) AtomicAdd(key string, value string) {
 	}
 }
 
-func (client *EtcKeystore) WatchPutPrefix(prefix string, onPut func(key string, value string)) {
+func (client *etcKeystore) WatchPutPrefix(prefix string, onPut func(key string, value string)) {
 	rch := client.Watch(context.Background(), prefix, clientv3.WithPrefix())
 	for wresp := range rch {
 		for _, ev := range wresp.Events {
