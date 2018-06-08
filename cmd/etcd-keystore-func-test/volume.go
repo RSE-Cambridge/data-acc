@@ -23,8 +23,8 @@ func testVolumeCRUD(volRegistry registry.VolumeRegistry) {
 		log.Printf("Volume update detected. old: %s new: %s", old.State, new.State)
 	})
 
-	volume := registry.Volume{Name: "asdf", State: registry.Registered}
-	volume2 := registry.Volume{Name: "asdf2"}
+	volume := registry.Volume{Name: "asdf", State: registry.Registered, JobName: "foo"}
+	volume2 := registry.Volume{Name: "asdf2", JobName: "foo"}
 	if err := volRegistry.AddVolume(volume); err != nil {
 		log.Fatal(err)
 	}
@@ -66,12 +66,18 @@ func testVolumeCRUD(volRegistry registry.VolumeRegistry) {
 		log.Fatal("expected error with out of order update")
 	}
 	volRegistry.UpdateState(volume2.Name, registry.Registered)
+
+	if volumes, err := volRegistry.AllVolumes(); err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println(volumes)
+	}
 }
 
 func testJobCRUD(volRegistry registry.VolumeRegistry) {
 	job := registry.Job{Name: "foo",
-		Volumes: []registry.VolumeName{"asdf", "asdf2"},
-		Owner: 1001,
+		Volumes:   []registry.VolumeName{"asdf", "asdf2"},
+		Owner:     1001,
 		CreatedAt: uint(time.Now().Unix()),
 	}
 	if err := volRegistry.AddJob(job); err != nil {

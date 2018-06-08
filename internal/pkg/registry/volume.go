@@ -24,6 +24,9 @@ type VolumeRegistry interface {
 	// Get information about a specific volume
 	Volume(name VolumeName) (Volume, error)
 
+	// Get information about all volumes
+	AllVolumes() ([]Volume, error)
+
 	// TODO: this should error if volume is not in correct state?
 	DeleteVolume(name VolumeName) error
 

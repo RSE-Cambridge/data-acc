@@ -15,6 +15,23 @@ type volumeRegistry struct {
 	keystore Keystore
 }
 
+func (volRegistry *volumeRegistry) AllVolumes() ([]registry.Volume, error) {
+	var volumes []registry.Volume
+	keyValues, err := volRegistry.keystore.GetAll(volumeKeyPrefix)
+	if err != nil {
+		return volumes, err
+	}
+	for _, keyValue := range keyValues {
+		var volume registry.Volume
+		err = volumeFromKeyValue(keyValue, &volume)
+		if err != nil {
+			return volumes, nil
+		}
+		volumes = append(volumes, volume)
+	}
+	return volumes, nil
+}
+
 func (volRegistry *volumeRegistry) Jobs() ([]registry.Job, error) {
 	var jobs []registry.Job
 	keyValues, err := volRegistry.keystore.GetAll(jobPrefix)
@@ -100,8 +117,10 @@ func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state r
 	return volRegistry.updateVolume(name, updateState)
 }
 
+const volumeKeyPrefix = "/volume/"
+
 func getVolumeKey(volumeName string) string {
-	return fmt.Sprintf("/volume/%s/", volumeName)
+	return fmt.Sprintf("%s%s/", volumeKeyPrefix, volumeName)
 }
 
 func (volRegistry *volumeRegistry) AddVolume(volume registry.Volume) error {
