@@ -20,7 +20,7 @@ func showSessions(_ *cli.Context) error {
 	return nil
 }
 
-func listPools(context *cli.Context) error {
+func listPools(_ *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
 	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
