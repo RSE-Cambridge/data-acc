@@ -22,12 +22,12 @@ func (list *pools) String() string {
 const GbInBytes = 1073741824
 
 func GetPools(registry registry.PoolRegistry) (*pools, error) {
+	pools := pools{}
 	regPools, err := registry.Pools()
 	if err != nil {
-		return nil, err
+		return &pools, err
 	}
 
-	var pools pools
 	for _, regPool := range regPools {
 		free := len(regPool.AvailableBricks)
 		quantity := free + len(regPool.AllocatedBricks)
