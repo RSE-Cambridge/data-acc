@@ -23,8 +23,8 @@ func testVolumeCRUD(volRegistry registry.VolumeRegistry) {
 		log.Printf("Volume update detected. old: %s new: %s", old.State, new.State)
 	})
 
-	volume := registry.Volume{Name: "asdf", State: registry.Registered, JobName: "foo", SizeBricks:2, SizeGB:200}
-	volume2 := registry.Volume{Name: "asdf2", JobName: "foo", SizeBricks:3, SizeGB:300}
+	volume := registry.Volume{Name: "asdf", State: registry.Registered, JobName: "foo", SizeBricks: 2, SizeGB: 200}
+	volume2 := registry.Volume{Name: "asdf2", JobName: "foo", SizeBricks: 3, SizeGB: 300}
 	if err := volRegistry.AddVolume(volume); err != nil {
 		log.Fatal(err)
 	}

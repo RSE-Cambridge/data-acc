@@ -69,7 +69,7 @@ type Volume struct {
 	Group int
 	// e.g. SLURM or Manila
 	CreatedBy string
-	CreatedAt int
+	CreatedAt uint
 	// Requested pool of bricks for volume
 	Pool string
 	// Requested size of volume

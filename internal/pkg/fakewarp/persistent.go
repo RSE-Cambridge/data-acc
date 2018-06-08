@@ -2,9 +2,10 @@ package fakewarp
 
 import (
 	"errors"
-	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/oldregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"strconv"
+	"time"
 )
 
 type PersistentBufferRequest struct {
@@ -23,19 +24,41 @@ func CreatePersistentBuffer(c CliContext, keystore keystoreregistry.Keystore) (s
 	request := PersistentBufferRequest{c.String("token"), c.String("caller"),
 		c.String("capacity"), c.Int("user"),
 		c.Int("groupid"), c.String("access"), c.String("type")}
-	fmt.Printf("--token %s --caller %s --user %d --groupid %d --capacity %s --access %s --type %s\n",
-		request.Token, request.Caller, request.User, request.Group, request.Capacity, request.Access, request.Type)
-	error := processCreatePersistentBuffer(&request, keystore)
-	return request.Token, error
-}
-
-func processCreatePersistentBuffer(request *PersistentBufferRequest, keystore keystoreregistry.Keystore) error {
-	if request.Token == "bob" {
-		return errors.New("unable to create buffer")
+	if request.Group == 0 {
+		request.Group = request.User
 	}
-	r := keystoreregistry.NewBufferRegistry(keystore)
-	// TODO: lots more validation needed to ensure valid key, etc
-	buf := oldregistry.Buffer{Name: request.Token, Owner: fmt.Sprintf("%d", request.User)}
-	r.AddBuffer(buf)
-	return nil
+	createdAt := uint(time.Now().Unix())
+
+	volReg := keystoreregistry.NewVolumeRegistry(keystore)
+	capacity, err := strconv.Atoi(request.Capacity) // TODO lots of proper parsing to do here, get poolname, etc
+	if err != nil {
+		return "", errors.New("please format capacity correctly")
+	}
+	err = volReg.AddVolume(registry.Volume{
+		Name:       registry.VolumeName(request.Token),
+		JobName:    request.Token,
+		Owner:      request.User,
+		CreatedAt:  createdAt,
+		CreatedBy:  request.Caller,
+		Group:      request.Group,
+		SizeGB:     uint(capacity),
+		SizeBricks: 3,         // TODO... check pool granularity
+		Pool:       "default", // TODO....
+		State:      registry.Registered,
+	})
+	if err != nil {
+		return request.Token, err
+	}
+	// TODO: get bricks assigned to volume (i.e. ensure we have capacity)
+	err = volReg.AddJob(registry.Job{
+		Name:      request.Token,
+		Volumes:   []registry.VolumeName{registry.VolumeName(request.Token)},
+		Owner:     uint(request.User),
+		CreatedAt: createdAt,
+	})
+	if err != nil {
+		volReg.DeleteVolume(registry.VolumeName(request.Token))
+	}
+	// TODO: wait for bricks to be provisioned correctly?
+	return request.Token, err
 }
