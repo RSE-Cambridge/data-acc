@@ -1,6 +1,9 @@
 package registry
 
-import "encoding/json"
+import (
+	"bytes"
+	"encoding/json"
+)
 
 type VolumeRegistry interface {
 	// Get all registered jobs and their volumes
@@ -10,6 +13,9 @@ type VolumeRegistry interface {
 	AddVolume(volume Volume) error
 	Volume(name VolumeName) (Volume, error)
 	DeleteVolume(name VolumeName) error
+
+	// Move between volume states, but only one by one
+	UpdateState(name VolumeName, state VolumeState) error
 
 	// Get all callback on all volume changes
 	// If the volume is new, old = nil
@@ -68,14 +74,58 @@ type Volume struct {
 	Paths []string
 
 	// TODO: track state machine...
-	readyForAttach  bool
-	dataInRequested bool
-	dataInComplete  bool
+	State VolumeState
 }
 
 func (volume Volume) String() string {
 	rawVolume, _ := json.Marshal(volume)
 	return string(rawVolume)
+}
+
+type VolumeState int
+
+const (
+	Unknown VolumeState = iota
+	Registered
+	BricksAssigned
+	Test2
+	Test3
+)
+
+var volumeStateStrings = map[VolumeState]string{
+	Unknown:        "",
+	Registered:     "Registered",
+	BricksAssigned: "BricksAssigned",
+	Test2:          "Test2",
+	Test3:          "Test3",
+}
+var stringToVolumeState = map[string]VolumeState{
+	"":               Unknown,
+	"Registered":     Registered,
+	"BricksAssigned": BricksAssigned,
+	"Test2":          Test2,
+	"Test3":          Test3,
+}
+
+func (volumeState VolumeState) String() string {
+	return volumeStateStrings[volumeState]
+}
+
+func (volumeState VolumeState) MarshalJSON() ([]byte, error) {
+	buffer := bytes.NewBufferString(`"`)
+	buffer.WriteString(volumeStateStrings[volumeState])
+	buffer.WriteString(`"`)
+	return buffer.Bytes(), nil
+}
+
+func (volumeState *VolumeState) UnmarshalJSON(b []byte) error {
+	var str string
+	err := json.Unmarshal(b, &str)
+	if err != nil {
+		return err
+	}
+	*volumeState = stringToVolumeState[str]
+	return nil
 }
 
 // TODO: define constants

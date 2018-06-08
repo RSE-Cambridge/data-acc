@@ -12,14 +12,17 @@ func TestKeystoreVolumeRegistry(keystore keystoreregistry.Keystore) {
 	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
 
 	testVolumeCRD(volumeRegistry)
+
+	// give watches time to print
+	time.Sleep(time.Second)
 }
 
 func testVolumeCRD(volRegistry registry.VolumeRegistry) {
 	volRegistry.WatchVolumeChanges("asdf", func(old *registry.Volume, new *registry.Volume) {
-		log.Printf("Volume update detected. old: %s new: %s", old.Name, new.Name)
+		log.Printf("Volume update detected. old: %s new: %s", old.State, new.State)
 	})
 
-	volume := registry.Volume{Name: "asdf"}
+	volume := registry.Volume{Name: "asdf", State: registry.Registered}
 	volume2 := registry.Volume{Name: "asdf2"}
 	if err := volRegistry.AddVolume(volume); err != nil {
 		log.Fatal(err)
@@ -49,5 +52,16 @@ func testVolumeCRD(volRegistry registry.VolumeRegistry) {
 	volRegistry.AddVolume(volume)
 	volRegistry.AddVolume(volume2)
 
-	time.Sleep(time.Second)
+	if err := volRegistry.UpdateState(volume.Name, registry.BricksAssigned); err != nil {
+		log.Fatal(err)
+	}
+	if err := volRegistry.UpdateState("badname", registry.BricksAssigned); err == nil {
+		log.Fatal("expected error")
+	}
+	if err := volRegistry.UpdateState(volume.Name, registry.BricksAssigned); err == nil {
+		log.Fatal("expected error with repeated update")
+	}
+	if err := volRegistry.UpdateState(volume.Name, registry.Test3); err == nil {
+		log.Fatal("expected error with out of order update")
+	}
 }

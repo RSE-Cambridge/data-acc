@@ -15,6 +15,29 @@ type volumeRegistry struct {
 	keystore Keystore
 }
 
+func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state registry.VolumeState) error {
+	keyValue, err := volRegistry.keystore.Get(getVolumeKey(string(name)))
+	if err != nil {
+		return err
+	}
+
+	volume := registry.Volume{}
+	err = volumeFromKeyValue(keyValue, &volume)
+	if err != nil {
+		return nil
+	}
+
+	// TODO: this is almost certainly too strict, but its a start...
+	stateDifference := state - volume.State
+	if stateDifference != 1 {
+		return fmt.Errorf("must update volume to the next state")
+	}
+	volume.State = state
+
+	keyValue.Value = toJson(volume)
+	return volRegistry.keystore.Update([]KeyValueVersion{keyValue})
+}
+
 func getVolumeKey(volumeName string) string {
 	return fmt.Sprintf("/volume/%s/", volumeName)
 }
