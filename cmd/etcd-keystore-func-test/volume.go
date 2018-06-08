@@ -69,7 +69,11 @@ func testVolumeCRUD(volRegistry registry.VolumeRegistry) {
 }
 
 func testJobCRUD(volRegistry registry.VolumeRegistry) {
-	job := registry.Job{Name: "foo", Volumes: []registry.VolumeName{"asdf", "asdf2"}}
+	job := registry.Job{Name: "foo",
+		Volumes: []registry.VolumeName{"asdf", "asdf2"},
+		Owner: 1001,
+		CreatedAt: uint(time.Now().Unix()),
+	}
 	if err := volRegistry.AddJob(job); err != nil {
 		log.Fatal(err)
 	}
@@ -96,4 +100,5 @@ func testJobCRUD(volRegistry registry.VolumeRegistry) {
 	if err == nil {
 		panic(err)
 	}
+	volRegistry.AddJob(job)
 }

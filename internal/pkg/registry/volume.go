@@ -42,10 +42,9 @@ type VolumeRegistry interface {
 
 type Job struct {
 	// Name of the job
-	Name string
-
-	Owner     int
-	CreatedAt int
+	Name      string // TODO: should we make a JobName type?
+	Owner     uint
+	CreatedAt uint
 
 	// Zero or One PerJob volumes
 	// and Zero or more MultiJob volumes
@@ -59,6 +58,8 @@ type VolumeName string
 type Volume struct {
 	// e.g. job1 or Foo
 	Name VolumeName
+	// Name of the job the volume was created for
+	JobName string
 	// e.g. 1001
 	Owner int
 	// If empty defaults to User

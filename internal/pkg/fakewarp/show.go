@@ -47,8 +47,21 @@ func (list *sessions) String() string {
 }
 
 func GetSessions(volRegistry registry.VolumeRegistry) (*sessions, error) {
-	fakeSession := session{"fakebuffer", 1234567890, 1001, "fakebuffer"}
-	return &sessions{fakeSession}, nil
+	jobs, err := volRegistry.Jobs()
+	if err != nil {
+		// TODO: error is usually about there not being any jobs
+		jobs = []registry.Job{}
+	}
+	sessions := sessions{}
+	for _, job := range jobs {
+		sessions = append(sessions, session{
+			Id:      job.Name,
+			Created: job.CreatedAt,
+			Owner:   job.Owner,
+			Token:   job.Name,
+		})
+	}
+	return &sessions, nil
 }
 
 type configurations []string
