@@ -74,6 +74,8 @@ type Volume struct {
 	Pool string
 	// Requested size of volume
 	SizeGB uint
+	// Number of bricks requested
+	SizeBricks uint
 	// True if multiple jobs can attach to this volume
 	MultiJob bool
 

@@ -24,12 +24,23 @@ func (list *instances) String() string {
 	return toJson(message)
 }
 
+const bytesInGB = 1073741824
+
 func GetInstances(volRegistry registry.VolumeRegistry) (*instances, error) {
-	fakeInstance := instance{
-		"fakebuffer",
-		instanceCapacity{3, 40},
-		instanceLinks{"fakebuffer"}}
-	return &instances{fakeInstance}, nil
+	var instances instances
+	volumes, err := volRegistry.AllVolumes()
+	if err != nil {
+		return &instances, err
+	}
+
+	for _, volume := range volumes {
+		instances = append(instances, instance{
+			Id:       string(volume.Name),
+			Capacity: instanceCapacity{Bytes: volume.SizeGB * bytesInGB, Nodes: volume.SizeBricks},
+			Links:    instanceLinks{volume.JobName},
+		})
+	}
+	return &instances, nil
 }
 
 type session struct {
