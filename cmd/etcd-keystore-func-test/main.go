@@ -13,4 +13,7 @@ func main() {
 	fmt.Println("")
 
 	TestKeystorePoolRegistry(keystore)
+	fmt.Println("")
+
+	TestKeystoreVolumeRegistry(keystore)
 }

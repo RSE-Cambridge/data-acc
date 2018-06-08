@@ -107,9 +107,9 @@ type AttachmentDriver string
 type ConfigurationType string
 
 const (
-	Filesytem ConfigurationType = "filesystem"
-	Cache     ConfigurationType = "cache"
-	Swap      ConfigurationType = "swap"
+	Filesystem ConfigurationType = "filesystem"
+	Cache      ConfigurationType = "cache"
+	Swap       ConfigurationType = "swap"
 )
 
 type DataCopyRequest struct {
