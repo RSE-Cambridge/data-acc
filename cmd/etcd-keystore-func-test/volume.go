@@ -87,4 +87,13 @@ func testJobCRUD(volRegistry registry.VolumeRegistry) {
 		log.Fatal(err)
 	}
 	log.Println(jobs)
+
+	err = volRegistry.DeleteJob("foo")
+	if err != nil {
+		panic(err)
+	}
+	err = volRegistry.DeleteJob("foo")
+	if err == nil {
+		panic(err)
+	}
 }

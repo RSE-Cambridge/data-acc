@@ -15,7 +15,7 @@ type VolumeRegistry interface {
 
 	// Remove job from the system
 	// TODO: fails if volumes are not in the deleted state?
-	DeleteJob() error
+	DeleteJob(jobName string) error
 
 	// Get information about specific volume
 	// TODO: remove add/detele and only

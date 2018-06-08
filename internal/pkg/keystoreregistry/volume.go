@@ -16,11 +16,23 @@ type volumeRegistry struct {
 }
 
 func (volRegistry *volumeRegistry) Jobs() ([]registry.Job, error) {
-	panic("implement me")
+	var jobs []registry.Job
+	keyValues, err := volRegistry.keystore.GetAll(jobPrefix)
+	for _, keyValue := range keyValues {
+		var job registry.Job
+		err := json.Unmarshal(bytes.NewBufferString(keyValue.Value).Bytes(), &job)
+		if err != nil {
+			return jobs, err
+		}
+		jobs = append(jobs, job)
+	}
+	return jobs, err
 }
 
+const jobPrefix = "/job/"
+
 func getJobKey(jobName string) string {
-	return fmt.Sprintf("/job/%s/", jobName)
+	return fmt.Sprintf("%s%s/", jobPrefix, jobName)
 }
 
 func (volRegistry *volumeRegistry) AddJob(job registry.Job) error {
@@ -39,8 +51,12 @@ func (volRegistry *volumeRegistry) AddJob(job registry.Job) error {
 	})
 }
 
-func (volRegistry *volumeRegistry) DeleteJob() error {
-	panic("implement me")
+func (volRegistry *volumeRegistry) DeleteJob(jobName string) error {
+	keyValue, err := volRegistry.keystore.Get(getJobKey(jobName))
+	if err != nil {
+		return err
+	}
+	return volRegistry.keystore.DeleteAll([]KeyValueVersion{keyValue})
 }
 
 func (volRegistry *volumeRegistry) UpdateConfiguration(name registry.VolumeName, configurations []registry.Configuration) error {
