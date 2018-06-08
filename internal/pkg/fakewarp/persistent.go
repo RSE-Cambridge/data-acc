@@ -8,31 +8,36 @@ import (
 	"time"
 )
 
-type PersistentBufferRequest struct {
-	Token    string
-	Caller   string
-	Capacity string
-	User     int
-	Group    int
-	Access   string
-	Type     string
+type BufferRequest struct {
+	Token      string
+	Caller     string
+	Capacity   string
+	User       int
+	Group      int
+	Access     string
+	Type       string
+	Persistent bool
 }
 
 // Creates a persistent buffer.
 // If it works, we return the name of the buffer, otherwise an error is returned
 func CreatePersistentBuffer(c CliContext, keystore keystoreregistry.Keystore) (string, error) {
-	request := PersistentBufferRequest{c.String("token"), c.String("caller"),
+	request := BufferRequest{c.String("token"), c.String("caller"),
 		c.String("capacity"), c.Int("user"),
-		c.Int("groupid"), c.String("access"), c.String("type")}
+		c.Int("groupid"), c.String("access"), c.String("type"),
+		true}
 	if request.Group == 0 {
 		request.Group = request.User
 	}
-	createdAt := uint(time.Now().Unix())
+	return request.Token, createVolumesAndJobs(keystore, request)
+}
 
+func createVolumesAndJobs(keystore keystoreregistry.Keystore, request BufferRequest) error {
+	createdAt := uint(time.Now().Unix())
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
 	capacity, err := strconv.Atoi(request.Capacity) // TODO lots of proper parsing to do here, get poolname, etc
 	if err != nil {
-		return "", errors.New("please format capacity correctly")
+		return errors.New("please format capacity correctly")
 	}
 	err = volReg.AddVolume(registry.Volume{
 		Name:       registry.VolumeName(request.Token),
@@ -47,7 +52,7 @@ func CreatePersistentBuffer(c CliContext, keystore keystoreregistry.Keystore) (s
 		State:      registry.Registered,
 	})
 	if err != nil {
-		return request.Token, err
+		return err
 	}
 	// TODO: get bricks assigned to volume (i.e. ensure we have capacity)
 	err = volReg.AddJob(registry.Job{
@@ -60,5 +65,5 @@ func CreatePersistentBuffer(c CliContext, keystore keystoreregistry.Keystore) (s
 		volReg.DeleteVolume(registry.VolumeName(request.Token))
 	}
 	// TODO: wait for bricks to be provisioned correctly?
-	return request.Token, err
+	return err
 }

@@ -17,8 +17,12 @@ import (
 // Creates a persistent buffer.
 // If it works, we return the name of the buffer, otherwise an error is returned
 func DeleteBuffer(c CliContext, keystore keystoreregistry.Keystore) error {
-	error := processDeleteBuffer(c.String("token"), keystore)
-	return error
+	token := c.String("token")
+	volReg := keystoreregistry.NewVolumeRegistry(keystore)
+	if err := volReg.DeleteVolume(registry.VolumeName(token)); err != nil {
+		return err
+	}
+	return volReg.DeleteJob(token)
 }
 
 func processDeleteBuffer(bufferName string, keystore keystoreregistry.Keystore) error {
@@ -30,8 +34,12 @@ func processDeleteBuffer(bufferName string, keystore keystoreregistry.Keystore) 
 }
 
 func CreatePerJobBuffer(c CliContext, keystore keystoreregistry.Keystore) error {
-	error := processCreatePerJobBuffer(keystore, c.String("token"), c.Int("user"))
-	return error
+	// TODO need to read and parse the job file...
+	return createVolumesAndJobs(keystore, BufferRequest{
+		Token:c.String("token"),
+		User: c.Int("user"),
+		Capacity: "3", // TODO
+	})
 }
 
 func processCreatePerJobBuffer(keystore keystoreregistry.Keystore, token string, user int) error {
