@@ -1,5 +1,7 @@
 package fakewarp
 
+import "github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+
 type instanceCapacity struct {
 	Bytes uint `json:"bytes"`
 	Nodes uint `json:"nodes"`
@@ -22,12 +24,12 @@ func (list *instances) String() string {
 	return toJson(message)
 }
 
-func GetInstances() *instances {
+func GetInstances(volRegistry registry.VolumeRegistry) (*instances, error) {
 	fakeInstance := instance{
 		"fakebuffer",
 		instanceCapacity{3, 40},
 		instanceLinks{"fakebuffer"}}
-	return &instances{fakeInstance}
+	return &instances{fakeInstance}, nil
 }
 
 type session struct {
@@ -44,9 +46,9 @@ func (list *sessions) String() string {
 	return toJson(message)
 }
 
-func GetSessions() *sessions {
+func GetSessions(volRegistry registry.VolumeRegistry) (*sessions, error) {
 	fakeSession := session{"fakebuffer", 1234567890, 1001, "fakebuffer"}
-	return &sessions{fakeSession}
+	return &sessions{fakeSession}, nil
 }
 
 type configurations []string

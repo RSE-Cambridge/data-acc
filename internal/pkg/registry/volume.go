@@ -44,6 +44,9 @@ type Job struct {
 	// Name of the job
 	Name string
 
+	Owner     int
+	CreatedAt int
+
 	// Zero or One PerJob volumes
 	// and Zero or more MultiJob volumes
 	Volumes []VolumeName
@@ -62,6 +65,7 @@ type Volume struct {
 	Group int
 	// e.g. SLURM or Manila
 	CreatedBy string
+	CreatedAt int
 	// Requested pool of bricks for volume
 	Pool string
 	// Requested size of volume

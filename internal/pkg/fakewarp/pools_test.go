@@ -1,10 +1,10 @@
 package fakewarp
 
 import (
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"github.com/golang/mock/gomock"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 )
 
 func TestGetPools(t *testing.T) {

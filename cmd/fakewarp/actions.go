@@ -11,12 +11,28 @@ import (
 )
 
 func showInstances(_ *cli.Context) error {
-	fmt.Print(fakewarp.GetInstances())
+	keystore := getKeystore()
+	defer keystore.Close()
+	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
+
+	instances, err := fakewarp.GetInstances(volumeRegistry)
+	if err != nil {
+		return err
+	}
+	fmt.Println(instances)
 	return nil
 }
 
 func showSessions(_ *cli.Context) error {
-	fmt.Print(fakewarp.GetSessions())
+	keystore := getKeystore()
+	defer keystore.Close()
+	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
+
+	sessions, err := fakewarp.GetSessions(volumeRegistry)
+	if err != nil {
+		return err
+	}
+	fmt.Println(sessions)
 	return nil
 }
 
@@ -29,7 +45,7 @@ func listPools(_ *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	fmt.Print(pools)
+	fmt.Println(pools)
 	return nil
 }
 

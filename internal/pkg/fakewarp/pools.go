@@ -32,11 +32,11 @@ func GetPools(registry registry.PoolRegistry) (*pools, error) {
 		free := len(regPool.AvailableBricks)
 		quantity := free + len(regPool.AllocatedBricks)
 		pools = append(pools, pool{
-			Id: regPool.Name,
-			Units: "bytes",
+			Id:          regPool.Name,
+			Units:       "bytes",
 			Granularity: regPool.GranularityGB * GbInBytes,
-			Quantity: uint(quantity),
-			Free: uint(free),
+			Quantity:    uint(quantity),
+			Free:        uint(free),
 		})
 	}
 	return &pools, nil

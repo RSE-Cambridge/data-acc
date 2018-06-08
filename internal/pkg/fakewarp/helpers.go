@@ -1,7 +1,6 @@
 package fakewarp
 
 import (
-	"bytes"
 	"encoding/json"
 	"log"
 )
@@ -16,8 +15,5 @@ func toJson(message interface{}) string {
 	if error != nil {
 		log.Fatal(error)
 	}
-	buffer := new(bytes.Buffer)
-	buffer.Write(b)
-	buffer.Write([]byte("\n"))
-	return buffer.String()
+	return string(b)
 }

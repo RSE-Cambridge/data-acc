@@ -211,7 +211,7 @@ func (client *etcKeystore) KeepAliveKey(key string) error {
 					counter = 0
 					log.Println("Still refreshing key:", key)
 				} else {
-					counter ++
+					counter++
 				}
 			}
 		}
