@@ -9,13 +9,30 @@ type VolumeRegistry interface {
 	// Get all registered jobs and their volumes
 	Jobs() ([]Job, error)
 
+	// Add job and associated volumes
+	// Fails to add job if volumes are in a bad state
+	AddJob(job Job) error
+
+	// Remove job from the system
+	// TODO: fails if volumes are not in the deleted state?
+	DeleteJob() error
+
 	// Get information about specific volume
+	// TODO: remove add/detele and only
 	AddVolume(volume Volume) error
+
+	// Get information about a specific volume
 	Volume(name VolumeName) (Volume, error)
+
+	// TODO: this should error if volume is not in correct state?
 	DeleteVolume(name VolumeName) error
 
 	// Move between volume states, but only one by one
 	UpdateState(name VolumeName, state VolumeState) error
+
+	// Used to add or remove attachments
+	// TODO: only allowed in certain states?
+	UpdateConfiguration(name VolumeName, configuration []Configuration) error
 
 	// Get all callback on all volume changes
 	// If the volume is new, old = nil
@@ -79,6 +96,9 @@ const (
 	BricksAssigned
 	Test2
 	Test3
+	Ready   VolumeState = 200
+	Deleted VolumeState = 400
+	Error   VolumeState = 500
 )
 
 var volumeStateStrings = map[VolumeState]string{
@@ -121,6 +141,7 @@ func (volumeState *VolumeState) UnmarshalJSON(b []byte) error {
 type VolumeDriver string
 
 type Configuration struct {
+	Name string
 	// Define if used as a transparent cache or
 	// if attached directly
 	Type ConfigurationType

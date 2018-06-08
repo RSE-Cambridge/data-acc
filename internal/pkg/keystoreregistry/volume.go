@@ -15,7 +15,45 @@ type volumeRegistry struct {
 	keystore Keystore
 }
 
-func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state registry.VolumeState) error {
+func (volRegistry *volumeRegistry) Jobs() ([]registry.Job, error) {
+	panic("implement me")
+}
+
+func getJobKey(jobName string) string {
+	return fmt.Sprintf("/job/%s/", jobName)
+}
+
+func (volRegistry *volumeRegistry) AddJob(job registry.Job) error {
+	for _, volumeName := range job.Volumes {
+		volume, err := volRegistry.Volume(volumeName)
+		if err != nil {
+			return err
+		}
+		// TODO: what other checks are required?
+		if volume.State < registry.Registered {
+			return fmt.Errorf("must register volume: %s", volume.Name)
+		}
+	}
+	return volRegistry.keystore.Add([]KeyValue{
+		{Key: getJobKey(job.Name), Value: toJson(job)},
+	})
+}
+
+func (volRegistry *volumeRegistry) DeleteJob() error {
+	panic("implement me")
+}
+
+func (volRegistry *volumeRegistry) UpdateConfiguration(name registry.VolumeName, configurations []registry.Configuration) error {
+	updateConfig := func(volume *registry.Volume) error {
+		volume.Configurations = configurations
+		return nil
+	}
+	return volRegistry.updateVolume(name, updateConfig)
+}
+
+func (volRegistry *volumeRegistry) updateVolume(name registry.VolumeName,
+	update func(volume *registry.Volume) error) error {
+
 	keyValue, err := volRegistry.keystore.Get(getVolumeKey(string(name)))
 	if err != nil {
 		return err
@@ -26,16 +64,24 @@ func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state r
 	if err != nil {
 		return nil
 	}
-
-	// TODO: this is almost certainly too strict, but its a start...
-	stateDifference := state - volume.State
-	if stateDifference != 1 {
-		return fmt.Errorf("must update volume to the next state")
+	if err := update(&volume); err != nil {
+		return err
 	}
-	volume.State = state
 
 	keyValue.Value = toJson(volume)
 	return volRegistry.keystore.Update([]KeyValueVersion{keyValue})
+
+}
+func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state registry.VolumeState) error {
+	updateState := func(volume *registry.Volume) error {
+		stateDifference := state - volume.State
+		if stateDifference != 1 {
+			return fmt.Errorf("must update volume to the next state")
+		}
+		volume.State = state
+		return nil
+	}
+	return volRegistry.updateVolume(name, updateState)
 }
 
 func getVolumeKey(volumeName string) string {
@@ -90,8 +136,4 @@ func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
 		callback(oldVolume, newVolume)
 	})
 	return nil // TODO check key is present
-}
-
-func (volRegistry *volumeRegistry) Jobs() ([]registry.Job, error) {
-	panic("implement me")
 }

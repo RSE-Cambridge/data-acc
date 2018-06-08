@@ -11,13 +11,14 @@ func TestKeystoreVolumeRegistry(keystore keystoreregistry.Keystore) {
 	log.Println("Testing keystoreregistry.volume")
 	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
 
-	testVolumeCRD(volumeRegistry)
+	testVolumeCRUD(volumeRegistry)
+	testJobCRUD(volumeRegistry)
 
 	// give watches time to print
 	time.Sleep(time.Second)
 }
 
-func testVolumeCRD(volRegistry registry.VolumeRegistry) {
+func testVolumeCRUD(volRegistry registry.VolumeRegistry) {
 	volRegistry.WatchVolumeChanges("asdf", func(old *registry.Volume, new *registry.Volume) {
 		log.Printf("Volume update detected. old: %s new: %s", old.State, new.State)
 	})
@@ -64,4 +65,26 @@ func testVolumeCRD(volRegistry registry.VolumeRegistry) {
 	if err := volRegistry.UpdateState(volume.Name, registry.Test3); err == nil {
 		log.Fatal("expected error with out of order update")
 	}
+	volRegistry.UpdateState(volume2.Name, registry.Registered)
+}
+
+func testJobCRUD(volRegistry registry.VolumeRegistry) {
+	job := registry.Job{Name: "foo", Volumes: []registry.VolumeName{"asdf", "asdf2"}}
+	if err := volRegistry.AddJob(job); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := volRegistry.AddJob(job); err == nil {
+		log.Fatal("expected an error adding duplicate job")
+	}
+	badJob := registry.Job{Name: "bar", Volumes: []registry.VolumeName{"asdf", "asdf3"}}
+	if err := volRegistry.AddJob(badJob); err == nil {
+		log.Fatal("expected an error for invalid volume name")
+	}
+
+	jobs, err := volRegistry.Jobs()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(jobs)
 }
