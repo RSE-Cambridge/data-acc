@@ -4,6 +4,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
+	"time"
 )
 
 func TestKeystoreVolumeRegistry(keystore keystoreregistry.Keystore) {
@@ -14,6 +15,10 @@ func TestKeystoreVolumeRegistry(keystore keystoreregistry.Keystore) {
 }
 
 func testVolumeCRD(volRegistry registry.VolumeRegistry) {
+	volRegistry.WatchVolumeChanges("asdf", func(old *registry.Volume, new *registry.Volume) {
+		log.Printf("Volume update detected. old: %s new: %s", old.Name, new.Name)
+	})
+
 	volume := registry.Volume{Name: "asdf"}
 	volume2 := registry.Volume{Name: "asdf2"}
 	if err := volRegistry.AddVolume(volume); err != nil {
@@ -43,4 +48,6 @@ func testVolumeCRD(volRegistry registry.VolumeRegistry) {
 	// leave around for following tests
 	volRegistry.AddVolume(volume)
 	volRegistry.AddVolume(volume2)
+
+	time.Sleep(time.Second)
 }

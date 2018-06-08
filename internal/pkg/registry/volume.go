@@ -14,7 +14,7 @@ type VolumeRegistry interface {
 	// Get all callback on all volume changes
 	// If the volume is new, old = nil
 	// used by the primary brick to get volume updates
-	WatchVolumeChanges(volumeName string, callback func(old Volume, new Volume)) error
+	WatchVolumeChanges(volumeName string, callback func(old *Volume, new *Volume)) error
 
 	// Creates volume and returns once volume is created
 	// At this point all bricks are assigned and configured
