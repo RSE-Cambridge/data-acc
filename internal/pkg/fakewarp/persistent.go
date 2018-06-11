@@ -2,12 +2,12 @@ package fakewarp
 
 import (
 	"errors"
+	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"strconv"
-	"time"
 	"strings"
-	"fmt"
+	"time"
 )
 
 type BufferRequest struct {
@@ -70,7 +70,7 @@ func createVolumesAndJobs(keystore keystoreregistry.Keystore, request BufferRequ
 		CreatedBy:  request.Caller,
 		Group:      request.Group,
 		SizeGB:     uint(capacity),
-		SizeBricks: 3,         // TODO... check pool granularity
+		SizeBricks: 3,    // TODO... check pool granularity
 		Pool:       pool, // TODO....
 		State:      registry.Registered,
 	})

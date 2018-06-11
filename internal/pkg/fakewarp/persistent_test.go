@@ -5,6 +5,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"testing"
 )
 
@@ -19,12 +20,26 @@ func (c *mockCliContext) Int(name string) int {
 }
 
 func TestCreatePersistentBufferReturnsError(t *testing.T) {
-	c := mockCliContext{}
 	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 	mockObj := keystoreregistry.NewMockKeystore(mockCtrl)
-	if _, error := CreatePersistentBuffer(&c, mockObj); error != nil {
+	mockCtxt := mockCliContext{}
+
+	if _, error := CreatePersistentBuffer(&mockCtxt, mockObj); error != nil {
 		assert.EqualValues(t, "unable to create buffer", fmt.Sprint(error))
 	} else {
 		t.Fatalf("Expected an error")
 	}
+}
+
+func TestParseJobRequest(t *testing.T) {
+	jobRequest := []string{
+		`#DW asdf`,
+		`foo`,
+		`#DW swap`,
+	}
+	if err := parseJobRequest(jobRequest); err != nil {
+		log.Fatal(err)
+	}
+
 }
