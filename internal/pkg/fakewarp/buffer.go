@@ -5,6 +5,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -19,7 +20,36 @@ func DeleteBuffer(c CliContext, volReg registry.VolumeRegistry) error {
 }
 
 func parseJobRequest(lines []string) error {
-	log.Println(lines)
+	for _, line := range lines {
+		tokens := strings.Split(line, " ")
+		if len(tokens) < 3 {
+			log.Println("Skip badly formatted line", line)
+			continue
+		}
+
+		cmdType := tokens[0]
+		cmd := tokens[1]
+		args := tokens[2:]
+
+		var isGeneric bool
+		switch cmdType {
+		case "#DW":
+			isGeneric = false
+		case "#BB":
+			isGeneric = true
+		default:
+			log.Println("unrecognised command type:", cmdType)
+			continue
+		}
+		log.Println("Is generic command:", isGeneric)
+
+		switch cmd {
+		case "asdf":
+			log.Println("test!")
+		default:
+			log.Println("unrecognised command:", cmd, "with argument length", len(args))
+		}
+	}
 	return nil
 }
 
