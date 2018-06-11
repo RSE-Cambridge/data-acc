@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/golang/mock/gomock"
 	"strings"
 	"testing"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 )
 
 func notEqual(a, b []string) bool {
@@ -39,7 +39,7 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	// TODO: has to be a better way to do this
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockKeystore := keystoreregistry.NewMockKeystore(mockCtrl)
+	mockKeystore := mocks.NewMockKeystore(mockCtrl)
 	mockKeystore.EXPECT().CleanPrefix("/buffers/a")
 	mockKeystore.EXPECT().CleanPrefix("/buffers/a2")
 	mockKeystore.EXPECT().Close().AnyTimes()

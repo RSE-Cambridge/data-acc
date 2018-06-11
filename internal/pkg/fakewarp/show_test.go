@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 )
 
 func assertNewline(t *testing.T, actual string) {
@@ -15,7 +16,7 @@ func assertNewline(t *testing.T, actual string) {
 func TestGetInstances(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockObj := keystoreregistry.NewMockKeystore(mockCtrl)
+	mockObj := mocks.NewMockKeystore(mockCtrl)
 	mockReg := keystoreregistry.NewVolumeRegistry(mockObj)
 
 	instances, err := GetInstances(mockReg)
@@ -32,7 +33,7 @@ func TestGetInstances(t *testing.T) {
 func TestGetSessions(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockObj := keystoreregistry.NewMockKeystore(mockCtrl)
+	mockObj := mocks.NewMockKeystore(mockCtrl)
 	mockReg := keystoreregistry.NewVolumeRegistry(mockObj)
 
 	sessions, err := GetSessions(mockReg)

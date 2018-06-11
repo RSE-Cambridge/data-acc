@@ -5,11 +5,12 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 )
 
 func TestGetPools(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
-	mockObj := keystoreregistry.NewMockKeystore(mockCtrl)
+	mockObj := mocks.NewMockKeystore(mockCtrl)
 
 	pools, _ := GetPools(keystoreregistry.NewPoolRegistry(mockObj))
 	actual := pools.String()
