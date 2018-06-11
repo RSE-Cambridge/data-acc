@@ -2,8 +2,10 @@ package fakewarp
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -48,11 +50,34 @@ type cmdAttachPersistent struct{}
 
 type cmdPerJobBuffer struct{}
 
-type cmdAttachPerJobSwap struct{}
+type cmdAttachPerJobSwap struct {
+	SizeBytes int
+}
 
 type cmdStageInData struct{}
 
 type cmdStageOutData struct{}
+
+func parseSize(raw string) (int, error) {
+	switch {
+	case strings.HasSuffix(raw, "GiB"):
+		rawGb := strings.TrimSuffix(raw, "GiB")
+		intGb, err := strconv.Atoi(rawGb)
+		if err != nil {
+			return 0, err
+		}
+		return intGb * GbInBytes, nil
+	case strings.HasSuffix(raw, "TiB"):
+		rawTb := strings.TrimSuffix(raw, "TiB")
+		intTb, err := strconv.Atoi(rawTb)
+		if err != nil {
+			return 0, err
+		}
+		return intTb * GbInBytes * 1024, nil
+	default:
+		return 0, fmt.Errorf("unable to parse size: %s", raw)
+	}
+}
 
 func parseJobRequest(lines []string) ([]jobCommand, error) {
 	var commands []jobCommand
@@ -89,7 +114,15 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 		case "jobdw":
 			command = cmdPerJobBuffer{}
 		case "swap":
-			command = cmdAttachPerJobSwap{}
+			if len(args) != 1 {
+				log.Println("Unable to parse swap command:", line)
+			}
+			if size, err := parseSize(args[0]); err != nil {
+				log.Println(err)
+				continue
+			} else {
+				command = cmdAttachPerJobSwap{SizeBytes: size}
+			}
 		case "stage_in":
 			command = cmdStageInData{}
 		case "stage_out":
