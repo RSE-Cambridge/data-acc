@@ -13,14 +13,53 @@ func parseJobFile(lineSrc GetLines, filename string) error {
 	if err != nil {
 		return err
 	}
-	return parseJobRequest(lines)
+	_, err = parseJobRequest(lines) // TODO use return value!
+	return err
 }
 
-func parseJobRequest(lines []string) error {
+type jobCommand interface{}
+
+type cmdCreatePersistent struct {
+	Name          string
+	CapacityBytes int64
+	AccessMode    AccessMode
+	BufferType    BufferType
+	GenericCmd    bool
+}
+
+type AccessMode int
+
+const (
+	striped           AccessMode = 1
+	private                      = 2
+	privateAndStriped            = 3
+)
+
+type BufferType int
+
+const (
+	scratch BufferType = iota
+	cache
+)
+
+type cmdDestroyPersistent struct{}
+
+type cmdAttachPersistent struct{}
+
+type cmdPerJobBuffer struct{}
+
+type cmdAttachPerJobSwap struct{}
+
+type cmdStageInData struct{}
+
+type cmdStageOutData struct{}
+
+func parseJobRequest(lines []string) ([]jobCommand, error) {
+	var commands []jobCommand
 	for _, line := range lines {
 		tokens := strings.Split(line, " ")
 		if len(tokens) < 3 {
-			log.Println("Skip badly formatted line", line)
+			log.Println("Skip badly formatted line:", line)
 			continue
 		}
 
@@ -38,16 +77,30 @@ func parseJobRequest(lines []string) error {
 			log.Println("unrecognised command type:", cmdType)
 			continue
 		}
-		log.Println("Is generic command:", isGeneric)
 
+		var command jobCommand
 		switch cmd {
-		case "asdf":
-			log.Println("test!")
+		case "create_persistent":
+			command = cmdCreatePersistent{GenericCmd: isGeneric}
+		case "destroy_persistent":
+			command = cmdDestroyPersistent{}
+		case "persistentdw":
+			command = cmdAttachPersistent{}
+		case "jobdw":
+			command = cmdPerJobBuffer{}
+		case "swap":
+			command = cmdAttachPerJobSwap{}
+		case "stage_in":
+			command = cmdStageInData{}
+		case "stage_out":
+			command = cmdStageOutData{}
 		default:
 			log.Println("unrecognised command:", cmd, "with argument length", len(args))
+			continue
 		}
+		commands = append(commands, command)
 	}
-	return nil
+	return commands, nil
 }
 
 // Allow tests to replace the source of lines in given file

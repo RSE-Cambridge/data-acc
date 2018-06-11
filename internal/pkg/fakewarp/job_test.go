@@ -21,8 +21,12 @@ func TestParseJobRequest(t *testing.T) {
 		`#DW stage_in source=/global/cscratch1/filename1 destination=$DW_JOB_STRIPED/filename1 type=file`,
 		`#DW stage_out source=$DW_JOB_STRIPED/outdir destination=/global/scratch1/outdir type=directory`,
 	}
-	if err := parseJobRequest(jobRequest); err != nil {
+	if cmds, err := parseJobRequest(jobRequest); err != nil {
 		log.Fatal(err)
+	} else {
+		for _, cmd := range cmds {
+			log.Printf("Cmd: %T Args: %s\n", cmd, cmd)
+		}
 	}
 
 }
