@@ -3,6 +3,7 @@ package fakewarp
 import (
 	"log"
 	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseJobRequest(t *testing.T) {
@@ -14,7 +15,7 @@ func TestParseJobRequest(t *testing.T) {
 		`#DW persistentdw name=myBBname2`,
 		`#DW persistentdw name=myBBname2`,
 		`#DW jobdw capacity=10GB access_mode=striped type=scratch`,
-		`#DW jobdw capacity=10GB access_mode=private type=scratch`,
+		`#DW jobdw capacity=2TB access_mode=private type=scratch`,
 		`#DW jobdw capacity=4TiB access_mode=striped,private type=scratch`,
 		`#DW jobdw capacity=42GiB access_mode=ldbalance type=cache pfs=/global/scratch1/john`,
 		`#DW swap 3TiB`,
@@ -24,6 +25,7 @@ func TestParseJobRequest(t *testing.T) {
 	if cmds, err := parseJobRequest(jobRequest); err != nil {
 		log.Fatal(err)
 	} else {
+		assert.Equal(t, 13, len(jobRequest)) // TODO should check returned values!!
 		for _, cmd := range cmds {
 			log.Printf("Cmd: %T Args: %s\n", cmd, cmd)
 		}

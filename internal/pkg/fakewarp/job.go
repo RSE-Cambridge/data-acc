@@ -23,7 +23,7 @@ type jobCommand interface{}
 
 type cmdCreatePersistent struct {
 	Name          string
-	CapacityBytes int64
+	CapacityBytes int
 	AccessMode    AccessMode
 	BufferType    BufferType
 	GenericCmd    bool
@@ -59,7 +59,7 @@ type cmdStageInData struct{}
 type cmdStageOutData struct{}
 
 func parseSize(raw string) (int, error) {
-	switch {
+	switch { // TODO move to a dict that contains conversions?
 	case strings.HasSuffix(raw, "GiB"):
 		rawGb := strings.TrimSuffix(raw, "GiB")
 		intGb, err := strconv.Atoi(rawGb)
@@ -67,6 +67,13 @@ func parseSize(raw string) (int, error) {
 			return 0, err
 		}
 		return intGb * GbInBytes, nil
+	case strings.HasSuffix(raw, "GB"):
+		rawGb := strings.TrimSuffix(raw, "GB")
+		intGb, err := strconv.Atoi(rawGb)
+		if err != nil {
+			return 0, err
+		}
+		return intGb * GbInBytes, nil // TODO... one of these is wrong!
 	case strings.HasSuffix(raw, "TiB"):
 		rawTb := strings.TrimSuffix(raw, "TiB")
 		intTb, err := strconv.Atoi(rawTb)
@@ -77,6 +84,18 @@ func parseSize(raw string) (int, error) {
 	default:
 		return 0, fmt.Errorf("unable to parse size: %s", raw)
 	}
+}
+
+func parseArgs(rawArgs []string) (map[string]string, error) {
+	args := make(map[string]string, len(rawArgs))
+	for _, arg := range rawArgs {
+		parts := strings.Split(arg, "=")
+		if len(parts) != 2 {
+			return args, fmt.Errorf("unable to parse arg: %s", arg)
+		}
+		args[parts[0]] = parts[1]
+	}
+	return args, nil
 }
 
 func parseJobRequest(lines []string) ([]jobCommand, error) {
@@ -103,10 +122,21 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 			continue
 		}
 
+		argKeyPair, _ := parseArgs(args) // TODO deal with errors when not swap
+
 		var command jobCommand
 		switch cmd {
 		case "create_persistent":
-			command = cmdCreatePersistent{GenericCmd: isGeneric}
+			size, err := parseSize(argKeyPair["capacity"])
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			command = cmdCreatePersistent{
+				Name: argKeyPair["name"],
+				CapacityBytes: size,
+				GenericCmd: isGeneric, // TODO... other fields
+			}
 		case "destroy_persistent":
 			command = cmdDestroyPersistent{}
 		case "persistentdw":
