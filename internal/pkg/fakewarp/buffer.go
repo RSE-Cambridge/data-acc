@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/oldregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"math/rand"
@@ -65,7 +64,7 @@ func CreatePerJobBuffer(c CliContext, keystore keystoreregistry.Keystore) error 
 }
 
 // TODO: need to reuse this with the new logic
-func getBricksForBuffer(keystore keystoreregistry.Keystore, buffer *oldregistry.Buffer) []registry.BrickInfo {
+func getBricksForBuffer(keystore keystoreregistry.Keystore, buffer *registry.Volume) []registry.BrickInfo {
 	log.Println("Add fakebuffer and match to bricks")
 
 	availableBricks := make(map[string][]registry.BrickInfo) // hostname to available bricks, getAvailableBricks(cli)
