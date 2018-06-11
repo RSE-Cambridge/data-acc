@@ -1,9 +1,20 @@
 package fakewarp
 
 import (
+	"bufio"
 	"log"
+	"os"
 	"strings"
 )
+
+// Parse a given job file
+func parseJobFile(lineSrc GetLines, filename string) error {
+	lines, err := lineSrc.Lines(filename)
+	if err != nil {
+		return err
+	}
+	return parseJobRequest(lines)
+}
 
 func parseJobRequest(lines []string) error {
 	for _, line := range lines {
@@ -39,25 +50,31 @@ func parseJobRequest(lines []string) error {
 	return nil
 }
 
-// returns an error if the format of the file is bad
-// or requests something unsupported
-func parseJobFile(filename string) error {
-	/*file, err := os.Open("file.txt")
+// Allow tests to replace the source of lines in given file
+type GetLines interface {
+	Lines(filename string) ([]string, error)
+}
+
+// Read lines from a file
+// Implements the GetLines interface
+type LinesFromFile struct{}
+
+func (LinesFromFile) Lines(filename string) ([]string, error) {
+	var lines []string
+
+	file, err := os.Open(filename)
 	if err != nil {
-		return err
+		return lines, err
 	}
 	defer file.Close()
 
-	var lines []string
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		return lines, err
 	}
-
-	return parseJobRequest(lines)*/
-	return nil
+	return lines, nil
 }

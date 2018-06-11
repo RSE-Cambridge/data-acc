@@ -18,9 +18,9 @@ func DeleteBuffer(c CliContext, volReg registry.VolumeRegistry) error {
 	return volReg.DeleteJob(token)
 }
 
-func CreatePerJobBuffer(c CliContext, volReg registry.VolumeRegistry) error {
+func CreatePerJobBuffer(c CliContext, volReg registry.VolumeRegistry, lineSrc GetLines) error {
 	// TODO need to read and parse the job file...
-	if err := parseJobFile(c.String("job")); err != nil {
+	if err := parseJobFile(lineSrc, c.String("job")); err != nil {
 		return err
 	}
 	return createVolumesAndJobs(volReg, BufferRequest{

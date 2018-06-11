@@ -91,7 +91,7 @@ func setup(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	error := fakewarp.CreatePerJobBuffer(c, volReg)
+	error := fakewarp.CreatePerJobBuffer(c, volReg, lines)
 	return error
 }
 
@@ -136,12 +136,16 @@ func dataOut(c *cli.Context) error {
 }
 
 var testKeystore keystoreregistry.Keystore
+var lines fakewarp.GetLines
 
 func getKeystore() keystoreregistry.Keystore {
 	// TODO must be a better way to test this, proper factory?
 	keystore := testKeystore
 	if keystore == nil {
 		keystore = etcdregistry.NewKeystore()
+	}
+	if lines == nil {
+		lines = fakewarp.LinesFromFile{}
 	}
 	return keystore
 }
