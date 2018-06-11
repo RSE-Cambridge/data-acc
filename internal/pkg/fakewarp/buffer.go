@@ -111,7 +111,8 @@ func getBricksForBuffer(keystore keystoreregistry.Keystore, buffer *registry.Vol
 	// TODO: should be done in a single transaction, and retry if clash
 	for i, brick := range chosenBricks {
 		chosenKey := fmt.Sprintf("/bricks/inuse/%s/%s", brick.Hostname, brick.Device)
-		keystore.AtomicAdd(chosenKey, fmt.Sprintf("%s:%d", buffer.Name, i))
+		log.Println("Add to etcd:", chosenKey, fmt.Sprintf("%s:%d", buffer.Name, i))
+		//TODO: keystore.AtomicAdd(chosenKey, fmt.Sprintf("%s:%d", buffer.Name, i))
 	}
 
 	return chosenBricks

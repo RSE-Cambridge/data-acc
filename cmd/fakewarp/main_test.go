@@ -42,9 +42,6 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	mockKeystore := keystoreregistry.NewMockKeystore(mockCtrl)
 	mockKeystore.EXPECT().CleanPrefix("/buffers/a")
 	mockKeystore.EXPECT().CleanPrefix("/buffers/a2")
-	mockKeystore.EXPECT().AtomicAdd("/buffers/a", gomock.Any())
-	mockKeystore.EXPECT().AtomicAdd("/buffers/p1", gomock.Any())
-	mockKeystore.EXPECT().AtomicAdd("/buffers/p2", gomock.Any())
 	mockKeystore.EXPECT().Close().AnyTimes()
 	testKeystore = mockKeystore
 	defer func() {

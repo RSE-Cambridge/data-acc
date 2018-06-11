@@ -139,23 +139,3 @@ func (m *MockKeystore) KeepAliveKey(key string) error {
 func (mr *MockKeystoreMockRecorder) KeepAliveKey(key interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KeepAliveKey", reflect.TypeOf((*MockKeystore)(nil).KeepAliveKey), key)
 }
-
-// AtomicAdd mocks base method
-func (m *MockKeystore) AtomicAdd(key, value string) {
-	m.ctrl.Call(m, "AtomicAdd", key, value)
-}
-
-// AtomicAdd indicates an expected call of AtomicAdd
-func (mr *MockKeystoreMockRecorder) AtomicAdd(key, value interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AtomicAdd", reflect.TypeOf((*MockKeystore)(nil).AtomicAdd), key, value)
-}
-
-// WatchPutPrefix mocks base method
-func (m *MockKeystore) WatchPutPrefix(prefix string, onPut func(string, string)) {
-	m.ctrl.Call(m, "WatchPutPrefix", prefix, onPut)
-}
-
-// WatchPutPrefix indicates an expected call of WatchPutPrefix
-func (mr *MockKeystoreMockRecorder) WatchPutPrefix(prefix, onPut interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchPutPrefix", reflect.TypeOf((*MockKeystore)(nil).WatchPutPrefix), prefix, onPut)
-}

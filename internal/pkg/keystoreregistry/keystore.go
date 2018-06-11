@@ -54,10 +54,6 @@ type Keystore interface {
 	// Add a key, and remove it when calling process dies
 	// Error is returned if the key already exists
 	KeepAliveKey(key string) error
-
-	// TODO: remove old methods
-	AtomicAdd(key string, value string)
-	WatchPutPrefix(prefix string, onPut func(string, string))
 }
 
 type KeyValue struct {

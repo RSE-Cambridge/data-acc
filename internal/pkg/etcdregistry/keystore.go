@@ -234,30 +234,3 @@ func (client *etcKeystore) CleanPrefix(prefix string) error {
 	// TODO return deleted count
 	return nil
 }
-
-func (client *etcKeystore) AtomicAdd(key string, value string) {
-	kvc := clientv3.NewKV(client.Client)
-	response, err := kvc.Txn(context.Background()).
-		If(clientv3util.KeyMissing(key)).
-		Then(clientv3.OpPut(key, value)).
-		Commit()
-	if err != nil {
-		panic(err)
-	}
-	if !response.Succeeded {
-		panic(fmt.Errorf("oh dear someone has added the key already: %s", key))
-	}
-}
-
-func (client *etcKeystore) WatchPutPrefix(prefix string, onPut func(key string, value string)) {
-	rch := client.Watch(context.Background(), prefix, clientv3.WithPrefix())
-	for wresp := range rch {
-		for _, ev := range wresp.Events {
-			if ev.Type.String() == "PUT" {
-				onPut(string(ev.Kv.Key), string(ev.Kv.Value))
-			} else {
-				fmt.Printf("%s %q : %q\n", ev.Type, ev.Kv.Key, ev.Kv.Value)
-			}
-		}
-	}
-}
