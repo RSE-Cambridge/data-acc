@@ -72,7 +72,8 @@ func teardown(c *cli.Context) error {
 		c.String("token"), c.String("job"), c.Bool("hurry"))
 	keystore := getKeystore()
 	defer keystore.Close()
-	error := fakewarp.DeleteBuffer(c, keystore)
+	volReg := keystoreregistry.NewVolumeRegistry(keystore)
+	error := fakewarp.DeleteBuffer(c, volReg)
 	return error
 }
 
@@ -89,7 +90,8 @@ func setup(c *cli.Context) error {
 		c.Int("groupid"), c.String("capacity"))
 	keystore := getKeystore()
 	defer keystore.Close()
-	error := fakewarp.CreatePerJobBuffer(c, keystore)
+	volReg := keystoreregistry.NewVolumeRegistry(keystore)
+	error := fakewarp.CreatePerJobBuffer(c, volReg)
 	return error
 }
 
@@ -148,7 +150,8 @@ func createPersistent(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "caller", "capacity", "user", "access", "type")
 	keystore := getKeystore()
 	defer keystore.Close()
-	name, error := fakewarp.CreatePersistentBuffer(c, keystore)
+	volReg := keystoreregistry.NewVolumeRegistry(keystore)
+	name, error := fakewarp.CreatePersistentBuffer(c, volReg)
 	if error == nil {
 		// Slurm is looking for the string "created" to know this worked
 		fmt.Printf("created %s\n", name)

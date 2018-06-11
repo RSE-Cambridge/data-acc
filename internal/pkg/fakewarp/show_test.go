@@ -1,12 +1,12 @@
 package fakewarp
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 )
 
 func assertNewline(t *testing.T, actual string) {
@@ -16,8 +16,13 @@ func assertNewline(t *testing.T, actual string) {
 func TestGetInstances(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockObj := mocks.NewMockKeystore(mockCtrl)
-	mockReg := keystoreregistry.NewVolumeRegistry(mockObj)
+	mockReg := mocks.NewMockVolumeRegistry(mockCtrl)
+	fakeGetVolumes := func() ([]registry.Volume, error) {
+		return []registry.Volume{
+			{Name: "fake1", Pool: "pool1", SizeGB: 2},
+		}, nil
+	}
+	mockReg.EXPECT().AllVolumes().DoAndReturn(fakeGetVolumes)
 
 	instances, err := GetInstances(mockReg)
 	if err != nil {
@@ -25,26 +30,28 @@ func TestGetInstances(t *testing.T) {
 	}
 	actual := instances.String()
 
-	expected := `{"instances":[{"id":"fakebuffer","capacity":{"bytes":3,"nodes":40},"links":{"session":"fakebuffer"}}]}`
-	assert.EqualValues(t, expected, actual[:len(actual)-1])
-	assertNewline(t, actual)
+	// TODO need to return sessions correctly... i.e. job
+	expected := `{"instances":[{"id":"fake1","capacity":{"bytes":2147483648,"nodes":0},"links":{"session":""}}]}`
+	assert.EqualValues(t, expected, actual)
 }
 
 func TestGetSessions(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockObj := mocks.NewMockKeystore(mockCtrl)
-	mockReg := keystoreregistry.NewVolumeRegistry(mockObj)
+	mockReg := mocks.NewMockVolumeRegistry(mockCtrl)
+	mockJobs := func() ([]registry.Job, error) {
+		return []registry.Job{{Name: "fake1", CreatedAt: 42, Owner: 1001}}, nil
 
+	}
+	mockReg.EXPECT().Jobs().DoAndReturn(mockJobs)
 	sessions, err := GetSessions(mockReg)
 	if err != nil {
 		log.Fatal(err)
 	}
 	actual := sessions.String()
 
-	expected := `{"sessions":[{"id":"fakebuffer","created":1234567890,"owner":1001,"token":"fakebuffer"}]}`
-	assert.EqualValues(t, expected, actual[:len(actual)-1])
-	assertNewline(t, actual)
+	expected := `{"sessions":[{"id":"fake1","created":42,"owner":1001,"token":"fake1"}]}`
+	assert.EqualValues(t, expected, actual)
 }
 
 func TestGetConfigurations(t *testing.T) {

@@ -1,21 +1,17 @@
 package fakewarp
 
 import (
-	"bufio"
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"math/rand"
-	"os"
 	"time"
 )
 
 // Creates a persistent buffer.
 // If it works, we return the name of the buffer, otherwise an error is returned
-func DeleteBuffer(c CliContext, keystore keystoreregistry.Keystore) error {
+func DeleteBuffer(c CliContext, volReg registry.VolumeRegistry) error {
 	token := c.String("token")
-	volReg := keystoreregistry.NewVolumeRegistry(keystore)
 	if err := volReg.DeleteVolume(registry.VolumeName(token)); err != nil {
 		return err
 	}
@@ -30,7 +26,7 @@ func parseJobRequest(lines []string) error {
 // returns an error if the format of the file is bad
 // or requests something unsupported
 func parseJobFile(filename string) error {
-	file, err := os.Open("file.txt")
+	/*file, err := os.Open("file.txt")
 	if err != nil {
 		return err
 	}
@@ -46,15 +42,16 @@ func parseJobFile(filename string) error {
 		log.Fatal(err)
 	}
 
-	return parseJobRequest(lines)
+	return parseJobRequest(lines)*/
+	return nil
 }
 
-func CreatePerJobBuffer(c CliContext, keystore keystoreregistry.Keystore) error {
+func CreatePerJobBuffer(c CliContext, volReg registry.VolumeRegistry) error {
 	// TODO need to read and parse the job file...
 	if err := parseJobFile(c.String("job")); err != nil {
 		return err
 	}
-	return createVolumesAndJobs(keystore, BufferRequest{
+	return createVolumesAndJobs(volReg, BufferRequest{
 		Token:    c.String("token"),
 		User:     c.Int("user"),
 		Group:    c.Int("group"),
@@ -64,7 +61,7 @@ func CreatePerJobBuffer(c CliContext, keystore keystoreregistry.Keystore) error 
 }
 
 // TODO: need to reuse this with the new logic
-func getBricksForBuffer(keystore keystoreregistry.Keystore, buffer *registry.Volume) []registry.BrickInfo {
+func getBricksForBuffer(volRegistry registry.VolumeRegistry, buffer *registry.Volume) []registry.BrickInfo {
 	log.Println("Add fakebuffer and match to bricks")
 
 	availableBricks := make(map[string][]registry.BrickInfo) // hostname to available bricks, getAvailableBricks(cli)

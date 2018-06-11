@@ -2,17 +2,22 @@ package fakewarp
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 )
 
 type mockCliContext struct{}
 
 func (c *mockCliContext) String(name string) string {
-	return "bob"
+	switch name {
+	case "capacity":
+		return "pool1:42GiB"
+	default:
+		return ""
+	}
 }
 
 func (c *mockCliContext) Int(name string) int {
@@ -22,13 +27,15 @@ func (c *mockCliContext) Int(name string) int {
 func TestCreatePersistentBufferReturnsError(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockObj := mocks.NewMockKeystore(mockCtrl)
+	mockObj := mocks.NewMockVolumeRegistry(mockCtrl)
+	mockObj.EXPECT().AddVolume(gomock.Any()) // TODO
+	mockObj.EXPECT().AddJob(gomock.Any())
 	mockCtxt := mockCliContext{}
 
-	if _, error := CreatePersistentBuffer(&mockCtxt, mockObj); error != nil {
-		assert.EqualValues(t, "unable to create buffer", fmt.Sprint(error))
+	if actual, err := CreatePersistentBuffer(&mockCtxt, mockObj); err != nil {
+		assert.EqualValues(t, "unable to create buffer", fmt.Sprint(err))
 	} else {
-		t.Fatalf("Expected an error")
+		assert.EqualValues(t, "", actual) // TODO
 	}
 }
 

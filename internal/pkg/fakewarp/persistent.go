@@ -3,7 +3,6 @@ package fakewarp
 import (
 	"errors"
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"strconv"
 	"strings"
@@ -23,7 +22,7 @@ type BufferRequest struct {
 
 // Creates a persistent buffer.
 // If it works, we return the name of the buffer, otherwise an error is returned
-func CreatePersistentBuffer(c CliContext, keystore keystoreregistry.Keystore) (string, error) {
+func CreatePersistentBuffer(c CliContext, volReg registry.VolumeRegistry) (string, error) {
 	request := BufferRequest{c.String("token"), c.String("caller"),
 		c.String("capacity"), c.Int("user"),
 		c.Int("groupid"), c.String("access"), c.String("type"),
@@ -31,7 +30,7 @@ func CreatePersistentBuffer(c CliContext, keystore keystoreregistry.Keystore) (s
 	if request.Group == 0 {
 		request.Group = request.User
 	}
-	return request.Token, createVolumesAndJobs(keystore, request)
+	return request.Token, createVolumesAndJobs(volReg, request)
 }
 
 func parseCapacity(raw string) (string, int, error) {
@@ -55,9 +54,8 @@ func parseCapacity(raw string) (string, int, error) {
 	return pool, capacityInt, nil
 }
 
-func createVolumesAndJobs(keystore keystoreregistry.Keystore, request BufferRequest) error {
+func createVolumesAndJobs(volReg registry.VolumeRegistry, request BufferRequest) error {
 	createdAt := uint(time.Now().Unix())
-	volReg := keystoreregistry.NewVolumeRegistry(keystore)
 	pool, capacity, err := parseCapacity(request.Capacity) // TODO lots of proper parsing to do here, get poolname, etc
 	if err != nil {
 		return err
