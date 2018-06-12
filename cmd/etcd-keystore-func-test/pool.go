@@ -69,6 +69,9 @@ func testAllocateBricks(poolRegistry registry.PoolRegistry) {
 	if err := poolRegistry.AllocateBricks(allocations); err != nil {
 		log.Fatal(err)
 	}
+	if err := poolRegistry.DeallocateBricks("vol1"); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func testGetAllocations(poolRegistry registry.PoolRegistry) {

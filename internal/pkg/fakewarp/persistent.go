@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"log"
+	"math"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
-	"math"
 )
 
 type BufferRequest struct {
@@ -86,7 +88,7 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	bricksRequired := uint(math.Ceil(float64(capacityGB) / float64(pool.GranularityGB)))
 	adjustedSize := bricksRequired * pool.GranularityGB
 
-	err = volReg.AddVolume(registry.Volume{
+	volume := registry.Volume{
 		Name:       registry.VolumeName(request.Token),
 		JobName:    request.Token,
 		Owner:      request.User,
@@ -97,20 +99,101 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 		SizeBricks: bricksRequired,
 		Pool:       pool.Name,
 		State:      registry.Registered,
-	})
+	}
+	err = volReg.AddVolume(volume)
 	if err != nil {
 		return err
 	}
-	err = volReg.AddJob(registry.Job{
+
+	job := registry.Job{
 		Name:      request.Token,
 		Volumes:   []registry.VolumeName{registry.VolumeName(request.Token)},
 		Owner:     uint(request.User),
 		CreatedAt: createdAt,
-	})
-	if err != nil {
-		volReg.DeleteVolume(registry.VolumeName(request.Token))
 	}
-	// TODO: get bricks assigned to volume (i.e. ensure we have capacity)
+	err = volReg.AddJob(job)
+	if err != nil {
+		volReg.DeleteVolume(volume.Name)
+		return err
+	}
+
+	err = getBricksForBuffer(poolRegistry, pool, volume)
+	if err != nil {
+		volReg.DeleteVolume(volume.Name)
+		volReg.DeleteJob(job.Name)
+	}
+
 	// TODO: wait for bricks to be provisioned correctly?
+	return err
+}
+
+func getBricksForBuffer(poolRegistry registry.PoolRegistry,
+	pool registry.Pool, volume registry.Volume) error {
+
+	availableBricks := pool.AvailableBricks
+	availableBricksByHost := make(map[string][]registry.BrickInfo)
+	for _, brick := range availableBricks {
+		hostBricks := availableBricksByHost[brick.Hostname]
+		availableBricksByHost[brick.Hostname] = append(hostBricks, brick)
+	}
+	log.Println(availableBricksByHost)
+
+	var chosenBricks []registry.BrickInfo
+
+	// pick some of the available bricks
+	s := rand.NewSource(time.Now().Unix())
+	r := rand.New(s) // initialize local pseudorandom generator
+
+	var hosts []string
+	for key := range availableBricksByHost {
+		hosts = append(hosts, key)
+	}
+
+	randomWalk := rand.Perm(len(availableBricksByHost))
+	for _, i := range randomWalk {
+		hostBricks := availableBricksByHost[hosts[i]]
+		candidateBrick := hostBricks[r.Intn(len(hostBricks))]
+
+		goodCandidate := true
+		for _, brick := range chosenBricks {
+			if brick == candidateBrick {
+				goodCandidate = false
+				break
+			}
+			if brick.Hostname == candidateBrick.Hostname {
+				goodCandidate = false
+				break
+			}
+		}
+		if goodCandidate {
+			chosenBricks = append(chosenBricks, candidateBrick)
+		}
+		if uint(len(chosenBricks)) >= volume.SizeBricks {
+			break
+		}
+	}
+
+	log.Println("chosen", chosenBricks)
+	if uint(len(chosenBricks)) != volume.SizeBricks {
+		return fmt.Errorf("unable to get number of requested bricks (%d) for given pool (%s)",
+			volume.SizeBricks, pool.Name)
+	}
+
+	var allocations []registry.BrickAllocation
+	for i, brick := range chosenBricks {
+		allocations = append(allocations, registry.BrickAllocation{
+			Device: brick.Device,
+			Hostname: brick.Hostname,
+			AllocatedVolume: volume.Name,
+			AllocatedIndex: uint(i),
+			DeallocateRequested: false,
+		})
+	}
+	err := poolRegistry.AllocateBricks(allocations)
+	if err != nil {
+		return err
+	}
+	finalAllocations, err := poolRegistry.GetAllocationsForVolume(volume.Name)
+	log.Println(finalAllocations)
 	return err
 }
