@@ -2,6 +2,7 @@ package fakewarp
 
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"log"
 )
 
 // Creates a persistent buffer.
@@ -14,17 +15,30 @@ func DeleteBuffer(c CliContext, volumeRegistry registry.VolumeRegistry, poolRegi
 func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry registry.PoolRegistry,
 	token string) error {
 
-	// TODO... ignore delete brick errors when allocations don't exist!
 	volumeName := registry.VolumeName(token)
-	err := poolRegistry.DeallocateBricks(volumeName)
+	volume, err := volumeRegistry.Volume(volumeName)
 	if err != nil {
-		return err
+		// TODO should check this error relates to the volume being missing
+		log.Println(err)
+		return nil
 	}
-	allocations, err := poolRegistry.GetAllocationsForVolume(volumeName)
-	if err != nil {
-		return err
+
+	if volume.SizeBricks != 0 {
+		// TODO should we error out here when one of these steps fail?
+		err := poolRegistry.DeallocateBricks(volumeName)
+		if err != nil {
+			return err
+		}
+		allocations, err := poolRegistry.GetAllocationsForVolume(volumeName)
+		if err != nil {
+			return err
+		}
+		// TODO we should really wait for the brick manager to call this API
+		err = poolRegistry.HardDeleteAllocations(allocations)
+		if err != nil {
+			return err
+		}
 	}
-	poolRegistry.HardDeleteAllocations(allocations)
 
 	if err := volumeRegistry.DeleteVolume(volumeName); err != nil {
 		return err

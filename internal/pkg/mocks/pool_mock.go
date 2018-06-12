@@ -95,8 +95,10 @@ func (mr *MockPoolRegistryMockRecorder) DeallocateBricks(volume interface{}) *go
 }
 
 // HardDeleteAllocations mocks base method
-func (m *MockPoolRegistry) HardDeleteAllocations(allocations []registry.BrickAllocation) {
-	m.ctrl.Call(m, "HardDeleteAllocations", allocations)
+func (m *MockPoolRegistry) HardDeleteAllocations(allocations []registry.BrickAllocation) error {
+	ret := m.ctrl.Call(m, "HardDeleteAllocations", allocations)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // HardDeleteAllocations indicates an expected call of HardDeleteAllocations

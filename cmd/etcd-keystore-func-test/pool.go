@@ -99,7 +99,10 @@ func testDeleteAllocations(poolRegistry registry.PoolRegistry) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	poolRegistry.HardDeleteAllocations(updatedAllocations) // TODO return error and check it?
+	err = poolRegistry.HardDeleteAllocations(updatedAllocations)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func testKeepHostAlive(poolRegistry registry.PoolRegistry) {

@@ -47,7 +47,7 @@ type PoolRegistry interface {
 	DeallocateBricks(volume VolumeName) error
 
 	// This is called after DeallocateBricks has been processed
-	HardDeleteAllocations(allocations []BrickAllocation)
+	HardDeleteAllocations(allocations []BrickAllocation) error
 
 	// Get all the allocations for bricks associated with the specified hostname
 	GetAllocationsForHost(hostname string) ([]BrickAllocation, error)

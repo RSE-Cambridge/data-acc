@@ -156,13 +156,13 @@ func (poolRegistry *poolRegistry) DeallocateBricks(volume registry.VolumeName) e
 	return poolRegistry.keystore.Update(updated)
 }
 
-func (poolRegistry *poolRegistry) HardDeleteAllocations(allocations []registry.BrickAllocation) {
+func (poolRegistry *poolRegistry) HardDeleteAllocations(allocations []registry.BrickAllocation) error {
 	var keys []string
 	for _, allocation := range allocations {
 		keys = append(keys, getBrickAllocationKeyHost(allocation))
 		keys = append(keys, getBrickAllocationKeyVolume(allocation))
 		if !allocation.DeallocateRequested {
-			panic(fmt.Errorf("must first call deallocate on: %s", allocation))
+			return fmt.Errorf("must first call deallocate on: %s", allocation)
 		}
 	}
 
@@ -170,15 +170,12 @@ func (poolRegistry *poolRegistry) HardDeleteAllocations(allocations []registry.B
 	for _, key := range keys {
 		keyValue, err := poolRegistry.keystore.Get(key)
 		if err != nil {
-			panic(err) // TODO should return error
+			return err
 		}
 		// TODO check we have already called deallocate properly
 		keyValues = append(keyValues, keyValue)
 	}
-	err := poolRegistry.keystore.DeleteAll(keyValues)
-	if err != nil {
-		panic(err)
-	}
+	return poolRegistry.keystore.DeleteAll(keyValues)
 }
 
 func (poolRegistry *poolRegistry) getAllocations(prefix string) ([]registry.BrickAllocation, error) {
