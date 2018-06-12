@@ -78,7 +78,7 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	setupArgs := strings.Split(
 		"--function setup --token a --job b --caller c --user 1 --groupid 1 --capacity dw:1GiB", " ")
 	if err := runCli(setupArgs); err != nil {
-		assert.EqualValues(t, "must register volume: ", err.Error())
+		assert.EqualValues(t, "unable to find pool: dw", err.Error())
 	} else {
 		t.Fatal("expected error")
 	}
@@ -104,14 +104,14 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 		"--function create_persistent --token p1 --caller c --user 1 --groupid 1 --capacity dw:1GiB "+
 			"--access striped --type scratch", " ")
 	if err := runCli(createPersistentArgs); err != nil {
-		assert.EqualValues(t, "must register volume: ", err.Error())
+		assert.EqualValues(t, "unable to find pool: dw", err.Error())
 	} else {
 		t.Fatal("expected error")
 	}
 	createPersistentArgs = strings.Split(
 		"--function create_persistent -t p2 -c c -u 1 -g 1 -C dw:1GiB -a striped -T scratch", " ")
 	if err := runCli(createPersistentArgs); err != nil {
-		assert.EqualValues(t, "must register volume: ", err.Error())
+		assert.EqualValues(t, "unable to find pool: dw", err.Error())
 	} else {
 		t.Fatal("expected error")
 	}

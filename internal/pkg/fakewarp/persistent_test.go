@@ -3,6 +3,7 @@ package fakewarp
 import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -13,7 +14,7 @@ type mockCliContext struct{}
 func (c *mockCliContext) String(name string) string {
 	switch name {
 	case "capacity":
-		return "pool1:42GiB"
+		return "pool1:0"
 	default:
 		return ""
 	}
@@ -30,6 +31,9 @@ func TestCreatePersistentBufferReturnsError(t *testing.T) {
 	mockObj.EXPECT().AddVolume(gomock.Any()) // TODO
 	mockObj.EXPECT().AddJob(gomock.Any())
 	mockPool := mocks.NewMockPoolRegistry(mockCtrl)
+	mockPool.EXPECT().Pools().DoAndReturn(func() ([]registry.Pool, error) {
+		return []registry.Pool{{Name: "pool1", GranularityGB: 1}}, nil
+	})
 	mockCtxt := mockCliContext{}
 
 	if actual, err := CreatePersistentBuffer(&mockCtxt, mockObj, mockPool); err != nil {
