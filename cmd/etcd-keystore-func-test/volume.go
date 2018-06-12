@@ -53,16 +53,16 @@ func testVolumeCRUD(volRegistry registry.VolumeRegistry) {
 	volRegistry.AddVolume(volume)
 	volRegistry.AddVolume(volume2)
 
-	if err := volRegistry.UpdateState(volume.Name, registry.BricksAssigned); err != nil {
+	if err := volRegistry.UpdateState(volume.Name, registry.BricksProvisioned); err != nil {
 		log.Fatal(err)
 	}
-	if err := volRegistry.UpdateState("badname", registry.BricksAssigned); err == nil {
+	if err := volRegistry.UpdateState("badname", registry.BricksProvisioned); err == nil {
 		log.Fatal("expected error")
 	}
-	if err := volRegistry.UpdateState(volume.Name, registry.BricksAssigned); err == nil {
+	if err := volRegistry.UpdateState(volume.Name, registry.BricksProvisioned); err == nil {
 		log.Fatal("expected error with repeated update")
 	}
-	if err := volRegistry.UpdateState(volume.Name, registry.Test3); err == nil {
+	if err := volRegistry.UpdateState(volume.Name, registry.MountRequested); err == nil {
 		log.Fatal("expected error with out of order update")
 	}
 	volRegistry.UpdateState(volume2.Name, registry.Registered)

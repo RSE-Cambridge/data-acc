@@ -103,27 +103,51 @@ type VolumeState int
 const (
 	Unknown VolumeState = iota
 	Registered
-	BricksAssigned
-	Test2
-	Test3
-	Ready   VolumeState = 200
-	Deleted VolumeState = 400
-	Error   VolumeState = 500
+	BricksProvisioned // setup waits for this, updated by host manager, paths should be setup, or gone to ERROR
+	DataInRequested
+	DataInComplete // data_in waits for host manager to data in, or gone to ERROR
+	MountRequested
+	MountComplete // compute nodes all mounted, or gone to ERROR
+	UnmountRequested
+	UnmountComplete // compute nodes all unmounted, or gone to ERROR
+	DataOutRequested
+	DataOutComplete             // data copied out by host manager, or gone to ERROR
+	DeleteRequested VolumeState = 399
+	Deleted         VolumeState = 400 // all bricks correctly deprovisioned unless host down or gone to ERROR
+	Error           VolumeState = 500
 )
 
 var volumeStateStrings = map[VolumeState]string{
-	Unknown:        "",
-	Registered:     "Registered",
-	BricksAssigned: "BricksAssigned",
-	Test2:          "Test2",
-	Test3:          "Test3",
+	Unknown:           "",
+	Registered:        "Registered",
+	BricksProvisioned: "BricksProvisioned",
+	DataInRequested:   "DataInRequested",
+	DataInComplete:    "DataInComplete",
+	MountRequested:    "MountRequested",
+	MountComplete:     "MountComplete",
+	UnmountRequested:  "UnmountRequested",
+	UnmountComplete:   "UnmountComplete",
+	DataOutRequested:  "DataOutRequested",
+	DataOutComplete:   "DataOutComplete",
+	DeleteRequested:   "DeleteRequested",
+	Deleted:           "Deleted",
+	Error:             "Error",
 }
 var stringToVolumeState = map[string]VolumeState{
-	"":               Unknown,
-	"Registered":     Registered,
-	"BricksAssigned": BricksAssigned,
-	"Test2":          Test2,
-	"Test3":          Test3,
+	"":                  Unknown,
+	"Registered":        Registered,
+	"BricksProvisioned": BricksProvisioned,
+	"DataInRequested":   DataInRequested,
+	"DataInComplete":    DataInComplete,
+	"MountRequested":    MountRequested,
+	"MountComplete":     MountComplete,
+	"UnmountRequested":  UnmountRequested,
+	"UnmountComplete":   UnmountComplete,
+	"DataOutRequested":  DataOutRequested,
+	"DataOutComplete":   DataOutComplete,
+	"DeleteRequested":   DeleteRequested,
+	"Deleted":           Deleted,
+	"Error":             Error,
 }
 
 func (volumeState VolumeState) String() string {
