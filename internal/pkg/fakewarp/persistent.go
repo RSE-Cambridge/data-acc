@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
-	"log"
 	"math"
 	"math/rand"
 	"strconv"
@@ -136,7 +135,6 @@ func getBricksForBuffer(poolRegistry registry.PoolRegistry,
 		hostBricks := availableBricksByHost[brick.Hostname]
 		availableBricksByHost[brick.Hostname] = append(hostBricks, brick)
 	}
-	log.Println(availableBricksByHost)
 
 	var chosenBricks []registry.BrickInfo
 
@@ -173,7 +171,6 @@ func getBricksForBuffer(poolRegistry registry.PoolRegistry,
 		}
 	}
 
-	log.Println("chosen", chosenBricks)
 	if uint(len(chosenBricks)) != volume.SizeBricks {
 		return fmt.Errorf("unable to get number of requested bricks (%d) for given pool (%s)",
 			volume.SizeBricks, pool.Name)
@@ -193,7 +190,6 @@ func getBricksForBuffer(poolRegistry registry.PoolRegistry,
 	if err != nil {
 		return err
 	}
-	finalAllocations, err := poolRegistry.GetAllocationsForVolume(volume.Name)
-	log.Println(finalAllocations)
+	_, err = poolRegistry.GetAllocationsForVolume(volume.Name) // TODO return result, wait for updates
 	return err
 }

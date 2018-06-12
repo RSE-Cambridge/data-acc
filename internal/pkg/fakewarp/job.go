@@ -159,7 +159,9 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 	for _, line := range lines {
 		tokens := strings.Split(line, " ")
 		if len(tokens) < 3 {
-			log.Println("Skip badly formatted line:", line)
+			if line != "" && line != "#!/bin/bash" {
+				log.Println("Skip badly formatted line:", line)
+			}
 			continue
 		}
 
