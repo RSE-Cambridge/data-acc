@@ -31,7 +31,7 @@ const (
 
 var stringToAccessMode = map[string]AccessMode{
 	"":                striped,
-	"striped":                striped,
+	"striped":         striped,
 	"private":         private,
 	"private,striped": privateAndStriped,
 	"striped,private": privateAndStriped,
@@ -48,10 +48,10 @@ const (
 	cache
 )
 
-var stringToBufferType = map[string]BufferType {
-	"":scratch,
+var stringToBufferType = map[string]BufferType{
+	"":        scratch,
 	"scratch": scratch,
-	"cache": cache,
+	"cache":   cache,
 }
 
 type cmdCreatePersistent struct {
@@ -74,7 +74,7 @@ type cmdAttachPersistent struct {
 	Name string
 }
 
-type cmdPerJobBuffer struct{
+type cmdPerJobBuffer struct {
 	CapacityBytes int
 	AccessMode    AccessMode
 	BufferType    BufferType
@@ -85,36 +85,54 @@ type cmdAttachPerJobSwap struct {
 	SizeBytes int
 }
 
-type cmdStageInData struct{}
+type StageType int
 
-type cmdStageOutData struct{}
+const (
+	directory StageType = iota
+	file                // TODO there is also list, but we ignore that for now
+)
+
+var stringToStageType = map[string]StageType{
+	"":          directory,
+	"directory": directory,
+	"file":      file,
+}
+
+func stageTypeFromString(raw string) StageType {
+	return stringToStageType[strings.ToLower(raw)]
+}
+
+type cmdStageInData struct {
+	Source      string
+	Destination string
+	StageType   StageType
+}
+
+type cmdStageOutData struct {
+	Source      string
+	Destination string
+	StageType   StageType
+}
+
+var sizeSuffixMulitiplyer = map[string]int{
+	"GiB": GbInBytes,
+	"GB":  GbInBytes, // TODO one of this is wrong!
+	"TiB": GbInBytes * 1024,
+	"TB":  GbInBytes * 1024,
+}
 
 func parseSize(raw string) (int, error) {
-	switch { // TODO move to a dict that contains conversions?
-	case strings.HasSuffix(raw, "GiB"):
-		rawGb := strings.TrimSuffix(raw, "GiB")
-		intGb, err := strconv.Atoi(rawGb)
-		if err != nil {
-			return 0, err
+	for suffix, multiplyer := range sizeSuffixMulitiplyer {
+		if strings.HasSuffix(raw, suffix) {
+			rawInt := strings.TrimSuffix(raw, suffix)
+			intVal, err := strconv.Atoi(rawInt)
+			if err != nil {
+				return 0, err
+			}
+			return intVal * multiplyer, nil
 		}
-		return intGb * GbInBytes, nil
-	case strings.HasSuffix(raw, "GB"):
-		rawGb := strings.TrimSuffix(raw, "GB")
-		intGb, err := strconv.Atoi(rawGb)
-		if err != nil {
-			return 0, err
-		}
-		return intGb * GbInBytes, nil // TODO... one of these is wrong!
-	case strings.HasSuffix(raw, "TiB"):
-		rawTb := strings.TrimSuffix(raw, "TiB")
-		intTb, err := strconv.Atoi(rawTb)
-		if err != nil {
-			return 0, err
-		}
-		return intTb * GbInBytes * 1024, nil
-	default:
-		return 0, fmt.Errorf("unable to parse size: %s", raw)
 	}
+	return 0, fmt.Errorf("unable to parse size: %s", raw)
 }
 
 func parseArgs(rawArgs []string) (map[string]string, error) {
@@ -167,8 +185,8 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 				Name:          argKeyPair["name"],
 				CapacityBytes: size,
 				GenericCmd:    isGeneric,
-				AccessMode: accessModeFromString(argKeyPair["access_mode"]),
-				BufferType: bufferTypeFromString(argKeyPair["type"]),
+				AccessMode:    accessModeFromString(argKeyPair["access_mode"]),
+				BufferType:    bufferTypeFromString(argKeyPair["type"]),
 			}
 		case "destroy_persistent":
 			command = cmdDestroyPersistent{Name: argKeyPair["name"]}
@@ -183,8 +201,8 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 			command = cmdPerJobBuffer{
 				CapacityBytes: size,
 				GenericCmd:    isGeneric,
-				AccessMode: accessModeFromString(argKeyPair["access_mode"]),
-				BufferType: bufferTypeFromString(argKeyPair["type"]),
+				AccessMode:    accessModeFromString(argKeyPair["access_mode"]),
+				BufferType:    bufferTypeFromString(argKeyPair["type"]),
 			}
 		case "swap":
 			if len(args) != 1 {
@@ -197,9 +215,17 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 				command = cmdAttachPerJobSwap{SizeBytes: size}
 			}
 		case "stage_in":
-			command = cmdStageInData{}
+			command = cmdStageInData{
+				Source:      argKeyPair["source"],
+				Destination: argKeyPair["destination"],
+				StageType:   stageTypeFromString(argKeyPair["type"]),
+			}
 		case "stage_out":
-			command = cmdStageOutData{}
+			command = cmdStageOutData{
+				Source:      argKeyPair["source"],
+				Destination: argKeyPair["destination"],
+				StageType:   stageTypeFromString(argKeyPair["type"]),
+			}
 		default:
 			log.Println("unrecognised command:", cmd, "with argument length", len(args))
 			continue
