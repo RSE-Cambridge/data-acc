@@ -12,6 +12,7 @@ func DeleteBuffer(c CliContext, volumeRegistry registry.VolumeRegistry) error {
 }
 
 func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, token string) error {
+	// TODO... delete bricks
 	if err := volumeRegistry.DeleteVolume(registry.VolumeName(token)); err != nil {
 		return err
 	}

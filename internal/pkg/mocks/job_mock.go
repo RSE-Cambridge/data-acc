@@ -9,6 +9,29 @@ import (
 	reflect "reflect"
 )
 
+// MockjobCommand is a mock of jobCommand interface
+type MockjobCommand struct {
+	ctrl     *gomock.Controller
+	recorder *MockjobCommandMockRecorder
+}
+
+// MockjobCommandMockRecorder is the mock recorder for MockjobCommand
+type MockjobCommandMockRecorder struct {
+	mock *MockjobCommand
+}
+
+// NewMockjobCommand creates a new mock instance
+func NewMockjobCommand(ctrl *gomock.Controller) *MockjobCommand {
+	mock := &MockjobCommand{ctrl: ctrl}
+	mock.recorder = &MockjobCommandMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockjobCommand) EXPECT() *MockjobCommandMockRecorder {
+	return m.recorder
+}
+
 // MockGetLines is a mock of GetLines interface
 type MockGetLines struct {
 	ctrl     *gomock.Controller

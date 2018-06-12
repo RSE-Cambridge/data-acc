@@ -72,6 +72,7 @@ func testAllocateBricks(poolRegistry registry.PoolRegistry) {
 	if err := poolRegistry.DeallocateBricks("vol1"); err != nil {
 		log.Fatal(err)
 	}
+	log.Println("asdf")
 }
 
 func testGetAllocations(poolRegistry registry.PoolRegistry) {
@@ -91,6 +92,14 @@ func testGetAllocations(poolRegistry registry.PoolRegistry) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func testDeleteAllocations(poolRegistry registry.PoolRegistry) {
+	updatedAllocations, err := poolRegistry.GetAllocationsForVolume("vol1")
+	if err != nil {
+		log.Fatal(err)
+	}
+	poolRegistry.HardDeleteAllocations(updatedAllocations) // TODO return error and check it?
 }
 
 func testKeepHostAlive(poolRegistry registry.PoolRegistry) {
@@ -121,6 +130,7 @@ func TestKeystorePoolRegistry(keystore keystoreregistry.Keystore) {
 	testGetBricks(poolRegistry)
 	testAllocateBricks(poolRegistry)
 	testGetAllocations(poolRegistry)
+	testDeleteAllocations(poolRegistry)
 	testKeepHostAlive(poolRegistry)
 
 	// TODO: update hosts first?

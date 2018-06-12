@@ -182,10 +182,10 @@ func getBricksForBuffer(poolRegistry registry.PoolRegistry,
 	var allocations []registry.BrickAllocation
 	for i, brick := range chosenBricks {
 		allocations = append(allocations, registry.BrickAllocation{
-			Device: brick.Device,
-			Hostname: brick.Hostname,
-			AllocatedVolume: volume.Name,
-			AllocatedIndex: uint(i),
+			Device:              brick.Device,
+			Hostname:            brick.Hostname,
+			AllocatedVolume:     volume.Name,
+			AllocatedIndex:      uint(i),
 			DeallocateRequested: false,
 		})
 	}

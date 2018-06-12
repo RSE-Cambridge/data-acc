@@ -94,6 +94,16 @@ func (mr *MockPoolRegistryMockRecorder) DeallocateBricks(volume interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeallocateBricks", reflect.TypeOf((*MockPoolRegistry)(nil).DeallocateBricks), volume)
 }
 
+// HardDeleteAllocations mocks base method
+func (m *MockPoolRegistry) HardDeleteAllocations(allocations []registry.BrickAllocation) {
+	m.ctrl.Call(m, "HardDeleteAllocations", allocations)
+}
+
+// HardDeleteAllocations indicates an expected call of HardDeleteAllocations
+func (mr *MockPoolRegistryMockRecorder) HardDeleteAllocations(allocations interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HardDeleteAllocations", reflect.TypeOf((*MockPoolRegistry)(nil).HardDeleteAllocations), allocations)
+}
+
 // GetAllocationsForHost mocks base method
 func (m *MockPoolRegistry) GetAllocationsForHost(hostname string) ([]registry.BrickAllocation, error) {
 	ret := m.ctrl.Call(m, "GetAllocationsForHost", hostname)
