@@ -72,6 +72,7 @@ func testVolumeCRUD(volRegistry registry.VolumeRegistry) {
 	} else {
 		log.Println(volumes)
 	}
+	// testJobCRUD uses volume and volume1
 }
 
 func testJobCRUD(volRegistry registry.VolumeRegistry) {
@@ -106,5 +107,8 @@ func testJobCRUD(volRegistry registry.VolumeRegistry) {
 	if err == nil {
 		panic(err)
 	}
-	volRegistry.AddJob(job)
+
+	// remove volumes now we are done with them
+	volRegistry.DeleteVolume(registry.VolumeName("asdf"))
+	volRegistry.DeleteVolume(registry.VolumeName("asdf2"))
 }

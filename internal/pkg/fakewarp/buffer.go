@@ -10,12 +10,16 @@ import (
 
 // Creates a persistent buffer.
 // If it works, we return the name of the buffer, otherwise an error is returned
-func DeleteBuffer(c CliContext, volReg registry.VolumeRegistry) error {
+func DeleteBuffer(c CliContext, volumeRegistry registry.VolumeRegistry) error {
 	token := c.String("token")
-	if err := volReg.DeleteVolume(registry.VolumeName(token)); err != nil {
+	return DeleteBufferComponents(volumeRegistry, token)
+}
+
+func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, token string) error {
+	if err := volumeRegistry.DeleteVolume(registry.VolumeName(token)); err != nil {
 		return err
 	}
-	return volReg.DeleteJob(token)
+	return volumeRegistry.DeleteJob(token)
 }
 
 func CreatePerJobBuffer(c CliContext, volReg registry.VolumeRegistry, lineSrc GetLines) error {

@@ -4,7 +4,6 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
-	"time"
 )
 
 func testGetPools(poolRegistry registry.PoolRegistry) {
@@ -120,8 +119,6 @@ func TestKeystorePoolRegistry(keystore keystoreregistry.Keystore) {
 	testAllocateBricks(poolRegistry)
 	testGetAllocations(poolRegistry)
 	testKeepHostAlive(poolRegistry)
-
-	time.Sleep(time.Second * 5)
 
 	// TODO: update hosts first?
 	testGetPools(poolRegistry)
