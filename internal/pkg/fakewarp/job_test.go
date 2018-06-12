@@ -9,7 +9,7 @@ import (
 func TestParseJobRequest(t *testing.T) {
 	jobRequest := []string{
 		`#BB create_persistent name=myBBname capacity=100GB access_mode=striped type=scratch`,
-		`#BB create_persistent name=myBBname capacity=100GB access_mode=striped type=cache`,
+		`#BB create_persistent name=myBBname capacity=1073741824 access_mode=striped type=cache`,
 		`#BB destroy_persistent name=myBBname`,
 		`#DW persistentdw name=myBBname1`,
 		`#DW persistentdw name=myBBname2`,

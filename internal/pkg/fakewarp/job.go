@@ -115,13 +115,20 @@ type cmdStageOutData struct {
 }
 
 var sizeSuffixMulitiplyer = map[string]int{
-	"GiB": GbInBytes,
-	"GB":  GbInBytes, // TODO one of this is wrong!
-	"TiB": GbInBytes * 1024,
-	"TB":  GbInBytes * 1024,
+	"TiB": 1099511627776,
+	"TB":  1099511627776,
+	"GiB": 1073741824,
+	"GB":  1073741824,
+	"MiB": 1048576,
+	"MB":  1048576,
 }
 
 func parseSize(raw string) (int, error) {
+	intVal, err := strconv.Atoi(raw)
+	if err == nil {
+		// specified raw bytes
+		return intVal, nil
+	}
 	for suffix, multiplyer := range sizeSuffixMulitiplyer {
 		if strings.HasSuffix(raw, suffix) {
 			rawInt := strings.TrimSuffix(raw, suffix)
