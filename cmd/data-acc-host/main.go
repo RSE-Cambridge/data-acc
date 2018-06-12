@@ -56,7 +56,7 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, hostname string
 		func(old *registry.BrickAllocation, new *registry.BrickAllocation) {
 			log.Println("Noticed brick allocation update. Old:", old, "New:", new)
 			if new != nil {
-				if new.AllocatedIndex == 0 {
+				if new.AllocatedVolume != "" && new.AllocatedIndex == 0 {
 					log.Println("Dectected we host primary brick for:",
 						new.AllocatedVolume, "Must check for action.")
 				}

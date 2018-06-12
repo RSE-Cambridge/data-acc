@@ -14,7 +14,7 @@ func DeleteBuffer(c CliContext, volumeRegistry registry.VolumeRegistry, poolRegi
 func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry registry.PoolRegistry,
 	token string) error {
 
-	// TODO... delete bricks
+	// TODO... ignore delete brick errors when allocations don't exist!
 	volumeName := registry.VolumeName(token)
 	err := poolRegistry.DeallocateBricks(volumeName)
 	if err != nil {
