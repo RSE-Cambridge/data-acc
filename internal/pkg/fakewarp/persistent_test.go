@@ -29,9 +29,10 @@ func TestCreatePersistentBufferReturnsError(t *testing.T) {
 	mockObj := mocks.NewMockVolumeRegistry(mockCtrl)
 	mockObj.EXPECT().AddVolume(gomock.Any()) // TODO
 	mockObj.EXPECT().AddJob(gomock.Any())
+	mockPool := mocks.NewMockPoolRegistry(mockCtrl)
 	mockCtxt := mockCliContext{}
 
-	if actual, err := CreatePersistentBuffer(&mockCtxt, mockObj); err != nil {
+	if actual, err := CreatePersistentBuffer(&mockCtxt, mockObj, mockPool); err != nil {
 		assert.EqualValues(t, "unable to create buffer", fmt.Sprint(err))
 	} else {
 		assert.EqualValues(t, "", actual) // TODO

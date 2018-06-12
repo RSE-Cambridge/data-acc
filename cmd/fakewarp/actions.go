@@ -91,7 +91,8 @@ func setup(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	error := fakewarp.CreatePerJobBuffer(c, volReg, lines)
+	poolReg := keystoreregistry.NewPoolRegistry(keystore)
+	error := fakewarp.CreatePerJobBuffer(c, volReg, poolReg, lines)
 	return error
 }
 
@@ -155,7 +156,8 @@ func createPersistent(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	name, error := fakewarp.CreatePersistentBuffer(c, volReg)
+	poolReg := keystoreregistry.NewPoolRegistry(keystore)
+	name, error := fakewarp.CreatePersistentBuffer(c, volReg, poolReg)
 	if error == nil {
 		// Slurm is looking for the string "created" to know this worked
 		fmt.Printf("created %s\n", name)

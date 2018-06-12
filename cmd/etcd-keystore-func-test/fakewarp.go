@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
-	"log"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"log"
 )
 
 func debugStatus(volumeRegistry registry.VolumeRegistry, poolRegistry registry.PoolRegistry) {
@@ -16,14 +16,14 @@ func debugStatus(volumeRegistry registry.VolumeRegistry, poolRegistry registry.P
 func testPersistent(volumeRegistry registry.VolumeRegistry, poolRegistry registry.PoolRegistry) {
 	bufferToken := "fakebuffer1"
 	bufferRequest := fakewarp.BufferRequest{
-		Token: bufferToken,
-		Capacity: "b:10GiB",
+		Token:      bufferToken,
+		Capacity:   "b:10GiB",
 		Persistent: true,
-		Caller: "test",
+		Caller:     "test",
 	}
 	debugStatus(volumeRegistry, poolRegistry)
 
-	log.Println(fakewarp.CreateVolumesAndJobs(volumeRegistry, bufferRequest))
+	log.Println(fakewarp.CreateVolumesAndJobs(volumeRegistry, poolRegistry, bufferRequest))
 
 	debugStatus(volumeRegistry, poolRegistry)
 

@@ -22,12 +22,14 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, token string
 	return volumeRegistry.DeleteJob(token)
 }
 
-func CreatePerJobBuffer(c CliContext, volReg registry.VolumeRegistry, lineSrc GetLines) error {
+func CreatePerJobBuffer(c CliContext, volReg registry.VolumeRegistry, poolReg registry.PoolRegistry,
+	lineSrc GetLines) error {
+
 	// TODO need to read and parse the job file...
 	if err := parseJobFile(lineSrc, c.String("job")); err != nil {
 		return err
 	}
-	return CreateVolumesAndJobs(volReg, BufferRequest{
+	return CreateVolumesAndJobs(volReg, poolReg, BufferRequest{
 		Token:    c.String("token"),
 		User:     c.Int("user"),
 		Group:    c.Int("group"),
