@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"math"
 )
 
 type BufferRequest struct {
@@ -48,7 +49,7 @@ func parseCapacity(raw string) (string, int, error) {
 	}
 	capacityInt, err := strconv.Atoi(capacityParts[0])
 	if len(capacityParts) == 1 {
-		capacityInt = capacityInt / bytesInGB
+		capacityInt = int(capacityInt / bytesInGB)
 	}
 	if err != nil {
 		return "", 0, fmt.Errorf("must format capacity amount: %s", rawCapacity)
@@ -61,10 +62,30 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	request BufferRequest) error {
 
 	createdAt := uint(time.Now().Unix())
-	pool, capacity, err := parseCapacity(request.Capacity) // TODO lots of proper parsing to do here, get poolname, etc
+	poolName, capacityGB, err := parseCapacity(request.Capacity) // TODO lots of proper parsing to do here, get poolname, etc
 	if err != nil {
 		return err
 	}
+
+	pools, err := poolRegistry.Pools()
+	if err != nil {
+		return err
+	}
+
+	var pool registry.Pool
+	for _, p := range pools {
+		if p.Name == poolName {
+			pool = p
+		}
+	}
+
+	if pool.Name == "" {
+		return fmt.Errorf("unable to find pool: %s", poolName)
+	}
+
+	bricksRequired := uint(math.Ceil(float64(capacityGB) / float64(pool.GranularityGB)))
+	adjustedSize := bricksRequired * pool.GranularityGB
+
 	err = volReg.AddVolume(registry.Volume{
 		Name:       registry.VolumeName(request.Token),
 		JobName:    request.Token,
@@ -72,15 +93,14 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 		CreatedAt:  createdAt,
 		CreatedBy:  request.Caller,
 		Group:      request.Group,
-		SizeGB:     uint(capacity),
-		SizeBricks: 3,    // TODO... check pool granularity
-		Pool:       pool, // TODO....
+		SizeGB:     uint(adjustedSize),
+		SizeBricks: bricksRequired,
+		Pool:       pool.Name,
 		State:      registry.Registered,
 	})
 	if err != nil {
 		return err
 	}
-	// TODO: get bricks assigned to volume (i.e. ensure we have capacity)
 	err = volReg.AddJob(registry.Job{
 		Name:      request.Token,
 		Volumes:   []registry.VolumeName{registry.VolumeName(request.Token)},
@@ -90,6 +110,7 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	if err != nil {
 		volReg.DeleteVolume(registry.VolumeName(request.Token))
 	}
+	// TODO: get bricks assigned to volume (i.e. ensure we have capacity)
 	// TODO: wait for bricks to be provisioned correctly?
 	return err
 }

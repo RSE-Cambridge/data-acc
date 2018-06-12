@@ -11,6 +11,7 @@ func debugStatus(volumeRegistry registry.VolumeRegistry, poolRegistry registry.P
 	log.Println(fakewarp.GetPools(poolRegistry))
 	log.Println(fakewarp.GetInstances(volumeRegistry))
 	log.Println(fakewarp.GetSessions(volumeRegistry))
+	log.Println(volumeRegistry.AllVolumes())
 }
 
 func testPersistent(volumeRegistry registry.VolumeRegistry, poolRegistry registry.PoolRegistry) {
