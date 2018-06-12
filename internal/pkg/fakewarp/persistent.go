@@ -122,6 +122,11 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 func getBricksForBuffer(poolRegistry registry.PoolRegistry,
 	pool registry.Pool, volume registry.Volume) error {
 
+	if volume.SizeBricks == 0 {
+		// No bricks requested, so return right away
+		return nil
+	}
+
 	availableBricks := pool.AvailableBricks
 	availableBricksByHost := make(map[string][]registry.BrickInfo)
 	for _, brick := range availableBricks {
