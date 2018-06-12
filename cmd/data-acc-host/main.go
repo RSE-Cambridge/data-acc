@@ -60,6 +60,11 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, hostname string
 					log.Println("Dectected we host primary brick for:",
 						new.AllocatedVolume, "Must check for action.")
 				}
+				if old != nil {
+					if new.DeallocateRequested && !old.DeallocateRequested {
+						log.Printf("requested clean of: %d:%s", new.AllocatedIndex, new.Device)
+					}
+				}
 			}
 		})
 }
