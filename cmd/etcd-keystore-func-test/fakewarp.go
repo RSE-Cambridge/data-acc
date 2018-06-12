@@ -49,6 +49,11 @@ func testPersistent(volumeRegistry registry.VolumeRegistry, poolRegistry registr
 
 	debugStatus(volumeRegistry, poolRegistry)
 
+	// TODO go through state machine for a given volume...?
+	// TODO fix up paths, real_size, etc
+	// TODO record all the data for fake data_in, etc
+	// TODO add wait for actions into volume state machine
+
 	log.Println(fakewarp.DeleteBufferComponents(volumeRegistry, poolRegistry, bufferToken))
 	log.Println(fakewarp.DeleteBufferComponents(volumeRegistry, poolRegistry, "fakebuffer2"))
 	log.Println(fakewarp.DeleteBufferComponents(volumeRegistry, poolRegistry, "fakebuffer3"))
