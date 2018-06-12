@@ -21,14 +21,6 @@ func parseJobFile(lineSrc GetLines, filename string) error {
 
 type jobCommand interface{}
 
-type cmdCreatePersistent struct {
-	Name          string
-	CapacityBytes int
-	AccessMode    AccessMode
-	BufferType    BufferType
-	GenericCmd    bool
-}
-
 type AccessMode int
 
 const (
@@ -37,6 +29,18 @@ const (
 	privateAndStriped            = 3
 )
 
+var stringToAccessMode = map[string]AccessMode{
+	"":                striped,
+	"striped":                striped,
+	"private":         private,
+	"private,striped": privateAndStriped,
+	"striped,private": privateAndStriped,
+}
+
+func accessModeFromString(raw string) AccessMode {
+	return stringToAccessMode[strings.ToLower(raw)]
+}
+
 type BufferType int
 
 const (
@@ -44,15 +48,38 @@ const (
 	cache
 )
 
-type cmdDestroyPersistent struct{
+var stringToBufferType = map[string]BufferType {
+	"":scratch,
+	"scratch": scratch,
+	"cache": cache,
+}
+
+type cmdCreatePersistent struct {
+	Name          string
+	CapacityBytes int
+	AccessMode    AccessMode
+	BufferType    BufferType
+	GenericCmd    bool
+}
+
+func bufferTypeFromString(raw string) BufferType {
+	return stringToBufferType[strings.ToLower(raw)]
+}
+
+type cmdDestroyPersistent struct {
 	Name string
 }
 
-type cmdAttachPersistent struct{
+type cmdAttachPersistent struct {
 	Name string
 }
 
-type cmdPerJobBuffer struct{}
+type cmdPerJobBuffer struct{
+	CapacityBytes int
+	AccessMode    AccessMode
+	BufferType    BufferType
+	GenericCmd    bool
+}
 
 type cmdAttachPerJobSwap struct {
 	SizeBytes int
@@ -137,16 +164,28 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 				continue
 			}
 			command = cmdCreatePersistent{
-				Name: argKeyPair["name"],
+				Name:          argKeyPair["name"],
 				CapacityBytes: size,
-				GenericCmd: isGeneric, // TODO... other fields
+				GenericCmd:    isGeneric,
+				AccessMode: accessModeFromString(argKeyPair["access_mode"]),
+				BufferType: bufferTypeFromString(argKeyPair["type"]),
 			}
 		case "destroy_persistent":
 			command = cmdDestroyPersistent{Name: argKeyPair["name"]}
 		case "persistentdw":
 			command = cmdAttachPersistent{Name: argKeyPair["name"]}
 		case "jobdw":
-			command = cmdPerJobBuffer{}
+			size, err := parseSize(argKeyPair["capacity"])
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			command = cmdPerJobBuffer{
+				CapacityBytes: size,
+				GenericCmd:    isGeneric,
+				AccessMode: accessModeFromString(argKeyPair["access_mode"]),
+				BufferType: bufferTypeFromString(argKeyPair["type"]),
+			}
 		case "swap":
 			if len(args) != 1 {
 				log.Println("Unable to parse swap command:", line)
