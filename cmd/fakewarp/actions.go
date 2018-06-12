@@ -73,7 +73,8 @@ func teardown(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	error := fakewarp.DeleteBuffer(c, volReg)
+	poolReg := keystoreregistry.NewPoolRegistry(keystore)
+	error := fakewarp.DeleteBuffer(c, volReg, poolReg)
 	return error
 }
 

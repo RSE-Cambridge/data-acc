@@ -25,10 +25,14 @@ func testPersistent(volumeRegistry registry.VolumeRegistry, poolRegistry registr
 	debugStatus(volumeRegistry, poolRegistry)
 
 	log.Println(fakewarp.CreateVolumesAndJobs(volumeRegistry, poolRegistry, bufferRequest))
+	bufferRequest2 := bufferRequest
+	bufferRequest2.Token = "fakebuffer2"
+	log.Println(fakewarp.CreateVolumesAndJobs(volumeRegistry, poolRegistry, bufferRequest2))
 
 	debugStatus(volumeRegistry, poolRegistry)
 
-	log.Println(fakewarp.DeleteBufferComponents(volumeRegistry, bufferToken))
+	log.Println(fakewarp.DeleteBufferComponents(volumeRegistry, poolRegistry, bufferToken))
+	log.Println(fakewarp.DeleteBufferComponents(volumeRegistry, poolRegistry, "fakebuffer2"))
 
 	debugStatus(volumeRegistry, poolRegistry)
 }
