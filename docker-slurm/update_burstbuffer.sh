@@ -22,7 +22,7 @@ echo "Wait for startup to complete..."
 sleep 10
 
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
-#BB create_persistent name=mytestbuffer capacity=1000GB access=striped type=scratch" > create-persistent.sh'
+#BB create_persistent name=mytestbuffer capacity=4000GB access=striped type=scratch" > create-persistent.sh'
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 #BB destroy_persistent name=mytestbuffer" > delete-persistent.sh'
 
@@ -49,16 +49,26 @@ docker exec slurmctld bash -c "cd /data && cat delete-persistent.sh"
 docker exec slurmctld bash -c "cd /data && su slurm -c 'sbatch delete-persistent.sh'"
 
 sleep 22
-echo "***Show all is cleaned up***"
+echo "***Show all buffers are cleaned up***"
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"
+echo "***Show all jobs completed***"
 docker exec slurmctld bash -c "cd /data && squeue"
 
 sleep 3
+echo "***brick manager node 1 ***"
 docker logs dockerslurm_fakebuffernode_1
+echo "***brick manager node 2 ***"
+docker logs dockerslurm_fakebuffernode_2
+echo "***brick manager node 3 ***"
+docker logs dockerslurm_fakebuffernode_3
 sleep 3
-docker logs bufferwatcher
+echo "***Debugger: volumes ***"
+docker logs dockerslurm_volumewatcher_1
+echo "***Debugger: bricks ***"
+docker logs dockerslurm_brickwatcher_1
 sleep 3
-docker exec bufferwatcher bash -c "etcdctl get --prefix /"
+echo "***Data still in etcd ***"
+docker exec dockerslurm_brickwatcher_1 bash -c "etcdctl get --prefix /"
 
 #sleep 15
 
