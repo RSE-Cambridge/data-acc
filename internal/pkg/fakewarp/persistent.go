@@ -116,6 +116,7 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	}
 
 	// TODO: wait for bricks to be provisioned correctly?
+	volReg.UpdateState(volume.Name, registry.BricksProvisioned)
 	return err
 }
 
