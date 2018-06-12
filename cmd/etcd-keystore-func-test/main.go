@@ -18,4 +18,7 @@ func main() {
 	fmt.Println("")
 
 	TestKeystoreVolumeRegistry(keystore)
+	fmt.Println("")
+
+	TestFakewarp(keystore)
 }

@@ -23,7 +23,7 @@ func CreatePerJobBuffer(c CliContext, volReg registry.VolumeRegistry, lineSrc Ge
 	if err := parseJobFile(lineSrc, c.String("job")); err != nil {
 		return err
 	}
-	return createVolumesAndJobs(volReg, BufferRequest{
+	return CreateVolumesAndJobs(volReg, BufferRequest{
 		Token:    c.String("token"),
 		User:     c.Int("user"),
 		Group:    c.Int("group"),

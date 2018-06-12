@@ -30,7 +30,7 @@ func CreatePersistentBuffer(c CliContext, volReg registry.VolumeRegistry) (strin
 	if request.Group == 0 {
 		request.Group = request.User
 	}
-	return request.Token, createVolumesAndJobs(volReg, request)
+	return request.Token, CreateVolumesAndJobs(volReg, request)
 }
 
 func parseCapacity(raw string) (string, int, error) {
@@ -54,7 +54,8 @@ func parseCapacity(raw string) (string, int, error) {
 	return pool, capacityInt, nil
 }
 
-func createVolumesAndJobs(volReg registry.VolumeRegistry, request BufferRequest) error {
+// TODO: ideally this would be private, if not for testing
+func CreateVolumesAndJobs(volReg registry.VolumeRegistry, request BufferRequest) error {
 	createdAt := uint(time.Now().Unix())
 	pool, capacity, err := parseCapacity(request.Capacity) // TODO lots of proper parsing to do here, get poolname, etc
 	if err != nil {
