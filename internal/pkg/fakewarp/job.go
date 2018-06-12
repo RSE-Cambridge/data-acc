@@ -44,9 +44,13 @@ const (
 	cache
 )
 
-type cmdDestroyPersistent struct{}
+type cmdDestroyPersistent struct{
+	Name string
+}
 
-type cmdAttachPersistent struct{}
+type cmdAttachPersistent struct{
+	Name string
+}
 
 type cmdPerJobBuffer struct{}
 
@@ -93,7 +97,7 @@ func parseArgs(rawArgs []string) (map[string]string, error) {
 		if len(parts) != 2 {
 			return args, fmt.Errorf("unable to parse arg: %s", arg)
 		}
-		args[parts[0]] = parts[1]
+		args[strings.ToLower(parts[0])] = parts[1]
 	}
 	return args, nil
 }
@@ -138,9 +142,9 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 				GenericCmd: isGeneric, // TODO... other fields
 			}
 		case "destroy_persistent":
-			command = cmdDestroyPersistent{}
+			command = cmdDestroyPersistent{Name: argKeyPair["name"]}
 		case "persistentdw":
-			command = cmdAttachPersistent{}
+			command = cmdAttachPersistent{Name: argKeyPair["name"]}
 		case "jobdw":
 			command = cmdPerJobBuffer{}
 		case "swap":

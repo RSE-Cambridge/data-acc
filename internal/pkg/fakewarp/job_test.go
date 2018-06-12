@@ -30,5 +30,4 @@ func TestParseJobRequest(t *testing.T) {
 			log.Printf("Cmd: %T Args: %s\n", cmd, cmd)
 		}
 	}
-
 }
