@@ -6,7 +6,6 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"math"
 	"math/rand"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -44,17 +43,11 @@ func parseCapacity(raw string) (string, int, error) {
 	}
 	pool := parts[0]
 	rawCapacity := parts[1]
-	capacityParts := strings.Split(rawCapacity, "GiB")
-	if len(capacityParts) > 2 {
-		return "", 0, fmt.Errorf("must format capacity units correctly: %s", rawCapacity)
-	}
-	capacityInt, err := strconv.Atoi(capacityParts[0])
-	if len(capacityParts) == 1 {
-		capacityInt = int(capacityInt / bytesInGB)
-	}
+	sizeBytes, err := parseSize(rawCapacity)
 	if err != nil {
-		return "", 0, fmt.Errorf("must format capacity amount: %s", rawCapacity)
+		return "", 0, err
 	}
+	capacityInt := int(sizeBytes / bytesInGB)
 	return pool, capacityInt, nil
 }
 

@@ -24,10 +24,28 @@ func testPersistent(volumeRegistry registry.VolumeRegistry, poolRegistry registr
 	}
 	debugStatus(volumeRegistry, poolRegistry)
 
-	log.Println(fakewarp.CreateVolumesAndJobs(volumeRegistry, poolRegistry, bufferRequest))
+	err := fakewarp.CreateVolumesAndJobs(volumeRegistry, poolRegistry, bufferRequest)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	bufferRequest2 := bufferRequest
 	bufferRequest2.Token = "fakebuffer2"
-	log.Println(fakewarp.CreateVolumesAndJobs(volumeRegistry, poolRegistry, bufferRequest2))
+	err = fakewarp.CreateVolumesAndJobs(volumeRegistry, poolRegistry, bufferRequest2)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bufferRequest3 := fakewarp.BufferRequest{
+		Token:      "fakebuffer3",
+		Capacity:   "a:0",
+		Persistent: true,
+		Caller:     "test",
+	}
+	err = fakewarp.CreateVolumesAndJobs(volumeRegistry, poolRegistry, bufferRequest3)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	debugStatus(volumeRegistry, poolRegistry)
 
