@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli"
 	"log"
 	"strings"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 )
 
 func showInstances(_ *cli.Context) error {
@@ -106,7 +107,16 @@ func realSize(c *cli.Context) error {
 func dataIn(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "job")
 	fmt.Printf("--token %s --job %s\n", c.String("token"), c.String("job"))
-	return nil
+
+	keystore := getKeystore()
+	defer keystore.Close()
+	volReg := keystoreregistry.NewVolumeRegistry(keystore)
+	volumeName := registry.VolumeName(c.String("token"))
+	err := volReg.UpdateState(volumeName, registry.DataInRequested)
+	if err != nil {
+		return err
+	}
+	return volReg.UpdateState(volumeName, registry.DataInComplete) // TODO should wait for host manager to do this
 }
 
 func paths(c *cli.Context) error {
