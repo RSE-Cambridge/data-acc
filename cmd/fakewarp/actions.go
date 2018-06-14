@@ -181,7 +181,7 @@ func postRun(c *cli.Context) error {
 		log.Println("skipping prerun for:", volume.Name)
 		return nil
 	}
-	
+
 	err = volReg.UpdateState(volume.Name, registry.UnmountRequested)
 	if err != nil {
 		return err

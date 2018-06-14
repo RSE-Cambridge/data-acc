@@ -62,6 +62,8 @@ func testPersistent(volumeRegistry registry.VolumeRegistry, poolRegistry registr
 }
 
 func TestFakewarp(keystore keystoreregistry.Keystore) {
+	log.Println("Testing fakewarp")
+
 	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
 	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
 

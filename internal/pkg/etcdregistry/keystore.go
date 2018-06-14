@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 func getEndpoints() []string {
@@ -206,6 +207,13 @@ func (client *etcKeystore) KeepAliveKey(key string) error {
 	leaseID := grantResponse.ID
 
 	kvc := clientv3.NewKV(client.Client)
+
+	getResponse, err := kvc.Get(context.Background(), key)
+	if getResponse.Count == 1 {
+		// if another host seems to exist, back off for 10 seconds incase we just did a quick restart
+		time.Sleep(time.Second * 10)
+	}
+
 	txnResponse, err := kvc.Txn(context.Background()).
 		If(clientv3util.KeyMissing(key)).
 		Then(clientv3.OpPut(key, "keep-alive", clientv3.WithLease(leaseID), clientv3.WithPrevKV())).

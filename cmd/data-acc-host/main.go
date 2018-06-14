@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 const FakeDeviceAddress = "nvme%dn1"
@@ -154,9 +153,6 @@ func outputDebugLogs(poolRegistry registry.PoolRegistry, hostname string) {
 }
 
 func notifyStarted(poolRegistry registry.PoolRegistry, hostname string) {
-	// TODO: if we restart quickly this fails as key is already present, maybe don't check that key doesn't exist?
-	time.Sleep(time.Second * 10)
-
 	err := poolRegistry.KeepAliveHost(hostname)
 	if err != nil {
 		log.Fatalln(err)
