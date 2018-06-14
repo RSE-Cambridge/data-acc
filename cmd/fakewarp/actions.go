@@ -5,10 +5,10 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/urfave/cli"
 	"log"
 	"strings"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 )
 
 func showInstances(_ *cli.Context) error {

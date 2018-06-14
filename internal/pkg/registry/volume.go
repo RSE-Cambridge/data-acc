@@ -33,6 +33,9 @@ type VolumeRegistry interface {
 	// Move between volume states, but only one by one
 	UpdateState(name VolumeName, state VolumeState) error
 
+	// Wait for a specific state, error returned if not possible
+	WaitForState(name VolumeName, state VolumeState) error
+
 	// Used to add or remove attachments
 	// TODO: only allowed in certain states?
 	UpdateConfiguration(name VolumeName, configuration []Configuration) error
@@ -113,7 +116,7 @@ const (
 	DataOutRequested
 	DataOutComplete             // data copied out by host manager, or gone to ERROR
 	DeleteRequested VolumeState = 399
-	Deleted         VolumeState = 400 // all bricks correctly deprovisioned unless host down or gone to ERROR
+	BricksDeleted   VolumeState = 400 // all bricks correctly deprovisioned unless host down or gone to ERROR
 	Error           VolumeState = 500
 )
 
@@ -130,7 +133,7 @@ var volumeStateStrings = map[VolumeState]string{
 	DataOutRequested:  "DataOutRequested",
 	DataOutComplete:   "DataOutComplete",
 	DeleteRequested:   "DeleteRequested",
-	Deleted:           "Deleted",
+	BricksDeleted:     "BricksDeleted",
 	Error:             "Error",
 }
 var stringToVolumeState = map[string]VolumeState{
@@ -146,7 +149,7 @@ var stringToVolumeState = map[string]VolumeState{
 	"DataOutRequested":  DataOutRequested,
 	"DataOutComplete":   DataOutComplete,
 	"DeleteRequested":   DeleteRequested,
-	"Deleted":           Deleted,
+	"BricksDeleted":     BricksDeleted,
 	"Error":             Error,
 }
 

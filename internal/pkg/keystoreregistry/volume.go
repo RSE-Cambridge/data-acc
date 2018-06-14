@@ -103,13 +103,14 @@ func (volRegistry *volumeRegistry) updateVolume(name registry.VolumeName,
 
 	keyValue.Value = toJson(volume)
 	return volRegistry.keystore.Update([]KeyValueVersion{keyValue})
-
 }
+
 func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state registry.VolumeState) error {
 	updateState := func(volume *registry.Volume) error {
 		stateDifference := state - volume.State
-		if stateDifference != 1 {
-			return fmt.Errorf("must update volume to the next state")
+		if stateDifference != 1 && state != registry.Error {
+			return fmt.Errorf("must update volume %s to the next state, current state: %s",
+				volume.Name, volume.State)
 		}
 		volume.State = state
 		return nil
@@ -171,4 +172,8 @@ func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
 		callback(oldVolume, newVolume)
 	})
 	return nil // TODO check key is present
+}
+
+func (volRegistry *volumeRegistry) WaitForState(name registry.VolumeName, state registry.VolumeState) error {
+	panic("implement me")
 }

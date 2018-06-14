@@ -51,14 +51,68 @@ func updateBricks(poolRegistry registry.PoolRegistry, hostname string, devices [
 	}
 }
 
-func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, hostname string) {
+func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume, err error) {
+	if err != nil {
+		log.Println("Error provisioning", volume.Name, err)
+		err = nil //TODO...volumeRegistry.UpdateState(volume.Name, registry.Error)
+		if err != nil {
+			log.Println("Unable to move volume", volume.Name, "to Error state")
+		}
+	}
+}
+func provisionNewVolume(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
+	if volume.State != registry.Registered {
+		log.Println("Volume in bad initial state:", volume.Name)
+		return
+	}
+
+	log.Println("FAKE provision volume:", volume.Name)
+	err := volumeRegistry.UpdateState(volume.Name, registry.BricksProvisioned)
+	handleError(volumeRegistry, volume, err)
+}
+
+func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
+	log.Println("FAKE datain volume:", volume.Name)
+	err := volumeRegistry.UpdateState(volume.Name, registry.DataInRequested)
+	handleError(volumeRegistry, volume, err)
+}
+
+func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registry.BrickAllocation) {
+	volume, err := volumeRegistry.Volume(new.AllocatedVolume)
+	if err != nil {
+		log.Printf("Could not file volume: %s because: %s\n", new.AllocatedVolume, err)
+	}
+	log.Println("Found new volume to watch:", volume.Name, "curent state is:", volume.State)
+
+	// TODO: watch from version associated with above volume to avoid any missed events
+	volumeRegistry.WatchVolumeChanges(string(volume.Name), func(old *registry.Volume, new *registry.Volume) {
+		if old != nil && new != nil {
+			if new.State != old.State {
+				switch new.State {
+				case registry.DataInRequested:
+					processDataIn(volumeRegistry, *new)
+				default:
+					log.Println("Ingore volume:", volume.Name, "move to state:", volume.State)
+				}
+			}
+		}
+	})
+
+	// Move to new state, ignored by above watch
+	provisionNewVolume(volumeRegistry, volume)
+}
+
+func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry,
+	hostname string) {
+
 	poolRegistry.WatchHostBrickAllocations(hostname,
 		func(old *registry.BrickAllocation, new *registry.BrickAllocation) {
 			log.Println("Noticed brick allocation update. Old:", old, "New:", new)
 			if new != nil {
-				if new.AllocatedVolume != "" && new.AllocatedIndex == 0 {
+				if new.AllocatedVolume != "" && old.AllocatedVolume == "" && new.AllocatedIndex == 0 {
 					log.Println("Dectected we host primary brick for:",
 						new.AllocatedVolume, "Must check for action.")
+					processNewPrimaryBlock(volumeRegistry, new)
 				}
 				if old != nil {
 					if new.DeallocateRequested && !old.DeallocateRequested {
@@ -110,11 +164,13 @@ func main() {
 	keystore := etcdregistry.NewKeystore()
 	defer keystore.Close()
 	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
+	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
 
 	devices := getDevices()
 	updateBricks(poolRegistry, hostname, devices)
 
-	setupBrickEventHandlers(poolRegistry, hostname)
+	// TODO, on startup see what existing allocations there are, and watch those volumes
+	setupBrickEventHandlers(poolRegistry, volumeRegistry, hostname)
 
 	log.Println("Notify others we have started:", hostname)
 	notifyStarted(poolRegistry, hostname)
