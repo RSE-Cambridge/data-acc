@@ -115,8 +115,10 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 		volReg.DeleteJob(job.Name)
 	}
 
-	// TODO: wait for bricks to be provisioned correctly?
-	volReg.WaitForState(volume.Name, registry.BricksProvisioned)
+	// if there are no bricks requested, don't wait for a provision that will never happen
+	if volume.SizeBricks != 0 {
+		volReg.WaitForState(volume.Name, registry.BricksProvisioned)
+	}
 	return err
 }
 

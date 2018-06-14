@@ -111,12 +111,22 @@ func dataIn(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	volumeName := registry.VolumeName(c.String("token"))
-	err := volReg.UpdateState(volumeName, registry.DataInRequested)
+
+	volume, err := volReg.Volume(registry.VolumeName(c.String("token")))
 	if err != nil {
 		return err
 	}
-	return volReg.WaitForState(volumeName, registry.DataInComplete)
+
+	if volume.SizeBricks == 0 {
+		log.Println("skipping datain for:", volume.Name)
+		return nil
+	}
+
+	err = volReg.UpdateState(volume.Name, registry.DataInRequested)
+	if err != nil {
+		return err
+	}
+	return volReg.WaitForState(volume.Name, registry.DataInComplete)
 }
 
 func paths(c *cli.Context) error {
@@ -135,12 +145,22 @@ func preRun(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	volumeName := registry.VolumeName(c.String("token"))
-	err := volReg.UpdateState(volumeName, registry.MountRequested)
+
+	volume, err := volReg.Volume(registry.VolumeName(c.String("token")))
 	if err != nil {
 		return err
 	}
-	return volReg.WaitForState(volumeName, registry.MountComplete)
+
+	if volume.SizeBricks == 0 {
+		log.Println("skipping prerun for:", volume.Name)
+		return nil
+	}
+
+	err = volReg.UpdateState(volume.Name, registry.MountRequested)
+	if err != nil {
+		return err
+	}
+	return volReg.WaitForState(volume.Name, registry.MountComplete)
 }
 
 func postRun(c *cli.Context) error {
@@ -151,12 +171,22 @@ func postRun(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	volumeName := registry.VolumeName(c.String("token"))
-	err := volReg.UpdateState(volumeName, registry.UnmountRequested)
+
+	volume, err := volReg.Volume(registry.VolumeName(c.String("token")))
 	if err != nil {
 		return err
 	}
-	return volReg.WaitForState(volumeName, registry.UnmountComplete)
+
+	if volume.SizeBricks == 0 {
+		log.Println("skipping prerun for:", volume.Name)
+		return nil
+	}
+	
+	err = volReg.UpdateState(volume.Name, registry.UnmountRequested)
+	if err != nil {
+		return err
+	}
+	return volReg.WaitForState(volume.Name, registry.UnmountComplete)
 }
 
 func dataOut(c *cli.Context) error {
@@ -167,12 +197,22 @@ func dataOut(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	volumeName := registry.VolumeName(c.String("token"))
-	err := volReg.UpdateState(volumeName, registry.DataOutRequested)
+
+	volume, err := volReg.Volume(registry.VolumeName(c.String("token")))
 	if err != nil {
 		return err
 	}
-	return volReg.UpdateState(volumeName, registry.DataOutComplete) // TODO should wait for host manager to do this
+
+	if volume.SizeBricks == 0 {
+		log.Println("skipping prerun for:", volume.Name)
+		return nil
+	}
+
+	err = volReg.UpdateState(volume.Name, registry.DataOutRequested)
+	if err != nil {
+		return err
+	}
+	return volReg.UpdateState(volume.Name, registry.DataOutComplete) // TODO should wait for host manager to do this
 }
 
 var testKeystore keystoreregistry.Keystore
