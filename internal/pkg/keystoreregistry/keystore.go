@@ -1,6 +1,7 @@
 package keystoreregistry
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 )
@@ -50,6 +51,11 @@ type Keystore interface {
 	// This starts watching from the current version, rather than replaying old events
 	// Returns the revision that the watch is starting on
 	WatchPrefix(prefix string, onUpdate func(old *KeyValueVersion, new *KeyValueVersion))
+
+	// Watch given key
+	//
+	// When callback returns true, stop watch the key
+	WatchKey(ctxt context.Context, key string, onUpdate func(old *KeyValueVersion, new *KeyValueVersion))
 
 	// Add a key, and remove it when calling process dies
 	// Error is returned if the key already exists

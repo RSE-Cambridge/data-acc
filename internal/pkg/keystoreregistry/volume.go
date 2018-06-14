@@ -2,9 +2,12 @@ package keystoreregistry
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"sync"
+	"time"
 )
 
 func NewVolumeRegistry(keystore Keystore) registry.VolumeRegistry {
@@ -103,13 +106,14 @@ func (volRegistry *volumeRegistry) updateVolume(name registry.VolumeName,
 
 	keyValue.Value = toJson(volume)
 	return volRegistry.keystore.Update([]KeyValueVersion{keyValue})
-
 }
+
 func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state registry.VolumeState) error {
 	updateState := func(volume *registry.Volume) error {
 		stateDifference := state - volume.State
-		if stateDifference != 1 {
-			return fmt.Errorf("must update volume to the next state")
+		if stateDifference != 1 && state != registry.Error {
+			return fmt.Errorf("must update volume %s to the next state, current state: %s",
+				volume.Name, volume.State)
 		}
 		volume.State = state
 		return nil
@@ -171,4 +175,36 @@ func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
 		callback(oldVolume, newVolume)
 	})
 	return nil // TODO check key is present
+}
+
+func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, state registry.VolumeState) error {
+	var waitGroup sync.WaitGroup
+	waitGroup.Add(1)
+	ctxt, cancelFunc := context.WithTimeout(context.Background(), time.Minute)
+	// TODO do we always need to call cancel?
+
+	err := fmt.Errorf("error waiting for volume %s to be state %s", volumeName, state)
+
+	volRegistry.keystore.WatchKey(ctxt, getVolumeKey(string(volumeName)),
+		func(old *KeyValueVersion, new *KeyValueVersion) {
+			oldVolume := &registry.Volume{}
+			newVolume := &registry.Volume{}
+			if old != nil {
+				volumeFromKeyValue(*old, oldVolume)
+			}
+			if new != nil {
+				volumeFromKeyValue(*new, newVolume)
+			}
+
+			if oldVolume.State != newVolume.State {
+				if newVolume.State == state {
+					err = nil
+					cancelFunc()
+					waitGroup.Done()
+				}
+			}
+		})
+
+	waitGroup.Wait()
+	return err
 }

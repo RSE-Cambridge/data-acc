@@ -174,6 +174,28 @@ func (client *etcKeystore) WatchPrefix(prefix string,
 	}()
 }
 
+func (client *etcKeystore) WatchKey(ctxt context.Context, key string,
+	onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
+	rch := client.Watch(ctxt, key, clientv3.WithPrevKV())
+	go func() {
+		for watchResponse := range rch {
+			if watchResponse.Canceled {
+				return
+			}
+			for _, ev := range watchResponse.Events {
+				new := getKeyValueVersion(ev.Kv)
+				if new != nil && new.CreateRevision == 0 {
+					// show deleted by returning nil
+					new = nil
+				}
+				old := getKeyValueVersion(ev.PrevKv)
+
+				onUpdate(old, new)
+			}
+		}
+	}()
+}
+
 func (client *etcKeystore) KeepAliveKey(key string) error {
 	// TODO what about configure timeout and ttl?
 	var ttl int64 = 10
