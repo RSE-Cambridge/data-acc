@@ -213,7 +213,7 @@ func dataOut(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	return volReg.UpdateState(volume.Name, registry.DataOutComplete) // TODO should wait for host manager to do this
+	return volReg.WaitForState(volume.Name, registry.DataOutComplete)
 }
 
 var testKeystore keystoreregistry.Keystore

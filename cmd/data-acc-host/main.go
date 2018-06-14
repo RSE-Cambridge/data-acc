@@ -89,6 +89,12 @@ func processUnmount(volumeRegistry registry.VolumeRegistry, volume registry.Volu
 	handleError(volumeRegistry, volume, err)
 }
 
+func processDataOut(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
+	log.Println("FAKE data_out volume:", volume.Name)
+	err := volumeRegistry.UpdateState(volume.Name, registry.DataOutComplete)
+	handleError(volumeRegistry, volume, err)
+}
+
 func processDelete(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	log.Println("FAKE decomission all bricks for:", volume.Name)
 	err := volumeRegistry.UpdateState(volume.Name, registry.BricksDeleted)
@@ -114,6 +120,8 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 					processMount(volumeRegistry, *new)
 				case registry.UnmountRequested:
 					processUnmount(volumeRegistry, *new)
+				case registry.DataOutRequested:
+					processDataOut(volumeRegistry, *new)
 				case registry.DeleteRequested:
 					processDelete(volumeRegistry, *new)
 				default:
