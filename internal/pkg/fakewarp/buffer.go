@@ -23,6 +23,8 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry
 		return nil
 	}
 
+	// TODO update volume state
+
 	if volume.SizeBricks != 0 {
 		// TODO should we error out here when one of these steps fail?
 		err := poolRegistry.DeallocateBricks(volumeName)

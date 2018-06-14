@@ -123,6 +123,7 @@ func paths(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "job", "pathfile")
 	fmt.Printf("--token %s --job %s --pathfile %s\n",
 		c.String("token"), c.String("job"), c.String("pathfile"))
+	// TODO get paths from the volume, and write out paths to given file
 	return nil
 }
 
@@ -130,21 +131,48 @@ func preRun(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "job", "nodehostnamefile")
 	fmt.Printf("--token %s --job %s --nodehostnamefile %s\n",
 		c.String("token"), c.String("job"), c.String("nodehostnamefile"))
-	return nil
+
+	keystore := getKeystore()
+	defer keystore.Close()
+	volReg := keystoreregistry.NewVolumeRegistry(keystore)
+	volumeName := registry.VolumeName(c.String("token"))
+	err := volReg.UpdateState(volumeName, registry.MountRequested)
+	if err != nil {
+		return err
+	}
+	return volReg.UpdateState(volumeName, registry.MountComplete) // TODO should wait for host manager to do this
 }
 
 func postRun(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "job")
 	fmt.Printf("--token %s --job %s\n",
 		c.String("token"), c.String("job"))
-	return nil
+
+	keystore := getKeystore()
+	defer keystore.Close()
+	volReg := keystoreregistry.NewVolumeRegistry(keystore)
+	volumeName := registry.VolumeName(c.String("token"))
+	err := volReg.UpdateState(volumeName, registry.UnmountRequested)
+	if err != nil {
+		return err
+	}
+	return volReg.UpdateState(volumeName, registry.UnmountComplete) // TODO should wait for host manager to do this
 }
 
 func dataOut(c *cli.Context) error {
 	checkRequiredStrings(c, "token", "job")
 	fmt.Printf("--token %s --job %s\n",
 		c.String("token"), c.String("job"))
-	return nil
+
+	keystore := getKeystore()
+	defer keystore.Close()
+	volReg := keystoreregistry.NewVolumeRegistry(keystore)
+	volumeName := registry.VolumeName(c.String("token"))
+	err := volReg.UpdateState(volumeName, registry.DataOutRequested)
+	if err != nil {
+		return err
+	}
+	return volReg.UpdateState(volumeName, registry.DataOutComplete) // TODO should wait for host manager to do this
 }
 
 var testKeystore keystoreregistry.Keystore
