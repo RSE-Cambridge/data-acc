@@ -116,7 +116,7 @@ func dataIn(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	return volReg.UpdateState(volumeName, registry.DataInComplete) // TODO should wait for host manager to do this
+	return volReg.WaitForState(volumeName, registry.DataInComplete)
 }
 
 func paths(c *cli.Context) error {
@@ -140,7 +140,7 @@ func preRun(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	return volReg.UpdateState(volumeName, registry.MountComplete) // TODO should wait for host manager to do this
+	return volReg.WaitForState(volumeName, registry.MountComplete)
 }
 
 func postRun(c *cli.Context) error {
@@ -156,7 +156,7 @@ func postRun(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	return volReg.UpdateState(volumeName, registry.UnmountComplete) // TODO should wait for host manager to do this
+	return volReg.WaitForState(volumeName, registry.UnmountComplete)
 }
 
 func dataOut(c *cli.Context) error {

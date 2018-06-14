@@ -73,7 +73,19 @@ func provisionNewVolume(volumeRegistry registry.VolumeRegistry, volume registry.
 
 func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	log.Println("FAKE datain volume:", volume.Name)
-	err := volumeRegistry.UpdateState(volume.Name, registry.DataInRequested)
+	err := volumeRegistry.UpdateState(volume.Name, registry.DataInComplete)
+	handleError(volumeRegistry, volume, err)
+}
+
+func processMount(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
+	log.Println("FAKE mount volume:", volume.Name)
+	err := volumeRegistry.UpdateState(volume.Name, registry.MountComplete)
+	handleError(volumeRegistry, volume, err)
+}
+
+func processUnmount(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
+	log.Println("FAKE unmount volume:", volume.Name)
+	err := volumeRegistry.UpdateState(volume.Name, registry.UnmountComplete)
 	handleError(volumeRegistry, volume, err)
 }
 
@@ -91,6 +103,10 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 				switch new.State {
 				case registry.DataInRequested:
 					processDataIn(volumeRegistry, *new)
+				case registry.MountRequested:
+					processMount(volumeRegistry, *new)
+				case registry.UnmountRequested:
+					processUnmount(volumeRegistry, *new)
 				default:
 					log.Println("Ingore volume:", volume.Name, "move to state:", volume.State)
 				}
@@ -107,17 +123,15 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 
 	poolRegistry.WatchHostBrickAllocations(hostname,
 		func(old *registry.BrickAllocation, new *registry.BrickAllocation) {
-			log.Println("Noticed brick allocation update. Old:", old, "New:", new)
-			if new != nil {
-				if new.AllocatedVolume != "" && old.AllocatedVolume == "" && new.AllocatedIndex == 0 {
-					log.Println("Dectected we host primary brick for:",
-						new.AllocatedVolume, "Must check for action.")
-					processNewPrimaryBlock(volumeRegistry, new)
-				}
-				if old != nil {
-					if new.DeallocateRequested && !old.DeallocateRequested {
-						log.Printf("requested clean of: %d:%s", new.AllocatedIndex, new.Device)
-					}
+			// log.Println("Noticed brick allocation update. Old:", old, "New:", new)
+			if new.AllocatedVolume != "" && old.AllocatedVolume == "" && new.AllocatedIndex == 0 {
+				//log.Println("Dectected we host primary brick for:",
+				//	new.AllocatedVolume, "Must check for action.")
+				processNewPrimaryBlock(volumeRegistry, new)
+			}
+			if old.AllocatedVolume != "" {
+				if new.DeallocateRequested && !old.DeallocateRequested {
+					log.Printf("requested clean of: %d:%s", new.AllocatedIndex, new.Device)
 				}
 			}
 		})
