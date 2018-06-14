@@ -53,7 +53,7 @@ func updateBricks(poolRegistry registry.PoolRegistry, hostname string, devices [
 func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume, err error) {
 	if err != nil {
 		log.Println("Error provisioning", volume.Name, err)
-		err = nil //TODO...volumeRegistry.UpdateState(volume.Name, registry.Error)
+		err = volumeRegistry.UpdateState(volume.Name, registry.Error)
 		if err != nil {
 			log.Println("Unable to move volume", volume.Name, "to Error state")
 		}
