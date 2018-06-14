@@ -10,11 +10,11 @@ import (
 )
 
 type jobSummary struct {
-	PerJobBuffer      *cmdPerJobBuffer
-	Swap              *cmdAttachPerJobSwap
-	Attachments       []cmdAttachPersistent
-	DataIn            *cmdStageInData
-	DataOut           *cmdStageOutData
+	PerJobBuffer *cmdPerJobBuffer
+	Swap         *cmdAttachPerJobSwap
+	Attachments  []cmdAttachPersistent
+	DataIn       *cmdStageInData
+	DataOut      *cmdStageOutData
 	//createPersistent  *cmdCreatePersistent
 	//destroyPersistent *cmdDestroyPersistent
 }

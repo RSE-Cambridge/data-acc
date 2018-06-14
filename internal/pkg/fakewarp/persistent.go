@@ -29,7 +29,7 @@ func CreatePersistentBuffer(c CliContext, volReg registry.VolumeRegistry,
 	request := BufferRequest{c.String("token"), c.String("caller"),
 		c.String("capacity"), c.Int("user"),
 		c.Int("groupid"), accessModeFromString(c.String("access")),
-	 bufferTypeFromString(c.String("type")),true}
+		bufferTypeFromString(c.String("type")), true}
 	if request.Group == 0 {
 		request.Group = request.User
 	}

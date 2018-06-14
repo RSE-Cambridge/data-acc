@@ -23,11 +23,18 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry
 		return nil
 	}
 
-	// TODO update volume state
-
 	if volume.SizeBricks != 0 {
+		err := volumeRegistry.UpdateState(volume.Name, registry.DeleteRequested)
+		if err != nil {
+			return err
+		}
+		err = volumeRegistry.WaitForState(volume.Name, registry.BricksDeleted)
+		if err != nil {
+			return err
+		}
+
 		// TODO should we error out here when one of these steps fail?
-		err := poolRegistry.DeallocateBricks(volumeName)
+		err = poolRegistry.DeallocateBricks(volumeName)
 		if err != nil {
 			return err
 		}

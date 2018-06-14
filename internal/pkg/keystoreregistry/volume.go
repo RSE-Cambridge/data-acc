@@ -111,7 +111,7 @@ func (volRegistry *volumeRegistry) updateVolume(name registry.VolumeName,
 func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state registry.VolumeState) error {
 	updateState := func(volume *registry.Volume) error {
 		stateDifference := state - volume.State
-		if stateDifference != 1 && state != registry.Error {
+		if stateDifference != 1 && state != registry.Error && state != registry.DeleteRequested {
 			return fmt.Errorf("must update volume %s to the next state, current state: %s",
 				volume.Name, volume.State)
 		}

@@ -99,7 +99,6 @@ func setup(c *cli.Context) error {
 	return error
 }
 
-
 func realSize(c *cli.Context) error {
 	checkRequiredStrings(c, "token")
 	fmt.Printf("--token %s\n", c.String("token"))
