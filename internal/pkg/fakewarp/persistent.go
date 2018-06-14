@@ -16,8 +16,8 @@ type BufferRequest struct {
 	Capacity   string
 	User       int
 	Group      int
-	Access     string
-	Type       string
+	Access     AccessMode
+	Type       BufferType
 	Persistent bool
 }
 
@@ -28,8 +28,8 @@ func CreatePersistentBuffer(c CliContext, volReg registry.VolumeRegistry,
 
 	request := BufferRequest{c.String("token"), c.String("caller"),
 		c.String("capacity"), c.Int("user"),
-		c.Int("groupid"), c.String("access"), c.String("type"),
-		true}
+		c.Int("groupid"), accessModeFromString(c.String("access")),
+	 bufferTypeFromString(c.String("type")),true}
 	if request.Group == 0 {
 		request.Group = request.User
 	}

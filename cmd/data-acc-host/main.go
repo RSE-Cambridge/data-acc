@@ -96,6 +96,7 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 	log.Println("Found new volume to watch:", volume.Name, "curent state is:", volume.State)
 
 	// TODO: watch from version associated with above volume to avoid any missed events
+	// TODO: leaking goroutines here, should cancel the watch when volume is deleted
 	volumeRegistry.WatchVolumeChanges(string(volume.Name), func(old *registry.Volume, new *registry.Volume) {
 		if old != nil && new != nil {
 			if new.State != old.State {
