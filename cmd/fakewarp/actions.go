@@ -82,6 +82,7 @@ func teardown(c *cli.Context) error {
 func jobProcess(c *cli.Context) error {
 	checkRequiredStrings(c, "job")
 	fmt.Printf("job: %s\n", c.String("job"))
+	// TODO call parseJobFile
 	return nil
 }
 
@@ -97,6 +98,7 @@ func setup(c *cli.Context) error {
 	error := fakewarp.CreatePerJobBuffer(c, volReg, poolReg, lines)
 	return error
 }
+
 
 func realSize(c *cli.Context) error {
 	checkRequiredStrings(c, "token")
@@ -178,7 +180,7 @@ func postRun(c *cli.Context) error {
 	}
 
 	if volume.SizeBricks == 0 {
-		log.Println("skipping prerun for:", volume.Name)
+		log.Println("skipping postrun for:", volume.Name)
 		return nil
 	}
 
@@ -204,7 +206,7 @@ func dataOut(c *cli.Context) error {
 	}
 
 	if volume.SizeBricks == 0 {
-		log.Println("skipping prerun for:", volume.Name)
+		log.Println("skipping data_out for:", volume.Name)
 		return nil
 	}
 

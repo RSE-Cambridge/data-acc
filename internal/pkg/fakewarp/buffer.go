@@ -51,9 +51,10 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry
 func CreatePerJobBuffer(c CliContext, volReg registry.VolumeRegistry, poolReg registry.PoolRegistry,
 	lineSrc GetLines) error {
 
-	// TODO need to read and parse the job file...
-	if err := parseJobFile(lineSrc, c.String("job")); err != nil {
+	if summary, err := parseJobFile(lineSrc, c.String("job")); err != nil {
 		return err
+	} else {
+		log.Println("Summary of job file:", summary)
 	}
 	return CreateVolumesAndJobs(volReg, poolReg, BufferRequest{
 		Token:    c.String("token"),

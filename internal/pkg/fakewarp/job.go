@@ -9,14 +9,61 @@ import (
 	"strings"
 )
 
+type jobSummary struct {
+	PerJobBuffer      *cmdPerJobBuffer
+	Swap              *cmdAttachPerJobSwap
+	Attachments       []cmdAttachPersistent
+	DataIn            *cmdStageInData
+	DataOut           *cmdStageOutData
+	//createPersistent  *cmdCreatePersistent
+	//destroyPersistent *cmdDestroyPersistent
+}
+
+func (s jobSummary) String() string {
+	return toJson(s)
+}
+
 // Parse a given job file
-func parseJobFile(lineSrc GetLines, filename string) error {
+func parseJobFile(lineSrc GetLines, filename string) (jobSummary, error) {
+	var summary jobSummary
 	lines, err := lineSrc.Lines(filename)
 	if err != nil {
-		return err
+		return summary, err
 	}
-	_, err = parseJobRequest(lines) // TODO use return value!
-	return err
+	jobCommands, err := parseJobRequest(lines)
+	for _, cmd := range jobCommands {
+		switch c := cmd.(type) {
+		case cmdPerJobBuffer:
+			if summary.PerJobBuffer == nil {
+				summary.PerJobBuffer = &c
+			} else {
+				return summary, fmt.Errorf("only one per job buffer allowed")
+			}
+		case cmdAttachPersistent:
+			summary.Attachments = append(summary.Attachments, c)
+		case cmdAttachPerJobSwap:
+			if summary.Swap != nil {
+				// TODO check amount isn't too big for per job buffer
+				return summary, fmt.Errorf("only one swap request allowed")
+			}
+			summary.Swap = &c
+		case cmdStageOutData:
+			if summary.DataOut != nil {
+				// TODO really should check if data out matches one of the requested buffers
+				return summary, fmt.Errorf("only one per data out requested allowed")
+			}
+			summary.DataOut = &c
+		case cmdStageInData:
+			if summary.DataIn != nil {
+				// TODO really should check if data in matches one of the requested buffers
+				return summary, fmt.Errorf("only one per data in requested allowed")
+			}
+			summary.DataIn = &c
+		default:
+			// do nothing
+		}
+	}
+	return summary, err
 }
 
 type jobCommand interface{}
