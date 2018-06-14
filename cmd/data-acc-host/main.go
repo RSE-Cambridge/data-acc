@@ -76,6 +76,7 @@ func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volum
 	handleError(volumeRegistry, volume, err)
 }
 
+// TODO: well this doesn't work for jobs that have no new bicks, i.e. just attach to persistent buffers
 func processMount(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	log.Println("FAKE mount volume:", volume.Name)
 	err := volumeRegistry.UpdateState(volume.Name, registry.MountComplete)
