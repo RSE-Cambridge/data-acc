@@ -205,6 +205,8 @@ func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, 
 			}
 		})
 
+	// TODO... check we are not already in the correct (or impossible) state, to make sure we don't race?
+
 	waitGroup.Wait()
 	return err
 }

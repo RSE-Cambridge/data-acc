@@ -2,6 +2,7 @@ package fakewarp
 
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/lifecycle"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 )
@@ -24,35 +25,11 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry
 		return nil
 	}
 
-	if volume.SizeBricks != 0 {
-		err := volumeRegistry.UpdateState(volume.Name, registry.DeleteRequested)
-		if err != nil {
-			return err
-		}
-		err = volumeRegistry.WaitForState(volume.Name, registry.BricksDeleted)
-		if err != nil {
-			return err
-		}
-
-		// TODO should we error out here when one of these steps fail?
-		err = poolRegistry.DeallocateBricks(volumeName)
-		if err != nil {
-			return err
-		}
-		allocations, err := poolRegistry.GetAllocationsForVolume(volumeName)
-		if err != nil {
-			return err
-		}
-		// TODO we should really wait for the brick manager to call this API
-		err = poolRegistry.HardDeleteAllocations(allocations)
-		if err != nil {
-			return err
-		}
-	}
-
-	if err := volumeRegistry.DeleteVolume(volumeName); err != nil {
+	vlm := lifecycle.NewVolumeLifecycleManager(volumeRegistry, poolRegistry, volume)
+	if err := vlm.Delete(); err != nil {
 		return err
 	}
+
 	return volumeRegistry.DeleteJob(token)
 }
 
