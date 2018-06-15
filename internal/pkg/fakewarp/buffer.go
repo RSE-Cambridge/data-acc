@@ -1,6 +1,7 @@
 package fakewarp
 
 import (
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 )
@@ -56,9 +57,9 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry
 }
 
 func CreatePerJobBuffer(c CliContext, volReg registry.VolumeRegistry, poolReg registry.PoolRegistry,
-	lineSrc GetLines) error {
+	reader fileio.Reader) error {
 
-	if summary, err := parseJobFile(lineSrc, c.String("job")); err != nil {
+	if summary, err := parseJobFile(reader, c.String("job")); err != nil {
 		return err
 	} else {
 		log.Println("Summary of job file:", summary)

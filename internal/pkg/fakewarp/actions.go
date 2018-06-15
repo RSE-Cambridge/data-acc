@@ -1,6 +1,7 @@
 package fakewarp
 
 import (
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"strings"
@@ -11,15 +12,15 @@ type FakewarpActions interface {
 }
 
 func NewFakewarpActions(
-	poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, lines GetLines) FakewarpActions {
+	poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, reader fileio.Reader) FakewarpActions {
 
-	return &fakewarpActions{poolRegistry, volumeRegistry, lines}
+	return &fakewarpActions{poolRegistry, volumeRegistry, reader}
 }
 
 type fakewarpActions struct {
 	poolRegistry   registry.PoolRegistry
 	volumeRegistry registry.VolumeRegistry
-	lines          GetLines
+	reader         fileio.Reader
 }
 
 func (fwa *fakewarpActions) CreatePersistentBuffer(c CliContext) (string, error) {

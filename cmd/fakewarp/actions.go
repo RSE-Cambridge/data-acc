@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/urfave/cli"
@@ -12,7 +13,7 @@ import (
 )
 
 var testKeystore keystoreregistry.Keystore
-var lines fakewarp.GetLines
+var reader fileio.Reader
 
 func getKeystore() keystoreregistry.Keystore {
 	// TODO must be a better way to test this, proper factory?
@@ -20,8 +21,8 @@ func getKeystore() keystoreregistry.Keystore {
 	if keystore == nil {
 		keystore = etcdregistry.NewKeystore()
 	}
-	if lines == nil {
-		lines = fakewarp.LinesFromFile{}
+	if reader == nil {
+		reader = fileio.NewReader()
 	}
 	return keystore
 }
@@ -29,7 +30,7 @@ func getKeystore() keystoreregistry.Keystore {
 func getActions(keystore keystoreregistry.Keystore) fakewarp.FakewarpActions {
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
 	poolReg := keystoreregistry.NewPoolRegistry(keystore)
-	return fakewarp.NewFakewarpActions(poolReg, volReg, lines)
+	return fakewarp.NewFakewarpActions(poolReg, volReg, reader)
 }
 
 func createPersistent(c *cli.Context) error {
@@ -38,12 +39,12 @@ func createPersistent(c *cli.Context) error {
 	defer keystore.Close()
 	actions := getActions(keystore)
 
-	name, error := actions.CreatePersistentBuffer(c)
-	if error == nil {
+	name, err := actions.CreatePersistentBuffer(c)
+	if err == nil {
 		// Slurm is looking for the string "created" to know this worked
 		fmt.Printf("created %s\n", name)
 	}
-	return error
+	return err
 }
 
 func showInstances(_ *cli.Context) error {
@@ -111,8 +112,8 @@ func teardown(c *cli.Context) error {
 	defer keystore.Close()
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
 	poolReg := keystoreregistry.NewPoolRegistry(keystore)
-	error := fakewarp.DeleteBuffer(c, volReg, poolReg)
-	return error
+	err := fakewarp.DeleteBuffer(c, volReg, poolReg)
+	return err
 }
 
 func jobProcess(c *cli.Context) error {
@@ -131,8 +132,8 @@ func setup(c *cli.Context) error {
 	defer keystore.Close()
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
 	poolReg := keystoreregistry.NewPoolRegistry(keystore)
-	error := fakewarp.CreatePerJobBuffer(c, volReg, poolReg, lines)
-	return error
+	err := fakewarp.CreatePerJobBuffer(c, volReg, poolReg, reader)
+	return err
 }
 
 func realSize(c *cli.Context) error {

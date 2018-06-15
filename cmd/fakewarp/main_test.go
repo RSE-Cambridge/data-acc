@@ -47,14 +47,14 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	mockKeystore.EXPECT().Add(gomock.Any()).AnyTimes()
 	mockKeystore.EXPECT().Close().AnyTimes()
 
-	mockLines := mocks.NewMockGetLines(mockCtrl)
-	mockLines.EXPECT().Lines("b")
+	mockReader := mocks.NewMockReader(mockCtrl)
+	mockReader.EXPECT().Lines("b")
 
 	testKeystore = mockKeystore
-	lines = mockLines
+	reader = mockReader
 	defer func() {
 		testKeystore = nil
-		lines = nil
+		reader = nil
 	}()
 
 	if err := runCli([]string{"--function", "pools"}); err != nil {

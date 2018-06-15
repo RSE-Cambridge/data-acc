@@ -6,7 +6,6 @@ package mocks
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockjobCommand is a mock of jobCommand interface
@@ -30,40 +29,4 @@ func NewMockjobCommand(ctrl *gomock.Controller) *MockjobCommand {
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockjobCommand) EXPECT() *MockjobCommandMockRecorder {
 	return m.recorder
-}
-
-// MockGetLines is a mock of GetLines interface
-type MockGetLines struct {
-	ctrl     *gomock.Controller
-	recorder *MockGetLinesMockRecorder
-}
-
-// MockGetLinesMockRecorder is the mock recorder for MockGetLines
-type MockGetLinesMockRecorder struct {
-	mock *MockGetLines
-}
-
-// NewMockGetLines creates a new mock instance
-func NewMockGetLines(ctrl *gomock.Controller) *MockGetLines {
-	mock := &MockGetLines{ctrl: ctrl}
-	mock.recorder = &MockGetLinesMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockGetLines) EXPECT() *MockGetLinesMockRecorder {
-	return m.recorder
-}
-
-// Lines mocks base method
-func (m *MockGetLines) Lines(filename string) ([]string, error) {
-	ret := m.ctrl.Call(m, "Lines", filename)
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Lines indicates an expected call of Lines
-func (mr *MockGetLinesMockRecorder) Lines(filename interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lines", reflect.TypeOf((*MockGetLines)(nil).Lines), filename)
 }

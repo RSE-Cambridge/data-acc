@@ -1,10 +1,9 @@
 package fakewarp
 
 import (
-	"bufio"
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -24,9 +23,9 @@ func (s jobSummary) String() string {
 }
 
 // Parse a given job file
-func parseJobFile(lineSrc GetLines, filename string) (jobSummary, error) {
+func parseJobFile(reader fileio.Reader, filename string) (jobSummary, error) {
 	var summary jobSummary
-	lines, err := lineSrc.Lines(filename)
+	lines, err := reader.Lines(filename)
 	if err != nil {
 		return summary, err
 	}
@@ -289,33 +288,4 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 		commands = append(commands, command)
 	}
 	return commands, nil
-}
-
-// Allow tests to replace the source of lines in given file
-type GetLines interface {
-	Lines(filename string) ([]string, error)
-}
-
-// Read lines from a file
-// Implements the GetLines interface
-type LinesFromFile struct{}
-
-func (LinesFromFile) Lines(filename string) ([]string, error) {
-	var lines []string
-
-	file, err := os.Open(filename)
-	if err != nil {
-		return lines, err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	if err := scanner.Err(); err != nil {
-		return lines, err
-	}
-	return lines, nil
 }
