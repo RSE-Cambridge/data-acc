@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/lifecycle/brickmanager"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/lifecycle/brickmanager"
 	"log"
 	"os"
 	"os/signal"
