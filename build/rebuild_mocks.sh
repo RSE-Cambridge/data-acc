@@ -27,3 +27,7 @@ for i in $items; do
     mockgen -source=internal/pkg/fileio/${i}.go \
         -package mocks >internal/pkg/mocks/${i}_mock.go
 done
+
+items="interface"
+mockgen -source=internal/pkg/pfsprovider/interface.go \
+    -package mocks >internal/pkg/mocks/pfsprovider_mock.go

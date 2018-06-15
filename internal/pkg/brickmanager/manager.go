@@ -2,6 +2,7 @@ package brickmanager
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/pfsprovider/fake"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"os"
@@ -83,51 +84,69 @@ func updateBricks(poolRegistry registry.PoolRegistry, hostname string, devices [
 func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume, err error) {
 	if err != nil {
 		log.Println("Error provisioning", volume.Name, err)
-		err = volumeRegistry.UpdateState(volume.Name, registry.Error)
+		err = volumeRegistry.UpdateState(volume.Name, registry.Error) // TODO record an error string?
 		if err != nil {
 			log.Println("Unable to move volume", volume.Name, "to Error state")
 		}
 	}
 }
+
+// TODO: should not be hardcoded here
+var plugin = fake.GetPlugin()
+
 func provisionNewVolume(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	if volume.State != registry.Registered {
 		log.Println("Volume in bad initial state:", volume.Name)
 		return
 	}
 
-	log.Println("FAKE provision volume:", volume.Name)
-	err := volumeRegistry.UpdateState(volume.Name, registry.BricksProvisioned)
+	err := plugin.VolumeProvider().SetupVolume(volume)
+	handleError(volumeRegistry, volume, err)
+
+	err = volumeRegistry.UpdateState(volume.Name, registry.BricksProvisioned)
 	handleError(volumeRegistry, volume, err)
 }
 
 func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	log.Println("FAKE datain volume:", volume.Name)
-	err := volumeRegistry.UpdateState(volume.Name, registry.DataInComplete)
+	err := plugin.VolumeProvider().CopyDataIn(volume)
+	handleError(volumeRegistry, volume, err)
+
+	err = volumeRegistry.UpdateState(volume.Name, registry.DataInComplete)
 	handleError(volumeRegistry, volume, err)
 }
 
 // TODO: well this doesn't work for jobs that have no new bicks, i.e. just attach to persistent buffers
 func processMount(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	log.Println("FAKE mount volume:", volume.Name)
-	err := volumeRegistry.UpdateState(volume.Name, registry.MountComplete)
+	hostname := "TODO" // TODO: loop around required mounts
+	err := plugin.Mounter().Mount(volume, registry.Configuration{}, hostname)
+	handleError(volumeRegistry, volume, err)
+
+	err = volumeRegistry.UpdateState(volume.Name, registry.MountComplete)
 	handleError(volumeRegistry, volume, err)
 }
 
 func processUnmount(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	log.Println("FAKE unmount volume:", volume.Name)
-	err := volumeRegistry.UpdateState(volume.Name, registry.UnmountComplete)
+	hostname := "TODO" // TODO: loop around required mounts
+	err := plugin.Mounter().Unmount(volume, registry.Configuration{}, hostname)
+	handleError(volumeRegistry, volume, err)
+
+	err = volumeRegistry.UpdateState(volume.Name, registry.UnmountComplete)
 	handleError(volumeRegistry, volume, err)
 }
 
 func processDataOut(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	log.Println("FAKE data_out volume:", volume.Name)
-	err := volumeRegistry.UpdateState(volume.Name, registry.DataOutComplete)
+	err := plugin.VolumeProvider().CopyDataOut(volume)
+	handleError(volumeRegistry, volume, err)
+
+	err = volumeRegistry.UpdateState(volume.Name, registry.DataOutComplete)
 	handleError(volumeRegistry, volume, err)
 }
 
 func processDelete(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	log.Println("FAKE decomission all bricks for:", volume.Name)
-	err := volumeRegistry.UpdateState(volume.Name, registry.BricksDeleted)
+	err := plugin.VolumeProvider().TeardownVolume(volume)
+	handleError(volumeRegistry, volume, err)
+
+	err = volumeRegistry.UpdateState(volume.Name, registry.BricksDeleted)
 	handleError(volumeRegistry, volume, err)
 }
 
