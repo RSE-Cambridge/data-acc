@@ -2,6 +2,8 @@ set -eux
 
 echo "Regenerate mocks:"
 
+mkdir -p internal/pkg/mocks
+
 items="keystore"
 for i in $items; do
     mockgen -source=internal/pkg/keystoreregistry/${i}.go \
