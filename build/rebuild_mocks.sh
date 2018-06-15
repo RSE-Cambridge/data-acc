@@ -14,7 +14,7 @@ for i in $items; do
         -package mocks >internal/pkg/mocks/${i}_mock.go
 done
 
-items="job actions"
+items="job"
 for i in $items; do
     mockgen -source=internal/pkg/fakewarp/${i}.go \
         -package mocks >internal/pkg/mocks/${i}_mock.go
