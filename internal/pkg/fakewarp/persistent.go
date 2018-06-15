@@ -23,18 +23,6 @@ type BufferRequest struct {
 
 // Creates a persistent buffer.
 // If it works, we return the name of the buffer, otherwise an error is returned
-func CreatePersistentBuffer(c CliContext, volReg registry.VolumeRegistry,
-	poolReg registry.PoolRegistry) (string, error) {
-
-	request := BufferRequest{c.String("token"), c.String("caller"),
-		c.String("capacity"), c.Int("user"),
-		c.Int("groupid"), accessModeFromString(c.String("access")),
-		bufferTypeFromString(c.String("type")), true}
-	if request.Group == 0 {
-		request.Group = request.User
-	}
-	return request.Token, CreateVolumesAndJobs(volReg, poolReg, request)
-}
 
 func parseCapacity(raw string) (string, int, error) {
 	parts := strings.Split(raw, ":")

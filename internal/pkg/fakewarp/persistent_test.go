@@ -15,6 +15,16 @@ func (c *mockCliContext) String(name string) string {
 	switch name {
 	case "capacity":
 		return "pool1:0"
+	case "token":
+		return "token"
+	case "caller":
+		return "caller"
+	case "user":
+		return "user"
+	case "access":
+		return "access"
+	case "type":
+		return "type"
 	default:
 		return ""
 	}
@@ -36,9 +46,11 @@ func TestCreatePersistentBufferReturnsError(t *testing.T) {
 	})
 	mockCtxt := mockCliContext{}
 
-	if actual, err := CreatePersistentBuffer(&mockCtxt, mockObj, mockPool); err != nil {
+	actions := NewFakewarpActions(mockPool, mockObj, nil)
+
+	if actual, err := actions.CreatePersistentBuffer(&mockCtxt); err != nil {
 		assert.EqualValues(t, "unable to create buffer", fmt.Sprint(err))
 	} else {
-		assert.EqualValues(t, "", actual) // TODO
+		assert.EqualValues(t, "token", actual) // TODO
 	}
 }

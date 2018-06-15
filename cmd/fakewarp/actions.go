@@ -11,6 +11,41 @@ import (
 	"strings"
 )
 
+var testKeystore keystoreregistry.Keystore
+var lines fakewarp.GetLines
+
+func getKeystore() keystoreregistry.Keystore {
+	// TODO must be a better way to test this, proper factory?
+	keystore := testKeystore
+	if keystore == nil {
+		keystore = etcdregistry.NewKeystore()
+	}
+	if lines == nil {
+		lines = fakewarp.LinesFromFile{}
+	}
+	return keystore
+}
+
+func getActions(keystore keystoreregistry.Keystore) fakewarp.FakewarpActions {
+	volReg := keystoreregistry.NewVolumeRegistry(keystore)
+	poolReg := keystoreregistry.NewPoolRegistry(keystore)
+	return fakewarp.NewFakewarpActions(poolReg, volReg, lines)
+}
+
+func createPersistent(c *cli.Context) error {
+
+	keystore := getKeystore()
+	defer keystore.Close()
+	actions := getActions(keystore)
+
+	name, error := actions.CreatePersistentBuffer(c)
+	if error == nil {
+		// Slurm is looking for the string "created" to know this worked
+		fmt.Printf("created %s\n", name)
+	}
+	return error
+}
+
 func showInstances(_ *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
@@ -55,6 +90,7 @@ func showConfigurations(_ *cli.Context) error {
 	return nil
 }
 
+// TODO needs deleting, its a duplicate
 func checkRequiredStrings(c *cli.Context, flags ...string) {
 	errors := []string{}
 	for _, flag := range flags {
@@ -214,33 +250,4 @@ func dataOut(c *cli.Context) error {
 		return err
 	}
 	return volReg.WaitForState(volume.Name, registry.DataOutComplete)
-}
-
-var testKeystore keystoreregistry.Keystore
-var lines fakewarp.GetLines
-
-func getKeystore() keystoreregistry.Keystore {
-	// TODO must be a better way to test this, proper factory?
-	keystore := testKeystore
-	if keystore == nil {
-		keystore = etcdregistry.NewKeystore()
-	}
-	if lines == nil {
-		lines = fakewarp.LinesFromFile{}
-	}
-	return keystore
-}
-
-func createPersistent(c *cli.Context) error {
-	checkRequiredStrings(c, "token", "caller", "capacity", "user", "access", "type")
-	keystore := getKeystore()
-	defer keystore.Close()
-	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	poolReg := keystoreregistry.NewPoolRegistry(keystore)
-	name, error := fakewarp.CreatePersistentBuffer(c, volReg, poolReg)
-	if error == nil {
-		// Slurm is looking for the string "created" to know this worked
-		fmt.Printf("created %s\n", name)
-	}
-	return error
 }
