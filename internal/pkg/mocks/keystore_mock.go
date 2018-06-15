@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	keystoreregistry "github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
@@ -127,6 +128,16 @@ func (m *MockKeystore) WatchPrefix(prefix string, onUpdate func(*keystoreregistr
 // WatchPrefix indicates an expected call of WatchPrefix
 func (mr *MockKeystoreMockRecorder) WatchPrefix(prefix, onUpdate interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchPrefix", reflect.TypeOf((*MockKeystore)(nil).WatchPrefix), prefix, onUpdate)
+}
+
+// WatchKey mocks base method
+func (m *MockKeystore) WatchKey(ctxt context.Context, key string, onUpdate func(*keystoreregistry.KeyValueVersion, *keystoreregistry.KeyValueVersion)) {
+	m.ctrl.Call(m, "WatchKey", ctxt, key, onUpdate)
+}
+
+// WatchKey indicates an expected call of WatchKey
+func (mr *MockKeystoreMockRecorder) WatchKey(ctxt, key, onUpdate interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchKey", reflect.TypeOf((*MockKeystore)(nil).WatchKey), ctxt, key, onUpdate)
 }
 
 // KeepAliveKey mocks base method
