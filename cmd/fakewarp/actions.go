@@ -55,14 +55,7 @@ func showSessions(_ *cli.Context) error {
 func listPools(_ *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
-	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
-
-	pools, err := fakewarp.GetPools(poolRegistry)
-	if err != nil {
-		return err
-	}
-	fmt.Println(pools)
-	return nil
+	return getActions(keystore).ListPools()
 }
 
 func showConfigurations(_ *cli.Context) error {

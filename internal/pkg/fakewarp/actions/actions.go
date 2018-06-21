@@ -20,6 +20,7 @@ type FakewarpActions interface {
 	CreatePerJobBuffer(c CliContext) error
 	ShowInstances() error
 	ShowSessions() error
+	ListPools() error
 }
 
 func NewFakewarpActions(
@@ -100,5 +101,14 @@ func (fwa *fakewarpActions) ShowSessions() error {
 		return err
 	}
 	fmt.Println(sessions)
+	return nil
+}
+
+func (fwa *fakewarpActions) ListPools() error {
+	pools, err := fakewarp.GetPools(fwa.poolRegistry)
+	if err != nil {
+		return err
+	}
+	fmt.Println(pools)
 	return nil
 }
