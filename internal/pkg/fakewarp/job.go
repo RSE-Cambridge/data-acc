@@ -23,7 +23,7 @@ func (s jobSummary) String() string {
 }
 
 // Parse a given job file
-func parseJobFile(reader fileio.Reader, filename string) (jobSummary, error) {
+func ParseJobFile(reader fileio.Reader, filename string) (jobSummary, error) {
 	var summary jobSummary
 	lines, err := reader.Lines(filename)
 	if err != nil {
@@ -83,7 +83,7 @@ var stringToAccessMode = map[string]AccessMode{
 	"striped,private": privateAndStriped,
 }
 
-func accessModeFromString(raw string) AccessMode {
+func AccessModeFromString(raw string) AccessMode {
 	return stringToAccessMode[strings.ToLower(raw)]
 }
 
@@ -108,7 +108,7 @@ type cmdCreatePersistent struct {
 	GenericCmd    bool
 }
 
-func bufferTypeFromString(raw string) BufferType {
+func BufferTypeFromString(raw string) BufferType {
 	return stringToBufferType[strings.ToLower(raw)]
 }
 
@@ -240,8 +240,8 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 				Name:          argKeyPair["name"],
 				CapacityBytes: size,
 				GenericCmd:    isGeneric,
-				AccessMode:    accessModeFromString(argKeyPair["access_mode"]),
-				BufferType:    bufferTypeFromString(argKeyPair["type"]),
+				AccessMode:    AccessModeFromString(argKeyPair["access_mode"]),
+				BufferType:    BufferTypeFromString(argKeyPair["type"]),
 			}
 		case "destroy_persistent":
 			command = cmdDestroyPersistent{Name: argKeyPair["name"]}
@@ -256,8 +256,8 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 			command = cmdPerJobBuffer{
 				CapacityBytes: size,
 				GenericCmd:    isGeneric,
-				AccessMode:    accessModeFromString(argKeyPair["access_mode"]),
-				BufferType:    bufferTypeFromString(argKeyPair["type"]),
+				AccessMode:    AccessModeFromString(argKeyPair["access_mode"]),
+				BufferType:    BufferTypeFromString(argKeyPair["type"]),
 			}
 		case "swap":
 			if len(args) != 1 {

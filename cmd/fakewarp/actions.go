@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp/actions"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
@@ -27,14 +28,13 @@ func getKeystore() keystoreregistry.Keystore {
 	return keystore
 }
 
-func getActions(keystore keystoreregistry.Keystore) fakewarp.FakewarpActions {
+func getActions(keystore keystoreregistry.Keystore) actions.FakewarpActions {
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
 	poolReg := keystoreregistry.NewPoolRegistry(keystore)
-	return fakewarp.NewFakewarpActions(poolReg, volReg, reader)
+	return actions.NewFakewarpActions(poolReg, volReg, reader)
 }
 
 func createPersistent(c *cli.Context) error {
-
 	keystore := getKeystore()
 	defer keystore.Close()
 	actions := getActions(keystore)
@@ -105,15 +105,11 @@ func checkRequiredStrings(c *cli.Context, flags ...string) {
 }
 
 func teardown(c *cli.Context) error {
-	checkRequiredStrings(c, "token", "job")
-	fmt.Printf("token: %s job: %s hurry:%t\n",
-		c.String("token"), c.String("job"), c.Bool("hurry"))
 	keystore := getKeystore()
 	defer keystore.Close()
-	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	poolReg := keystoreregistry.NewPoolRegistry(keystore)
-	err := fakewarp.DeleteBuffer(c, volReg, poolReg)
-	return err
+	actions := getActions(keystore)
+
+	return actions.DeleteBuffer(c)
 }
 
 func jobProcess(c *cli.Context) error {
@@ -124,16 +120,11 @@ func jobProcess(c *cli.Context) error {
 }
 
 func setup(c *cli.Context) error {
-	checkRequiredStrings(c, "token", "job", "caller", "capacity")
-	fmt.Printf("--token %s --job %s --caller %s --user %d --groupid %d --capacity %s\n",
-		c.String("token"), c.String("job"), c.String("caller"), c.Int("user"),
-		c.Int("groupid"), c.String("capacity"))
 	keystore := getKeystore()
 	defer keystore.Close()
-	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-	poolReg := keystoreregistry.NewPoolRegistry(keystore)
-	err := fakewarp.CreatePerJobBuffer(c, volReg, poolReg, reader)
-	return err
+	actions := getActions(keystore)
+
+	return actions.CreatePerJobBuffer(c)
 }
 
 func realSize(c *cli.Context) error {
