@@ -37,40 +37,19 @@ func getActions(keystore keystoreregistry.Keystore) actions.FakewarpActions {
 func createPersistent(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
-	actions := getActions(keystore)
-
-	name, err := actions.CreatePersistentBuffer(c)
-	if err == nil {
-		// Slurm is looking for the string "created" to know this worked
-		fmt.Printf("created %s\n", name)
-	}
-	return err
+	return getActions(keystore).CreatePersistentBuffer(c)
 }
 
 func showInstances(_ *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
-	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
-
-	instances, err := fakewarp.GetInstances(volumeRegistry)
-	if err != nil {
-		return err
-	}
-	fmt.Println(instances)
-	return nil
+	return getActions(keystore).ShowInstances()
 }
 
 func showSessions(_ *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
-	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
-
-	sessions, err := fakewarp.GetSessions(volumeRegistry)
-	if err != nil {
-		return err
-	}
-	fmt.Println(sessions)
-	return nil
+	return getActions(keystore).ShowSessions()
 }
 
 func listPools(_ *cli.Context) error {

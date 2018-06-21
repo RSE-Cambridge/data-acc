@@ -48,9 +48,8 @@ func TestCreatePersistentBufferReturnsError(t *testing.T) {
 
 	actions := NewFakewarpActions(mockPool, mockObj, nil)
 
-	if actual, err := actions.CreatePersistentBuffer(&mockCtxt); err != nil {
+	if err := actions.CreatePersistentBuffer(&mockCtxt); err != nil {
 		assert.EqualValues(t, "unable to create buffer", fmt.Sprint(err))
-	} else {
-		assert.EqualValues(t, "token", actual) // TODO
+		t.Fatal("expected success")
 	}
 }

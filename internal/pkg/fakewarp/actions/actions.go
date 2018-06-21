@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
@@ -14,9 +15,11 @@ type CliContext interface {
 }
 
 type FakewarpActions interface {
-	CreatePersistentBuffer(c CliContext) (string, error)
+	CreatePersistentBuffer(c CliContext) error
 	DeleteBuffer(c CliContext) error
 	CreatePerJobBuffer(c CliContext) error
+	ShowInstances() error
+	ShowSessions() error
 }
 
 func NewFakewarpActions(
@@ -31,7 +34,7 @@ type fakewarpActions struct {
 	reader         fileio.Reader
 }
 
-func (fwa *fakewarpActions) CreatePersistentBuffer(c CliContext) (string, error) {
+func (fwa *fakewarpActions) CreatePersistentBuffer(c CliContext) error {
 	checkRequiredStrings(c, "token", "caller", "capacity", "user", "access", "type")
 	request := fakewarp.BufferRequest{c.String("token"), c.String("caller"),
 		c.String("capacity"), c.Int("user"),
@@ -40,7 +43,12 @@ func (fwa *fakewarpActions) CreatePersistentBuffer(c CliContext) (string, error)
 	if request.Group == 0 {
 		request.Group = request.User
 	}
-	return request.Token, fakewarp.CreateVolumesAndJobs(fwa.volumeRegistry, fwa.poolRegistry, request)
+	err := fakewarp.CreateVolumesAndJobs(fwa.volumeRegistry, fwa.poolRegistry, request)
+	if err == nil {
+		// Slurm is looking for the string "created" to know this worked
+		fmt.Printf("created %s\n", request.Token)
+	}
+	return err
 }
 
 func checkRequiredStrings(c CliContext, flags ...string) {
@@ -75,4 +83,22 @@ func (fwa *fakewarpActions) CreatePerJobBuffer(c CliContext) error {
 		Capacity: c.String("capacity"),
 		Caller:   c.String("caller"),
 	})
+}
+
+func (fwa *fakewarpActions) ShowInstances() error {
+	instances, err := fakewarp.GetInstances(fwa.volumeRegistry)
+	if err != nil {
+		return err
+	}
+	fmt.Println(instances)
+	return nil
+}
+
+func (fwa *fakewarpActions) ShowSessions() error {
+	sessions, err := fakewarp.GetSessions(fwa.volumeRegistry)
+	if err != nil {
+		return err
+	}
+	fmt.Println(sessions)
+	return nil
 }
