@@ -72,12 +72,6 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	if err := runCli([]string{"--function", "show_sessions"}); err != nil {
 		t.Fatal(err)
 	}
-	if err := runCli([]string{"--function", "teardown", "--job", "a", "--token", "a"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := runCli([]string{"--function", "teardown", "--job", "a", "--token", "a2", "--hurry"}); err != nil {
-		t.Fatal(err)
-	}
 	if err := runCli([]string{"--function", "job_process", "--job", "a"}); err != nil {
 		t.Fatal(err)
 	}
@@ -128,6 +122,21 @@ func TestCreatePersistentBuffer(t *testing.T) {
 	assert.Equal(t, "CreatePersistentBuffer p1", err.Error())
 }
 
+func TestDeleteBuffer(t *testing.T) {
+	testActions = &stubFakewarpActions{}
+	testKeystore = &stubKeystore{}
+	defer func() {
+		testActions = nil
+		testKeystore = nil
+	}()
+
+	err := runCli([]string{"--function", "teardown", "--job", "a", "--token", "a"})
+	assert.Equal(t, "DeleteBuffer a", err.Error())
+
+	err = runCli([]string{"--function", "teardown", "--job", "b", "--token", "a2", "--hurry"})
+	assert.Equal(t, "DeleteBuffer a2", err.Error())
+}
+
 type stubKeystore struct{}
 
 func (*stubKeystore) Close() error {
@@ -167,7 +176,7 @@ func (*stubFakewarpActions) CreatePersistentBuffer(c actions.CliContext) error {
 	return fmt.Errorf("CreatePersistentBuffer %s", c.String("token"))
 }
 func (*stubFakewarpActions) DeleteBuffer(c actions.CliContext) error {
-	return errors.New("DeleteBuffer")
+	return fmt.Errorf("DeleteBuffer %s", c.String("token"))
 }
 func (*stubFakewarpActions) CreatePerJobBuffer(c actions.CliContext) error {
 	return errors.New("CreatePerJobBuffer")
