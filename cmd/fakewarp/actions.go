@@ -7,7 +7,6 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp/actions"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/urfave/cli"
 	"log"
 	"strings"
@@ -101,112 +100,31 @@ func realSize(c *cli.Context) error {
 }
 
 func dataIn(c *cli.Context) error {
-	checkRequiredStrings(c, "token", "job")
-	fmt.Printf("--token %s --job %s\n", c.String("token"), c.String("job"))
-
 	keystore := getKeystore()
 	defer keystore.Close()
-	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-
-	volume, err := volReg.Volume(registry.VolumeName(c.String("token")))
-	if err != nil {
-		return err
-	}
-
-	if volume.SizeBricks == 0 {
-		log.Println("skipping datain for:", volume.Name)
-		return nil
-	}
-
-	err = volReg.UpdateState(volume.Name, registry.DataInRequested)
-	if err != nil {
-		return err
-	}
-	return volReg.WaitForState(volume.Name, registry.DataInComplete)
+	return getActions(keystore).DataIn(c)
 }
 
 func paths(c *cli.Context) error {
-	checkRequiredStrings(c, "token", "job", "pathfile")
-	fmt.Printf("--token %s --job %s --pathfile %s\n",
-		c.String("token"), c.String("job"), c.String("pathfile"))
-	// TODO get paths from the volume, and write out paths to given file
-	return nil
+	keystore := getKeystore()
+	defer keystore.Close()
+	return getActions(keystore).Paths(c)
 }
 
 func preRun(c *cli.Context) error {
-	checkRequiredStrings(c, "token", "job", "nodehostnamefile")
-	fmt.Printf("--token %s --job %s --nodehostnamefile %s\n",
-		c.String("token"), c.String("job"), c.String("nodehostnamefile"))
-
 	keystore := getKeystore()
 	defer keystore.Close()
-	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-
-	volume, err := volReg.Volume(registry.VolumeName(c.String("token")))
-	if err != nil {
-		return err
-	}
-
-	if volume.SizeBricks == 0 {
-		log.Println("skipping prerun for:", volume.Name)
-		return nil
-	}
-
-	err = volReg.UpdateState(volume.Name, registry.MountRequested)
-	if err != nil {
-		return err
-	}
-	return volReg.WaitForState(volume.Name, registry.MountComplete)
+	return getActions(keystore).PreRun(c)
 }
 
 func postRun(c *cli.Context) error {
-	checkRequiredStrings(c, "token", "job")
-	fmt.Printf("--token %s --job %s\n",
-		c.String("token"), c.String("job"))
-
 	keystore := getKeystore()
 	defer keystore.Close()
-	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-
-	volume, err := volReg.Volume(registry.VolumeName(c.String("token")))
-	if err != nil {
-		return err
-	}
-
-	if volume.SizeBricks == 0 {
-		log.Println("skipping postrun for:", volume.Name)
-		return nil
-	}
-
-	err = volReg.UpdateState(volume.Name, registry.UnmountRequested)
-	if err != nil {
-		return err
-	}
-	return volReg.WaitForState(volume.Name, registry.UnmountComplete)
+	return getActions(keystore).PostRun(c)
 }
 
 func dataOut(c *cli.Context) error {
-	checkRequiredStrings(c, "token", "job")
-	fmt.Printf("--token %s --job %s\n",
-		c.String("token"), c.String("job"))
-
 	keystore := getKeystore()
 	defer keystore.Close()
-	volReg := keystoreregistry.NewVolumeRegistry(keystore)
-
-	volume, err := volReg.Volume(registry.VolumeName(c.String("token")))
-	if err != nil {
-		return err
-	}
-
-	if volume.SizeBricks == 0 {
-		log.Println("skipping data_out for:", volume.Name)
-		return nil
-	}
-
-	err = volReg.UpdateState(volume.Name, registry.DataOutRequested)
-	if err != nil {
-		return err
-	}
-	return volReg.WaitForState(volume.Name, registry.DataOutComplete)
+	return getActions(keystore).DataOut(c)
 }

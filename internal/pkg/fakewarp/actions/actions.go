@@ -139,21 +139,97 @@ func (fwa *fakewarpActions) RealSize(c CliContext) error {
 }
 
 func (fwa *fakewarpActions) DataIn(c CliContext) error {
-	return nil
+	checkRequiredStrings(c, "token", "job")
+	fmt.Printf("--token %s --job %s\n", c.String("token"), c.String("job"))
+
+	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+	if err != nil {
+		return err
+	}
+
+	if volume.SizeBricks == 0 {
+		log.Println("skipping datain for:", volume.Name)
+		return nil
+	}
+
+	err = fwa.volumeRegistry.UpdateState(volume.Name, registry.DataInRequested)
+	if err != nil {
+		return err
+	}
+	return fwa.volumeRegistry.WaitForState(volume.Name, registry.DataInComplete)
 }
 
 func (fwa *fakewarpActions) Paths(c CliContext) error {
+	checkRequiredStrings(c, "token", "job", "pathfile")
+	fmt.Printf("--token %s --job %s --pathfile %s\n",
+		c.String("token"), c.String("job"), c.String("pathfile"))
+	// TODO get paths from the volume, and write out paths to given file
 	return nil
 }
 
 func (fwa *fakewarpActions) PreRun(c CliContext) error {
-	return nil
+	checkRequiredStrings(c, "token", "job", "nodehostnamefile")
+	fmt.Printf("--token %s --job %s --nodehostnamefile %s\n",
+		c.String("token"), c.String("job"), c.String("nodehostnamefile"))
+
+	// TODO: read in nodehostnamefile and update attachments for each configuration?
+	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+	if err != nil {
+		return err
+	}
+
+	if volume.SizeBricks == 0 {
+		log.Println("skipping prerun for:", volume.Name)
+		return nil
+	}
+
+	err = fwa.volumeRegistry.UpdateState(volume.Name, registry.MountRequested)
+	if err != nil {
+		return err
+	}
+	return fwa.volumeRegistry.WaitForState(volume.Name, registry.MountComplete)
 }
 
 func (fwa *fakewarpActions) PostRun(c CliContext) error {
-	return nil
+	checkRequiredStrings(c, "token", "job")
+	fmt.Printf("--token %s --job %s\n",
+		c.String("token"), c.String("job"))
+
+	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+	if err != nil {
+		return err
+	}
+
+	if volume.SizeBricks == 0 {
+		log.Println("skipping postrun for:", volume.Name)
+		return nil
+	}
+
+	err = fwa.volumeRegistry.UpdateState(volume.Name, registry.UnmountRequested)
+	if err != nil {
+		return err
+	}
+	return fwa.volumeRegistry.WaitForState(volume.Name, registry.UnmountComplete)
 }
 
 func (fwa *fakewarpActions) DataOut(c CliContext) error {
-	return nil
+	checkRequiredStrings(c, "token", "job")
+	fmt.Printf("--token %s --job %s\n",
+		c.String("token"), c.String("job"))
+
+	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+	if err != nil {
+		return err
+	}
+
+	if volume.SizeBricks == 0 {
+		log.Println("skipping data_out for:", volume.Name)
+		return nil
+	}
+
+	err = fwa.volumeRegistry.UpdateState(volume.Name, registry.DataOutRequested)
+	if err != nil {
+		return err
+	}
+	return fwa.volumeRegistry.WaitForState(volume.Name, registry.DataOutComplete)
 }
