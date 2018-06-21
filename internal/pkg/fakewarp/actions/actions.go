@@ -23,6 +23,11 @@ type FakewarpActions interface {
 	ListPools() error
 	ValidateJob(c CliContext) error
 	RealSize(c CliContext) error
+	DataIn(c CliContext) error
+	Paths(c CliContext) error
+	PreRun(c CliContext) error
+	PostRun(c CliContext) error
+	DataOut(c CliContext) error
 }
 
 func NewFakewarpActions(
@@ -128,6 +133,27 @@ func (fwa *fakewarpActions) ValidateJob(c CliContext) error {
 
 func (fwa *fakewarpActions) RealSize(c CliContext) error {
 	checkRequiredStrings(c, "token")
+	// TODO need to fetch volume and get size, return in correct format
 	fmt.Printf("--token %s\n", c.String("token"))
+	return nil
+}
+
+func (fwa *fakewarpActions) DataIn(c CliContext) error {
+	return nil
+}
+
+func (fwa *fakewarpActions) Paths(c CliContext) error {
+	return nil
+}
+
+func (fwa *fakewarpActions) PreRun(c CliContext) error {
+	return nil
+}
+
+func (fwa *fakewarpActions) PostRun(c CliContext) error {
+	return nil
+}
+
+func (fwa *fakewarpActions) DataOut(c CliContext) error {
 	return nil
 }
