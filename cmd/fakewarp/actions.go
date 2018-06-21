@@ -9,23 +9,27 @@ import (
 )
 
 var testKeystore keystoreregistry.Keystore
-var reader fileio.Reader
+var testReader fileio.Reader
+var testActions actions.FakewarpActions
 
 func getKeystore() keystoreregistry.Keystore {
 	// TODO must be a better way to test this, proper factory?
-	keystore := testKeystore
-	if keystore == nil {
-		keystore = etcdregistry.NewKeystore()
+	if testKeystore != nil {
+		return testKeystore
 	}
-	if reader == nil {
-		reader = fileio.NewReader()
-	}
-	return keystore
+	return etcdregistry.NewKeystore()
 }
 
 func getActions(keystore keystoreregistry.Keystore) actions.FakewarpActions {
+	if testActions != nil {
+		return testActions
+	}
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
 	poolReg := keystoreregistry.NewPoolRegistry(keystore)
+	reader := testReader
+	if testReader == nil {
+		reader = fileio.NewReader()
+	}
 	return actions.NewFakewarpActions(poolReg, volReg, reader)
 }
 

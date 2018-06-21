@@ -1,6 +1,11 @@
 package main
 
 import (
+	"context"
+	"errors"
+	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp/actions"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -52,10 +57,10 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	mockReader.EXPECT().Lines("b")
 
 	testKeystore = mockKeystore
-	reader = mockReader
+	testReader = mockReader
 	defer func() {
 		testKeystore = nil
-		reader = nil
+		testReader = nil
 	}()
 
 	if err := runCli([]string{"--function", "pools"}); err != nil {
@@ -101,19 +106,102 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	if err := runCli([]string{"--function", "data_out", "--token", "a", "--job", "b"}); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestCreatePersistentBuffer(t *testing.T) {
+	testActions = &stubFakewarpActions{}
+	testKeystore = &stubKeystore{}
+	defer func() {
+		testActions = nil
+		testKeystore = nil
+	}()
+
 	createPersistentArgs := strings.Split(
+		"--function create_persistent -t p2 -c c -u 1 -g 1 -C dw:1GiB -a striped -T scratch", " ")
+	err := runCli(createPersistentArgs)
+	assert.Equal(t, "CreatePersistentBuffer p2", err.Error())
+
+	createPersistentArgs = strings.Split(
 		"--function create_persistent --token p1 --caller c --user 1 --groupid 1 --capacity dw:1GiB "+
 			"--access striped --type scratch", " ")
-	if err := runCli(createPersistentArgs); err != nil {
-		assert.EqualValues(t, "unable to find pool: dw", err.Error())
-	} else {
-		t.Fatal("expected error")
-	}
-	createPersistentArgs = strings.Split(
-		"--function create_persistent -t p2 -c c -u 1 -g 1 -C dw:1GiB -a striped -T scratch", " ")
-	if err := runCli(createPersistentArgs); err != nil {
-		assert.EqualValues(t, "unable to find pool: dw", err.Error())
-	} else {
-		t.Fatal("expected error")
-	}
+	err = runCli(createPersistentArgs)
+	assert.Equal(t, "CreatePersistentBuffer p1", err.Error())
+}
+
+type stubKeystore struct{}
+
+func (*stubKeystore) Close() error {
+	return nil
+}
+func (*stubKeystore) CleanPrefix(prefix string) error {
+	panic("implement me")
+}
+func (*stubKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
+	panic("implement me")
+}
+func (*stubKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) error {
+	panic("implement me")
+}
+func (*stubKeystore) DeleteAll(keyValues []keystoreregistry.KeyValueVersion) error {
+	panic("implement me")
+}
+func (*stubKeystore) GetAll(prefix string) ([]keystoreregistry.KeyValueVersion, error) {
+	panic("implement me")
+}
+func (*stubKeystore) Get(key string) (keystoreregistry.KeyValueVersion, error) {
+	panic("implement me")
+}
+func (*stubKeystore) WatchPrefix(prefix string, onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
+	panic("implement me")
+}
+func (*stubKeystore) WatchKey(ctxt context.Context, key string, onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
+	panic("implement me")
+}
+func (*stubKeystore) KeepAliveKey(key string) error {
+	panic("implement me")
+}
+
+type stubFakewarpActions struct{}
+
+func (*stubFakewarpActions) CreatePersistentBuffer(c actions.CliContext) error {
+	return fmt.Errorf("CreatePersistentBuffer %s", c.String("token"))
+}
+func (*stubFakewarpActions) DeleteBuffer(c actions.CliContext) error {
+	return errors.New("DeleteBuffer")
+}
+func (*stubFakewarpActions) CreatePerJobBuffer(c actions.CliContext) error {
+	return errors.New("CreatePerJobBuffer")
+}
+func (*stubFakewarpActions) ShowInstances() error {
+	return errors.New("CreatePerJobBuffer")
+}
+func (*stubFakewarpActions) ShowSessions() error {
+	return errors.New("ShowSessions")
+}
+func (*stubFakewarpActions) ListPools() error {
+	return errors.New("ListPools")
+}
+func (*stubFakewarpActions) ShowConfigurations() error {
+	return errors.New("ShowConfigurations")
+}
+func (*stubFakewarpActions) ValidateJob(c actions.CliContext) error {
+	return errors.New("ValidateJob")
+}
+func (*stubFakewarpActions) RealSize(c actions.CliContext) error {
+	return errors.New("RealSize")
+}
+func (*stubFakewarpActions) DataIn(c actions.CliContext) error {
+	return errors.New("DataIn")
+}
+func (*stubFakewarpActions) Paths(c actions.CliContext) error {
+	return errors.New("Paths")
+}
+func (*stubFakewarpActions) PreRun(c actions.CliContext) error {
+	return errors.New("PreRun")
+}
+func (*stubFakewarpActions) PostRun(c actions.CliContext) error {
+	return errors.New("PostRun")
+}
+func (*stubFakewarpActions) DataOut(c actions.CliContext) error {
+	return errors.New("DataOut")
 }
