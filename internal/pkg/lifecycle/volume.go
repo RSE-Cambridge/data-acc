@@ -55,11 +55,30 @@ func (vlm *volumeLifecyceManager) Delete() error {
 }
 
 func (vlm *volumeLifecyceManager) DataIn() error {
-	return nil
+	if vlm.volume.SizeBricks == 0 {
+		log.Println("skipping datain for:", vlm.volume.Name)
+		return nil
+	}
+
+	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.DataInRequested)
+	if err != nil {
+		return err
+	}
+	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.DataInComplete)
 }
 
 func (vlm *volumeLifecyceManager) Mount() error {
-	return nil
+
+	if vlm.volume.SizeBricks == 0 {
+		log.Println("skipping prerun for:", vlm.volume.Name)
+		return nil
+	}
+
+	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.MountRequested)
+	if err != nil {
+		return err
+	}
+	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.MountComplete)
 }
 
 func (vlm *volumeLifecyceManager) Unmount() error {
@@ -76,5 +95,14 @@ func (vlm *volumeLifecyceManager) Unmount() error {
 }
 
 func (vlm *volumeLifecyceManager) DataOut() error {
-	return nil
+	if vlm.volume.SizeBricks == 0 {
+		log.Println("skipping data_out for:", vlm.volume.Name)
+		return nil
+	}
+
+	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.DataOutRequested)
+	if err != nil {
+		return err
+	}
+	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.DataOutComplete)
 }

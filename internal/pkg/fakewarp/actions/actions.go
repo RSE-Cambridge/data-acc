@@ -154,16 +154,8 @@ func (fwa *fakewarpActions) DataIn(c CliContext) error {
 		return err
 	}
 
-	if volume.SizeBricks == 0 {
-		log.Println("skipping datain for:", volume.Name)
-		return nil
-	}
-
-	err = fwa.volumeRegistry.UpdateState(volume.Name, registry.DataInRequested)
-	if err != nil {
-		return err
-	}
-	return fwa.volumeRegistry.WaitForState(volume.Name, registry.DataInComplete)
+	vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
+	return vlm.DataIn()
 }
 
 func (fwa *fakewarpActions) Paths(c CliContext) error {
@@ -185,16 +177,8 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		return err
 	}
 
-	if volume.SizeBricks == 0 {
-		log.Println("skipping prerun for:", volume.Name)
-		return nil
-	}
-
-	err = fwa.volumeRegistry.UpdateState(volume.Name, registry.MountRequested)
-	if err != nil {
-		return err
-	}
-	return fwa.volumeRegistry.WaitForState(volume.Name, registry.MountComplete)
+	vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
+	return vlm.Mount()
 }
 
 func (fwa *fakewarpActions) PostRun(c CliContext) error {
@@ -221,14 +205,6 @@ func (fwa *fakewarpActions) DataOut(c CliContext) error {
 		return err
 	}
 
-	if volume.SizeBricks == 0 {
-		log.Println("skipping data_out for:", volume.Name)
-		return nil
-	}
-
-	err = fwa.volumeRegistry.UpdateState(volume.Name, registry.DataOutRequested)
-	if err != nil {
-		return err
-	}
-	return fwa.volumeRegistry.WaitForState(volume.Name, registry.DataOutComplete)
+	vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
+	return vlm.DataOut()
 }
