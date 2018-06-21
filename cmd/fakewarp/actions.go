@@ -79,16 +79,13 @@ func checkRequiredStrings(c *cli.Context, flags ...string) {
 func teardown(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
-	actions := getActions(keystore)
-
-	return actions.DeleteBuffer(c)
+	return getActions(keystore).DeleteBuffer(c)
 }
 
 func jobProcess(c *cli.Context) error {
-	checkRequiredStrings(c, "job")
-	fmt.Printf("job: %s\n", c.String("job"))
-	// TODO call parseJobFile
-	return nil
+	keystore := getKeystore()
+	defer keystore.Close()
+	return getActions(keystore).ValidateJob(c)
 }
 
 func setup(c *cli.Context) error {

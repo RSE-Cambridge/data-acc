@@ -21,6 +21,7 @@ type FakewarpActions interface {
 	ShowInstances() error
 	ShowSessions() error
 	ListPools() error
+	ValidateJob(c CliContext) error
 }
 
 func NewFakewarpActions(
@@ -110,5 +111,16 @@ func (fwa *fakewarpActions) ListPools() error {
 		return err
 	}
 	fmt.Println(pools)
+	return nil
+}
+
+func (fwa *fakewarpActions) ValidateJob(c CliContext) error {
+	checkRequiredStrings(c, "job")
+	if summary, err := fakewarp.ParseJobFile(fwa.reader, c.String("job")); err != nil {
+		return err
+	} else {
+		// TODO check valid pools, etc, etc.
+		log.Println("Summary of job file:", summary)
+	}
 	return nil
 }

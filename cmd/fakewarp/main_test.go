@@ -48,6 +48,7 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 	mockKeystore.EXPECT().Close().AnyTimes()
 
 	mockReader := mocks.NewMockReader(mockCtrl)
+	mockReader.EXPECT().Lines("a")
 	mockReader.EXPECT().Lines("b")
 
 	testKeystore = mockKeystore
