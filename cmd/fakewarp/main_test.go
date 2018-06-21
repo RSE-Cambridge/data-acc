@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp/actions"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -38,58 +36,6 @@ func TestStripFunctionArg(t *testing.T) {
 
 	if v := stripFunctionArg([]string{}); notEqual([]string{}, v) {
 		t.Fatalf("Expected empty list but got %s", v)
-	}
-}
-
-func TestRunCliAcceptsRequiredArgs(t *testing.T) {
-	// TODO: has to be a better way to do this
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockKeystore := mocks.NewMockKeystore(mockCtrl)
-	mockKeystore.EXPECT().GetAll(gomock.Any()).AnyTimes()
-	mockKeystore.EXPECT().Get(gomock.Any()).AnyTimes()
-	mockKeystore.EXPECT().DeleteAll(gomock.Any()).AnyTimes()
-	mockKeystore.EXPECT().Add(gomock.Any()).AnyTimes()
-	mockKeystore.EXPECT().Close().AnyTimes()
-
-	mockReader := mocks.NewMockReader(mockCtrl)
-	mockReader.EXPECT().Lines("a")
-	mockReader.EXPECT().Lines("b")
-
-	testKeystore = mockKeystore
-	testReader = mockReader
-	defer func() {
-		testKeystore = nil
-		testReader = nil
-	}()
-
-	if err := runCli([]string{"--function", "job_process", "--job", "a"}); err != nil {
-		t.Fatal(err)
-	}
-	setupArgs := strings.Split(
-		"--function setup --token a --job b --caller c --user 1 --groupid 1 --capacity dw:1GiB", " ")
-	if err := runCli(setupArgs); err != nil {
-		assert.EqualValues(t, "unable to find pool: dw", err.Error())
-	} else {
-		t.Fatal("expected error")
-	}
-	if err := runCli([]string{"--function", "real_size", "--token", "a"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := runCli([]string{"--function", "data_in", "--token", "a", "--job", "b"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := runCli([]string{"--function", "paths", "--token", "a", "--job", "b", "--pathfile", "c"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := runCli([]string{"--function", "pre_run", "--token", "a", "--job", "b", "--nodehostnamefile", "c"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := runCli([]string{"--function", "post_run", "--token", "a", "--job", "b"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := runCli([]string{"--function", "data_out", "--token", "a", "--job", "b"}); err != nil {
-		t.Fatal(err)
 	}
 }
 
@@ -159,6 +105,36 @@ func TestShow(t *testing.T) {
 
 	err = runCli([]string{"--function", "show_sessions"})
 	assert.Equal(t, "ShowSessions", err.Error())
+}
+
+func TestFlow(t *testing.T) {
+	testActions = &stubFakewarpActions{}
+	testKeystore = &stubKeystore{}
+	defer func() {
+		testActions = nil
+		testKeystore = nil
+	}()
+
+	err := runCli([]string{"--function", "job_process", "--job", "a"})
+	assert.Equal(t, "ValidateJob", err.Error())
+
+	err = runCli([]string{"--function", "real_size", "--token", "a"})
+	assert.Equal(t, "RealSize", err.Error())
+
+	err = runCli([]string{"--function", "data_in", "--token", "a", "--job", "b"})
+	assert.Equal(t, "DataIn", err.Error())
+
+	err = runCli([]string{"--function", "paths", "--token", "a", "--job", "b", "--pathfile", "c"})
+	assert.Equal(t, "Paths", err.Error())
+
+	err = runCli([]string{"--function", "pre_run", "--token", "a", "--job", "b", "--nodehostnamefile", "c"})
+	assert.Equal(t, "PreRun", err.Error())
+
+	err = runCli([]string{"--function", "post_run", "--token", "a", "--job", "b"})
+	assert.Equal(t, "PostRun", err.Error())
+
+	err = runCli([]string{"--function", "data_out", "--token", "a", "--job", "b"})
+	assert.Equal(t, "DataOut", err.Error())
 }
 
 type stubKeystore struct{}
