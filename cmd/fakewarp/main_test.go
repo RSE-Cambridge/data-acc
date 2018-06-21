@@ -63,15 +63,6 @@ func TestRunCliAcceptsRequiredArgs(t *testing.T) {
 		testReader = nil
 	}()
 
-	if err := runCli([]string{"--function", "pools"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := runCli([]string{"--function", "show_instances"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := runCli([]string{"--function", "show_sessions"}); err != nil {
-		t.Fatal(err)
-	}
 	if err := runCli([]string{"--function", "job_process", "--job", "a"}); err != nil {
 		t.Fatal(err)
 	}
@@ -149,6 +140,25 @@ func TestCreatePerJobBuffer(t *testing.T) {
 		"--function setup --token a --job b --caller c --user 1 --groupid 1 --capacity dw:1GiB", " ")
 	err := runCli(setupArgs)
 	assert.Equal(t, "CreatePerJobBuffer", err.Error())
+
+}
+
+func TestShow(t *testing.T) {
+	testActions = &stubFakewarpActions{}
+	testKeystore = &stubKeystore{}
+	defer func() {
+		testActions = nil
+		testKeystore = nil
+	}()
+
+	err := runCli([]string{"--function", "pools"})
+	assert.Equal(t, "ListPools", err.Error())
+
+	err = runCli([]string{"--function", "show_instances"})
+	assert.Equal(t, "ShowInstances", err.Error())
+
+	err = runCli([]string{"--function", "show_sessions"})
+	assert.Equal(t, "ShowSessions", err.Error())
 }
 
 type stubKeystore struct{}
@@ -196,7 +206,7 @@ func (*stubFakewarpActions) CreatePerJobBuffer(c actions.CliContext) error {
 	return errors.New("CreatePerJobBuffer")
 }
 func (*stubFakewarpActions) ShowInstances() error {
-	return errors.New("CreatePerJobBuffer")
+	return errors.New("ShowInstances")
 }
 func (*stubFakewarpActions) ShowSessions() error {
 	return errors.New("ShowSessions")
