@@ -8,8 +8,6 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/urfave/cli"
-	"log"
-	"strings"
 )
 
 var testKeystore keystoreregistry.Keystore
@@ -60,19 +58,6 @@ func listPools(_ *cli.Context) error {
 func showConfigurations(_ *cli.Context) error {
 	fmt.Print(fakewarp.GetConfigurations())
 	return nil
-}
-
-// TODO needs deleting, its a duplicate
-func checkRequiredStrings(c *cli.Context, flags ...string) {
-	errors := []string{}
-	for _, flag := range flags {
-		if str := c.String(flag); str == "" {
-			errors = append(errors, flag)
-		}
-	}
-	if len(errors) > 0 {
-		log.Fatalf("Please provide these required parameters: %s", strings.Join(errors, ", "))
-	}
 }
 
 func teardown(c *cli.Context) error {
