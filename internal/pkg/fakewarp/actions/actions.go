@@ -22,6 +22,7 @@ type FakewarpActions interface {
 	ShowSessions() error
 	ListPools() error
 	ValidateJob(c CliContext) error
+	RealSize(c CliContext) error
 }
 
 func NewFakewarpActions(
@@ -122,5 +123,11 @@ func (fwa *fakewarpActions) ValidateJob(c CliContext) error {
 		// TODO check valid pools, etc, etc.
 		log.Println("Summary of job file:", summary)
 	}
+	return nil
+}
+
+func (fwa *fakewarpActions) RealSize(c CliContext) error {
+	checkRequiredStrings(c, "token")
+	fmt.Printf("--token %s\n", c.String("token"))
 	return nil
 }

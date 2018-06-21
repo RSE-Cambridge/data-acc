@@ -91,15 +91,13 @@ func jobProcess(c *cli.Context) error {
 func setup(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
-	actions := getActions(keystore)
-
-	return actions.CreatePerJobBuffer(c)
+	return getActions(keystore).CreatePerJobBuffer(c)
 }
 
 func realSize(c *cli.Context) error {
-	checkRequiredStrings(c, "token")
-	fmt.Printf("--token %s\n", c.String("token"))
-	return nil
+	keystore := getKeystore()
+	defer keystore.Close()
+	return getActions(keystore).RealSize(c)
 }
 
 func dataIn(c *cli.Context) error {
