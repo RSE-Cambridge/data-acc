@@ -28,6 +28,7 @@ docker-compose down --vol
 
 To build it locally and run tests:
 ```
+dep ensure
 make
 make test
 ```
