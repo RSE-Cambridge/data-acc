@@ -137,6 +137,20 @@ func TestDeleteBuffer(t *testing.T) {
 	assert.Equal(t, "DeleteBuffer a2", err.Error())
 }
 
+func TestCreatePerJobBuffer(t *testing.T) {
+	testActions = &stubFakewarpActions{}
+	testKeystore = &stubKeystore{}
+	defer func() {
+		testActions = nil
+		testKeystore = nil
+	}()
+
+	setupArgs := strings.Split(
+		"--function setup --token a --job b --caller c --user 1 --groupid 1 --capacity dw:1GiB", " ")
+	err := runCli(setupArgs)
+	assert.Equal(t, "CreatePerJobBuffer", err.Error())
+}
+
 type stubKeystore struct{}
 
 func (*stubKeystore) Close() error {
