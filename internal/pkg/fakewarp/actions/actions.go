@@ -21,6 +21,7 @@ type FakewarpActions interface {
 	ShowInstances() error
 	ShowSessions() error
 	ListPools() error
+	ShowConfigurations() error
 	ValidateJob(c CliContext) error
 	RealSize(c CliContext) error
 	DataIn(c CliContext) error
@@ -117,6 +118,11 @@ func (fwa *fakewarpActions) ListPools() error {
 		return err
 	}
 	fmt.Println(pools)
+	return nil
+}
+
+func (fwa *fakewarpActions) ShowConfigurations() error {
+	fmt.Print(fakewarp.GetConfigurations())
 	return nil
 }
 

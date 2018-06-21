@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp/actions"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
@@ -56,8 +54,9 @@ func listPools(_ *cli.Context) error {
 }
 
 func showConfigurations(_ *cli.Context) error {
-	fmt.Print(fakewarp.GetConfigurations())
-	return nil
+	keystore := getKeystore()
+	defer keystore.Close()
+	return getActions(keystore).ShowConfigurations()
 }
 
 func teardown(c *cli.Context) error {
