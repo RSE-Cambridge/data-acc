@@ -2,9 +2,14 @@ package lifecycle
 
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"log"
 )
 
 type VolumeLifecycleManager interface {
+	DataIn() error
+	Mount() error
+	Unmount() error
+	DataOut() error
 	Delete() error // TODO allow context for timeout and cancel?
 }
 
@@ -47,4 +52,29 @@ func (vlm *volumeLifecyceManager) Delete() error {
 		}
 	}
 	return vlm.volumeRegistry.DeleteVolume(vlm.volume.Name)
+}
+
+func (vlm *volumeLifecyceManager) DataIn() error {
+	return nil
+}
+
+func (vlm *volumeLifecyceManager) Mount() error {
+	return nil
+}
+
+func (vlm *volumeLifecyceManager) Unmount() error {
+	if vlm.volume.SizeBricks == 0 {
+		log.Println("skipping postrun for:", vlm.volume.Name) // TODO return error type and handle outside?
+		return nil
+	}
+
+	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.UnmountRequested)
+	if err != nil {
+		return err
+	}
+	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.UnmountComplete)
+}
+
+func (vlm *volumeLifecyceManager) DataOut() error {
+	return nil
 }

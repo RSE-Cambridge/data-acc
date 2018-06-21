@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/lifecycle"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"strings"
@@ -206,16 +207,8 @@ func (fwa *fakewarpActions) PostRun(c CliContext) error {
 		return err
 	}
 
-	if volume.SizeBricks == 0 {
-		log.Println("skipping postrun for:", volume.Name)
-		return nil
-	}
-
-	err = fwa.volumeRegistry.UpdateState(volume.Name, registry.UnmountRequested)
-	if err != nil {
-		return err
-	}
-	return fwa.volumeRegistry.WaitForState(volume.Name, registry.UnmountComplete)
+	vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
+	return vlm.Unmount()
 }
 
 func (fwa *fakewarpActions) DataOut(c CliContext) error {
