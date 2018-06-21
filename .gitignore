@@ -5,3 +5,4 @@
 /.dockerfile-*
 /.idea/workspace.xml
 /docker-slurm/bin/*
+/vendor
