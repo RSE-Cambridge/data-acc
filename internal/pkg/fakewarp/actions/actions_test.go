@@ -31,6 +31,8 @@ func (c *mockCliContext) String(name string) string {
 		return "jobfile"
 	case "nodehostnamefile":
 		return "nodehostnamefile1"
+	case "pathfile":
+		return "pathfile1"
 	default:
 		return ""
 	}
@@ -77,6 +79,26 @@ func TestFakewarpActions_PreRun(t *testing.T) {
 
 	err := actions.PreRun(mockCtxt)
 	assert.EqualValues(t, "host1,host2", err.Error())
+}
+
+func TestFakewarpActions_Paths(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
+	mockDisk := mocks.NewMockDisk(mockCtrl)
+	mockCtxt := &mockCliContext{}
+	actions := NewFakewarpActions(nil, mockVolReg, mockDisk)
+	testVLM = &mockVLM{}
+	defer func() { testVLM = nil }()
+
+	mockVolReg.EXPECT().Volume(registry.VolumeName("token")).DoAndReturn(
+		func(name registry.VolumeName) (registry.Volume, error) {
+			return registry.Volume{Paths: []string{"a", "b"}}, nil
+		})
+	mockDisk.EXPECT().Write("pathfile1", []string{"a", "b"})
+
+	err := actions.Paths(mockCtxt)
+	assert.Nil(t, err)
 }
 
 type mockVLM struct{}

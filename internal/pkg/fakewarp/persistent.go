@@ -72,10 +72,10 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	var suffix string
 	if request.Persistent {
 		// TODO: sanitize token!!!
-		suffix = fmt.Sprintf("_PERSISTENT_STRIPED_%s=/mnt/dac/persistent/%s", request.Token, request.Token)
+		suffix = fmt.Sprintf("PERSISTENT_STRIPED_%s=/mnt/dac/persistent/%s", request.Token, request.Token)
 	} else {
 		// TODO: not only striped, long term
-		suffix = fmt.Sprintf("_JOB_STRIPED=/mnt/dac/job/%s/striped", request.Token)
+		suffix = fmt.Sprintf("JOB_STRIPED=/mnt/dac/job/%s/striped", request.Token)
 	}
 	paths := []string{
 		fmt.Sprintf("BB_%s", suffix),

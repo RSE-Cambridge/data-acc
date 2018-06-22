@@ -163,13 +163,11 @@ func (fwa *fakewarpActions) Paths(c CliContext) error {
 	checkRequiredStrings(c, "token", "job", "pathfile")
 	fmt.Printf("--token %s --job %s --pathfile %s\n",
 		c.String("token"), c.String("job"), c.String("pathfile"))
-	// TODO get paths from the volume, and write out paths to given file
 	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
 	if err != nil {
 		return err
 	}
-	log.Println("Paths:", volume.Paths)
-	return nil
+	return fwa.disk.Write(c.String("pathfile"), volume.Paths)
 }
 
 var testVLM lifecycle.VolumeLifecycleManager
