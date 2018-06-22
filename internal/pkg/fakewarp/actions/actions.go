@@ -187,7 +187,7 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		return err
 	}
 
-	hosts, err := fwa.reader.Lines("nodehostnamefile")
+	hosts, err := fwa.reader.Lines(c.String("nodehostnamefile"))
 	if err != nil {
 		return err
 	}

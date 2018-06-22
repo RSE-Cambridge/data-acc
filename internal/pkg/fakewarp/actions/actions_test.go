@@ -30,7 +30,7 @@ func (c *mockCliContext) String(name string) string {
 	case "job":
 		return "jobfile"
 	case "nodehostnamefile":
-		return "nodehostnamefile"
+		return "nodehostnamefile1"
 	default:
 		return ""
 	}
@@ -70,7 +70,7 @@ func TestFakewarpActions_PreRun(t *testing.T) {
 	testVLM = &mockVLM{}
 	defer func() { testVLM = nil }()
 
-	mockReader.EXPECT().Lines("nodehostnamefile").DoAndReturn(func(string) ([]string, error) {
+	mockReader.EXPECT().Lines("nodehostnamefile1").DoAndReturn(func(string) ([]string, error) {
 		return []string{"host1", "host2"}, nil
 	})
 	mockVolReg.EXPECT().Volume(registry.VolumeName("token"))

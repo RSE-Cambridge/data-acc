@@ -173,9 +173,12 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 	for _, host := range hosts {
 		config.Attachments = append(config.Attachments, registry.Attachment{Hostname: host})
 	}
-	vlm.volumeRegistry.UpdateConfiguration(vlm.volume.Name, []registry.Configuration{config})
+	err := vlm.volumeRegistry.UpdateConfiguration(vlm.volume.Name, []registry.Configuration{config})
+	if err != nil {
+		return err
+	}
 
-	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.MountRequested)
+	err = vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.MountRequested)
 	if err != nil {
 		return err
 	}
