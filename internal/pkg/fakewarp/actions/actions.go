@@ -166,6 +166,15 @@ func (fwa *fakewarpActions) Paths(c CliContext) error {
 	return nil
 }
 
+var testVLM lifecycle.VolumeLifecycleManager
+
+func (fwa *fakewarpActions) getVolumeLifecycleManger(volume registry.Volume) lifecycle.VolumeLifecycleManager {
+	if testVLM != nil {
+		return testVLM
+	}
+	return lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
+}
+
 func (fwa *fakewarpActions) PreRun(c CliContext) error {
 	checkRequiredStrings(c, "token", "job", "nodehostnamefile")
 	fmt.Printf("--token %s --job %s --nodehostnamefile %s\n",
@@ -177,7 +186,7 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		return err
 	}
 
-	vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
+	vlm := fwa.getVolumeLifecycleManger(volume)
 	return vlm.Mount()
 }
 

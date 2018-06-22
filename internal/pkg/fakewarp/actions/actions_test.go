@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
@@ -25,6 +26,10 @@ func (c *mockCliContext) String(name string) string {
 		return "access"
 	case "type":
 		return "type"
+	case "job":
+		return "jobfile"
+	case "nodehostnamefile":
+		return "nodehostnamefile"
 	default:
 		return ""
 	}
@@ -44,12 +49,53 @@ func TestCreatePersistentBufferReturnsError(t *testing.T) {
 	mockPool.EXPECT().Pools().DoAndReturn(func() ([]registry.Pool, error) {
 		return []registry.Pool{{Name: "pool1", GranularityGB: 1}}, nil
 	})
-	mockCtxt := mockCliContext{}
+	mockCtxt := &mockCliContext{}
 
 	actions := NewFakewarpActions(mockPool, mockObj, nil)
 
-	if err := actions.CreatePersistentBuffer(&mockCtxt); err != nil {
+	if err := actions.CreatePersistentBuffer(mockCtxt); err != nil {
 		assert.EqualValues(t, "unable to create buffer", fmt.Sprint(err))
 		t.Fatal("expected success")
 	}
+}
+
+func TestFakewarpActions_PreRun(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
+	mockCtxt := &mockCliContext{}
+	actions := NewFakewarpActions(nil, mockVolReg, nil)
+	testVLM = &mockVLM{}
+	defer func() { testVLM = nil }()
+
+	mockVolReg.EXPECT().Volume(registry.VolumeName("token"))
+
+	err := actions.PreRun(mockCtxt)
+	assert.EqualValues(t, "mount", err.Error())
+}
+
+type mockVLM struct{}
+
+func (*mockVLM) ProvisionBricks(pool registry.Pool) error {
+	panic("implement me")
+}
+
+func (*mockVLM) DataIn() error {
+	panic("implement me")
+}
+
+func (*mockVLM) Mount() error {
+	return errors.New("mount")
+}
+
+func (*mockVLM) Unmount() error {
+	panic("implement me")
+}
+
+func (*mockVLM) DataOut() error {
+	panic("implement me")
+}
+
+func (*mockVLM) Delete() error {
+	panic("implement me")
 }
