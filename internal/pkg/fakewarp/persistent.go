@@ -68,6 +68,20 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	bricksRequired := uint(math.Ceil(float64(capacityGB) / float64(pool.GranularityGB)))
 	adjustedSize := bricksRequired * pool.GranularityGB
 
+	// TODO should populate configurations also, from job file
+	var suffix string
+	if request.Persistent {
+		// TODO: sanitize token!!!
+		suffix = fmt.Sprintf("_PERSISTENT_STRIPED_%s=/mnt/dac/persistent/%s", request.Token, request.Token)
+	} else {
+		// TODO: not only striped, long term
+		suffix = fmt.Sprintf("_JOB_STRIPED=/mnt/dac/job/%s/striped", request.Token)
+	}
+	paths := []string{
+		fmt.Sprintf("BB_%s", suffix),
+		fmt.Sprintf("DW_%s", suffix),
+	}
+
 	volume := registry.Volume{
 		Name:       registry.VolumeName(request.Token),
 		JobName:    request.Token,
@@ -79,6 +93,8 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 		SizeBricks: bricksRequired,
 		Pool:       pool.Name,
 		State:      registry.Registered,
+		MultiJob:   request.Persistent,
+		Paths:      paths,
 	}
 	err = volReg.AddVolume(volume)
 	if err != nil {
