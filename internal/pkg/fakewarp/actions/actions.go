@@ -195,6 +195,8 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		return errors.New("unable to mount to zero compute hosts")
 	}
 
+	// TODO: update the job with the list of hosts, so we have the list for unmount?
+
 	vlm := fwa.getVolumeLifecycleManger(volume)
 	return vlm.Mount(hosts)
 }

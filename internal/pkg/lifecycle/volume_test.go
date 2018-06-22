@@ -16,7 +16,11 @@ func TestVolumeLifecycleManager_Mount(t *testing.T) {
 	volume := registry.Volume{Name: "vol1", SizeBricks: 3}
 	vlm := NewVolumeLifecycleManager(mockVolReg, nil, volume)
 	hosts := []string{"host1", "host2"}
+	expectedConfigs := []registry.Configuration{{
+		Attachments: []registry.Attachment{
+			{Hostname: "host1"}, {Hostname: "host2"}}}}
 
+	mockVolReg.EXPECT().UpdateConfiguration(volume.Name, expectedConfigs)
 	mockVolReg.EXPECT().UpdateState(volume.Name, registry.MountRequested)
 	mockVolReg.EXPECT().WaitForState(volume.Name, registry.MountComplete)
 

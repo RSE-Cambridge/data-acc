@@ -1,6 +1,7 @@
 package lifecycle
 
 import (
+	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
@@ -157,11 +158,22 @@ func (vlm *volumeLifecycleManager) DataIn() error {
 }
 
 func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
-
 	if vlm.volume.SizeBricks == 0 {
 		log.Println("skipping prerun for:", vlm.volume.Name)
 		return nil
 	}
+
+	if len(vlm.volume.Configurations) != 0 {
+		// TODO need multiple jobs single persistent buffer
+		return errors.New("volume already has mounts, not yet support multiple jobs mounting")
+	}
+
+	// TODO really need to read job file to get accurate info on the required configurations
+	config := registry.Configuration{}
+	for _, host := range hosts {
+		config.Attachments = append(config.Attachments, registry.Attachment{Hostname: host})
+	}
+	vlm.volumeRegistry.UpdateConfiguration(vlm.volume.Name, []registry.Configuration{config})
 
 	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.MountRequested)
 	if err != nil {
