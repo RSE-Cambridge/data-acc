@@ -108,25 +108,6 @@ RUN set -x \
     && rm etcd.tar.gz \
     && rm -rf /usr/local/src/etcd
 
-
-# Install burstbuffer python wrapper
-RUN yum -y install python34 python-pip python-wheel
-RUN pip install -U pip
-RUN pip install virtualenv
-
-ARG BURSTBUFFER_BRANCH=python-prototype
-
-RUN cd /usr/local/src \
-    && git clone https://github.com/johngarbutt/data-acc \
-    && cd data-acc \
-    && git checkout python-prototype \
-    && virtualenv -p python3 .venv \
-    && . .venv/bin/activate \
-    && pip install -e . \
-    && deactivate \
-    && mkdir -p /opt/cray/dw_wlm/default/bin \
-    && ln -s /usr/local/src/data-acc/.venv/bin/buffernode /usr/local/bin/buffernode
-
 COPY bin/fakewarp /usr/local/bin/fakewarp
 RUN install -D -m755 /usr/local/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli
 COPY bin/data-acc-brick-host /usr/local/bin/data-acc-brick-host
