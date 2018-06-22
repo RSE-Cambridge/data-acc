@@ -19,16 +19,16 @@ type VolumeLifecycleManager interface {
 
 func NewVolumeLifecycleManager(volumeRegistry registry.VolumeRegistry, poolRegistry registry.PoolRegistry,
 	volume registry.Volume) VolumeLifecycleManager {
-	return &volumeLifecyceManager{volumeRegistry, poolRegistry, volume}
+	return &volumeLifecycleManager{volumeRegistry, poolRegistry, volume}
 }
 
-type volumeLifecyceManager struct {
+type volumeLifecycleManager struct {
 	volumeRegistry registry.VolumeRegistry
 	poolRegistry   registry.PoolRegistry
 	volume         registry.Volume
 }
 
-func (vlm *volumeLifecyceManager) ProvisionBricks(pool registry.Pool) error {
+func (vlm *volumeLifecycleManager) ProvisionBricks(pool registry.Pool) error {
 	err := getBricksForBuffer(vlm.poolRegistry, pool, vlm.volume)
 	if err != nil {
 		return err
@@ -113,7 +113,7 @@ func getBricksForBuffer(poolRegistry registry.PoolRegistry,
 	return err
 }
 
-func (vlm *volumeLifecyceManager) Delete() error {
+func (vlm *volumeLifecycleManager) Delete() error {
 	// TODO convert errors into volume related errors, somewhere?
 	if vlm.volume.SizeBricks != 0 {
 		err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.DeleteRequested)
@@ -143,7 +143,7 @@ func (vlm *volumeLifecyceManager) Delete() error {
 	return vlm.volumeRegistry.DeleteVolume(vlm.volume.Name)
 }
 
-func (vlm *volumeLifecyceManager) DataIn() error {
+func (vlm *volumeLifecycleManager) DataIn() error {
 	if vlm.volume.SizeBricks == 0 {
 		log.Println("skipping datain for:", vlm.volume.Name)
 		return nil
@@ -156,7 +156,7 @@ func (vlm *volumeLifecyceManager) DataIn() error {
 	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.DataInComplete)
 }
 
-func (vlm *volumeLifecyceManager) Mount(hosts []string) error {
+func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 
 	if vlm.volume.SizeBricks == 0 {
 		log.Println("skipping prerun for:", vlm.volume.Name)
@@ -170,7 +170,7 @@ func (vlm *volumeLifecyceManager) Mount(hosts []string) error {
 	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.MountComplete)
 }
 
-func (vlm *volumeLifecyceManager) Unmount() error {
+func (vlm *volumeLifecycleManager) Unmount() error {
 	if vlm.volume.SizeBricks == 0 {
 		log.Println("skipping postrun for:", vlm.volume.Name) // TODO return error type and handle outside?
 		return nil
@@ -183,7 +183,7 @@ func (vlm *volumeLifecyceManager) Unmount() error {
 	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.UnmountComplete)
 }
 
-func (vlm *volumeLifecyceManager) DataOut() error {
+func (vlm *volumeLifecycleManager) DataOut() error {
 	if vlm.volume.SizeBricks == 0 {
 		log.Println("skipping data_out for:", vlm.volume.Name)
 		return nil
