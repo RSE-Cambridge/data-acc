@@ -7,6 +7,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
 )
 
@@ -63,15 +64,19 @@ func TestFakewarpActions_PreRun(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
+	mockReader := mocks.NewMockReader(mockCtrl)
 	mockCtxt := &mockCliContext{}
-	actions := NewFakewarpActions(nil, mockVolReg, nil)
+	actions := NewFakewarpActions(nil, mockVolReg, mockReader)
 	testVLM = &mockVLM{}
 	defer func() { testVLM = nil }()
 
+	mockReader.EXPECT().Lines("nodehostnamefile").DoAndReturn(func(string) ([]string, error) {
+		return []string{"host1", "host2"}, nil
+	})
 	mockVolReg.EXPECT().Volume(registry.VolumeName("token"))
 
 	err := actions.PreRun(mockCtxt)
-	assert.EqualValues(t, "mount", err.Error())
+	assert.EqualValues(t, "host1,host2", err.Error())
 }
 
 type mockVLM struct{}
@@ -84,8 +89,8 @@ func (*mockVLM) DataIn() error {
 	panic("implement me")
 }
 
-func (*mockVLM) Mount() error {
-	return errors.New("mount")
+func (*mockVLM) Mount(hosts []string) error {
+	return errors.New(strings.Join(hosts, ","))
 }
 
 func (*mockVLM) Unmount() error {

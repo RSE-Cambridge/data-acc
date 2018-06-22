@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
@@ -180,14 +181,22 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 	fmt.Printf("--token %s --job %s --nodehostnamefile %s\n",
 		c.String("token"), c.String("job"), c.String("nodehostnamefile"))
 
-	// TODO: read in nodehostnamefile and update attachments for each configuration?
+	// TODO: really we should get the job and mount all the volumes?
 	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
 	if err != nil {
 		return err
 	}
 
+	hosts, err := fwa.reader.Lines("nodehostnamefile")
+	if err != nil {
+		return err
+	}
+	if len(hosts) < 1 {
+		return errors.New("unable to mount to zero compute hosts")
+	}
+
 	vlm := fwa.getVolumeLifecycleManger(volume)
-	return vlm.Mount()
+	return vlm.Mount(hosts)
 }
 
 func (fwa *fakewarpActions) PostRun(c CliContext) error {

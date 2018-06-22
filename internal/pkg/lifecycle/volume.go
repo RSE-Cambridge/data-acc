@@ -11,7 +11,7 @@ import (
 type VolumeLifecycleManager interface {
 	ProvisionBricks(pool registry.Pool) error
 	DataIn() error
-	Mount() error
+	Mount(hosts []string) error
 	Unmount() error
 	DataOut() error
 	Delete() error // TODO allow context for timeout and cancel?
@@ -156,7 +156,7 @@ func (vlm *volumeLifecyceManager) DataIn() error {
 	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.DataInComplete)
 }
 
-func (vlm *volumeLifecyceManager) Mount() error {
+func (vlm *volumeLifecyceManager) Mount(hosts []string) error {
 
 	if vlm.volume.SizeBricks == 0 {
 		log.Println("skipping prerun for:", vlm.volume.Name)
