@@ -64,13 +64,13 @@ func TestFakewarpActions_PreRun(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
-	mockReader := mocks.NewMockReader(mockCtrl)
+	mockDisk := mocks.NewMockDisk(mockCtrl)
 	mockCtxt := &mockCliContext{}
-	actions := NewFakewarpActions(nil, mockVolReg, mockReader)
+	actions := NewFakewarpActions(nil, mockVolReg, mockDisk)
 	testVLM = &mockVLM{}
 	defer func() { testVLM = nil }()
 
-	mockReader.EXPECT().Lines("nodehostnamefile1").DoAndReturn(func(string) ([]string, error) {
+	mockDisk.EXPECT().Lines("nodehostnamefile1").DoAndReturn(func(string) ([]string, error) {
 		return []string{"host1", "host2"}, nil
 	})
 	mockVolReg.EXPECT().Volume(registry.VolumeName("token"))

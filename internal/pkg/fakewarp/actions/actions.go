@@ -34,15 +34,15 @@ type FakewarpActions interface {
 }
 
 func NewFakewarpActions(
-	poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, reader fileio.Reader) FakewarpActions {
+	poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, disk fileio.Disk) FakewarpActions {
 
-	return &fakewarpActions{poolRegistry, volumeRegistry, reader}
+	return &fakewarpActions{poolRegistry, volumeRegistry, disk}
 }
 
 type fakewarpActions struct {
 	poolRegistry   registry.PoolRegistry
 	volumeRegistry registry.VolumeRegistry
-	reader         fileio.Reader
+	disk           fileio.Disk
 }
 
 func (fwa *fakewarpActions) CreatePersistentBuffer(c CliContext) error {
@@ -82,7 +82,7 @@ func (fwa *fakewarpActions) DeleteBuffer(c CliContext) error {
 
 func (fwa *fakewarpActions) CreatePerJobBuffer(c CliContext) error {
 	checkRequiredStrings(c, "token", "job", "caller", "capacity")
-	if summary, err := fakewarp.ParseJobFile(fwa.reader, c.String("job")); err != nil {
+	if summary, err := fakewarp.ParseJobFile(fwa.disk, c.String("job")); err != nil {
 		return err
 	} else {
 		log.Println("Summary of job file:", summary)
@@ -130,7 +130,7 @@ func (fwa *fakewarpActions) ShowConfigurations() error {
 
 func (fwa *fakewarpActions) ValidateJob(c CliContext) error {
 	checkRequiredStrings(c, "job")
-	if summary, err := fakewarp.ParseJobFile(fwa.reader, c.String("job")); err != nil {
+	if summary, err := fakewarp.ParseJobFile(fwa.disk, c.String("job")); err != nil {
 		return err
 	} else {
 		// TODO check valid pools, etc, etc.
@@ -192,7 +192,7 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		return err
 	}
 
-	hosts, err := fwa.reader.Lines(c.String("nodehostnamefile"))
+	hosts, err := fwa.disk.Lines(c.String("nodehostnamefile"))
 	if err != nil {
 		return err
 	}

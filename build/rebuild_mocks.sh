@@ -22,7 +22,7 @@ for i in $items; do
         -package mocks >internal/pkg/mocks/${i}_mock.go
 done
 
-items="reader"
+items="disk"
 for i in $items; do
     mockgen -source=internal/pkg/fileio/${i}.go \
         -package mocks >internal/pkg/mocks/${i}_mock.go

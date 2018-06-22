@@ -9,7 +9,7 @@ import (
 )
 
 var testKeystore keystoreregistry.Keystore
-var testReader fileio.Reader
+var testDisk fileio.Disk
 var testActions actions.FakewarpActions
 
 func getKeystore() keystoreregistry.Keystore {
@@ -26,11 +26,11 @@ func getActions(keystore keystoreregistry.Keystore) actions.FakewarpActions {
 	}
 	volReg := keystoreregistry.NewVolumeRegistry(keystore)
 	poolReg := keystoreregistry.NewPoolRegistry(keystore)
-	reader := testReader
-	if testReader == nil {
-		reader = fileio.NewReader()
+	disk := testDisk
+	if testDisk == nil {
+		disk = fileio.NewDisk()
 	}
-	return actions.NewFakewarpActions(poolReg, volReg, reader)
+	return actions.NewFakewarpActions(poolReg, volReg, disk)
 }
 
 func createPersistent(c *cli.Context) error {

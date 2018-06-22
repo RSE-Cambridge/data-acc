@@ -23,9 +23,9 @@ func (s jobSummary) String() string {
 }
 
 // Parse a given job file
-func ParseJobFile(reader fileio.Reader, filename string) (jobSummary, error) {
+func ParseJobFile(disk fileio.Disk, filename string) (jobSummary, error) {
 	var summary jobSummary
-	lines, err := reader.Lines(filename)
+	lines, err := disk.Lines(filename)
 	if err != nil {
 		return summary, err
 	}
