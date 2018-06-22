@@ -141,8 +141,12 @@ func (fwa *fakewarpActions) ValidateJob(c CliContext) error {
 
 func (fwa *fakewarpActions) RealSize(c CliContext) error {
 	checkRequiredStrings(c, "token")
-	// TODO need to fetch volume and get size, return in correct format
-	fmt.Printf("--token %s\n", c.String("token"))
+	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+	if err != nil {
+		return err
+	}
+	// TODO get GiB vs GB correct here!
+	fmt.Printf(`{"token":"%s", "capacity":%d, "units":"bytes"}`, volume.Name, volume.SizeGB * 10737418240)
 	return nil
 }
 
