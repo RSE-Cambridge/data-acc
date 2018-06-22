@@ -95,11 +95,14 @@ func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volum
 
 // TODO: well this doesn't work for jobs that have no new bicks, i.e. just attach to persistent buffers
 func processMount(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	hostname := "TODO" // TODO: loop around required mounts
-	err := plugin.Mounter().Mount(volume, registry.Configuration{}, hostname)
-	handleError(volumeRegistry, volume, err)
+	for _, config := range volume.Configurations {
+		for _, attachment := range config.Attachments {
+			err := plugin.Mounter().Mount(volume, config, attachment.Hostname)
+			handleError(volumeRegistry, volume, err)
+		}
+	}
 
-	err = volumeRegistry.UpdateState(volume.Name, registry.MountComplete)
+	err := volumeRegistry.UpdateState(volume.Name, registry.MountComplete)
 	handleError(volumeRegistry, volume, err)
 }
 

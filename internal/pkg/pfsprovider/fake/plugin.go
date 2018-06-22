@@ -45,7 +45,7 @@ func (*volumeProvider) CopyDataOut(volume registry.Volume) error {
 type mounter struct{}
 
 func (*mounter) Mount(volume registry.Volume, configuration registry.Configuration, hostname string) error {
-	log.Println("FAKE Mount for:", volume.Name, "on:", hostname)
+	log.Println("FAKE Mount for:", volume.Name, "with config:", configuration, "on:", hostname)
 	return nil
 }
 
