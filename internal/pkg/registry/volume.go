@@ -91,7 +91,7 @@ type Volume struct {
 	State VolumeState
 
 	// Requested pool of bricks for volume
-	Pool string
+	Pool string // TODO: PoolName?
 	// Number of bricks requested, calculated from requested capacity
 	SizeBricks uint
 	// Actual size of the volume
@@ -100,9 +100,9 @@ type Volume struct {
 	// Back reference to what job created this volume
 	JobName string
 	// e.g. 1001
-	Owner int
+	Owner uint
 	// If empty defaults to User
-	Group int
+	Group uint
 	// e.g. SLURM or Manila
 	CreatedBy string
 	// The unix (utc) timestamp of when this volume was created
@@ -110,9 +110,6 @@ type Volume struct {
 
 	// TODO: need to fill these in...
 	// They all related to how the volume is attached
-
-	// Reserved space for swap and/or metadata service
-	ReservedGB uint
 
 	// All current attachments
 	Attachments []Attachment
@@ -123,7 +120,7 @@ type Volume struct {
 	AttachPrivateNamespace bool
 	// If not zero, swap of the requested amount mounted for each attachment
 	// Not allowed for multi job
-	AttachAsSwapGB uint
+	AttachAsSwapBytes uint
 	// Add attachment specific cache for each given filesystem path
 	// Not allowed for multi job
 	// Note: assumes the same path is cached for all attachments
@@ -139,6 +136,7 @@ type Volume struct {
 	// TODO: data model currently does not do these things well:
 	// 1. correctly track multiple jobs at the same time attach to the same persistent buffer
 	// 2. data in/out requests for persistent buffer
+	// 3. track amount of space used by swap and/or metadata
 
 	// Each string contains an environment variable export
 	// The paths handed to a job come from aggregating the paths

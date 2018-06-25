@@ -39,34 +39,53 @@ func parseCapacity(raw string) (string, int, error) {
 	return pool, capacityInt, nil
 }
 
+func findPool(poolRegistry registry.PoolRegistry, poolName string) (pool *registry.Pool, err error) {
+	pools, err := poolRegistry.Pools()
+	if err != nil {
+		return
+	}
+
+	for _, p := range pools {
+		if p.Name == poolName {
+			pool = &p
+		}
+	}
+
+	if pool.Name == "" {
+		err = fmt.Errorf("unable to find pool: %s", poolName)
+		return
+	}
+	return
+}
+
+func getPoolAndBrickCount(poolRegistry registry.PoolRegistry, capacity string) (pool *registry.Pool,
+	bricksRequired uint, err error) {
+
+	poolName, capacityGB, err := parseCapacity(capacity)
+	if err != nil {
+		return
+	}
+
+	pool, err = findPool(poolRegistry, poolName)
+	if err != nil {
+		return
+	}
+
+	bricksRequired = uint(math.Ceil(float64(capacityGB) / float64(pool.GranularityGB)))
+	return
+}
+
 // TODO: ideally this would be private, if not for testing
 func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.PoolRegistry,
 	request BufferRequest) error {
 
 	createdAt := uint(time.Now().Unix())
-	poolName, capacityGB, err := parseCapacity(request.Capacity) // TODO lots of proper parsing to do here, get poolname, etc
+
+	pool, bricksRequired, err := getPoolAndBrickCount(poolRegistry, request.Capacity)
 	if err != nil {
 		return err
 	}
-
-	pools, err := poolRegistry.Pools()
-	if err != nil {
-		return err
-	}
-
-	var pool registry.Pool
-	for _, p := range pools {
-		if p.Name == poolName {
-			pool = p
-		}
-	}
-
-	if pool.Name == "" {
-		return fmt.Errorf("unable to find pool: %s", poolName)
-	}
-
-	bricksRequired := uint(math.Ceil(float64(capacityGB) / float64(pool.GranularityGB)))
-	adjustedSize := bricksRequired * pool.GranularityGB
+	adjustedSizeGB := bricksRequired * pool.GranularityGB
 
 	// TODO should populate configurations also, from job file
 	var suffix string
@@ -85,11 +104,11 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	volume := registry.Volume{
 		Name:       registry.VolumeName(request.Token),
 		JobName:    request.Token,
-		Owner:      request.User,
+		Owner:      uint(request.User),
 		CreatedAt:  createdAt,
 		CreatedBy:  request.Caller,
-		Group:      request.Group,
-		SizeGB:     uint(adjustedSize),
+		Group:      uint(request.Group),
+		SizeGB:     adjustedSizeGB,
 		SizeBricks: bricksRequired,
 		Pool:       pool.Name,
 		State:      registry.Registered,
@@ -114,7 +133,7 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	}
 
 	vlm := lifecycle.NewVolumeLifecycleManager(volReg, poolRegistry, volume)
-	err = vlm.ProvisionBricks(pool)
+	err = vlm.ProvisionBricks(*pool)
 	if err != nil {
 		volReg.DeleteVolume(volume.Name)
 		volReg.DeleteJob(job.Name)
