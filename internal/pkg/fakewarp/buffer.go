@@ -11,17 +11,21 @@ import (
 func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry registry.PoolRegistry,
 	token string) error {
 
-	volumeName := registry.VolumeName(token)
-	volume, err := volumeRegistry.Volume(volumeName)
+	job, err := volumeRegistry.Job(token)
 	if err != nil {
-		// TODO should check this error relates to the volume being missing
-		log.Println(err)
-		return nil
+		return err
 	}
 
-	vlm := lifecycle.NewVolumeLifecycleManager(volumeRegistry, poolRegistry, volume)
-	if err := vlm.Delete(); err != nil {
-		return err
+	if job.JobVolume != "" {
+		volume, err := volumeRegistry.Volume(job.JobVolume)
+		if err != nil {
+			return err
+		} else {
+			vlm := lifecycle.NewVolumeLifecycleManager(volumeRegistry, poolRegistry, volume)
+			if err := vlm.Delete(); err != nil {
+				return err
+			}
+		}
 	}
 
 	return volumeRegistry.DeleteJob(token)
@@ -53,6 +57,7 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 		perJobVolume := registry.Volume{
 			Name:       registry.VolumeName(token),
 			MultiJob:   false,
+			State:      registry.Registered,
 			Pool:       pool.Name,
 			SizeBricks: bricksRequired,
 			SizeGB:     adjustedSizeGB,
