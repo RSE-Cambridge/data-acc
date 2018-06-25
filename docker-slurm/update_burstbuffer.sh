@@ -65,6 +65,8 @@ docker logs dockerslurm_fakebuffernode_3
 sleep 3
 echo "***Debugger: volumes ***"
 docker logs dockerslurm_volumewatcher_1
+echo "***Debugger: jobs ***"
+docker logs dockerslurm_jobwatcher_1
 echo "***Debugger: bricks ***"
 docker logs dockerslurm_brickwatcher_1
 sleep 3
