@@ -87,13 +87,9 @@ func (fwa *fakewarpActions) CreatePerJobBuffer(c CliContext) error {
 	} else {
 		log.Println("Summary of job file:", summary)
 	}
-	return fakewarp.CreateVolumesAndJobs(fwa.volumeRegistry, fwa.poolRegistry, fakewarp.BufferRequest{
-		Token:    c.String("token"),
-		User:     c.Int("user"),
-		Group:    c.Int("group"),
-		Capacity: c.String("capacity"),
-		Caller:   c.String("caller"),
-	})
+	return fakewarp.CreatePerJobBuffer(fwa.volumeRegistry, fwa.poolRegistry, fwa.disk,
+		c.String("token"), c.Int("user"), c.Int("group"), c.String("capacity"),
+		c.String("caller"), c.String("job"))
 }
 
 func (fwa *fakewarpActions) ShowInstances() error {
