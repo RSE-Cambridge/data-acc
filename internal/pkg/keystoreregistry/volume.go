@@ -55,6 +55,19 @@ func getJobKey(jobName string) string {
 	return fmt.Sprintf("%s%s/", jobPrefix, jobName)
 }
 
+func (volRegistry *volumeRegistry) Job(jobName string) (registry.Job, error) {
+	var job registry.Job // TODO return a pointer instead?
+	keyValue, err := volRegistry.keystore.Get(getJobKey(jobName))
+	if err != nil {
+		return job, err
+	}
+	err = json.Unmarshal(bytes.NewBufferString(keyValue.Value).Bytes(), &job)
+	if err != nil {
+		return job, err
+	}
+	return job, nil
+}
+
 func (volRegistry *volumeRegistry) AddJob(job registry.Job) error {
 	for _, volumeName := range job.Volumes {
 		volume, err := volRegistry.Volume(volumeName)

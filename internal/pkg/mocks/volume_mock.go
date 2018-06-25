@@ -46,6 +46,19 @@ func (mr *MockVolumeRegistryMockRecorder) Jobs() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Jobs", reflect.TypeOf((*MockVolumeRegistry)(nil).Jobs))
 }
 
+// Job mocks base method
+func (m *MockVolumeRegistry) Job(jobName string) (registry.Job, error) {
+	ret := m.ctrl.Call(m, "Job", jobName)
+	ret0, _ := ret[0].(registry.Job)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Job indicates an expected call of Job
+func (mr *MockVolumeRegistryMockRecorder) Job(jobName interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Job", reflect.TypeOf((*MockVolumeRegistry)(nil).Job), jobName)
+}
+
 // AddJob mocks base method
 func (m *MockVolumeRegistry) AddJob(job registry.Job) error {
 	ret := m.ctrl.Call(m, "AddJob", job)

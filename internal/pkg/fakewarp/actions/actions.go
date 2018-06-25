@@ -63,14 +63,14 @@ func (fwa *fakewarpActions) CreatePersistentBuffer(c CliContext) error {
 }
 
 func checkRequiredStrings(c CliContext, flags ...string) {
-	errors := []string{}
+	errs := []string{}
 	for _, flag := range flags {
 		if str := c.String(flag); str == "" {
-			errors = append(errors, flag)
+			errs = append(errs, flag)
 		}
 	}
-	if len(errors) > 0 {
-		log.Fatalf("Please provide these required parameters: %s", strings.Join(errors, ", "))
+	if len(errs) > 0 {
+		log.Fatalf("Please provide these required parameters: %s", strings.Join(errs, ", "))
 	}
 }
 

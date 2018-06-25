@@ -10,7 +10,7 @@ type VolumeRegistry interface {
 	Jobs() ([]Job, error)
 
 	// Get a specific job
-	// TODO: Job(jobName string) (Job, error)
+	Job(jobName string) (Job, error)
 
 	// Add job and associated volumes
 	// Fails to add job if volumes are in a bad state
