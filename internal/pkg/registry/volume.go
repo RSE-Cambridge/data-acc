@@ -9,6 +9,9 @@ type VolumeRegistry interface {
 	// Get all registered jobs and their volumes
 	Jobs() ([]Job, error)
 
+	// Get a specific job
+	// TODO: Job(jobName string) (Job, error)
+
 	// Add job and associated volumes
 	// Fails to add job if volumes are in a bad state
 	AddJob(job Job) error
@@ -37,8 +40,13 @@ type VolumeRegistry interface {
 	WaitForState(name VolumeName, state VolumeState) error
 
 	// Used to add or remove attachments
-	// TODO: only allowed in certain states?
+	// TODO: remove this??
 	UpdateConfiguration(name VolumeName, configuration []Configuration) error
+
+	// TODO: RequestVolumeAttachment(name VolumeName, hostnames string[])
+	// TODO: RequestVolumeDetach(name VolumeName, hostnames string[])
+	// TODO: RequestVolumeDataIn(name VolumeName, datain DataCopyRequest)
+	// TODO: RequestVolumeDataOut(name VolumeName, datain DataCopyRequest)
 
 	// Get all callback on all volume changes
 	// If the volume is new, old = nil
@@ -46,14 +54,25 @@ type VolumeRegistry interface {
 	WatchVolumeChanges(volumeName string, callback func(old *Volume, new *Volume)) error
 }
 
+// TODO: Attachment request, or session is probably a better name here...
 type Job struct {
 	// Name of the job
 	Name      string // TODO: should we make a JobName type?
 	Owner     uint
 	CreatedAt uint
 
-	// Zero or One PerJob volumes
-	// and Zero or more MultiJob volumes
+	// The hosts that want to mount the storage
+	// Note: to allow for copy in/out the brick hosts are assumed to have an attachment
+	AttachHosts []string
+
+	// If non-zero capacity requested, a volume is created for this job
+	// It may be exposed to the attach hosts in a variety of ways, as defined by the volume
+	JobVolume VolumeName
+
+	// There maybe be attachments to multiple shared volumes
+	MultiJobVolumes []VolumeName
+
+	// TODO: remove once moved to above fields
 	Volumes []VolumeName
 }
 
@@ -64,7 +83,21 @@ type VolumeName string
 type Volume struct {
 	// e.g. job1 or Foo
 	Name VolumeName
-	// Name of the job the volume was created for
+	// True if multiple jobs can attach to this volume
+	MultiJob bool
+
+	// Message requested actions to primary brick host
+	// TODO: move mount and data copy actions to other parts of the volume state
+	State VolumeState
+
+	// Requested pool of bricks for volume
+	Pool string
+	// Number of bricks requested, calculated from requested capacity
+	SizeBricks uint
+	// Actual size of the volume
+	SizeGB uint
+
+	// Back reference to what job created this volume
 	JobName string
 	// e.g. 1001
 	Owner int
@@ -72,15 +105,50 @@ type Volume struct {
 	Group int
 	// e.g. SLURM or Manila
 	CreatedBy string
+	// The unix (utc) timestamp of when this volume was created
 	CreatedAt uint
-	// Requested pool of bricks for volume
-	Pool string
-	// Requested size of volume
-	SizeGB uint
-	// Number of bricks requested
-	SizeBricks uint
-	// True if multiple jobs can attach to this volume
-	MultiJob bool
+
+	// TODO: need to fill these in...
+	// They all related to how the volume is attached
+
+	// Reserved space for swap and/or metadata service
+	ReservedGB uint
+
+	// All current attachments
+	Attachments []Attachment
+	// Attach all attachments to a shared global namespace
+	// Allowed for any volume type
+	AttachGlobalNamespace bool
+	// Have an attachment specific namespace mounted, only for non multi job
+	AttachPrivateNamespace bool
+	// If not zero, swap of the requested amount mounted for each attachment
+	// Not allowed for multi job
+	AttachAsSwapGB uint
+	// Add attachment specific cache for each given filesystem path
+	// Not allowed for multi job
+	// Note: assumes the same path is cached for all attachments
+	AttachPrivateCache []string
+
+	// Request certain files to be staged in
+	// Not currently allowed for multi job volumes
+	StageIn DataCopyRequest
+	// Request certain files to be staged in
+	// Not currently allowed for multi job volumes
+	StageOut DataCopyRequest
+
+	// TODO: data model currently does not do these things well:
+	// 1. correctly track multiple jobs at the same time attach to the same persistent buffer
+	// 2. data in/out requests for persistent buffer
+
+	// Each string contains an environment variable export
+	// The paths handed to a job come from aggregating the paths
+	// used by all volumes
+	// TODO: should split into Name/Value pairs, or use a map?
+	Paths []string
+
+	//
+	// TODO... delete all these fields, once they are no longer used!
+	//
 
 	// Current uses of the volume capacity and its attachments
 	Configurations []Configuration
@@ -88,12 +156,6 @@ type Volume struct {
 	// Volume drivers e.g. Lustre, Lustre+Loopback,
 	// BeeGFS, NVMe-over-Fabrics, etc
 	Driver VolumeDriver
-
-	// TODO:....
-	Paths []string
-
-	// TODO: track state machine...
-	State VolumeState
 }
 
 func (volume Volume) String() string {
@@ -177,6 +239,7 @@ func (volumeState *VolumeState) UnmarshalJSON(b []byte) error {
 // TODO: define constants
 type VolumeDriver string
 
+// TODO: delete
 type Configuration struct {
 	Name string
 	// Define if used as a transparent cache or
@@ -225,6 +288,10 @@ type DataCopyRequest struct {
 	Source string
 	// Must be empty string for type list, otherwise specifes location
 	Destination string
+	// Report if the copy has completed
+	CopyCompleted bool
+	// if there was problem, record it
+	Error error
 }
 
 type SourceType string
@@ -232,11 +299,22 @@ type SourceType string
 const (
 	File      SourceType = "file"
 	Directory SourceType = "directory"
-	List      SourceType = "list"
+	// Provide a file that has source and destination file space separated pairs, each on a new line
+	List SourceType = "list"
 )
 
 type Attachment struct {
-	Hostname        string
-	Attached        bool
+	// Hostname and Volume name uniquely identify an attachment
+	Hostname string
+
+	// Report true when the mount has worked
+	// Add attachment with false to request the mount
+	Attached bool
+
+	// Report if the detach was requested
+	// Attachment is removed once detach is complete
 	DetachRequested bool
+
+	// If any error happened, it is reported here
+	Error error
 }
