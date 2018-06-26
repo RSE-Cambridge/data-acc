@@ -71,9 +71,6 @@ type Job struct {
 
 	// There maybe be attachments to multiple shared volumes
 	MultiJobVolumes []VolumeName
-
-	// TODO: remove once moved to above fields
-	Volumes []VolumeName
 }
 
 type VolumeName string

@@ -122,7 +122,6 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 
 	job := registry.Job{
 		Name:      request.Token,
-		Volumes:   []registry.VolumeName{registry.VolumeName(request.Token)},
 		Owner:     uint(request.User),
 		CreatedAt: createdAt,
 		JobVolume: volume.Name, // Even though its a persistent buffer, we add it here to ensure we delete buffer

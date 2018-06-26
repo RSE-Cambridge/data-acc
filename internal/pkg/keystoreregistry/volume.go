@@ -69,8 +69,18 @@ func (volRegistry *volumeRegistry) Job(jobName string) (registry.Job, error) {
 }
 
 func (volRegistry *volumeRegistry) AddJob(job registry.Job) error {
-	for _, volumeName := range job.Volumes {
+	for _, volumeName := range job.MultiJobVolumes {
 		volume, err := volRegistry.Volume(volumeName)
+		if err != nil {
+			return err
+		}
+		// TODO: what other checks are required?
+		if volume.State < registry.Registered {
+			return fmt.Errorf("must register volume: %s", volume.Name)
+		}
+	}
+	if job.JobVolume != "" {
+		volume, err := volRegistry.Volume(job.JobVolume)
 		if err != nil {
 			return err
 		}
