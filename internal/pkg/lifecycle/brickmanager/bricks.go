@@ -29,6 +29,7 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 	volume, err := volumeRegistry.Volume(new.AllocatedVolume)
 	if err != nil {
 		log.Printf("Could not file volume: %s because: %s\n", new.AllocatedVolume, err)
+		return
 	}
 	log.Println("Found new volume to watch:", volume.Name, "curent state is:", volume.State)
 
@@ -79,7 +80,10 @@ func provisionNewVolume(volumeRegistry registry.VolumeRegistry, volume registry.
 	}
 
 	err := plugin.VolumeProvider().SetupVolume(volume)
-	handleError(volumeRegistry, volume, err)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+		return
+	}
 
 	err = volumeRegistry.UpdateState(volume.Name, registry.BricksProvisioned)
 	handleError(volumeRegistry, volume, err)
@@ -87,7 +91,10 @@ func provisionNewVolume(volumeRegistry registry.VolumeRegistry, volume registry.
 
 func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	err := plugin.VolumeProvider().CopyDataIn(volume)
-	handleError(volumeRegistry, volume, err)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+		return
+	}
 
 	err = volumeRegistry.UpdateState(volume.Name, registry.DataInComplete)
 	handleError(volumeRegistry, volume, err)
@@ -109,7 +116,9 @@ func processMount(volumeRegistry registry.VolumeRegistry, volume registry.Volume
 func processUnmount(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	hostname := "TODO" // TODO: loop around required mounts
 	err := plugin.Mounter().Unmount(volume, registry.Configuration{}, hostname)
-	handleError(volumeRegistry, volume, err)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+	}
 
 	err = volumeRegistry.UpdateState(volume.Name, registry.UnmountComplete)
 	handleError(volumeRegistry, volume, err)
@@ -117,7 +126,9 @@ func processUnmount(volumeRegistry registry.VolumeRegistry, volume registry.Volu
 
 func processDataOut(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	err := plugin.VolumeProvider().CopyDataOut(volume)
-	handleError(volumeRegistry, volume, err)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+	}
 
 	err = volumeRegistry.UpdateState(volume.Name, registry.DataOutComplete)
 	handleError(volumeRegistry, volume, err)
@@ -125,7 +136,9 @@ func processDataOut(volumeRegistry registry.VolumeRegistry, volume registry.Volu
 
 func processDelete(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	err := plugin.VolumeProvider().TeardownVolume(volume)
-	handleError(volumeRegistry, volume, err)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+	}
 
 	err = volumeRegistry.UpdateState(volume.Name, registry.BricksDeleted)
 	handleError(volumeRegistry, volume, err)
