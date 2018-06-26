@@ -153,25 +153,25 @@ func (m *MockMounter) EXPECT() *MockMounterMockRecorder {
 }
 
 // Mount mocks base method
-func (m *MockMounter) Mount(volume registry.Volume, configuration registry.Configuration, hostname string) error {
-	ret := m.ctrl.Call(m, "Mount", volume, configuration, hostname)
+func (m *MockMounter) Mount(volume registry.Volume) error {
+	ret := m.ctrl.Call(m, "Mount", volume)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Mount indicates an expected call of Mount
-func (mr *MockMounterMockRecorder) Mount(volume, configuration, hostname interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mount", reflect.TypeOf((*MockMounter)(nil).Mount), volume, configuration, hostname)
+func (mr *MockMounterMockRecorder) Mount(volume interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mount", reflect.TypeOf((*MockMounter)(nil).Mount), volume)
 }
 
 // Unmount mocks base method
-func (m *MockMounter) Unmount(volume registry.Volume, configuration registry.Configuration, hostname string) error {
-	ret := m.ctrl.Call(m, "Unmount", volume, configuration, hostname)
+func (m *MockMounter) Unmount(volume registry.Volume) error {
+	ret := m.ctrl.Call(m, "Unmount", volume)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Unmount indicates an expected call of Unmount
-func (mr *MockMounterMockRecorder) Unmount(volume, configuration, hostname interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unmount", reflect.TypeOf((*MockMounter)(nil).Unmount), volume, configuration, hostname)
+func (mr *MockMounterMockRecorder) Unmount(volume interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unmount", reflect.TypeOf((*MockMounter)(nil).Unmount), volume)
 }

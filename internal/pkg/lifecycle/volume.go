@@ -178,6 +178,8 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 		return err
 	}
 
+	// TODO... update volume attachments
+
 	err = vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.MountRequested)
 	if err != nil {
 		return err

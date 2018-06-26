@@ -33,23 +33,23 @@ func (*volumeProvider) TeardownVolume(volume registry.Volume) error {
 }
 
 func (*volumeProvider) CopyDataIn(volume registry.Volume) error {
-	log.Println("FAKE SetupVolume for:", volume.Name)
+	log.Println("FAKE SetupVolume for:", volume.Name, "with details:", volume.StageIn)
 	return nil
 }
 
 func (*volumeProvider) CopyDataOut(volume registry.Volume) error {
-	log.Println("FAKE SetupVolume for:", volume.Name)
+	log.Println("FAKE SetupVolume for:", volume.Name, "with details:", volume.StageOut)
 	return nil
 }
 
 type mounter struct{}
 
-func (*mounter) Mount(volume registry.Volume, configuration registry.Configuration, hostname string) error {
-	log.Println("FAKE Mount for:", volume.Name, "with config:", configuration, "on:", hostname)
+func (*mounter) Mount(volume registry.Volume) error {
+	log.Println("FAKE Mount for:", volume.Name, "with attachments:", volume.Attachments)
 	return nil
 }
 
-func (*mounter) Unmount(volume registry.Volume, configuration registry.Configuration, hostname string) error {
-	log.Println("FAKE Unmount for:", volume.Name, "on:", hostname)
+func (*mounter) Unmount(volume registry.Volume) error {
+	log.Println("FAKE Unmount for:", volume.Name, "with attachments:", volume.Attachments)
 	return nil
 }

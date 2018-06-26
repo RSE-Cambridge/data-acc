@@ -217,26 +217,33 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		return errors.New("unable to mount to zero compute hosts")
 	}
 
-	// TODO: update the job with the list of hosts
 	err = fwa.volumeRegistry.JobAttachHosts(job.Name, hosts)
 	if err != nil {
 		return err
 	}
 
-	// TODO: really we should mount all the volumes!
 	if job.JobVolume == "" {
 		log.Print("No volume to mount")
-		return nil
-	}
+	} else {
+		volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
+		if err != nil {
+			return err
+		}
 
-	volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
-	if err != nil {
-		return err
-	}
+		if volume.Attachments != nil {
+			return fmt.Errorf("per job volume already attached")
+		}
+		for _, host := range hosts {
+			volume.Attachments = append(volume.Attachments, registry.Attachment{Hostname: host})
+		}
+		// TODO update volume with above
 
-	// TODO: should we not pass the job here?
-	vlm := fwa.getVolumeLifecycleManger(volume)
-	return vlm.Mount(hosts)
+		vlm := fwa.getVolumeLifecycleManger(volume)
+		if err := vlm.Mount(hosts); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (fwa *fakewarpActions) PostRun(c CliContext) error {
@@ -258,6 +265,8 @@ func (fwa *fakewarpActions) PostRun(c CliContext) error {
 	if err != nil {
 		return err
 	}
+
+	// TODO update attachments for all job.AttachHosts
 
 	vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
 	return vlm.Unmount()
