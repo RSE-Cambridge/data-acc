@@ -120,12 +120,35 @@ func (volRegistry *volumeRegistry) JobAttachHosts(jobName string, hosts []string
 	return volRegistry.keystore.Update([]KeyValueVersion{keyValue})
 }
 
-func (volRegistry *volumeRegistry) UpdateConfiguration(name registry.VolumeName, configurations []registry.Configuration) error {
-	updateConfig := func(volume *registry.Volume) error {
-		volume.Configurations = configurations
+func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeName,
+	attachments map[string]registry.Attachment) error {
+
+	update := func(volume *registry.Volume) error {
+		for key, value := range attachments {
+			volume.Attachments[key] = value
+		}
 		return nil
 	}
-	return volRegistry.updateVolume(name, updateConfig)
+	return volRegistry.updateVolume(name, update)
+}
+
+func (volRegistry *volumeRegistry) RemoveVolumeAttachments(name registry.VolumeName, attachments []registry.Attachment) error {
+	update := func(volume *registry.Volume) error {
+		for _, attachment := range attachments {
+			current, ok := volume.Attachments[attachment.Hostname]
+			if ok {
+				if current.DetachRequested {
+					delete(volume.Attachments, attachment.Hostname)
+				} else {
+					return fmt.Errorf(
+						"unable to remove attachment as delete not requested for: %s volume %s",
+						current.Hostname, volume.Name)
+				}
+			}
+		}
+		return nil
+	}
+	return volRegistry.updateVolume(name, update)
 }
 
 func (volRegistry *volumeRegistry) updateVolume(name registry.VolumeName,

@@ -91,6 +91,10 @@ func TestFakewarpActions_PreRun(t *testing.T) {
 		})
 	mockVolReg.EXPECT().JobAttachHosts("token", []string{"host1", "host2"})
 	mockVolReg.EXPECT().Volume(registry.VolumeName("token"))
+	mockVolReg.EXPECT().UpdateVolumeAttachments(registry.VolumeName("token"), map[string]registry.Attachment{
+		"host1": {Hostname: "host1"},
+		"host2": {Hostname: "host2"},
+	})
 
 	err := actions.PreRun(mockCtxt)
 	assert.EqualValues(t, "host1,host2", err.Error())

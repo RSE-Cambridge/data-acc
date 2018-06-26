@@ -40,17 +40,15 @@ type VolumeRegistry interface {
 	// Move between volume states, but only one by one
 	UpdateState(name VolumeName, state VolumeState) error
 
+	// Update all the specified attachments
+	// if attachment doesn't exist, attachment is added
+	UpdateVolumeAttachments(name VolumeName, attachments map[string]Attachment) error
+
+	// Remove all specified attachments, error if missing
+	RemoveVolumeAttachments(name VolumeName, attachments []Attachment) error
+
 	// Wait for a specific state, error returned if not possible
 	WaitForState(name VolumeName, state VolumeState) error
-
-	// Used to add or remove attachments
-	// TODO: remove this??
-	UpdateConfiguration(name VolumeName, configuration []Configuration) error
-
-	// TODO: RequestVolumeAttachment(name VolumeName, hostnames string[])
-	// TODO: RequestVolumeDetach(name VolumeName, hostnames string[])
-	// TODO: RequestVolumeDataIn(name VolumeName, datain DataCopyRequest)
-	// TODO: RequestVolumeDataOut(name VolumeName, datain DataCopyRequest)
 
 	// Get all callback on all volume changes
 	// If the volume is new, old = nil
@@ -115,8 +113,8 @@ type Volume struct {
 	// TODO: need to fill these in...
 	// They all related to how the volume is attached
 
-	// All current attachments
-	Attachments []Attachment
+	// All current attachments, by hostname
+	Attachments map[string]Attachment
 	// Attach all attachments to a shared global namespace
 	// Allowed for any volume type
 	AttachGlobalNamespace bool
@@ -142,24 +140,6 @@ type Volume struct {
 	// 1. correctly track multiple jobs at the same time attach to the same persistent buffer
 	// 2. data in/out requests for persistent buffer
 	// 3. track amount of space used by swap and/or metadata
-
-	// Each string contains an environment variable export
-	// The paths handed to a job come from aggregating the paths
-	// used by all volumes
-	// TODO: should split into Name/Value pairs, or use a map?
-	// TODO: should be attached to the job?
-	Paths []string
-
-	//
-	// TODO... delete all these fields, once they are no longer used!
-	//
-
-	// Current uses of the volume capacity and its attachments
-	Configurations []Configuration
-
-	// Volume drivers e.g. Lustre, Lustre+Loopback,
-	// BeeGFS, NVMe-over-Fabrics, etc
-	Driver VolumeDriver
 }
 
 func (volume Volume) String() string {

@@ -233,16 +233,19 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		if volume.Attachments != nil {
 			return fmt.Errorf("per job volume already attached")
 		}
+		attachments := make(map[string]registry.Attachment)
 		for _, host := range hosts {
-			volume.Attachments = append(volume.Attachments, registry.Attachment{Hostname: host})
+			attachments[host] = registry.Attachment{Hostname: host}
 		}
-		// TODO update volume with above
+		fwa.volumeRegistry.UpdateVolumeAttachments(job.JobVolume, attachments)
 
 		vlm := fwa.getVolumeLifecycleManger(volume)
-		if err := vlm.Mount(hosts); err != nil {
+		if err := vlm.Mount(hosts); err != nil { // TODO: why pass the hosts down here?
 			return err
 		}
 	}
+
+	// TODO update attachments for multijob volumes
 	return nil
 }
 

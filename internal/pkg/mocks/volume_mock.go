@@ -157,6 +157,30 @@ func (mr *MockVolumeRegistryMockRecorder) UpdateState(name, state interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateState", reflect.TypeOf((*MockVolumeRegistry)(nil).UpdateState), name, state)
 }
 
+// UpdateVolumeAttachments mocks base method
+func (m *MockVolumeRegistry) UpdateVolumeAttachments(name registry.VolumeName, attachments map[string]registry.Attachment) error {
+	ret := m.ctrl.Call(m, "UpdateVolumeAttachments", name, attachments)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateVolumeAttachments indicates an expected call of UpdateVolumeAttachments
+func (mr *MockVolumeRegistryMockRecorder) UpdateVolumeAttachments(name, attachments interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateVolumeAttachments", reflect.TypeOf((*MockVolumeRegistry)(nil).UpdateVolumeAttachments), name, attachments)
+}
+
+// RemoveVolumeAttachments mocks base method
+func (m *MockVolumeRegistry) RemoveVolumeAttachments(name registry.VolumeName, attachments []registry.Attachment) error {
+	ret := m.ctrl.Call(m, "RemoveVolumeAttachments", name, attachments)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveVolumeAttachments indicates an expected call of RemoveVolumeAttachments
+func (mr *MockVolumeRegistryMockRecorder) RemoveVolumeAttachments(name, attachments interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveVolumeAttachments", reflect.TypeOf((*MockVolumeRegistry)(nil).RemoveVolumeAttachments), name, attachments)
+}
+
 // WaitForState mocks base method
 func (m *MockVolumeRegistry) WaitForState(name registry.VolumeName, state registry.VolumeState) error {
 	ret := m.ctrl.Call(m, "WaitForState", name, state)
@@ -167,18 +191,6 @@ func (m *MockVolumeRegistry) WaitForState(name registry.VolumeName, state regist
 // WaitForState indicates an expected call of WaitForState
 func (mr *MockVolumeRegistryMockRecorder) WaitForState(name, state interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitForState", reflect.TypeOf((*MockVolumeRegistry)(nil).WaitForState), name, state)
-}
-
-// UpdateConfiguration mocks base method
-func (m *MockVolumeRegistry) UpdateConfiguration(name registry.VolumeName, configuration []registry.Configuration) error {
-	ret := m.ctrl.Call(m, "UpdateConfiguration", name, configuration)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateConfiguration indicates an expected call of UpdateConfiguration
-func (mr *MockVolumeRegistryMockRecorder) UpdateConfiguration(name, configuration interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateConfiguration", reflect.TypeOf((*MockVolumeRegistry)(nil).UpdateConfiguration), name, configuration)
 }
 
 // WatchVolumeChanges mocks base method
