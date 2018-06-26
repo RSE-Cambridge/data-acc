@@ -286,6 +286,9 @@ type DataCopyRequest struct {
 	Source string
 	// Must be empty string for type list, otherwise specifes location
 	Destination string
+	// Used to notify if copy in has been requested
+	// TODO: remove volume states and update this instead
+	RequestCopyIn bool
 	// Report if the copy has completed
 	CopyCompleted bool
 	// if there was problem, record it

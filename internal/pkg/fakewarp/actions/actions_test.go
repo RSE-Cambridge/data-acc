@@ -75,6 +75,10 @@ func TestFakewarpActions_PreRun(t *testing.T) {
 	mockDisk.EXPECT().Lines("nodehostnamefile1").DoAndReturn(func(string) ([]string, error) {
 		return []string{"host1", "host2"}, nil
 	})
+	mockVolReg.EXPECT().Job("token").DoAndReturn(
+		func(name string) (registry.Job, error) {
+			return registry.Job{JobVolume: registry.VolumeName("token")}, nil
+		})
 	mockVolReg.EXPECT().Volume(registry.VolumeName("token"))
 
 	err := actions.PreRun(mockCtxt)
@@ -91,6 +95,10 @@ func TestFakewarpActions_Paths(t *testing.T) {
 	testVLM = &mockVLM{}
 	defer func() { testVLM = nil }()
 
+	mockVolReg.EXPECT().Job("token").DoAndReturn(
+		func(name string) (registry.Job, error) {
+			return registry.Job{JobVolume: registry.VolumeName("token")}, nil
+		})
 	mockVolReg.EXPECT().Volume(registry.VolumeName("token")).DoAndReturn(
 		func(name registry.VolumeName) (registry.Volume, error) {
 			return registry.Volume{Paths: []string{"a", "b"}}, nil
