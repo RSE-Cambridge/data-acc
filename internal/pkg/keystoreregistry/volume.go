@@ -102,6 +102,10 @@ func (volRegistry *volumeRegistry) DeleteJob(jobName string) error {
 	return volRegistry.keystore.DeleteAll([]KeyValueVersion{keyValue})
 }
 
+func (volRegistry *volumeRegistry) JobAttachHosts(jobName string, hosts []string) error {
+	panic("TODO")
+}
+
 func (volRegistry *volumeRegistry) UpdateConfiguration(name registry.VolumeName, configurations []registry.Configuration) error {
 	updateConfig := func(volume *registry.Volume) error {
 		volume.Configurations = configurations

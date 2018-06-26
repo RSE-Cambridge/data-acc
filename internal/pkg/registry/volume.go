@@ -16,6 +16,10 @@ type VolumeRegistry interface {
 	// Fails to add job if volumes are in a bad state
 	AddJob(job Job) error
 
+	// Update specified job with given hosts
+	// Fails if the job already has any hosts associated with it
+	JobAttachHosts(jobName string, hosts []string) error
+
 	// Remove job from the system
 	// TODO: fails if volumes are not in the deleted state?
 	DeleteJob(jobName string) error

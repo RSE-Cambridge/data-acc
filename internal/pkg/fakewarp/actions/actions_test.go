@@ -97,13 +97,9 @@ func TestFakewarpActions_Paths(t *testing.T) {
 
 	mockVolReg.EXPECT().Job("token").DoAndReturn(
 		func(name string) (registry.Job, error) {
-			return registry.Job{JobVolume: registry.VolumeName("token")}, nil
+			return registry.Job{JobVolume: registry.VolumeName("token"), Paths: map[string]string{"a": "A"}}, nil
 		})
-	mockVolReg.EXPECT().Volume(registry.VolumeName("token")).DoAndReturn(
-		func(name registry.VolumeName) (registry.Volume, error) {
-			return registry.Volume{Paths: []string{"a", "b"}}, nil
-		})
-	mockDisk.EXPECT().Write("pathfile1", []string{"a", "b"})
+	mockDisk.EXPECT().Write("pathfile1", []string{"a=A"})
 
 	err := actions.Paths(mockCtxt)
 	assert.Nil(t, err)

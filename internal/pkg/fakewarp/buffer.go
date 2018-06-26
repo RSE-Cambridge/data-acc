@@ -95,7 +95,7 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 			perJobVolume.AttachAsSwapBytes = uint(summary.Swap.SizeBytes)
 		}
 		// TODO that can be many data_in and data_out, we only allow one relating to striped job buffer
-		if summary.DataIn != nil &&  summary.DataIn.Source != "" {
+		if summary.DataIn != nil && summary.DataIn.Source != "" {
 			// TODO check destination includes striped buffer path?
 			perJobVolume.StageIn.Source = summary.DataIn.Source
 			perJobVolume.StageIn.Destination = summary.DataIn.Destination
