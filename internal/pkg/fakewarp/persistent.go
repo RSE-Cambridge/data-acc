@@ -51,7 +51,7 @@ func findPool(poolRegistry registry.PoolRegistry, poolName string) (pool *regist
 		}
 	}
 
-	if pool.Name == "" {
+	if pool == nil {
 		err = fmt.Errorf("unable to find pool: %s", poolName)
 		return
 	}

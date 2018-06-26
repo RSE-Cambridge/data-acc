@@ -82,11 +82,6 @@ func (fwa *fakewarpActions) DeleteBuffer(c CliContext) error {
 
 func (fwa *fakewarpActions) CreatePerJobBuffer(c CliContext) error {
 	checkRequiredStrings(c, "token", "job", "caller", "capacity")
-	if summary, err := fakewarp.ParseJobFile(fwa.disk, c.String("job")); err != nil {
-		return err
-	} else {
-		log.Println("Summary of job file:", summary)
-	}
 	return fakewarp.CreatePerJobBuffer(fwa.volumeRegistry, fwa.poolRegistry, fwa.disk,
 		c.String("token"), c.Int("user"), c.Int("group"), c.String("capacity"),
 		c.String("caller"), c.String("job"))
@@ -205,7 +200,7 @@ func (fwa *fakewarpActions) getVolumeLifecycleManger(volume registry.Volume) lif
 }
 
 func (fwa *fakewarpActions) PreRun(c CliContext) error {
-	checkRequiredStrings(c, "token", "job", "nodehostnamefile")
+	checkRequiredStrings(c, "token", "job", "nodehostnamefile") // TODO: why require job if we don't use it?
 	fmt.Printf("--token %s --job %s --nodehostnamefile %s\n",
 		c.String("token"), c.String("job"), c.String("nodehostnamefile"))
 

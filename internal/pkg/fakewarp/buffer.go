@@ -5,7 +5,6 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/lifecycle"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
-	"log"
 	"time"
 )
 
@@ -37,8 +36,6 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 	summary, err := ParseJobFile(disk, jobFile)
 	if err != nil {
 		return err
-	} else {
-		log.Println("Summary of job file:", summary)
 	}
 
 	pool, bricksRequired, err := getPoolAndBrickCount(poolRegistry, capacity)
