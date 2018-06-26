@@ -1,6 +1,7 @@
 package fakewarp
 
 import (
+	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/lifecycle"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
@@ -51,6 +52,7 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 		Name:      token,
 		Owner:     uint(user),
 		CreatedAt: createdAt,
+		Paths:     make(map[string]string),
 	}
 	if bricksRequired > 0 && summary.PerJobBuffer != nil {
 		job.JobVolume = registry.VolumeName(token)
@@ -66,10 +68,16 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 			Group:      uint(group),
 			CreatedBy:  caller,
 			CreatedAt:  createdAt,
-			AttachGlobalNamespace: summary.PerJobBuffer.BufferType == scratch &&
-				summary.PerJobBuffer.AccessMode != private,
-			AttachPrivateNamespace: summary.PerJobBuffer.BufferType == scratch &&
-				summary.PerJobBuffer.AccessMode != striped,
+		}
+		if summary.PerJobBuffer.BufferType == scratch &&
+			summary.PerJobBuffer.AccessMode != private {
+			perJobVolume.AttachGlobalNamespace = true
+			job.Paths["$DW_JOB_PRIVATE"] = fmt.Sprintf("/mnt/dac/job/%s/private", job.Name)
+		}
+		if summary.PerJobBuffer.BufferType == scratch &&
+			summary.PerJobBuffer.AccessMode != striped {
+			perJobVolume.AttachPrivateNamespace = true
+			job.Paths["$DW_JOB_STRIPED"] = fmt.Sprintf("/mnt/dac/job/%s/global", job.Name)
 		}
 		if summary.PerJobBuffer.BufferType == scratch && summary.Swap != nil {
 			perJobVolume.AttachAsSwapBytes = uint(summary.Swap.SizeBytes)
@@ -109,6 +117,8 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 			return err
 		}
 		job.MultiJobVolumes = append(job.MultiJobVolumes, name)
+		job.Paths[fmt.Sprintf("DW_PERSISTENT_STRIPED_%s", name)] = fmt.Sprintf(
+			"/mnt/dac/job/%s/multijob/%s", job.Name, name)
 	}
 
 	err = volumeRegistry.AddJob(job)

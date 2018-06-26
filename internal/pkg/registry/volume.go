@@ -71,6 +71,9 @@ type Job struct {
 
 	// There maybe be attachments to multiple shared volumes
 	MultiJobVolumes []VolumeName
+
+	// Environment variables for each volume associated with the job
+	Paths map[string]string
 }
 
 type VolumeName string
