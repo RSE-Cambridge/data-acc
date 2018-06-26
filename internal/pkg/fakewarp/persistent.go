@@ -87,20 +87,6 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	}
 	adjustedSizeGB := bricksRequired * pool.GranularityGB
 
-	// TODO should populate configurations also, from job file
-	var suffix string
-	if request.Persistent {
-		// TODO: sanitize token!!!
-		suffix = fmt.Sprintf("PERSISTENT_STRIPED_%s=/mnt/dac/persistent/%s", request.Token, request.Token)
-	} else {
-		// TODO: not only striped, long term
-		suffix = fmt.Sprintf("JOB_STRIPED=/mnt/dac/job/%s/striped", request.Token)
-	}
-	paths := []string{
-		fmt.Sprintf("BB_%s", suffix),
-		fmt.Sprintf("DW_%s", suffix),
-	}
-
 	volume := registry.Volume{
 		Name:       registry.VolumeName(request.Token),
 		JobName:    request.Token,
@@ -113,7 +99,6 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 		Pool:       pool.Name,
 		State:      registry.Registered,
 		MultiJob:   request.Persistent,
-		Paths:      paths,
 	}
 	err = volReg.AddVolume(volume)
 	if err != nil {
@@ -125,8 +110,11 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 		Owner:     uint(request.User),
 		CreatedAt: createdAt,
 		JobVolume: volume.Name, // Even though its a persistent buffer, we add it here to ensure we delete buffer
-
+		Paths:     make(map[string]string),
 	}
+	job.Paths[fmt.Sprintf("DW_PERSISTENT_STRIPED_%s", volume.Name)] = fmt.Sprintf(
+		"/mnt/dac/job/%s/multijob/%s", job.Name, volume.Name)
+
 	err = volReg.AddJob(job)
 	if err != nil {
 		volReg.DeleteVolume(volume.Name)

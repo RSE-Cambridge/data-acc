@@ -54,6 +54,18 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 		CreatedAt: createdAt,
 		Paths:     make(map[string]string),
 	}
+
+	for _, attachment := range summary.Attachments {
+		name := registry.VolumeName(attachment.Name)
+		_, err := volumeRegistry.Volume(name)
+		if err != nil {
+			return err
+		}
+		job.MultiJobVolumes = append(job.MultiJobVolumes, name)
+		job.Paths[fmt.Sprintf("DW_PERSISTENT_STRIPED_%s", name)] = fmt.Sprintf(
+			"/mnt/dac/job/%s/multijob/%s", job.Name, name)
+	}
+
 	if bricksRequired > 0 && summary.PerJobBuffer != nil {
 		job.JobVolume = registry.VolumeName(token)
 		perJobVolume := registry.Volume{
@@ -72,18 +84,18 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 		if summary.PerJobBuffer.BufferType == scratch &&
 			summary.PerJobBuffer.AccessMode != private {
 			perJobVolume.AttachGlobalNamespace = true
-			job.Paths["$DW_JOB_PRIVATE"] = fmt.Sprintf("/mnt/dac/job/%s/private", job.Name)
+			job.Paths["DW_JOB_PRIVATE"] = fmt.Sprintf("/mnt/dac/job/%s/private", job.Name)
 		}
 		if summary.PerJobBuffer.BufferType == scratch &&
 			summary.PerJobBuffer.AccessMode != striped {
 			perJobVolume.AttachPrivateNamespace = true
-			job.Paths["$DW_JOB_STRIPED"] = fmt.Sprintf("/mnt/dac/job/%s/global", job.Name)
+			job.Paths["DW_JOB_STRIPED"] = fmt.Sprintf("/mnt/dac/job/%s/global", job.Name)
 		}
 		if summary.PerJobBuffer.BufferType == scratch && summary.Swap != nil {
 			perJobVolume.AttachAsSwapBytes = uint(summary.Swap.SizeBytes)
 		}
 		// TODO that can be many data_in and data_out, we only allow one relating to striped job buffer
-		if summary.DataIn.Source != "" {
+		if summary.DataIn != nil &&  summary.DataIn.Source != "" {
 			// TODO check destination includes striped buffer path?
 			perJobVolume.StageIn.Source = summary.DataIn.Source
 			perJobVolume.StageIn.Destination = summary.DataIn.Destination
@@ -94,7 +106,7 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 				perJobVolume.StageIn.SourceType = registry.Directory
 			}
 		}
-		if summary.DataOut.Source != "" {
+		if summary.DataOut != nil && summary.DataOut.Source != "" {
 			// TODO check source includes striped buffer path?
 			perJobVolume.StageOut.Source = summary.DataIn.Source
 			perJobVolume.StageOut.Destination = summary.DataIn.Destination
@@ -105,20 +117,11 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 				perJobVolume.StageIn.SourceType = registry.Directory
 			}
 		}
+
 		err := volumeRegistry.AddVolume(perJobVolume)
 		if err != nil {
 			return err
 		}
-	}
-	for _, attachment := range summary.Attachments {
-		name := registry.VolumeName(attachment.Name)
-		_, err := volumeRegistry.Volume(name)
-		if err != nil {
-			return err
-		}
-		job.MultiJobVolumes = append(job.MultiJobVolumes, name)
-		job.Paths[fmt.Sprintf("DW_PERSISTENT_STRIPED_%s", name)] = fmt.Sprintf(
-			"/mnt/dac/job/%s/multijob/%s", job.Name, name)
 	}
 
 	err = volumeRegistry.AddJob(job)

@@ -189,12 +189,8 @@ func (fwa *fakewarpActions) Paths(c CliContext) error {
 	}
 
 	paths := []string{}
-	if job.JobVolume != "" {
-		volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
-		if err != nil {
-			return err
-		}
-		paths = volume.Paths
+	for key, value := range job.Paths {
+		paths = append(paths, fmt.Sprintf("%s=%s", key, value))
 	}
 	return fwa.disk.Write(c.String("pathfile"), paths)
 }
