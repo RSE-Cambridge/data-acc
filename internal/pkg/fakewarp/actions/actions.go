@@ -63,14 +63,14 @@ func (fwa *fakewarpActions) CreatePersistentBuffer(c CliContext) error {
 }
 
 func checkRequiredStrings(c CliContext, flags ...string) {
-	errors := []string{}
+	errs := []string{}
 	for _, flag := range flags {
 		if str := c.String(flag); str == "" {
-			errors = append(errors, flag)
+			errs = append(errs, flag)
 		}
 	}
-	if len(errors) > 0 {
-		log.Fatalf("Please provide these required parameters: %s", strings.Join(errors, ", "))
+	if len(errs) > 0 {
+		log.Fatalf("Please provide these required parameters: %s", strings.Join(errs, ", "))
 	}
 }
 
@@ -82,18 +82,9 @@ func (fwa *fakewarpActions) DeleteBuffer(c CliContext) error {
 
 func (fwa *fakewarpActions) CreatePerJobBuffer(c CliContext) error {
 	checkRequiredStrings(c, "token", "job", "caller", "capacity")
-	if summary, err := fakewarp.ParseJobFile(fwa.disk, c.String("job")); err != nil {
-		return err
-	} else {
-		log.Println("Summary of job file:", summary)
-	}
-	return fakewarp.CreateVolumesAndJobs(fwa.volumeRegistry, fwa.poolRegistry, fakewarp.BufferRequest{
-		Token:    c.String("token"),
-		User:     c.Int("user"),
-		Group:    c.Int("group"),
-		Capacity: c.String("capacity"),
-		Caller:   c.String("caller"),
-	})
+	return fakewarp.CreatePerJobBuffer(fwa.volumeRegistry, fwa.poolRegistry, fwa.disk,
+		c.String("token"), c.Int("user"), c.Int("group"), c.String("capacity"),
+		c.String("caller"), c.String("job"))
 }
 
 func (fwa *fakewarpActions) ShowInstances() error {
@@ -141,7 +132,16 @@ func (fwa *fakewarpActions) ValidateJob(c CliContext) error {
 
 func (fwa *fakewarpActions) RealSize(c CliContext) error {
 	checkRequiredStrings(c, "token")
-	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+	job, err := fwa.volumeRegistry.Job(c.String("token"))
+	if err != nil {
+		return err
+	}
+
+	if job.JobVolume == "" {
+		return fmt.Errorf("no volume to report the size of: %s", job.Name)
+	}
+
+	volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,17 @@ func (fwa *fakewarpActions) DataIn(c CliContext) error {
 	checkRequiredStrings(c, "token", "job")
 	fmt.Printf("--token %s --job %s\n", c.String("token"), c.String("job"))
 
-	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+	job, err := fwa.volumeRegistry.Job(c.String("token"))
+	if err != nil {
+		return err
+	}
+
+	if job.JobVolume == "" {
+		log.Print("No data in required")
+		return nil
+	}
+
+	volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
 	if err != nil {
 		return err
 	}
@@ -167,11 +177,17 @@ func (fwa *fakewarpActions) Paths(c CliContext) error {
 	checkRequiredStrings(c, "token", "job", "pathfile")
 	fmt.Printf("--token %s --job %s --pathfile %s\n",
 		c.String("token"), c.String("job"), c.String("pathfile"))
-	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+
+	job, err := fwa.volumeRegistry.Job(c.String("token"))
 	if err != nil {
 		return err
 	}
-	return fwa.disk.Write(c.String("pathfile"), volume.Paths)
+
+	paths := []string{}
+	for key, value := range job.Paths {
+		paths = append(paths, fmt.Sprintf("%s=%s", key, value))
+	}
+	return fwa.disk.Write(c.String("pathfile"), paths)
 }
 
 var testVLM lifecycle.VolumeLifecycleManager
@@ -184,12 +200,11 @@ func (fwa *fakewarpActions) getVolumeLifecycleManger(volume registry.Volume) lif
 }
 
 func (fwa *fakewarpActions) PreRun(c CliContext) error {
-	checkRequiredStrings(c, "token", "job", "nodehostnamefile")
+	checkRequiredStrings(c, "token", "job", "nodehostnamefile") // TODO: why require job if we don't use it?
 	fmt.Printf("--token %s --job %s --nodehostnamefile %s\n",
 		c.String("token"), c.String("job"), c.String("nodehostnamefile"))
 
-	// TODO: really we should get the job and mount all the volumes?
-	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+	job, err := fwa.volumeRegistry.Job(c.String("token"))
 	if err != nil {
 		return err
 	}
@@ -202,8 +217,24 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		return errors.New("unable to mount to zero compute hosts")
 	}
 
-	// TODO: update the job with the list of hosts, so we have the list for unmount?
+	// TODO: update the job with the list of hosts
+	err = fwa.volumeRegistry.JobAttachHosts(job.Name, hosts)
+	if err != nil {
+		return err
+	}
 
+	// TODO: really we should mount all the volumes!
+	if job.JobVolume == "" {
+		log.Print("No volume to mount")
+		return nil
+	}
+
+	volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
+	if err != nil {
+		return err
+	}
+
+	// TODO: should we not pass the job here?
 	vlm := fwa.getVolumeLifecycleManger(volume)
 	return vlm.Mount(hosts)
 }
@@ -213,7 +244,17 @@ func (fwa *fakewarpActions) PostRun(c CliContext) error {
 	fmt.Printf("--token %s --job %s\n",
 		c.String("token"), c.String("job"))
 
-	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+	job, err := fwa.volumeRegistry.Job(c.String("token"))
+	if err != nil {
+		return err
+	}
+
+	if job.JobVolume == "" {
+		log.Print("No post run required")
+		return nil
+	}
+
+	volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
 	if err != nil {
 		return err
 	}
@@ -227,7 +268,17 @@ func (fwa *fakewarpActions) DataOut(c CliContext) error {
 	fmt.Printf("--token %s --job %s\n",
 		c.String("token"), c.String("job"))
 
-	volume, err := fwa.volumeRegistry.Volume(registry.VolumeName(c.String("token")))
+	job, err := fwa.volumeRegistry.Job(c.String("token"))
+	if err != nil {
+		return err
+	}
+
+	if job.JobVolume == "" {
+		log.Print("No data out required")
+		return nil
+	}
+
+	volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
 	if err != nil {
 		return err
 	}

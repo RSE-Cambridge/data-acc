@@ -55,9 +55,32 @@ func getJobKey(jobName string) string {
 	return fmt.Sprintf("%s%s/", jobPrefix, jobName)
 }
 
+func (volRegistry *volumeRegistry) Job(jobName string) (registry.Job, error) {
+	var job registry.Job // TODO return a pointer instead?
+	keyValue, err := volRegistry.keystore.Get(getJobKey(jobName))
+	if err != nil {
+		return job, err
+	}
+	err = json.Unmarshal(bytes.NewBufferString(keyValue.Value).Bytes(), &job)
+	if err != nil {
+		return job, err
+	}
+	return job, nil
+}
+
 func (volRegistry *volumeRegistry) AddJob(job registry.Job) error {
-	for _, volumeName := range job.Volumes {
+	for _, volumeName := range job.MultiJobVolumes {
 		volume, err := volRegistry.Volume(volumeName)
+		if err != nil {
+			return err
+		}
+		// TODO: what other checks are required?
+		if volume.State < registry.Registered {
+			return fmt.Errorf("must register volume: %s", volume.Name)
+		}
+	}
+	if job.JobVolume != "" {
+		volume, err := volRegistry.Volume(job.JobVolume)
 		if err != nil {
 			return err
 		}
@@ -77,6 +100,24 @@ func (volRegistry *volumeRegistry) DeleteJob(jobName string) error {
 		return err
 	}
 	return volRegistry.keystore.DeleteAll([]KeyValueVersion{keyValue})
+}
+
+func (volRegistry *volumeRegistry) JobAttachHosts(jobName string, hosts []string) error {
+	keyValue, err := volRegistry.keystore.Get(getJobKey(jobName))
+	if err != nil {
+		return err
+	}
+	var job registry.Job
+	err = json.Unmarshal(bytes.NewBufferString(keyValue.Value).Bytes(), &job)
+	if err != nil {
+		return err
+	}
+
+	// TODO validate hostnames?
+	job.AttachHosts = hosts
+	keyValue.Value = toJson(job)
+
+	return volRegistry.keystore.Update([]KeyValueVersion{keyValue})
 }
 
 func (volRegistry *volumeRegistry) UpdateConfiguration(name registry.VolumeName, configurations []registry.Configuration) error {

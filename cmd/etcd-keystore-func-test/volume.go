@@ -77,9 +77,9 @@ func testVolumeCRUD(volRegistry registry.VolumeRegistry) {
 
 func testJobCRUD(volRegistry registry.VolumeRegistry) {
 	job := registry.Job{Name: "foo",
-		Volumes:   []registry.VolumeName{"asdf", "asdf2"},
-		Owner:     1001,
-		CreatedAt: uint(time.Now().Unix()),
+		MultiJobVolumes: []registry.VolumeName{"asdf", "asdf2"},
+		Owner:           1001,
+		CreatedAt:       uint(time.Now().Unix()),
 	}
 	if err := volRegistry.AddJob(job); err != nil {
 		log.Fatal(err)
@@ -88,7 +88,7 @@ func testJobCRUD(volRegistry registry.VolumeRegistry) {
 	if err := volRegistry.AddJob(job); err == nil {
 		log.Fatal("expected an error adding duplicate job")
 	}
-	badJob := registry.Job{Name: "bar", Volumes: []registry.VolumeName{"asdf", "asdf3"}}
+	badJob := registry.Job{Name: "bar", MultiJobVolumes: []registry.VolumeName{"asdf", "asdf3"}}
 	if err := volRegistry.AddJob(badJob); err == nil {
 		log.Fatal("expected an error for invalid volume name")
 	}

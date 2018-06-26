@@ -9,6 +9,8 @@ type PoolRegistry interface {
 	// Returns a summary of the current state of all pools, including the bricks in each pool
 	Pools() ([]Pool, error)
 
+	// TODO: Pool(name string) (Pool, error)
+
 	// Update (or add) information on what bricks are present
 	//
 	// Note: it is possible to have bricks from multiple pools on a single host

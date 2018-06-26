@@ -9,14 +9,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+	"time"
 )
 
-type mockCliContext struct{}
+type mockCliContext struct {
+	capacity int
+}
 
 func (c *mockCliContext) String(name string) string {
 	switch name {
 	case "capacity":
-		return "pool1:0"
+		return fmt.Sprintf("pool1:%dGB", c.capacity)
 	case "token":
 		return "token"
 	case "caller":
@@ -39,7 +42,14 @@ func (c *mockCliContext) String(name string) string {
 }
 
 func (c *mockCliContext) Int(name string) int {
-	return 42 + len(name)
+	switch name {
+	case "user":
+		return 1001
+	case "group":
+		return 1001
+	default:
+		return 42 + len(name)
+	}
 }
 
 func TestCreatePersistentBufferReturnsError(t *testing.T) {
@@ -75,6 +85,11 @@ func TestFakewarpActions_PreRun(t *testing.T) {
 	mockDisk.EXPECT().Lines("nodehostnamefile1").DoAndReturn(func(string) ([]string, error) {
 		return []string{"host1", "host2"}, nil
 	})
+	mockVolReg.EXPECT().Job("token").DoAndReturn(
+		func(name string) (registry.Job, error) {
+			return registry.Job{Name: "token", JobVolume: registry.VolumeName("token")}, nil
+		})
+	mockVolReg.EXPECT().JobAttachHosts("token", []string{"host1", "host2"})
 	mockVolReg.EXPECT().Volume(registry.VolumeName("token"))
 
 	err := actions.PreRun(mockCtxt)
@@ -91,20 +106,83 @@ func TestFakewarpActions_Paths(t *testing.T) {
 	testVLM = &mockVLM{}
 	defer func() { testVLM = nil }()
 
-	mockVolReg.EXPECT().Volume(registry.VolumeName("token")).DoAndReturn(
-		func(name registry.VolumeName) (registry.Volume, error) {
-			return registry.Volume{Paths: []string{"a", "b"}}, nil
+	mockVolReg.EXPECT().Job("token").DoAndReturn(
+		func(name string) (registry.Job, error) {
+			return registry.Job{JobVolume: registry.VolumeName("token"), Paths: map[string]string{"a": "A"}}, nil
 		})
-	mockDisk.EXPECT().Write("pathfile1", []string{"a", "b"})
+	mockDisk.EXPECT().Write("pathfile1", []string{"a=A"})
 
 	err := actions.Paths(mockCtxt)
+	assert.Nil(t, err)
+}
+
+func TestFakewarpActions_CreatePerJobBuffer(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockPoolReg := mocks.NewMockPoolRegistry(mockCtrl)
+	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
+	mockDisk := mocks.NewMockDisk(mockCtrl)
+	mockCtxt := &mockCliContext{capacity: 2}
+	actions := NewFakewarpActions(mockPoolReg, mockVolReg, mockDisk)
+
+	mockDisk.EXPECT().Lines("jobfile").DoAndReturn(func(string) ([]string, error) {
+		return []string{
+			"#DW persistentdw name=mybuffer",
+			"#DW jobdw capacity=2GB access_mode=striped,private type=scratch",
+		}, nil
+	})
+
+	mockPoolReg.EXPECT().Pools().DoAndReturn(func() ([]registry.Pool, error) {
+		return []registry.Pool{{Name: "pool1", GranularityGB: 200}}, nil
+	})
+	mockVolReg.EXPECT().Volume(registry.VolumeName("mybuffer")).DoAndReturn(
+		func(name registry.VolumeName) (registry.Volume, error) {
+			return registry.Volume{Name: name}, nil
+		})
+	mockVolReg.EXPECT().AddVolume(registry.Volume{
+		Name:                   "token",
+		MultiJob:               false,
+		State:                  registry.Registered,
+		Pool:                   "pool1",
+		SizeBricks:             1,
+		SizeGB:                 200,
+		JobName:                "token",
+		Owner:                  1001,
+		Group:                  1001,
+		CreatedBy:              "caller",
+		CreatedAt:              uint(time.Now().Unix()), // TODO this is racey!
+		AttachGlobalNamespace:  true,
+		AttachPrivateNamespace: true,
+		AttachAsSwapBytes:      0,
+	})
+	mockVolReg.EXPECT().AddJob(registry.Job{
+		Name:      "token",
+		Owner:     1001,
+		CreatedAt: uint(time.Now().Unix()),
+		Paths: map[string]string{
+			"DW_PERSISTENT_STRIPED_mybuffer": "/mnt/dac/job/token/multijob/mybuffer",
+			"DW_JOB_PRIVATE":                 "/mnt/dac/job/token/private",
+			"DW_JOB_STRIPED":                 "/mnt/dac/job/token/global",
+		},
+		JobVolume:       registry.VolumeName("token"),
+		MultiJobVolumes: []registry.VolumeName{"mybuffer"},
+	})
+	mockVolReg.EXPECT().Volume(registry.VolumeName("token")).DoAndReturn(
+		func(name registry.VolumeName) (registry.Volume, error) {
+			return registry.Volume{
+				Name:       name,
+				SizeBricks: 0, // TODO: skips ProvisionBricks logic
+			}, nil
+		})
+
+	err := actions.CreatePerJobBuffer(mockCtxt)
 	assert.Nil(t, err)
 }
 
 type mockVLM struct{}
 
 func (*mockVLM) ProvisionBricks(pool registry.Pool) error {
-	panic("implement me")
+	return errors.New(pool.Name)
 }
 
 func (*mockVLM) DataIn() error {

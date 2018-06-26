@@ -10,11 +10,15 @@ type VolumeRegistry interface {
 	Jobs() ([]Job, error)
 
 	// Get a specific job
-	// TODO: Job(jobName string) (Job, error)
+	Job(jobName string) (Job, error)
 
 	// Add job and associated volumes
 	// Fails to add job if volumes are in a bad state
 	AddJob(job Job) error
+
+	// Update specified job with given hosts
+	// Fails if the job already has any hosts associated with it
+	JobAttachHosts(jobName string, hosts []string) error
 
 	// Remove job from the system
 	// TODO: fails if volumes are not in the deleted state?
@@ -72,8 +76,8 @@ type Job struct {
 	// There maybe be attachments to multiple shared volumes
 	MultiJobVolumes []VolumeName
 
-	// TODO: remove once moved to above fields
-	Volumes []VolumeName
+	// Environment variables for each volume associated with the job
+	Paths map[string]string
 }
 
 type VolumeName string
@@ -91,7 +95,7 @@ type Volume struct {
 	State VolumeState
 
 	// Requested pool of bricks for volume
-	Pool string
+	Pool string // TODO: PoolName?
 	// Number of bricks requested, calculated from requested capacity
 	SizeBricks uint
 	// Actual size of the volume
@@ -100,9 +104,9 @@ type Volume struct {
 	// Back reference to what job created this volume
 	JobName string
 	// e.g. 1001
-	Owner int
+	Owner uint
 	// If empty defaults to User
-	Group int
+	Group uint
 	// e.g. SLURM or Manila
 	CreatedBy string
 	// The unix (utc) timestamp of when this volume was created
@@ -110,9 +114,6 @@ type Volume struct {
 
 	// TODO: need to fill these in...
 	// They all related to how the volume is attached
-
-	// Reserved space for swap and/or metadata service
-	ReservedGB uint
 
 	// All current attachments
 	Attachments []Attachment
@@ -123,12 +124,13 @@ type Volume struct {
 	AttachPrivateNamespace bool
 	// If not zero, swap of the requested amount mounted for each attachment
 	// Not allowed for multi job
-	AttachAsSwapGB uint
+	AttachAsSwapBytes uint
 	// Add attachment specific cache for each given filesystem path
 	// Not allowed for multi job
 	// Note: assumes the same path is cached for all attachments
 	AttachPrivateCache []string
 
+	// TODO: maybe data copy should be a slice associated with the job?
 	// Request certain files to be staged in
 	// Not currently allowed for multi job volumes
 	StageIn DataCopyRequest
@@ -139,11 +141,13 @@ type Volume struct {
 	// TODO: data model currently does not do these things well:
 	// 1. correctly track multiple jobs at the same time attach to the same persistent buffer
 	// 2. data in/out requests for persistent buffer
+	// 3. track amount of space used by swap and/or metadata
 
 	// Each string contains an environment variable export
 	// The paths handed to a job come from aggregating the paths
 	// used by all volumes
 	// TODO: should split into Name/Value pairs, or use a map?
+	// TODO: should be attached to the job?
 	Paths []string
 
 	//
@@ -288,6 +292,9 @@ type DataCopyRequest struct {
 	Source string
 	// Must be empty string for type list, otherwise specifes location
 	Destination string
+	// Used to notify if copy in has been requested
+	// TODO: remove volume states and update this instead
+	RequestCopyIn bool
 	// Report if the copy has completed
 	CopyCompleted bool
 	// if there was problem, record it

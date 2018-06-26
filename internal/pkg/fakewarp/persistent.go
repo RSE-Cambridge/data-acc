@@ -39,62 +39,66 @@ func parseCapacity(raw string) (string, int, error) {
 	return pool, capacityInt, nil
 }
 
+func findPool(poolRegistry registry.PoolRegistry, poolName string) (pool *registry.Pool, err error) {
+	pools, err := poolRegistry.Pools()
+	if err != nil {
+		return
+	}
+
+	for _, p := range pools {
+		if p.Name == poolName {
+			pool = &p
+		}
+	}
+
+	if pool == nil {
+		err = fmt.Errorf("unable to find pool: %s", poolName)
+		return
+	}
+	return
+}
+
+func getPoolAndBrickCount(poolRegistry registry.PoolRegistry, capacity string) (pool *registry.Pool,
+	bricksRequired uint, err error) {
+
+	poolName, capacityGB, err := parseCapacity(capacity)
+	if err != nil {
+		return
+	}
+
+	pool, err = findPool(poolRegistry, poolName)
+	if err != nil {
+		return
+	}
+
+	bricksRequired = uint(math.Ceil(float64(capacityGB) / float64(pool.GranularityGB)))
+	return
+}
+
 // TODO: ideally this would be private, if not for testing
 func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.PoolRegistry,
 	request BufferRequest) error {
 
 	createdAt := uint(time.Now().Unix())
-	poolName, capacityGB, err := parseCapacity(request.Capacity) // TODO lots of proper parsing to do here, get poolname, etc
+
+	pool, bricksRequired, err := getPoolAndBrickCount(poolRegistry, request.Capacity)
 	if err != nil {
 		return err
 	}
-
-	pools, err := poolRegistry.Pools()
-	if err != nil {
-		return err
-	}
-
-	var pool registry.Pool
-	for _, p := range pools {
-		if p.Name == poolName {
-			pool = p
-		}
-	}
-
-	if pool.Name == "" {
-		return fmt.Errorf("unable to find pool: %s", poolName)
-	}
-
-	bricksRequired := uint(math.Ceil(float64(capacityGB) / float64(pool.GranularityGB)))
-	adjustedSize := bricksRequired * pool.GranularityGB
-
-	// TODO should populate configurations also, from job file
-	var suffix string
-	if request.Persistent {
-		// TODO: sanitize token!!!
-		suffix = fmt.Sprintf("PERSISTENT_STRIPED_%s=/mnt/dac/persistent/%s", request.Token, request.Token)
-	} else {
-		// TODO: not only striped, long term
-		suffix = fmt.Sprintf("JOB_STRIPED=/mnt/dac/job/%s/striped", request.Token)
-	}
-	paths := []string{
-		fmt.Sprintf("BB_%s", suffix),
-		fmt.Sprintf("DW_%s", suffix),
-	}
+	adjustedSizeGB := bricksRequired * pool.GranularityGB
 
 	volume := registry.Volume{
 		Name:       registry.VolumeName(request.Token),
 		JobName:    request.Token,
-		Owner:      request.User,
+		Owner:      uint(request.User),
 		CreatedAt:  createdAt,
 		CreatedBy:  request.Caller,
-		Group:      request.Group,
-		SizeGB:     uint(adjustedSize),
+		Group:      uint(request.Group),
+		SizeGB:     adjustedSizeGB,
 		SizeBricks: bricksRequired,
 		Pool:       pool.Name,
 		State:      registry.Registered,
 		MultiJob:   request.Persistent,
-		Paths:      paths,
 	}
 	err = volReg.AddVolume(volume)
 	if err != nil {
@@ -103,10 +107,14 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 
 	job := registry.Job{
 		Name:      request.Token,
-		Volumes:   []registry.VolumeName{registry.VolumeName(request.Token)},
 		Owner:     uint(request.User),
 		CreatedAt: createdAt,
+		JobVolume: volume.Name, // Even though its a persistent buffer, we add it here to ensure we delete buffer
+		Paths:     make(map[string]string),
 	}
+	job.Paths[fmt.Sprintf("DW_PERSISTENT_STRIPED_%s", volume.Name)] = fmt.Sprintf(
+		"/mnt/dac/job/%s/multijob/%s", job.Name, volume.Name)
+
 	err = volReg.AddJob(job)
 	if err != nil {
 		volReg.DeleteVolume(volume.Name)
@@ -114,7 +122,7 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	}
 
 	vlm := lifecycle.NewVolumeLifecycleManager(volReg, poolRegistry, volume)
-	err = vlm.ProvisionBricks(pool)
+	err = vlm.ProvisionBricks(*pool)
 	if err != nil {
 		volReg.DeleteVolume(volume.Name)
 		volReg.DeleteJob(job.Name)
