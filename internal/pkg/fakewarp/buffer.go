@@ -74,7 +74,29 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 		if summary.PerJobBuffer.BufferType == scratch && summary.Swap != nil {
 			perJobVolume.AttachAsSwapBytes = uint(summary.Swap.SizeBytes)
 		}
-		// TODO data in and data out, maybe do this later anyways?
+		// TODO that can be many data_in and data_out, we only allow one relating to striped job buffer
+		if summary.DataIn.Source != "" {
+			// TODO check destination includes striped buffer path?
+			perJobVolume.StageIn.Source = summary.DataIn.Source
+			perJobVolume.StageIn.Destination = summary.DataIn.Destination
+			switch summary.DataIn.StageType {
+			case file:
+				perJobVolume.StageIn.SourceType = registry.File
+			case directory:
+				perJobVolume.StageIn.SourceType = registry.Directory
+			}
+		}
+		if summary.DataOut.Source != "" {
+			// TODO check source includes striped buffer path?
+			perJobVolume.StageOut.Source = summary.DataIn.Source
+			perJobVolume.StageOut.Destination = summary.DataIn.Destination
+			switch summary.DataIn.StageType {
+			case file:
+				perJobVolume.StageIn.SourceType = registry.File
+			case directory:
+				perJobVolume.StageIn.SourceType = registry.Directory
+			}
+		}
 		err := volumeRegistry.AddVolume(perJobVolume)
 		if err != nil {
 			return err

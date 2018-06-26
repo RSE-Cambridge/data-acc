@@ -126,6 +126,7 @@ type Volume struct {
 	// Note: assumes the same path is cached for all attachments
 	AttachPrivateCache []string
 
+	// TODO: maybe data copy should be a slice associated with the job?
 	// Request certain files to be staged in
 	// Not currently allowed for multi job volumes
 	StageIn DataCopyRequest
@@ -142,6 +143,7 @@ type Volume struct {
 	// The paths handed to a job come from aggregating the paths
 	// used by all volumes
 	// TODO: should split into Name/Value pairs, or use a map?
+	// TODO: should be attached to the job?
 	Paths []string
 
 	//
