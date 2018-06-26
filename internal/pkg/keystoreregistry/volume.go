@@ -103,7 +103,21 @@ func (volRegistry *volumeRegistry) DeleteJob(jobName string) error {
 }
 
 func (volRegistry *volumeRegistry) JobAttachHosts(jobName string, hosts []string) error {
-	panic("TODO")
+	keyValue, err := volRegistry.keystore.Get(getJobKey(jobName))
+	if err != nil {
+		return err
+	}
+	var job registry.Job
+	err = json.Unmarshal(bytes.NewBufferString(keyValue.Value).Bytes(), &job)
+	if err != nil {
+		return err
+	}
+
+	// TODO validate hostnames?
+	job.AttachHosts = hosts
+	keyValue.Value = toJson(job)
+
+	return volRegistry.keystore.Update([]KeyValueVersion{keyValue})
 }
 
 func (volRegistry *volumeRegistry) UpdateConfiguration(name registry.VolumeName, configurations []registry.Configuration) error {

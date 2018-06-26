@@ -77,8 +77,9 @@ func TestFakewarpActions_PreRun(t *testing.T) {
 	})
 	mockVolReg.EXPECT().Job("token").DoAndReturn(
 		func(name string) (registry.Job, error) {
-			return registry.Job{JobVolume: registry.VolumeName("token")}, nil
+			return registry.Job{Name: "token", JobVolume: registry.VolumeName("token")}, nil
 		})
+	mockVolReg.EXPECT().JobAttachHosts("token", []string{"host1", "host2"})
 	mockVolReg.EXPECT().Volume(registry.VolumeName("token"))
 
 	err := actions.PreRun(mockCtxt)

@@ -223,7 +223,10 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 	}
 
 	// TODO: update the job with the list of hosts
-	job.AttachHosts = hosts
+	err = fwa.volumeRegistry.JobAttachHosts(job.Name, hosts)
+	if err != nil {
+		return err
+	}
 
 	// TODO: really we should mount all the volumes!
 	if job.JobVolume == "" {
@@ -236,8 +239,9 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		return err
 	}
 
+	// TODO: should we not pass the job here?
 	vlm := fwa.getVolumeLifecycleManger(volume)
-	return vlm.Mount(job.AttachHosts)
+	return vlm.Mount(hosts)
 }
 
 func (fwa *fakewarpActions) PostRun(c CliContext) error {
