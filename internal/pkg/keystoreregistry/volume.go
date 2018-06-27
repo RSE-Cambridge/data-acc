@@ -8,6 +8,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"sync"
 	"time"
+	"errors"
 )
 
 func NewVolumeRegistry(keystore Keystore) registry.VolumeRegistry {
@@ -124,8 +125,12 @@ func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeN
 	attachments map[string]registry.Attachment) error {
 
 	update := func(volume *registry.Volume) error {
-		for key, value := range attachments {
-			volume.Attachments[key] = value
+		if volume.Attachments == nil {
+			volume.Attachments = attachments
+		} else {
+			for key, value := range attachments {
+				volume.Attachments[key] = value
+			}
 		}
 		return nil
 	}
@@ -135,6 +140,9 @@ func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeN
 func (volRegistry *volumeRegistry) RemoveVolumeAttachments(name registry.VolumeName, attachments []registry.Attachment) error {
 	update := func(volume *registry.Volume) error {
 		for _, attachment := range attachments {
+			if volume.Attachments == nil {
+				return errors.New("no attachments present")
+			}
 			current, ok := volume.Attachments[attachment.Hostname]
 			if ok {
 				if current.DetachRequested {
