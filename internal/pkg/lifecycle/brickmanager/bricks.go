@@ -54,9 +54,41 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 					// Ignore the state changes we triggered
 					log.Println(". ingore volume:", volume.Name, "state move:", old.State, "->", new.State)
 				}
+				return
 			}
+
+			if len(old.Attachments) != len(new.Attachments) {
+				attachRequested := make(map[string]registry.Attachment)
+				for key, new := range new.Attachments {
+					isMissing := false
+					if old.Attachments == nil {
+						isMissing = true
+					} else {
+						_, ok := old.Attachments[key]
+						isMissing = !ok
+					}
+					if isMissing {
+						attachRequested[key] = new
+					}
+				}
+				if len(attachRequested) > 0 {
+					log.Println("ATTACH to:", volume.Name, " requested for:", attachRequested)
+				}
+			} else {
+				if new.Attachments != nil && old.Attachments != nil {
+					detachRequested := make(map[string]registry.Attachment)
+					for key, new := range new.Attachments {
+						if new.DetachRequested && !old.Attachments[key].DetachRequested {
+							detachRequested[key] = new
+						}
+					}
+					if len(detachRequested) > 0 {
+						log.Println("DETACH to:", volume.Name, " requested for:", detachRequested)
+					}
+				}
+			}
+
 			// TODO spot data in or data out requested
-			// TODO spot attachments added or removed
 		}
 	})
 
