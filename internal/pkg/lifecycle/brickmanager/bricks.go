@@ -19,7 +19,7 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 			}
 			if old.AllocatedVolume != "" {
 				if new.DeallocateRequested && !old.DeallocateRequested {
-					log.Printf("requested clean of: %d:%s", new.AllocatedIndex, new.Device)
+					log.Printf("Requested clean of brick: %d:%s", new.AllocatedIndex, new.Device)
 				}
 			}
 		})
@@ -31,7 +31,8 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 		log.Printf("Could not file volume: %s because: %s\n", new.AllocatedVolume, err)
 		return
 	}
-	log.Println("Found new volume to watch:", volume.Name, "curent state is:", volume.State)
+	log.Println("Found new volume to watch:", volume.Name)
+	log.Println(volume)
 
 	// TODO: watch from version associated with above volume to avoid any missed events
 	// TODO: leaking goroutines here, should cancel the watch when volume is deleted
@@ -50,9 +51,12 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 				case registry.DeleteRequested:
 					processDelete(volumeRegistry, *new)
 				default:
-					log.Println("Ingore volume:", volume.Name, "move to state:", volume.State)
+					// Ignore the state changes we triggered
+					log.Println(". ingore volume:", volume.Name, "state move:", old.State, "->", new.State)
 				}
 			}
+			// TODO spot data in or data out requested
+			// TODO spot attachments added or removed
 		}
 	})
 

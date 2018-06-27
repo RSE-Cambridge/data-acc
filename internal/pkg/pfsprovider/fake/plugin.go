@@ -23,22 +23,26 @@ func (*plugin) VolumeProvider() pfsprovider.VolumeProvider {
 type volumeProvider struct{}
 
 func (*volumeProvider) SetupVolume(volume registry.Volume) error {
-	log.Println("FAKE SetupVolume for:", volume)
+	log.Println("FAKE SetupVolume for:", volume.Name)
+	log.Println(volume)
 	return nil
 }
 
 func (*volumeProvider) TeardownVolume(volume registry.Volume) error {
-	log.Println("FAKE TeardownVolume for:", volume)
+	log.Println("FAKE TeardownVolume for:", volume.Name)
+	log.Println(volume)
 	return nil
 }
 
 func (*volumeProvider) CopyDataIn(volume registry.Volume) error {
-	log.Println("FAKE CopyDataIn for:", volume.Name, "with details:", volume.StageIn)
+	log.Println("FAKE CopyDataIn for:", volume.Name)
+	log.Println(volume.StageIn)
 	return nil
 }
 
 func (*volumeProvider) CopyDataOut(volume registry.Volume) error {
-	log.Println("FAKE CopyDataOut for:", volume.Name, "with details:", volume.StageOut)
+	log.Println("FAKE CopyDataOut for:", volume.Name)
+	log.Println(volume.StageOut)
 	return nil
 }
 

@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"sync"
 	"time"
-	"errors"
 )
 
 func NewVolumeRegistry(keystore Keystore) registry.VolumeRegistry {
