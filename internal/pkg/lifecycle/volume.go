@@ -158,12 +158,20 @@ func (vlm *volumeLifecycleManager) DataIn() error {
 
 func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 	if vlm.volume.SizeBricks == 0 {
-		log.Println("skipping prerun for:", vlm.volume.Name)
+		log.Println("skipping mount for:", vlm.volume.Name) // TODO: should never happen now?
 		return nil
 	}
 
-	// TODO... update volume attachments!!
+	if vlm.volume.Attachments != nil {
+		return fmt.Errorf("per job volume already attached")
+	}
+	attachments := make(map[string]registry.Attachment)
+	for _, host := range hosts {
+		attachments[host] = registry.Attachment{Hostname: host}
+	}
+	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, attachments)
 
+	// TODO... should move to watching attachment state
 	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.MountRequested)
 	if err != nil {
 		return err

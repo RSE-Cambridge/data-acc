@@ -223,21 +223,12 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 	}
 
 	if job.JobVolume == "" {
-		log.Print("No volume to mount")
+		log.Print("No job volume to mount")
 	} else {
 		volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
 		if err != nil {
 			return err
 		}
-
-		if volume.Attachments != nil {
-			return fmt.Errorf("per job volume already attached")
-		}
-		attachments := make(map[string]registry.Attachment)
-		for _, host := range hosts {
-			attachments[host] = registry.Attachment{Hostname: host}
-		}
-		fwa.volumeRegistry.UpdateVolumeAttachments(job.JobVolume, attachments)
 
 		vlm := fwa.getVolumeLifecycleManger(volume)
 		if err := vlm.Mount(hosts); err != nil { // TODO: why pass the hosts down here?
@@ -245,7 +236,15 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		}
 	}
 
-	// TODO update attachments for multijob volumes
+	for _, volumeName := range job.MultiJobVolumes {
+		volume, err := fwa.volumeRegistry.Volume(volumeName)
+		if err != nil {
+			return err
+		}
+		log.Println("TODO: mount:", volume)
+		// TODO call vlm to update attachments for multijob volumes
+	}
+
 	return nil
 }
 

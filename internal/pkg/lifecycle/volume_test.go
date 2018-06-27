@@ -20,6 +20,11 @@ func TestVolumeLifecycleManager_Mount(t *testing.T) {
 	mockVolReg.EXPECT().UpdateState(volume.Name, registry.MountRequested)
 	mockVolReg.EXPECT().WaitForState(volume.Name, registry.MountComplete)
 
+	mockVolReg.EXPECT().UpdateVolumeAttachments(volume.Name, map[string]registry.Attachment{
+		"host1": {Hostname: "host1"},
+		"host2": {Hostname: "host2"},
+	})
+
 	err := vlm.Mount(hosts)
 	assert.Nil(t, err)
 }

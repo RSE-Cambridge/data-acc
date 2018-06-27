@@ -7,7 +7,6 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"strings"
 	"testing"
 	"time"
 )
@@ -87,17 +86,21 @@ func TestFakewarpActions_PreRun(t *testing.T) {
 	})
 	mockVolReg.EXPECT().Job("token").DoAndReturn(
 		func(name string) (registry.Job, error) {
-			return registry.Job{Name: "token", JobVolume: registry.VolumeName("token")}, nil
+			return registry.Job{
+				Name:            "token",
+				JobVolume:       registry.VolumeName("token"),
+				MultiJobVolumes: []registry.VolumeName{registry.VolumeName("othervolume")},
+			}, nil
 		})
 	mockVolReg.EXPECT().JobAttachHosts("token", []string{"host1", "host2"})
 	mockVolReg.EXPECT().Volume(registry.VolumeName("token"))
-	mockVolReg.EXPECT().UpdateVolumeAttachments(registry.VolumeName("token"), map[string]registry.Attachment{
-		"host1": {Hostname: "host1"},
-		"host2": {Hostname: "host2"},
-	})
+	mockVolReg.EXPECT().Volume(registry.VolumeName("othervolume")).DoAndReturn(
+		func(name registry.VolumeName) (registry.Volume, error) {
+			return registry.Volume{Name: name}, nil
+		})
 
 	err := actions.PreRun(mockCtxt)
-	assert.EqualValues(t, "host1,host2", err.Error())
+	assert.Nil(t, err)
 }
 
 func TestFakewarpActions_Paths(t *testing.T) {
@@ -194,7 +197,7 @@ func (*mockVLM) DataIn() error {
 }
 
 func (*mockVLM) Mount(hosts []string) error {
-	return errors.New(strings.Join(hosts, ","))
+	return nil
 }
 
 func (*mockVLM) Unmount() error {
