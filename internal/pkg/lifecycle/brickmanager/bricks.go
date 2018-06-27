@@ -54,10 +54,9 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 					// Ignore the state changes we triggered
 					log.Println(". ingore volume:", volume.Name, "state move:", old.State, "->", new.State)
 				}
-				return
 			}
 
-			if len(old.Attachments) != len(new.Attachments) {
+			if len(new.Attachments) > len(old.Attachments) {
 				attachRequested := make(map[string]registry.Attachment)
 				for key, new := range new.Attachments {
 					isMissing := false
@@ -72,20 +71,21 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 					}
 				}
 				if len(attachRequested) > 0 {
-					log.Println("ATTACH of:", volume.Name, " requested for:", attachRequested)
+					processAttach(volumeRegistry, *new, attachRequested)
 				}
-			} else {
-				if new.Attachments != nil && old.Attachments != nil {
-					detachRequested := make(map[string]registry.Attachment)
-					for key, new := range new.Attachments {
-						if new.DetachRequested && !old.Attachments[key].DetachRequested {
-							detachRequested[key] = new
-						}
-					}
-					if len(detachRequested) > 0 {
-						log.Println("DETACH of:", volume.Name, " requested for:", detachRequested)
+			}
+
+			if len(new.Attachments) == len(old.Attachments) && new.Attachments != nil && old.Attachments != nil {
+				detachRequested := make(map[string]registry.Attachment)
+				for key, new := range new.Attachments {
+					if new.DetachRequested && !old.Attachments[key].DetachRequested {
+						detachRequested[key] = new
 					}
 				}
+				if len(detachRequested) > 0 {
+					processDetach(volumeRegistry, *new, detachRequested)
+				}
+
 			}
 
 			// TODO spot data in or data out requested
@@ -160,6 +160,44 @@ func processUnmount(volumeRegistry registry.VolumeRegistry, volume registry.Volu
 
 	err = volumeRegistry.UpdateState(volume.Name, registry.UnmountComplete)
 	handleError(volumeRegistry, volume, err)
+}
+
+func processAttach(volumeRegistry registry.VolumeRegistry, volume registry.Volume,
+	attachments map[string]registry.Attachment) {
+
+	err := plugin.Mounter().Mount(volume)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+		return
+	}
+
+	updates := make(map[string]registry.Attachment)
+	for key, attachment := range attachments {
+		attachment.Attached = true
+		updates[key] = attachment
+	}
+
+	log.Println("ATTACH of:", volume.Name, " requested for:", attachments)
+	// TODO: add back once we wait for this update, currently causes a race
+	// volumeRegistry.UpdateVolumeAttachments(volume.Name, updates)
+}
+
+func processDetach(volumeRegistry registry.VolumeRegistry, volume registry.Volume,
+	attachments map[string]registry.Attachment) {
+
+	err := plugin.Mounter().Unmount(volume)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+	}
+
+	var removeList []registry.Attachment
+	for _, attachment := range attachments {
+		removeList = append(removeList, attachment)
+	}
+
+	log.Println("DETACH of:", volume.Name, " requested for:", attachments)
+	// TODO: add back once we wait for this update, currently causes a race
+	// volumeRegistry.RemoveVolumeAttachments(volume.Name, removeList)
 }
 
 func processDataOut(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {

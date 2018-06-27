@@ -171,11 +171,12 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 	}
 	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, attachments)
 
-	// TODO... should move to watching attachment state
+	// TODO: remove when above triggers attachment updates
 	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.MountRequested)
 	if err != nil {
 		return err
 	}
+	// TODO: wait on attachment updates
 	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.MountComplete)
 }
 
@@ -193,10 +194,12 @@ func (vlm *volumeLifecycleManager) Unmount() error {
 	}
 	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, updates)
 
+	// TODO: remove when above triggers attachment updates
 	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.UnmountRequested)
 	if err != nil {
 		return err
 	}
+	// TODO: wait on attachment updates
 	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.UnmountComplete)
 }
 

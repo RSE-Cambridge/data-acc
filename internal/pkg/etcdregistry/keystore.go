@@ -69,7 +69,8 @@ func (client *etcKeystore) runTransaction(ifOps []clientv3.Cmp, thenOps []client
 	handleError(err)
 
 	if !response.Succeeded {
-		return fmt.Errorf("unable to add all the key values")
+		log.Println(ifOps)
+		return fmt.Errorf("transaction failed, as condition not met")
 	}
 	return nil
 }
