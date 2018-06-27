@@ -72,7 +72,7 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 					}
 				}
 				if len(attachRequested) > 0 {
-					log.Println("ATTACH to:", volume.Name, " requested for:", attachRequested)
+					log.Println("ATTACH of:", volume.Name, " requested for:", attachRequested)
 				}
 			} else {
 				if new.Attachments != nil && old.Attachments != nil {
@@ -83,7 +83,7 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 						}
 					}
 					if len(detachRequested) > 0 {
-						log.Println("DETACH to:", volume.Name, " requested for:", detachRequested)
+						log.Println("DETACH of:", volume.Name, " requested for:", detachRequested)
 					}
 				}
 			}

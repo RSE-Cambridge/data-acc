@@ -185,6 +185,14 @@ func (vlm *volumeLifecycleManager) Unmount() error {
 		return nil
 	}
 
+	// TODO pass in specific hosts to detach, from job...
+	updates := make(map[string]registry.Attachment)
+	for host, attachment := range vlm.volume.Attachments {
+		attachment.DetachRequested = true
+		updates[host] = attachment
+	}
+	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, updates)
+
 	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.UnmountRequested)
 	if err != nil {
 		return err
