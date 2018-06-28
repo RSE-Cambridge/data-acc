@@ -24,6 +24,7 @@ func TestVolumeLifecycleManager_Mount(t *testing.T) {
 		"host1": {Hostname: "host1"},
 		"host2": {Hostname: "host2"},
 	})
+	mockVolReg.EXPECT().WaitForCondition(volume.Name, gomock.Any())
 
 	err := vlm.Mount(hosts)
 	assert.Nil(t, err)

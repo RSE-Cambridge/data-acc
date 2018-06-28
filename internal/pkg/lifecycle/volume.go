@@ -12,7 +12,7 @@ type VolumeLifecycleManager interface {
 	ProvisionBricks(pool registry.Pool) error
 	DataIn() error
 	Mount(hosts []string) error
-	Unmount() error
+	Unmount(hosts []string) error
 	DataOut() error
 	Delete() error // TODO allow context for timeout and cancel?
 }
@@ -176,19 +176,37 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 	if err != nil {
 		return err
 	}
+
 	// TODO: wait on attachment updates
-	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.MountComplete)
+	err = vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.MountComplete)
+	if err != nil {
+		return err
+	}
+
+	return vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
+		allAttached := false
+		for _, host := range hosts {
+			attachment, ok := new.Attachments[host]
+			if ok && attachment.Attached {
+				allAttached = true
+			} else {
+				allAttached = false
+				break
+			}
+		}
+		return allAttached
+	})
 }
 
-func (vlm *volumeLifecycleManager) Unmount() error {
+func (vlm *volumeLifecycleManager) Unmount(hosts []string) error {
 	if vlm.volume.SizeBricks == 0 {
 		log.Println("skipping postrun for:", vlm.volume.Name) // TODO return error type and handle outside?
 		return nil
 	}
 
-	// TODO pass in specific hosts to detach, from job...
 	updates := make(map[string]registry.Attachment)
-	for host, attachment := range vlm.volume.Attachments {
+	for _, host := range hosts {
+		attachment := vlm.volume.Attachments[host]
 		attachment.DetachRequested = true
 		updates[host] = attachment
 	}
@@ -199,8 +217,24 @@ func (vlm *volumeLifecycleManager) Unmount() error {
 	if err != nil {
 		return err
 	}
-	// TODO: wait on attachment updates
-	return vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.UnmountComplete)
+
+	if err = vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.UnmountComplete); err != nil {
+		return err
+	}
+
+	return vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
+		allDettached := false
+		for _, host := range hosts {
+			attachment, ok := new.Attachments[host]
+			if ok && attachment.DetachComplete {
+				allDettached = true
+			} else {
+				allDettached = false
+				break
+			}
+		}
+		return allDettached
+	})
 }
 
 func (vlm *volumeLifecycleManager) DataOut() error {

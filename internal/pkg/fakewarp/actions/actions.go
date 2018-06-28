@@ -259,19 +259,29 @@ func (fwa *fakewarpActions) PostRun(c CliContext) error {
 	}
 
 	if job.JobVolume == "" {
-		log.Print("No post run required")
-		return nil
+		log.Print("No job volume to unmount")
+	} else {
+		volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
+		if err != nil {
+			return err
+		}
+
+		vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
+		if err := vlm.Unmount(job.AttachHosts); err != nil {
+			return err
+		}
 	}
 
-	volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
-	if err != nil {
-		return err
+	for _, volumeName := range job.MultiJobVolumes {
+		volume, err := fwa.volumeRegistry.Volume(volumeName)
+		if err != nil {
+			return err
+		}
+		log.Println("TODO: unmount:", volume)
+		// TODO call vlm to update attachments for multijob volumes
 	}
 
-	// TODO update attachments for all job.AttachHosts
-
-	vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
-	return vlm.Unmount()
+	return nil
 }
 
 func (fwa *fakewarpActions) DataOut(c CliContext) error {

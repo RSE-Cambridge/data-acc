@@ -177,9 +177,7 @@ func processAttach(volumeRegistry registry.VolumeRegistry, volume registry.Volum
 		updates[key] = attachment
 	}
 
-	log.Println("ATTACH of:", volume.Name, " requested for:", attachments)
-	// TODO: add back once we wait for this update, currently causes a race
-	// volumeRegistry.UpdateVolumeAttachments(volume.Name, updates)
+	volumeRegistry.UpdateVolumeAttachments(volume.Name, updates)
 }
 
 func processDetach(volumeRegistry registry.VolumeRegistry, volume registry.Volume,
@@ -190,14 +188,13 @@ func processDetach(volumeRegistry registry.VolumeRegistry, volume registry.Volum
 		handleError(volumeRegistry, volume, err)
 	}
 
-	var removeList []registry.Attachment
-	for _, attachment := range attachments {
-		removeList = append(removeList, attachment)
+	updates := make(map[string]registry.Attachment)
+	for key, attachment := range attachments {
+		attachment.DetachComplete = true
+		updates[key] = attachment
 	}
 
-	log.Println("DETACH of:", volume.Name, " requested for:", attachments)
-	// TODO: add back once we wait for this update, currently causes a race
-	// volumeRegistry.RemoveVolumeAttachments(volume.Name, removeList)
+	volumeRegistry.UpdateVolumeAttachments(volume.Name, updates)
 }
 
 func processDataOut(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {

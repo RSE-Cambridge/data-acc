@@ -200,7 +200,7 @@ func (*mockVLM) Mount(hosts []string) error {
 	return nil
 }
 
-func (*mockVLM) Unmount() error {
+func (*mockVLM) Unmount(hosts []string) error {
 	panic("implement me")
 }
 

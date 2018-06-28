@@ -250,12 +250,20 @@ func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
 }
 
 func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, state registry.VolumeState) error {
+	return volRegistry.WaitForCondition(volumeName, func(old *registry.Volume, new *registry.Volume) bool {
+		return new.State == state
+	})
+}
+
+func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeName,
+	condition func(old *registry.Volume, new *registry.Volume) bool) error {
+
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(1)
 	ctxt, cancelFunc := context.WithTimeout(context.Background(), time.Minute)
-	// TODO do we always need to call cancel?
+	// TODO should we always need to call cancel? or is timeout enough?
 
-	err := fmt.Errorf("error waiting for volume %s to be state %s", volumeName, state)
+	err := fmt.Errorf("error waiting for volume %s to meet supplied condition", volumeName)
 
 	volRegistry.keystore.WatchKey(ctxt, getVolumeKey(string(volumeName)),
 		func(old *KeyValueVersion, new *KeyValueVersion) {
@@ -268,16 +276,23 @@ func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, 
 				volumeFromKeyValue(*new, newVolume)
 			}
 
-			if oldVolume.State != newVolume.State {
-				if newVolume.State == state {
-					err = nil
-					cancelFunc()
-					waitGroup.Done()
-				}
+			if condition(oldVolume, newVolume) {
+				err = nil
+				cancelFunc()
+				waitGroup.Done()
 			}
 		})
 
-	// TODO... check we are not already in the correct (or impossible) state, to make sure we don't race?
+	// check we have not already hit the condition
+	volume, err := volRegistry.Volume(volumeName)
+	if err != nil {
+		// NOTE this forces the volume to existing before you wait, seems OK
+		return err
+	}
+	if condition(&volume, &volume) {
+		cancelFunc()
+		return nil
+	}
 
 	waitGroup.Wait()
 	return err

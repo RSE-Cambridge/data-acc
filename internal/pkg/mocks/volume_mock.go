@@ -193,6 +193,18 @@ func (mr *MockVolumeRegistryMockRecorder) WaitForState(name, state interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitForState", reflect.TypeOf((*MockVolumeRegistry)(nil).WaitForState), name, state)
 }
 
+// WaitForCondition mocks base method
+func (m *MockVolumeRegistry) WaitForCondition(volumeName registry.VolumeName, condition func(*registry.Volume, *registry.Volume) bool) error {
+	ret := m.ctrl.Call(m, "WaitForCondition", volumeName, condition)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// WaitForCondition indicates an expected call of WaitForCondition
+func (mr *MockVolumeRegistryMockRecorder) WaitForCondition(volumeName, condition interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitForCondition", reflect.TypeOf((*MockVolumeRegistry)(nil).WaitForCondition), volumeName, condition)
+}
+
 // WatchVolumeChanges mocks base method
 func (m *MockVolumeRegistry) WatchVolumeChanges(volumeName string, callback func(*registry.Volume, *registry.Volume)) error {
 	ret := m.ctrl.Call(m, "WatchVolumeChanges", volumeName, callback)

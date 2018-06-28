@@ -50,6 +50,10 @@ type VolumeRegistry interface {
 	// Wait for a specific state, error returned if not possible
 	WaitForState(name VolumeName, state VolumeState) error
 
+	// Wait for a given condition
+	// TODO: remove wait for state?
+	WaitForCondition(volumeName VolumeName, condition func(old *Volume, new *Volume) bool) error
+
 	// Get all callback on all volume changes
 	// If the volume is new, old = nil
 	// used by the primary brick to get volume updates
@@ -301,6 +305,9 @@ type Attachment struct {
 	// Report if the detach was requested
 	// Attachment is removed once detach is complete
 	DetachRequested bool
+
+	// TODO: move to attachment state?
+	DetachComplete bool
 
 	// If any error happened, it is reported here
 	Error error
