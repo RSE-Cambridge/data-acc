@@ -159,10 +159,6 @@ const (
 	BricksProvisioned // setup waits for this, updated by host manager, paths should be setup, or gone to ERROR
 	DataInRequested
 	DataInComplete // data_in waits for host manager to data in, or gone to ERROR
-	MountRequested
-	MountComplete // compute nodes all mounted, or gone to ERROR
-	UnmountRequested
-	UnmountComplete // compute nodes all unmounted, or gone to ERROR
 	DataOutRequested
 	DataOutComplete             // data copied out by host manager, or gone to ERROR
 	DeleteRequested VolumeState = 399
@@ -176,10 +172,6 @@ var volumeStateStrings = map[VolumeState]string{
 	BricksProvisioned: "BricksProvisioned",
 	DataInRequested:   "DataInRequested",
 	DataInComplete:    "DataInComplete",
-	MountRequested:    "MountRequested",
-	MountComplete:     "MountComplete",
-	UnmountRequested:  "UnmountRequested",
-	UnmountComplete:   "UnmountComplete",
 	DataOutRequested:  "DataOutRequested",
 	DataOutComplete:   "DataOutComplete",
 	DeleteRequested:   "DeleteRequested",
@@ -192,10 +184,6 @@ var stringToVolumeState = map[string]VolumeState{
 	"BricksProvisioned": BricksProvisioned,
 	"DataInRequested":   DataInRequested,
 	"DataInComplete":    DataInComplete,
-	"MountRequested":    MountRequested,
-	"MountComplete":     MountComplete,
-	"UnmountRequested":  UnmountRequested,
-	"UnmountComplete":   UnmountComplete,
 	"DataOutRequested":  DataOutRequested,
 	"DataOutComplete":   DataOutComplete,
 	"DeleteRequested":   DeleteRequested,

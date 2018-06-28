@@ -171,18 +171,6 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 	}
 	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, attachments)
 
-	// TODO: remove when above triggers attachment updates
-	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.MountRequested)
-	if err != nil {
-		return err
-	}
-
-	// TODO: wait on attachment updates
-	err = vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.MountComplete)
-	if err != nil {
-		return err
-	}
-
 	return vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
 		allAttached := false
 		for _, host := range hosts {
@@ -211,16 +199,6 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string) error {
 		updates[host] = attachment
 	}
 	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, updates)
-
-	// TODO: remove when above triggers attachment updates
-	err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.UnmountRequested)
-	if err != nil {
-		return err
-	}
-
-	if err = vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.UnmountComplete); err != nil {
-		return err
-	}
 
 	return vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
 		allDettached := false

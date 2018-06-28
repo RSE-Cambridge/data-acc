@@ -42,10 +42,6 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 				switch new.State {
 				case registry.DataInRequested:
 					processDataIn(volumeRegistry, *new)
-				case registry.MountRequested:
-					processMount(volumeRegistry, *new)
-				case registry.UnmountRequested:
-					processUnmount(volumeRegistry, *new)
 				case registry.DataOutRequested:
 					processDataOut(volumeRegistry, *new)
 				case registry.DeleteRequested:
@@ -133,32 +129,6 @@ func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volum
 	}
 
 	err = volumeRegistry.UpdateState(volume.Name, registry.DataInComplete)
-	handleError(volumeRegistry, volume, err)
-}
-
-// TODO: well this doesn't work for jobs that have no new bicks, i.e. just attach to persistent buffers
-func processMount(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	err := plugin.Mounter().Mount(volume)
-	if err != nil {
-		handleError(volumeRegistry, volume, err)
-		return
-	}
-
-	// TODO update volume.Attachments?
-
-	err = volumeRegistry.UpdateState(volume.Name, registry.MountComplete)
-	handleError(volumeRegistry, volume, err)
-}
-
-func processUnmount(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	err := plugin.Mounter().Unmount(volume)
-	if err != nil {
-		handleError(volumeRegistry, volume, err)
-	}
-
-	// TODO update volume.Attachments?
-
-	err = volumeRegistry.UpdateState(volume.Name, registry.UnmountComplete)
 	handleError(volumeRegistry, volume, err)
 }
 

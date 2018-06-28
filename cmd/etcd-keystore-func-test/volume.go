@@ -62,7 +62,7 @@ func testVolumeCRUD(volRegistry registry.VolumeRegistry) {
 	if err := volRegistry.UpdateState(volume.Name, registry.BricksProvisioned); err == nil {
 		log.Fatal("expected error with repeated update")
 	}
-	if err := volRegistry.UpdateState(volume.Name, registry.MountRequested); err == nil {
+	if err := volRegistry.UpdateState(volume.Name, registry.Unknown); err == nil {
 		log.Fatal("expected error with out of order update")
 	}
 	volRegistry.UpdateState(volume2.Name, registry.Registered)
