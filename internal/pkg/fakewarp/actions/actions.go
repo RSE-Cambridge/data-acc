@@ -229,7 +229,6 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		if err != nil {
 			return err
 		}
-
 		vlm := fwa.getVolumeLifecycleManger(volume)
 		if err := vlm.Mount(hosts); err != nil { // TODO: why pass the hosts down here?
 			return err
@@ -241,8 +240,10 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 		if err != nil {
 			return err
 		}
-		log.Println("TODO: mount:", volume)
-		// TODO call vlm to update attachments for multijob volumes
+		vlm := fwa.getVolumeLifecycleManger(volume)
+		if err := vlm.Mount(hosts); err != nil { // TODO: why pass the hosts down here?
+			return err
+		}
 	}
 
 	return nil
@@ -265,7 +266,6 @@ func (fwa *fakewarpActions) PostRun(c CliContext) error {
 		if err != nil {
 			return err
 		}
-
 		vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
 		if err := vlm.Unmount(job.AttachHosts); err != nil {
 			return err
@@ -277,8 +277,10 @@ func (fwa *fakewarpActions) PostRun(c CliContext) error {
 		if err != nil {
 			return err
 		}
-		log.Println("TODO: unmount:", volume)
-		// TODO call vlm to update attachments for multijob volumes
+		vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
+		if err := vlm.Unmount(job.AttachHosts); err != nil {
+			return err
+		}
 	}
 
 	return nil
