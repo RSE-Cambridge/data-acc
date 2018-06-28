@@ -44,9 +44,6 @@ type VolumeRegistry interface {
 	// if attachment doesn't exist, attachment is added
 	UpdateVolumeAttachments(name VolumeName, attachments map[string]Attachment) error
 
-	// Remove all specified attachments, error if missing
-	RemoveVolumeAttachments(name VolumeName, attachments []Attachment) error
-
 	// Wait for a specific state, error returned if not possible
 	WaitForState(name VolumeName, state VolumeState) error
 
@@ -242,17 +239,6 @@ const (
 type Attachment struct {
 	// Hostname and Volume name uniquely identify an attachment
 	Hostname string
-
-	// Report true when the mount has worked
-	// Add attachment with false to request the mount
-	Attached bool
-
-	// Report if the detach was requested
-	// Attachment is removed once detach is complete
-	DetachRequested bool
-
-	// TODO: move to attachment state?
-	DetachComplete bool
 
 	// TODO: delete three fields above
 	State AttachmentState

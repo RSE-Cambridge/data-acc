@@ -167,7 +167,7 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 	}
 	attachments := make(map[string]registry.Attachment)
 	for _, host := range hosts {
-		attachments[host] = registry.Attachment{Hostname: host}
+		attachments[host] = registry.Attachment{Hostname: host, State: registry.RequestAttach}
 	}
 	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, attachments)
 
@@ -175,7 +175,7 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 		allAttached := false
 		for _, host := range hosts {
 			attachment, ok := new.Attachments[host]
-			if ok && attachment.Attached {
+			if ok && attachment.State == registry.Attached {
 				allAttached = true
 			} else {
 				allAttached = false
@@ -195,7 +195,10 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string) error {
 	updates := make(map[string]registry.Attachment)
 	for _, host := range hosts {
 		attachment := vlm.volume.Attachments[host]
-		attachment.DetachRequested = true
+		if attachment.State != registry.Attached {
+			return fmt.Errorf("attachment must be attached to do unmount for volume: %s", vlm.volume.Name)
+		}
+		attachment.State = registry.RequestDetach
 		updates[host] = attachment
 	}
 	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, updates)
@@ -204,7 +207,7 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string) error {
 		allDettached := false
 		for _, host := range hosts {
 			attachment, ok := new.Attachments[host]
-			if ok && attachment.DetachComplete {
+			if ok && attachment.State == registry.Detached {
 				allDettached = true
 			} else {
 				allDettached = false

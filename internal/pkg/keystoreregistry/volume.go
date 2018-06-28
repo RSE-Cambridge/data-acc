@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"sync"
@@ -130,28 +129,6 @@ func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeN
 		} else {
 			for key, value := range attachments {
 				volume.Attachments[key] = value
-			}
-		}
-		return nil
-	}
-	return volRegistry.updateVolume(name, update)
-}
-
-func (volRegistry *volumeRegistry) RemoveVolumeAttachments(name registry.VolumeName, attachments []registry.Attachment) error {
-	update := func(volume *registry.Volume) error {
-		for _, attachment := range attachments {
-			if volume.Attachments == nil {
-				return errors.New("no attachments present")
-			}
-			current, ok := volume.Attachments[attachment.Hostname]
-			if ok {
-				if current.DetachRequested {
-					delete(volume.Attachments, attachment.Hostname)
-				} else {
-					return fmt.Errorf(
-						"unable to remove attachment as delete not requested for: %s volume %s",
-						current.Hostname, volume.Name)
-				}
 			}
 		}
 		return nil
