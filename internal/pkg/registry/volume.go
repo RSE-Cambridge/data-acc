@@ -224,49 +224,6 @@ func (volumeState *VolumeState) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// TODO: define constants
-type VolumeDriver string
-
-// TODO: delete
-type Configuration struct {
-	Name string
-	// Define if used as a transparent cache or
-	// if attached directly
-	Type ConfigurationType
-
-	// Size of the configuration
-	// 0 means unrestricted, could consume whole volume
-	// >0 means statically allocated space from volume
-	NamespaceSize uint
-
-	// If true all attachments share the same namespace,
-	// else each attachment gets a dedicated namespace
-	// Note: content of dedicated namespace deleted
-	// when attachment deleted
-	SharedNamespace bool
-
-	// All current attachments for this configuration
-	Attachments []Attachment
-
-	// Request certain files to be staged in and out
-	// Currently only supported when SharedNamespace=True
-	StageIn  DataCopyRequest
-	StageOut DataCopyRequest
-
-	// e.g. lustre + sparse file created for each attachment, etc..
-	Driver AttachmentDriver
-}
-
-type AttachmentDriver string
-
-type ConfigurationType string
-
-const (
-	Filesystem ConfigurationType = "filesystem"
-	Cache      ConfigurationType = "cache"
-	Swap       ConfigurationType = "swap"
-)
-
 type DataCopyRequest struct {
 	// Source points to a File or a Directory,
 	// or a file that contains a list of source and destinations,
