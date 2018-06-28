@@ -266,6 +266,58 @@ type Attachment struct {
 	// TODO: move to attachment state?
 	DetachComplete bool
 
+	// TODO: delete three fields above
+	State AttachmentState
+
 	// If any error happened, it is reported here
 	Error error
+}
+
+type AttachmentState int
+
+const (
+	UnknownAttachmentState AttachmentState = iota
+	RequestAttach
+	Attached
+	RequestDetach
+	Detached        AttachmentState = 400 // all bricks correctly deprovisioned unless host down or gone to ERROR
+	AttachmentError AttachmentState = 500
+)
+
+var attachStateStrings = map[AttachmentState]string{
+	UnknownAttachmentState: "",
+	RequestAttach:          "RequestAttach",
+	Attached:               "Attached",
+	RequestDetach:          "RequestDetach",
+	Detached:               "Detached",
+	AttachmentError:        "AttachmentError",
+}
+var stringToAttachmentState = map[string]AttachmentState{
+	"":                UnknownAttachmentState,
+	"RequestAttach":   RequestAttach,
+	"Attached":        Attached,
+	"RequestDetach":   RequestDetach,
+	"Detached":        Detached,
+	"AttachmentError": AttachmentError,
+}
+
+func (attachmentState AttachmentState) String() string {
+	return attachStateStrings[attachmentState]
+}
+
+func (attachmentState AttachmentState) MarshalJSON() ([]byte, error) {
+	buffer := bytes.NewBufferString(`"`)
+	buffer.WriteString(attachStateStrings[attachmentState])
+	buffer.WriteString(`"`)
+	return buffer.Bytes(), nil
+}
+
+func (attachmentState *AttachmentState) UnmarshalJSON(b []byte) error {
+	var str string
+	err := json.Unmarshal(b, &str)
+	if err != nil {
+		return err
+	}
+	*attachmentState = stringToAttachmentState[str]
+	return nil
 }
