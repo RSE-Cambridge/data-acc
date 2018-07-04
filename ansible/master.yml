@@ -15,12 +15,41 @@
   become: true
   tasks:
     - yum:
-        name: python,git
+        name: git
         state: latest
         update_cache: yes
     - git:
         repo: 'https://github.com/JohnGarbutt/data-acc.git'
         dest: ~/jmfg2/data-acc
+
+- hosts: swarm-manager[0]
+  tasks:
+    - name: determine swarm status
+      shell: >
+        docker info | egrep '^Swarm: ' | cut -d ' ' -f2
+      register: swarm_status
+    - name: initialize swarm cluster
+      shell: docker swarm init --advertise-addr={{ ansible_host }}:2377
+      when: "'active' not in swarm_status.stdout_lines"
+    - name: retrieve swarm worker token
+      shell: docker swarm join-token -q worker
+      register: swarm_worker_token
+
+- hosts: swarm-workers
+  vars:
+    token: "{{ hostvars[groups['swarm-manager'][0]]['swarm_worker_token']['stdout'] }}"
+  tasks:
+    - name: determine swarm status
+      shell: >
+        docker info | egrep '^Swarm: ' | cut -d ' ' -f2
+      register: swarm_status
+    - name: join worker to swarm
+      shell: docker swarm join --advertise-addr={{ ansible_host }}:2377 --token={{ token }} {{ groups['swarm_manager'][0] }}:2377
+      when: "'active' not in swarm_status.stdout_lines"
+
+- hosts: swarm-manager[0]
+  become: true
+  tasks:
     - docker_service:
         project_src: ~/jmfg2/data-acc/docker-slurm
       register: output

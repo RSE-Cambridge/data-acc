@@ -1,3 +1,5 @@
-[all]
-dac-e-23 ansible_user=root
+[swarm-manager]
 dac-e-24 ansible_user=root
+
+[swarm-workers]
+dac-e-23 ansible_user=root
