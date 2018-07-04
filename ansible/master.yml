@@ -15,11 +15,23 @@
   become: true
   tasks:
     - yum:
-        name: git
+        name: git,go
         state: present
+    - file:
+        path: ~/go/github.com/JohnGarbutt/
+        state: directory
     - git:
         repo: 'https://github.com/JohnGarbutt/data-acc.git'
-        dest: ~/jmfg2/data-acc
+        dest: ~/go/github.com/JohnGarbutt/data-acc
+    - name: install go dep
+      shell: go get -u github.com/golang/dep/cmd/dep
+      args:
+         creates: ~/go/bin/dep
+    - name: get dependencies
+      shell: ~/go/bin/dep ensure
+      args:
+        chdir: ~/go/github.com/JohnGarbutt/data-acc
+        creates: ~/go/github.com/JohnGarbutt/data-acc/vendor
 
 - hosts: swarm-manager[0]
   tasks:
