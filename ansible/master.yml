@@ -28,7 +28,7 @@
       args:
          creates: ~/go/bin/dep
     - name: get dependencies
-      shell: ~/go/bin/dep ensure
+      shell: GOPATH=~/go ~/go/bin/dep ensure
       args:
         chdir: ~/go/github.com/JohnGarbutt/data-acc
         creates: ~/go/github.com/JohnGarbutt/data-acc/vendor
