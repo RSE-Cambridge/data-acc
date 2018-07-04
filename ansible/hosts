@@ -1,0 +1,3 @@
+[all]
+dac-e-23 ansible_user=root
+dac-e-24 ansible_user=root

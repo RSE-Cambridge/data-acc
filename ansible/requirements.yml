@@ -1,0 +1,4 @@
+---
+- src: geerlingguy.docker
+- src: geerlingguy.pip
+- src: geerlingguy.repo-epel

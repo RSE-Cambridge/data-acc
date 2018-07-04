@@ -1,0 +1,28 @@
+---
+- hosts: all
+  become: true
+  vars:
+    pip_install_packages:
+      - name: docker
+      - name: docker-compose
+
+  roles:
+    - geerlingguy.repo-epel
+    - geerlingguy.pip
+    - geerlingguy.docker
+
+- hosts: all
+  become: true
+  tasks:
+    - yum:
+        name: python,git
+        state: latest
+        update_cache: yes
+    - git:
+        repo: 'https://github.com/JohnGarbutt/data-acc.git'
+        dest: ~/jmfg2/data-acc
+    - docker_service:
+        project_src: ~/jmfg2/data-acc/docker-slurm
+      register: output
+    - debug:
+        var: output
