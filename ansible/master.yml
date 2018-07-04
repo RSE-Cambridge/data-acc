@@ -16,8 +16,7 @@
   tasks:
     - yum:
         name: git
-        state: latest
-        update_cache: yes
+        state: present
     - git:
         repo: 'https://github.com/JohnGarbutt/data-acc.git'
         dest: ~/jmfg2/data-acc
@@ -29,7 +28,7 @@
         docker info | egrep '^Swarm: ' | cut -d ' ' -f2
       register: swarm_status
     - name: initialize swarm cluster
-      shell: docker swarm init --advertise-addr={{ ansible_host }}:2377
+      shell: docker swarm init --advertise-addr=em1:2377
       when: "'active' not in swarm_status.stdout_lines"
     - name: retrieve swarm worker token
       shell: docker swarm join-token -q worker
@@ -44,7 +43,7 @@
         docker info | egrep '^Swarm: ' | cut -d ' ' -f2
       register: swarm_status
     - name: join worker to swarm
-      shell: docker swarm join --advertise-addr={{ ansible_host }}:2377 --token={{ token }} {{ groups['swarm_manager'][0] }}:2377
+      shell: docker swarm join --advertise-addr=em1:2377 --token={{ token }} {{ groups['swarm-manager'][0] }}:2377
       when: "'active' not in swarm_status.stdout_lines"
 
 - hosts: swarm-manager[0]
