@@ -62,7 +62,7 @@
   become: true
   tasks:
     - docker_service:
-        project_src: ~/jmfg2/data-acc/docker-slurm
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/docker-slurm
       register: output
     - debug:
         var: output
