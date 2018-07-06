@@ -1,0 +1,26 @@
+---
+- name: load lustre module
+  command: modprobe -v lustre
+  tags: [ 'never', 'start_lustre']
+
+- name: mount MDT/MGS
+  command: mount -t lustre /dev/{{ item.name }} /lustre/{{ lustre.fsname }}/MGSDT/{{ item.name }}
+  with_items: "{{ mdts }}"
+  when:
+    - mdts is defined
+    - item.name is match(target|default(".*"))
+  tags: [ 'never', 'start_mgsdt', 'start_lustre']
+
+- name: mount OSTs
+  command: mount -t lustre /dev/{{ item.name }} /lustre/{{ lustre.fsname }}/OST{{ item.name }}
+  with_items: "{{ osts }}"
+  when:
+    - osts is defined
+    - item.name is match(target|default(".*"))
+  tags: [ 'never', 'start_osts', 'start_lustre']
+
+- name: umount all lustre
+  command: umount -a -t lustre
+  when:
+    - osts is defined
+  tags: [ 'never', 'stop_alllustre']

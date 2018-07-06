@@ -1,0 +1,80 @@
+---
+
+- name: make mgmtd dir
+  file:
+    path: /data/mgmtd
+    state: directory
+    recurse: yes
+  tags: [ 'never', 'create_mds']
+
+
+- name: BeeGFS mgmtd
+  command: /opt/beegfs/sbin/beegfs-setup-mgmtd -f -p /data/mgmtd
+  when:
+    - mgs is defined
+  tags: [ 'never', 'format_mgs']
+
+- name: BeeGFS mgmtd conf
+  lineinfile:
+    path: /etc/beegfs/beegfs-mgmtd.conf
+    regexp: '^storeMgmtdDirectory'
+    line: 'storeMgmtdDirectory=/data/mgmtd'
+
+- name: make mds tmpfs dir
+  file:
+    path: /data/mds/tmpfs
+    state: directory
+    recurse: yes
+  tags: [ 'never', 'create_mds']
+
+- name: make mds data dir
+  file:
+    path: /data/mds/data
+    state: directory
+    recurse: yes
+  tags: [ 'never', 'create_mds']
+
+- name: mount MDS tmpfs
+  mount:
+    name: /data/mds/tmpfs
+    src: tmpfs
+    fstype: tmpfs
+    opts: 'rw,size=2G'
+    state: mounted
+  when:
+    - mds is defined
+  tags: [ 'never', 'create_mds']
+
+
+- name: create mds data file
+  command: 'dd if=/dev/zero of=/data/mds/tmpfs/mds.dat bs=1M count=2048'
+  when:
+    - mds is defined
+  tags: [ 'never', 'create_mds']
+
+- name: loop mount mds data
+  command: losetup /dev/loop0 /data/mds/tmpfs/mds.dat
+  when:
+    - mds is defined
+  tags: [ 'never', 'create_mds']
+
+- name: Format mds loop file
+  command: mkfs.ext4 -i 2048 -I 512 -J size=400 -Odir_index,filetype /dev/loop0
+  when:
+    - mds is defined
+  tags: [ 'never', 'create_mds']
+
+- name: mount mds ramdisk
+  command: mount -onoatime,nodiratime,nobarrier,user_xattr /dev/loop0 /data/mds/data
+  when:
+    - mds is defined
+  tags: [ 'never', 'create_mds']
+
+
+- name: Beegfs Format MDS
+  command: /opt/beegfs/sbin/beegfs-setup-meta -f -p /data/mds/data -s {{ item.index }} -m {{ item.name }}
+  with_items: "{{ mds }}"
+  when:
+    - mds is defined
+    - item.name is match(target|default(".*"))
+  tags: [ 'never', 'format_mds']

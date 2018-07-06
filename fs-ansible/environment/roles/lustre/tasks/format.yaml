@@ -1,0 +1,42 @@
+---
+
+- name: Format MDT/MGS
+  command: /usr/sbin/mkfs.lustre --mgs --mdt --reformat --fsname={{ lustre.fsname }} --index={{ item.index }} --mgsnode={{ lustre.mgsnode }} /dev/{{ item.name}}
+  with_items: "{{ mdts }}"
+  when:
+    - mdts is defined
+    - item.name is match(target|default(".*"))
+  tags: [ 'never', 'format_mdtmgs']
+
+- name: Format OSTs
+  command: /usr/sbin/mkfs.lustre --ost --reformat --fsname={{ lustre.fsname }} --index={{ item.index }} --mgsnode={{ lustre.mgsnode }} /dev/{{ item.name}}
+  with_items: "{{ osts }}"
+  when:
+    - osts is defined
+    - item.name is match(target|default(".*"))
+  tags: [ 'never', 'format_osts']
+
+- name: MGSDT mount dir
+  file: 
+    path: /lustre/{{ lustre.fsname }}/MGSDT/{{ item.name }}
+    state: directory
+    recurse: yes
+  with_items: "{{ mdts }}"
+  when:
+    - mdts is defined
+    - item.name is match(target|default(".*"))
+  tags: [ 'never', 'format_mdtmgs']
+
+
+- name: OST mount dir
+  file: 
+    path: /lustre/{{ lustre.fsname }}/OST{{ item.name }}
+    state: directory
+    recurse: yes
+  with_items: "{{ osts }}"
+  when:
+    - osts is defined
+    - item.name is match(target|default(".*"))
+  tags: [ 'never', 'format_osts']
+
+

@@ -1,0 +1,7 @@
+---
+- name: set lnet module options
+  lineinfile:
+    path: /etc/modprobe.d/lnet.conf
+    regexp: '^options'
+    line: 'options lnet networks=o2ib1(ib0)'
+  tags: ['never', 'start_lustre']

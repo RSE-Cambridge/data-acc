@@ -1,0 +1,8 @@
+---
+
+- name: tuneBindToNumaZone
+  lineinfile:
+    path: /etc/beegfs/beegfs-storage.conf
+    regexp: '^tuneBindToNumaZone'
+    line: 'tuneBindToNumaZone=0'
+

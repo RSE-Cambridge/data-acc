@@ -1,0 +1,25 @@
+---
+osts:
+  - name: nvme1n1
+    index: 46
+  - name: nvme2n1
+    index: 47
+  - name: nvme3n1
+    index: 48
+  - name: nvme4n1
+    index: 49
+  - name: nvme5n1
+    index: 50
+#  - name: nvme6n1
+#    index: 6
+#  - name: nvme7n1
+#    index: 7
+#  - name: nvme8n1
+#    index: 8
+#  - name: nvme9n1
+#    index: 9
+#  - name: nvme10n1
+#    index: 10
+#  - name: nvme11n1
+#    index: 11
+

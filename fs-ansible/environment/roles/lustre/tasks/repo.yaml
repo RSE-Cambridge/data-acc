@@ -1,0 +1,24 @@
+---
+- name: enable lustre server repo
+  yum_repository:
+    name: lustre-server
+    description: "{{ lustre.servertype }}"
+    file: lustre-repo
+    baseurl: https://downloads.whamcloud.com/public/lustre/{{ lustre.release }}/el7/{{ lustre.servertype }}
+    gpgcheck: no
+
+- name: enable lustre client repo
+  yum_repository:
+    name: lustre-client
+    description: lustre-client
+    file: lustre-repo
+    baseurl: https://downloads.whamcloud.com/public/lustre/{{ lustre.release }}/el7/client
+    gpgcheck: no
+
+- name: enable lustre e2fs repo
+  yum_repository:
+    name: e2fsprogs-wc
+    description: e2fsprogs-wc
+    file: lustre-repo
+    baseurl: https://downloads.whamcloud.com/public/e2fsprogs/latest/el7
+    gpgcheck: no

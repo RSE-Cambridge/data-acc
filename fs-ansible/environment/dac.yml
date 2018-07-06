@@ -1,0 +1,87 @@
+---
+- name: config hfi
+  hosts: dac
+  gather_facts: no
+  tasks:
+    - name: hfi1
+      lineinfile:
+        path: /etc/modprobe.d/hfi1.conf
+        regexp: '^options'
+        line: 'options hfi1 krcvqs=8 pcie_caps=0x51 rcvhdrcnt=8192'
+
+- name: update ko2ib
+  hosts: dac
+  gather_facts: no
+  tasks:
+    - name: update ko2ibopa
+      lineinfile:
+        path: /etc/modprobe.d/ko2iblnd.conf
+        regexp: '^options ko2iblnd-opa'
+        line: 'options ko2iblnd-opa peer_credits=128 peer_credits_hiw=64 credits=1024 ntx=2048 map_on_demand=32 fmr_pool_size=2048 fmr_flush_trigger=512 fmr_cache=1 conns_per_peer=4'
+
+
+
+- name: Install Lustre
+  hosts: dac
+  gather_facts: no
+  roles:
+    - role: lustre
+
+- name: ib iface
+  hosts: dac
+  gather_facts: no
+  tasks:
+   - name: configure
+     blockinfile:
+       create: yes
+       state: present
+       path: /etc/sysconfig/network-scripts/ifcfg-{{ item.name }}
+       block: |
+          DEVICE={{ item.name }}
+          TYPE='InfiniBand'
+          BOOTPROTO=static
+          IPADDR={{ item.addr }}
+          BROADCAST=10.47.255.255
+          NETWORK=10.47.0.0
+          NETMASK=255.255.0.0
+          ONBOOT=yes
+          CONNECTED_MODE=yes
+          MTU=65520
+     with_items: "{{ ip }}"
+     when:
+       - ip is defined
+       - item.name is match(target|default(".*"))
+
+- name: config sys
+  hosts: dac
+  gather_facts: no
+  tasks:
+    - name: kernel params
+      blockinfile:
+        path: /etc/sysctl.conf
+        block: |
+          #kernel.msgmnb = 65536
+          #kernel.msgmax = 65536
+          #kernel.shmmax = 68719476736
+          #kernel.shmall = 4294967296
+          #vm.dirty_background_ratio = 5
+          #vm.dirty_ratio = 20
+          #vm.min_free_kbytes = 262144
+          net.ipv4.conf.all.rp_filter=0
+          net.ipv4.conf.ib0.arp_ignore=1
+          net.ipv4.conf.ib0.arp_filter=0
+          net.ipv4.conf.ib0.arp_announce=2
+          net.ipv4.conf.ib0.rp_filter=0
+          net.ipv4.conf.ib1.arp_ignore=1
+          net.ipv4.conf.ib1.arp_filter=0
+          net.ipv4.conf.ib1.arp_announce=2
+          net.ipv4.conf.ib1.rp_filter=0
+
+- name: Fix lustre multirail ip networking
+  hosts: dac
+  gather_facts: no
+  roles:
+    - role: lustre-multirail
+
+
+

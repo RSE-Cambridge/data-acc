@@ -1,0 +1,23 @@
+---
+- name: enable beegfs  repo
+  yum_repository:
+    name: BeeGFS7
+    description: "BeeGFS 7"
+    file: beegfs-repo
+    baseurl: http://www.beegfs.io/release/beegfs_7/dists/rhel7
+    gpgcheck: no
+
+- name: install beegfs
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - libibverbs-utils
+    - beegfs-mgmtd
+    - beegfs-meta
+    - beegfs-storage
+    - beegfs-client
+    - beegfs-helperd
+    - beegfs-utils
+    - beegfs-admon
+    - beeond
