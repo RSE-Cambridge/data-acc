@@ -1,5 +1,17 @@
-[swarm-manager]
-dac-e-24 ansible_user=root
+[slurm-master]
+slurm-master ansible_host=192.168.0.109 ansible_user=centos
 
-[swarm-workers]
-dac-e-23 ansible_user=root
+[slurm-workers]
+slurm-c1 ansible_host=192.168.0.106
+slurm-c2 ansible_host=192.168.0.105
+
+[dac-workers]
+dac1 ansible_host=192.168.0.116
+dac2 ansible_host=192.168.0.117
+
+[swarm-manager:children]
+slurm-master
+
+[swarm-workers:children]
+slurm-workers
+dac-workers
