@@ -4,6 +4,8 @@
   vars:
     pip_install_packages:
       - name: docker
+    docker_users:
+      - "centos"
 
   roles:
     - geerlingguy.repo-epel
@@ -16,6 +18,9 @@
     - yum:
         name: git,go
         state: present
+
+- hosts: all
+  tasks:
     - file:
         path: ~/go/github.com/JohnGarbutt/
         state: directory
@@ -24,7 +29,6 @@
         dest: ~/go/src/github.com/JohnGarbutt/data-acc
 
 - hosts: slurm-master[0]
-  become: true
   tasks:
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-master
@@ -33,7 +37,6 @@
         var: output
 
 - hosts: slurm-workers
-  become: true
   tasks:
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-worker
@@ -42,7 +45,6 @@
         var: output
 
 - hosts: dac-workers
-  become: true
   tasks:
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/dac-worker
