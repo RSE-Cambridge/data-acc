@@ -13,3 +13,9 @@ services:
       - "6818"
       - "60001-63000"
     network_mode: host
+
+volumes:
+  etc_munge:
+  etc_slurm:
+  slurm_jobdir:
+  var_log_slurm:
