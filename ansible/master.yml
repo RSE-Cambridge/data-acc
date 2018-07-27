@@ -6,6 +6,7 @@
       - name: docker
     docker_users:
       - "centos"
+    docker_compose_version: "1.22.0"
 
   roles:
     - geerlingguy.repo-epel
