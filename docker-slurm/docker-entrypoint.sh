@@ -8,7 +8,7 @@ then
 
     echo "---> Starting the Slurm Database Daemon (slurmdbd) ..."
 
-    until echo "SELECT 1" | mysql -h mysql -uslurm -ppassword 2>&1 > /dev/null
+    until echo "SELECT 1" | mysql -h 192.168.0.109 -uslurm -ppassword 2>&1 > /dev/null
     do
         echo "-- Waiting for database to become active ..."
         sleep 2
