@@ -38,7 +38,8 @@
         var: output
     - name: ensure slurm cluster registered in db
       shell: |
-        docker exec slurmctld bash -c "/usr/bin/sacctmgr --immediate add cluster name=linux" && docker-compose restart slurmdbd slurmctld
+        docker exec slurmctld bash -c "/usr/bin/sacctmgr --immediate add cluster name=linux" && docker restart slurmdbd slurmctld
+      when: output.changed
 
 - hosts: slurm-workers
   tasks:
