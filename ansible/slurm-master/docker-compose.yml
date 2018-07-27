@@ -72,8 +72,6 @@ services:
       - "2379:2379"
     depends_on:
       - etcd1
-      - etcd2
-      - etcd3
     network_mode: host
 
   volumewatcher:
