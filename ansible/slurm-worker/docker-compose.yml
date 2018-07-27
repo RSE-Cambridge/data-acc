@@ -1,0 +1,15 @@
+version: "2.2"
+
+services:
+  c1:
+    image: johngarbutt/data-acc-slurm
+    command: ["slurmd"]
+    volumes:
+      - etc_munge:/etc/munge
+      - etc_slurm:/etc/slurm
+      - slurm_jobdir:/data
+      - var_log_slurm:/var/log/slurm
+    expose:
+      - "6818"
+      - "60001-63000"
+    network_mode: host

@@ -1,0 +1,10 @@
+version: "2.2"
+
+services:
+  dac-node:
+    image: johngarbutt/data-acc-slurm
+    environment:
+      - ETCDCTL_API=3
+      - ETCDCTL_ENDPOINTS=etcdproxy1:2379
+    command: ["data-acc-brick-host"]
+    network_mode: host

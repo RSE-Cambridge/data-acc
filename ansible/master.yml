@@ -23,46 +23,30 @@
     - git:
         repo: 'https://github.com/JohnGarbutt/data-acc.git'
         dest: ~/go/src/github.com/JohnGarbutt/data-acc
-    - name: install go dep
-      shell: go get -u github.com/golang/dep/cmd/dep
-      args:
-         creates: ~/go/bin/dep
-    - name: get dependencies
-      shell: ~/go/bin/dep ensure
-      args:
-        chdir: ~/go/src/github.com/JohnGarbutt/data-acc
-        creates: ~/go/src/github.com/JohnGarbutt/data-acc/vendor
 
-- hosts: swarm-manager[0]
-  tasks:
-    - name: determine swarm status
-      shell: >
-        docker info | egrep '^Swarm: ' | cut -d ' ' -f2
-      register: swarm_status
-    - name: initialize swarm cluster
-      shell: docker swarm init --advertise-addr=em1:2377
-      when: "'active' not in swarm_status.stdout_lines"
-    - name: retrieve swarm worker token
-      shell: docker swarm join-token -q worker
-      register: swarm_worker_token
-
-- hosts: swarm-workers
-  vars:
-    token: "{{ hostvars[groups['swarm-manager'][0]]['swarm_worker_token']['stdout'] }}"
-  tasks:
-    - name: determine swarm status
-      shell: >
-        docker info | egrep '^Swarm: ' | cut -d ' ' -f2
-      register: swarm_status
-    - name: join worker to swarm
-      shell: docker swarm join --advertise-addr=em1:2377 --token={{ token }} {{ groups['swarm-manager'][0] }}:2377
-      when: "'active' not in swarm_status.stdout_lines"
-
-- hosts: swarm-manager[0]
+- hosts: slurm-master[0]
   become: true
   tasks:
     - docker_service:
-        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/docker-slurm
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-master
+      register: output
+    - debug:
+        var: output
+
+- hosts: slurm-workers
+  become: true
+  tasks:
+    - docker_service:
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-worker
+      register: output
+    - debug:
+        var: output
+
+- hosts: dac-workers
+  become: true
+  tasks:
+    - docker_service:
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/dac-worker
       register: output
     - debug:
         var: output
