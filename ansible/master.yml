@@ -33,6 +33,7 @@
   tasks:
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-master
+        pull: true
       register: output
     - debug:
         var: output
@@ -45,6 +46,7 @@
   tasks:
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-worker
+        pull: true
       register: output
     - debug:
         var: output
@@ -53,6 +55,7 @@
   tasks:
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/dac-worker
+        pull: true
       register: output
     - debug:
         var: output
