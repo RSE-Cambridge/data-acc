@@ -12,6 +12,7 @@ services:
       MYSQL_PASSWORD: password
     volumes:
       - var_lib_mysql:/var/lib/mysql
+    network_mode: host
 
   slurmdbd:
     image: johngarbutt/data-acc-slurm
@@ -26,6 +27,7 @@ services:
       - "6819"
     depends_on:
       - mysql
+    network_mode: host
 
   slurmctld:
     image: johngarbutt/data-acc-slurm
@@ -46,6 +48,7 @@ services:
     environment:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=etcdproxy1:2379
+    network_mode: host
 
   etcd1:
     image: quay.io/coreos/etcd
@@ -56,30 +59,11 @@ services:
       - etcd1_data:/etcd-data
     #expose:
     #  - "2379:2379"
-
-  etcd2:
-    image: quay.io/coreos/etcd
-    command: etcd --name etcd2 --data-dir=/etcd-data --initial-cluster-state new --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-cluster 'etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380'
-    hostname: etcd2
-    container_name: etcd2
-    volumes:
-      - etcd2_data:/etcd-data
-    depends_on:
-      - etcd1
-
-  etcd3:
-    image: quay.io/coreos/etcd
-    command: etcd --name etcd3 --data-dir=/etcd-data --initial-cluster-state new --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-cluster 'etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380'
-    hostname: etcd3
-    container_name: etcd3
-    volumes:
-      - etcd3_data:/etcd-data
-    depends_on:
-      - etcd2
+    network_mode: host
 
   etcdproxy1:
     image: quay.io/coreos/etcd
-    command: etcd grpc-proxy start --endpoints=etcd1:2379,etcd2:2379,etcd3:2379 --listen-addr=0.0.0.0:2379 --namespace=burstbuffer
+    command: etcd grpc-proxy start --endpoints=localhost:2379 --listen-addr=0.0.0.0:2379 --namespace=burstbuffer
     hostname: etcdproxy1
     container_name: etcdproxy1
     expose:
@@ -90,33 +74,37 @@ services:
       - etcd1
       - etcd2
       - etcd3
+    network_mode: host
 
   volumewatcher:
     image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
-      - ETCDCTL_ENDPOINTS=etcdproxy1:2379
+      - ETCDCTL_ENDPOINTS=localhost:2379
     command: sh -c "etcdctl watch --prefix /volume -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
+    network_mode: host
 
   jobwatcher:
     image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
-      - ETCDCTL_ENDPOINTS=etcdproxy1:2379
+      - ETCDCTL_ENDPOINTS=localhost:2379
     command: sh -c "etcdctl watch --prefix /job -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
+    network_mode: host
 
   brickwatcher:
     image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
-      - ETCDCTL_ENDPOINTS=etcdproxy1:2379
+      - ETCDCTL_ENDPOINTS=localhost:2379
     command: sh -c "etcdctl watch --prefix /brick -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
+    network_mode: host
 
 volumes:
   etc_munge:
