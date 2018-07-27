@@ -111,5 +111,3 @@ volumes:
   var_lib_mysql:
   var_log_slurm:
   etcd1_data:
-  etcd2_data:
-  etcd3_data:
