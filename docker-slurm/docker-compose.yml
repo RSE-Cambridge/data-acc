@@ -15,6 +15,7 @@ services:
 
   slurmdbd:
     build: ./
+    image: johngarbutt/data-acc-slurm
     command: ["slurmdbd"]
     container_name: slurmdbd
     hostname: slurmdbd
@@ -29,6 +30,7 @@ services:
 
   slurmctld:
     build: ./
+    image: johngarbutt/data-acc-slurm
     command: ["slurmctld"]
     container_name: slurmctld
     hostname: slurmctld
@@ -49,6 +51,7 @@ services:
 
   c1:
     build: ./
+    image: johngarbutt/data-acc-slurm
     command: ["slurmd"]
     hostname: c1
     container_name: c1
@@ -65,6 +68,7 @@ services:
 
   c2:
     build: ./
+    image: johngarbutt/data-acc-slurm
     command: ["slurmd"]
     hostname: c2
     container_name: c2
@@ -126,6 +130,7 @@ services:
   fakebuffernode:
     scale: 3
     build: ./
+    image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
       - ETCDCTL_ENDPOINTS=etcdproxy1:2379
@@ -135,6 +140,7 @@ services:
 
   volumewatcher:
     build: ./
+    image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
       - ETCDCTL_ENDPOINTS=etcdproxy1:2379
@@ -144,6 +150,7 @@ services:
 
   jobwatcher:
     build: ./
+    image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
       - ETCDCTL_ENDPOINTS=etcdproxy1:2379
@@ -153,6 +160,7 @@ services:
 
   brickwatcher:
     build: ./
+    image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
       - ETCDCTL_ENDPOINTS=etcdproxy1:2379
