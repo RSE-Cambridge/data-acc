@@ -3,6 +3,7 @@ version: "2.2"
 services:
   mysql:
     image: mysql:5.7
+    container_name: mysql
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
       MYSQL_DATABASE: slurm_acct_db
@@ -15,6 +16,7 @@ services:
   slurmdbd:
     image: johngarbutt/data-acc-slurm
     command: ["slurmdbd"]
+    container_name: slurmdbd
     volumes:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
@@ -28,6 +30,7 @@ services:
   slurmctld:
     image: johngarbutt/data-acc-slurm
     command: ["slurmctld"]
+    container_name: slurmctld
     volumes:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
@@ -47,7 +50,6 @@ services:
   etcd1:
     image: quay.io/coreos/etcd
     command: etcd --name etcd1 --data-dir=/etcd-data --initial-cluster-state new --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-cluster 'etcd1=http://192.168.0.109:2380'
-    hostname: etcd1
     container_name: etcd1
     volumes:
       - etcd1_data:/etcd-data
@@ -58,7 +60,6 @@ services:
   etcdproxy1:
     image: quay.io/coreos/etcd
     command: etcd grpc-proxy start --endpoints=localhost:2379 --listen-addr=0.0.0.0:2381 --namespace=burstbuffer
-    hostname: etcdproxy1
     container_name: etcdproxy1
     expose:
       - "2381"
