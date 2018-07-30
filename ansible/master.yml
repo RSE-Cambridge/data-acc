@@ -165,12 +165,12 @@
       lvg:
         vg: vg_thin
         pvs: /dev/vdc
-    - name: Create a thin pool of 200g
+    - name: Create a thin pool
       lvol:
         vg: vg_thin
         thinpool: testpool
-        size: 200g
-    - name: Create a thin volume of 100g
+        size: 190g
+    - name: Create a thin volume
       lvol:
         vg: vg_thin
         lv: test
