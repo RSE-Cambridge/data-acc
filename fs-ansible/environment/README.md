@@ -2,7 +2,7 @@
 
 To run this set of playbooks, please try:
 
-    ansible-playbook test-dac.yml -i test-inventory
+    ansible-playbook test-dac.yml -i test-inventory --tag start_lustre --tag start_osts --tag start_mgsdt
 
 ## Install notes
 
