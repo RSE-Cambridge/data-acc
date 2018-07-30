@@ -1,9 +1,6 @@
 #!/bin/bash
 set +eux
 
-echo "Wait for startup to complete..."
-sleep 10
-
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 #BB create_persistent name=mytestbuffer capacity=2000GB access=striped type=scratch" > create-persistent.sh'
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
