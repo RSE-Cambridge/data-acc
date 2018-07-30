@@ -43,7 +43,7 @@ then
 
     echo "---> Waiting for slurmctld to become active before starting slurmd..."
 
-    until 2>/dev/null >/dev/tcp/slurm-master/6817
+    until 2>/dev/null >/dev/tcp/192.168.0.109/6817
     do
         echo "-- slurmctld is not available.  Sleeping ..."
         sleep 2

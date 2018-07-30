@@ -3,6 +3,7 @@ version: "2.2"
 services:
   dac-node:
     image: johngarbutt/data-acc-slurm
+    container_name: "dac-brick-host"
     environment:
       - ETCDCTL_API=3
       - ETCDCTL_ENDPOINTS=192.168.0.109:2381

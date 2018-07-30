@@ -1,9 +1,10 @@
 version: "2.2"
 
 services:
-  c1:
+  slurmd:
     image: johngarbutt/data-acc-slurm
     command: ["slurmd"]
+    container_name: "slurmd"
     volumes:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
