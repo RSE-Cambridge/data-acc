@@ -4,19 +4,17 @@
   tags: [ 'never', 'start_lustre']
 
 - name: mount MDT/MGS
-  command: mount -t lustre /dev/{{ item.name }} /lustre/{{ lustre.fsname }}/MGSDT/{{ item.name }}
-  with_items: "{{ mdts }}"
+  command: mount -t lustre /dev/{{ item }} /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
+  loop: "{{ mdts }}"
   when:
     - mdts is defined
-    - item.name is match(target|default(".*"))
   tags: [ 'never', 'start_mgsdt', 'start_lustre']
 
 - name: mount OSTs
-  command: mount -t lustre /dev/{{ item.name }} /lustre/{{ lustre.fsname }}/OST{{ item.name }}
+  command: mount -t lustre /dev/{{ item }} /lustre/{{ group_names[0] }}/OST{{ item }}
   with_items: "{{ osts }}"
   when:
     - osts is defined
-    - item.name is match(target|default(".*"))
   tags: [ 'never', 'start_osts', 'start_lustre']
 
 - name: umount all lustre
