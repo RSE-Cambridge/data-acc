@@ -190,3 +190,7 @@
         dest: "/dev/{{ item }}"
         state: link
       with_items: "{{ nvme_devices }}"
+    - name: Ensure lustre present, will require an initial reboot
+      modprobe:
+        name: lustre
+        state: present
