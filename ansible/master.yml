@@ -115,3 +115,12 @@
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/dac-worker
         pull: yes
+    - name: Add ansible venv
+      shell: |
+          cd  ~/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment
+          virtualenv .venv
+          . .venv/bin/activate
+          pip install -U pip
+          pip install -U ansible
+      args:
+        creates: ~/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment/.venv
