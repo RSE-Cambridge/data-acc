@@ -128,7 +128,9 @@
 - hosts: all[0]
   tasks:
     - name: Create ssh key for user
-      shell: ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+      shell: |
+        ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+        cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
       args:
          creates: /home/centos/.ssh/id_rsa
     - name: Pull Keys
