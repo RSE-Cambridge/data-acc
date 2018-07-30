@@ -3,7 +3,7 @@
 To run this set of playbooks, please try:
 
     ansible-playbook test-dac.yml -i test-inventory --tag format_mdtmgs --tag format_osts
-    ansible-playbook test-dac.yml -i test-inventory --tag start_lustre --tag start_osts --tag start_mgsdt
+    ansible-playbook test-dac.yml -i test-inventory --tag start_osts --tag start_mgsdt
 
 ## Install notes
 

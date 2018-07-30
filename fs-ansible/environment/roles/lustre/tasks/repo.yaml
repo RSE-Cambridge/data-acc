@@ -2,7 +2,7 @@
 - name: enable lustre server repo
   yum_repository:
     name: lustre-server
-    description: "{{ lustre.servertype }}"
+    description: lustre-server
     file: lustre-repo
     baseurl: https://downloads.whamcloud.com/public/lustre/{{ lustre.release }}/el7/{{ lustre.servertype }}
     gpgcheck: no

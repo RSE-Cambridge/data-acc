@@ -1,4 +1,4 @@
 ---
   lustre:
-     release: lustre-2.10.3
-     servertype: server
+     release: lustre-2.10.4
+     servertype: patchless-ldiskfs-server
