@@ -74,7 +74,7 @@ services:
     environment:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=192.168.0.109:2381
-    command: sh -c "etcdctl watch --prefix /volume -- sh -c 'env | grep ETCD_WATCH_'"
+    command: sh -c "etcdctl watch --prefix burstbuffer/volume -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
     network_mode: host
@@ -84,7 +84,7 @@ services:
     environment:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=192.168.0.109:2381
-    command: sh -c "etcdctl watch --prefix /job -- sh -c 'env | grep ETCD_WATCH_'"
+    command: sh -c "etcdctl watch --prefix burstbuffer/job -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
     network_mode: host
@@ -94,7 +94,7 @@ services:
     environment:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=192.168.0.109:2381
-    command: sh -c "etcdctl watch --prefix /brick -- sh -c 'env | grep ETCD_WATCH_'"
+    command: sh -c "etcdctl watch --prefix burstbuffer/brick -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
     network_mode: host

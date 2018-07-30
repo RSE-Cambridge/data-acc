@@ -59,5 +59,5 @@ echo "***Debugger: bricks ***"
 docker logs slurm-master_brickwatcher_1
 sleep 3
 echo "***Data still in etcd ***"
-docker exec slurm-master_brickwatcher_1 bash -c "etcdctl get --prefix /"
+docker exec slurm-master_brickwatcher_1 bash -c "etcdctl get --prefix ''"
 
