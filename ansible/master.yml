@@ -155,3 +155,24 @@
       arg:
          creates: "~/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
       with_items: "{{ ansible_play_hosts }}"
+
+- hosts: dac-workers
+  become: true
+  tasks:
+    - yum:
+        name: lvm2
+    - name: Create a volume group on top of /dev/vdc
+      lvg:
+        vg: vg_thin
+        pvs: /dev/vdc
+    - name: Create a thin pool of 200g
+      lvol:
+        vg: vg_thin
+        thinpool: testpool
+        size: 200g
+    - name: Create a thin volume of 100g
+      lvol:
+        vg: vg_thin
+        lv: test
+        thinpool: testpool
+        size: 100g
