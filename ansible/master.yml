@@ -19,6 +19,15 @@
     - yum:
         name: git,go
         state: present
+    - name: Create entries in /etc/hosts for all nodes
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{ item }}.novalocal {{ item }}"
+        regexp: "^.* {{ item }}$"
+        create: no
+        state: present
+      with_items:
+        - "{{ ansible_play_hosts }}"
 
 - hosts: all
   tasks:
