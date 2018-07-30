@@ -57,7 +57,7 @@
         state: present
     - name: Install Lustre Client
       yum:
-        name: "lustre-client-{{ lustre_release }}"
+        name: "lustre-client-dkms-{{ lustre_release }}"
         state: present
 
 - hosts: all
