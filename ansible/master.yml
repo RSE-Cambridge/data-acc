@@ -15,6 +15,8 @@
 
 - hosts: all
   become: true
+  vars:
+      lustre_release: "2.10.4"
   tasks:
     - yum:
         name: git,go
@@ -28,6 +30,27 @@
         state: present
       with_items:
         - "{{ ansible_play_hosts }}"
+    - name: enable lustre server repo
+      yum_repository:
+        name: lustre-server
+        description: lustre-server
+        file: lustre-repo
+        baseurl: https://downloads.whamcloud.com/public/lustre/lustre-{{ lustre_release }}/el7/server
+        gpgcheck: no
+    - name: enable lustre client repo
+      yum_repository:
+        name: lustre-client
+        description: lustre-client
+        file: lustre-repo
+        baseurl: https://downloads.whamcloud.com/public/lustre/lustre-{{ lustre_release }}/el7/client
+        gpgcheck: no
+    - name: enable lustre e2fs repo
+      yum_repository:
+        name: e2fsprogs-wc
+        description: e2fsprogs-wc
+        file: lustre-repo
+        baseurl: https://downloads.whamcloud.com/public/e2fsprogs/latest/el7
+        gpgcheck: no
 
 - hosts: all
   tasks:
