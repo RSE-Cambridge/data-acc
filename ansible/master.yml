@@ -47,7 +47,7 @@
         pull: yes
         state: absent
         remove_volumes: yes
-      when: recreate
+      when: recreate|bool
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-master
         pull: yes
@@ -66,7 +66,7 @@
         pull: yes
         state: absent
         remove_volumes: yes
-      when: recreate
+      when: recreate|bool
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-worker
         pull: yes
@@ -80,7 +80,7 @@
         pull: yes
         state: absent
         remove_volumes: yes
-      when: recreate
+      when: recreate|bool
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/dac-worker
         pull: yes
