@@ -7,5 +7,4 @@ all:
           osts: {nvme2n1: 1, nvme3n1: 2}
         dac2:
           osts: {nvme2n1: 3, nvme3n1: 4}
-      vars: {mgsnode: 192.168.0.116@eth0}
-
+      vars: {mgsnode: dac1}
