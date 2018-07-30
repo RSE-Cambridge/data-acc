@@ -151,4 +151,7 @@
     - name: trust host keys
       shell: |
         ssh-keyscan -H {{ hostvars[item]['ansible_default_ipv4']['address'] }} >> ~/.ssh/known_hosts
+        touch ~/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}
+      arg:
+         creates: "~/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
       with_items: "{{ ansible_play_hosts }}"
