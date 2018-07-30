@@ -19,7 +19,7 @@
       lustre_release: "2.10.4"
   tasks:
     - yum:
-        name: git,go
+        name: git,go,python-virtualenv
         state: present
     - name: Create entries in /etc/hosts for all nodes
       lineinfile:
@@ -119,7 +119,7 @@
       shell: |
           cd  ~/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment
           virtualenv .venv
-          . .venv/bin/activate
+          source .venv/bin/activate
           pip install -U pip
           pip install -U ansible
       args:
