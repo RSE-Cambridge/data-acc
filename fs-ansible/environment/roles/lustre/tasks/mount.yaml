@@ -22,3 +22,11 @@
   when:
     - osts is defined
   tags: [ 'never', 'stop_alllustre']
+
+- name: ensure mount dir exists
+  file:
+    path: "/mnt/lustre/{{ group_names[0] }}"
+    state: directory
+
+- name: mount lustre fs
+  command: "mount -t lustre {{ mgsnode }}:/{{ group_names[0] }} /mnt/lustre/{{ group_names[0] }}"
