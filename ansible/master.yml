@@ -124,3 +124,37 @@
           pip install -U ansible
       args:
         creates: ~/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment/.venv
+
+- hosts: all[0]
+  tasks:
+    - name: Create ssh key for user
+      shell: ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+      args:
+         creates: /home/{{ ansible_user }}/.ssh/id_rsa
+    - name: trust host key
+      shell: |
+        ssh-keyscan -H {{ hostvars[item]['ansible_hostname'] }} >> ~/.ssh/known_hosts
+      with_items: "{{ groups['all'] }}"
+    - name: Pull Keys
+      synchronize:
+        mode: pull
+        src:  ~/.ssh/
+        dest: /tmp/dac.ssh/
+        recursive: yes
+
+- hosts: all
+  tasks:
+    - name: Push Keys
+      synchronize:
+        mode: push
+        src: /tmp/dac.ssh/
+        dest:  ~/.ssh/
+        recursive: yes
+    - name: trust host key
+      # TODO - fix this for many more hosts
+      shell: |
+        ssh-keyscan -H {{ ansible_host }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H localhost >> ~/.ssh/known_hosts
+        touch ~/.ssh/.extended_known_hosts
+      args:
+        creates: /home/hadoop/.ssh/.extended_known_hosts
