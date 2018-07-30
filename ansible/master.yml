@@ -130,10 +130,10 @@
     - name: Create ssh key for user
       shell: ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
       args:
-         creates: /home/{{ ansible_user }}/.ssh/id_rsa
+         creates: /home/centos/.ssh/id_rsa
     - name: trust host key
       shell: |
-        ssh-keyscan -H {{ hostvars[item]['ansible_hostname'] }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H {{ hostvars[item]['ansible_default_ipv4']['address'] }} >> ~/.ssh/known_hosts
       with_items: "{{ groups['all'] }}"
     - name: Pull Keys
       synchronize:
