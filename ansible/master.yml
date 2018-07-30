@@ -4,7 +4,9 @@
   vars:
     pip_install_packages:
       - name: docker
-      - name: docker-compose
+    docker_users:
+      - "centos"
+    docker_compose_version: "1.22.0"
 
   roles:
     - geerlingguy.repo-epel
@@ -17,52 +19,68 @@
     - yum:
         name: git,go
         state: present
+    - name: Create entries in /etc/hosts for all nodes
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{ item }}.novalocal {{ item }}"
+        regexp: "^.* {{ item }}$"
+        create: no
+        state: present
+      with_items:
+        - "{{ ansible_play_hosts }}"
+
+- hosts: all
+  tasks:
     - file:
         path: ~/go/github.com/JohnGarbutt/
         state: directory
     - git:
         repo: 'https://github.com/JohnGarbutt/data-acc.git'
         dest: ~/go/src/github.com/JohnGarbutt/data-acc
-    - name: install go dep
-      shell: go get -u github.com/golang/dep/cmd/dep
-      args:
-         creates: ~/go/bin/dep
-    - name: get dependencies
-      shell: ~/go/bin/dep ensure
-      args:
-        chdir: ~/go/src/github.com/JohnGarbutt/data-acc
-        creates: ~/go/src/github.com/JohnGarbutt/data-acc/vendor
 
-- hosts: swarm-manager[0]
-  tasks:
-    - name: determine swarm status
-      shell: >
-        docker info | egrep '^Swarm: ' | cut -d ' ' -f2
-      register: swarm_status
-    - name: initialize swarm cluster
-      shell: docker swarm init --advertise-addr=em1:2377
-      when: "'active' not in swarm_status.stdout_lines"
-    - name: retrieve swarm worker token
-      shell: docker swarm join-token -q worker
-      register: swarm_worker_token
-
-- hosts: swarm-workers
+- hosts: slurm-master[0]
   vars:
-    token: "{{ hostvars[groups['swarm-manager'][0]]['swarm_worker_token']['stdout'] }}"
-  tasks:
-    - name: determine swarm status
-      shell: >
-        docker info | egrep '^Swarm: ' | cut -d ' ' -f2
-      register: swarm_status
-    - name: join worker to swarm
-      shell: docker swarm join --advertise-addr=em1:2377 --token={{ token }} {{ groups['swarm-manager'][0] }}:2377
-      when: "'active' not in swarm_status.stdout_lines"
-
-- hosts: swarm-manager[0]
-  become: true
+      recreate: false
   tasks:
     - docker_service:
-        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/docker-slurm
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-master
+        pull: yes
+        state: absent
+        remove_volumes: yes
+      when: recreate|bool
+    - docker_service:
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-master
+        pull: yes
       register: output
-    - debug:
-        var: output
+    - name: ensure slurm cluster registered in db
+      shell: |
+        sleep 10 && docker exec slurmctld bash -c "/usr/bin/sacctmgr --immediate add cluster name=linux" && docker restart slurmdbd slurmctld
+      when: output.changed
+
+- hosts: slurm-workers
+  vars:
+      recreate: false
+  tasks:
+    - docker_service:
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-worker
+        pull: yes
+        state: absent
+        remove_volumes: yes
+      when: recreate|bool
+    - docker_service:
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-worker
+        pull: yes
+
+- hosts: dac-workers
+  vars:
+      recreate: false
+  tasks:
+    - docker_service:
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/dac-worker
+        pull: yes
+        state: absent
+        remove_volumes: yes
+      when: recreate|bool
+    - docker_service:
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/dac-worker
+        pull: yes

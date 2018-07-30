@@ -8,7 +8,7 @@ then
 
     echo "---> Starting the Slurm Database Daemon (slurmdbd) ..."
 
-    until echo "SELECT 1" | mysql -h mysql -uslurm -ppassword 2>&1 > /dev/null
+    until echo "SELECT 1" | mysql -h 192.168.0.109 -uslurm -ppassword 2>&1 > /dev/null
     do
         echo "-- Waiting for database to become active ..."
         sleep 2
@@ -25,7 +25,7 @@ then
 
     echo "---> Waiting for slurmdbd to become active before starting slurmctld ..."
 
-    until 2>/dev/null >/dev/tcp/slurmdbd/6819
+    until 2>/dev/null >/dev/tcp/slurm-master/6819
     do
         echo "-- slurmdbd is not available.  Sleeping ..."
         sleep 2
@@ -43,7 +43,7 @@ then
 
     echo "---> Waiting for slurmctld to become active before starting slurmd..."
 
-    until 2>/dev/null >/dev/tcp/slurmctld/6817
+    until 2>/dev/null >/dev/tcp/192.168.0.109/6817
     do
         echo "-- slurmctld is not available.  Sleeping ..."
         sleep 2
