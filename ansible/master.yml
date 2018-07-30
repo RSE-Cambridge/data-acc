@@ -180,13 +180,13 @@
     - name: Create a thin volume
       lvol:
         vg: vg_thin
-        lv: {{ item }}
+        lv: "{{ item }}"
         thinpool: testpool
         size: 100g
-      with_items: nvme_devices
+      with_items: "{{ nvme_devices }}"
     - name: Link fake nvme to lvm volume
       file:
         src: "/dev/mapper/vg_thin-{{ item }}"
         dest: "/dev/{{ item }}"
         state: link
-      with_items: nvme_devices
+      with_items: "{{ nvme_devices }}"
