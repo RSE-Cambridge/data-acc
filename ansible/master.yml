@@ -131,10 +131,6 @@
       shell: ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
       args:
          creates: /home/centos/.ssh/id_rsa
-    - name: trust host key
-      shell: |
-        ssh-keyscan -H {{ hostvars[item]['ansible_default_ipv4']['address'] }} >> ~/.ssh/known_hosts
-      with_items: "{{ groups['all'] }}"
     - name: Pull Keys
       synchronize:
         mode: pull
@@ -150,11 +146,7 @@
         src: /tmp/dac.ssh/
         dest:  ~/.ssh/
         recursive: yes
-    - name: trust host key
-      # TODO - fix this for many more hosts
+    - name: trust host keys
       shell: |
-        ssh-keyscan -H {{ ansible_host }} >> ~/.ssh/known_hosts
-        ssh-keyscan -H localhost >> ~/.ssh/known_hosts
-        touch ~/.ssh/.extended_known_hosts
-      args:
-        creates: /home/hadoop/.ssh/.extended_known_hosts
+        ssh-keyscan -H {{ hostvars[item]['ansible_default_ipv4']['address'] }} >> ~/.ssh/known_hosts
+      with_items: "{{ ansible_play_hosts }}"
