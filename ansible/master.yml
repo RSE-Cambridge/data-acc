@@ -35,7 +35,7 @@
         name: lustre-server
         description: lustre-server
         file: lustre-repo
-        baseurl: https://downloads.whamcloud.com/public/lustre/lustre-{{ lustre_release }}/el7/server
+        baseurl: https://downloads.whamcloud.com/public/lustre/lustre-{{ lustre_release }}/el7/patchless-ldiskfs-server
         gpgcheck: no
     - name: enable lustre client repo
       yum_repository:
