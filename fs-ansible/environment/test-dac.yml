@@ -1,6 +1,6 @@
 ---
 - name: Install Lustre
-  hosts: all
+  hosts: fs1
   gather_facts: no
   roles:
     - role: lustre
