@@ -158,6 +158,13 @@
 
 - hosts: dac-workers
   become: true
+  vars:
+    nvme_devices:
+      - nvme0n1
+      - nvme1n1
+      - nvme2n1
+      - nvme3n1
+      - nvme4n1
   tasks:
     - yum:
         name: lvm2
@@ -173,6 +180,13 @@
     - name: Create a thin volume
       lvol:
         vg: vg_thin
-        lv: test
+        lv: {{ item }}
         thinpool: testpool
         size: 100g
+      with_items: nvme_devices
+    - name: Link fake nvme to lvm volume
+      file:
+        src: "/dev/mapper/vg_thin-{{ item }}"
+        dest: "/dev/{{ item }}"
+        state: link
+      with_items: nvme_devices
