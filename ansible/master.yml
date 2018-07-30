@@ -51,6 +51,14 @@
         file: lustre-repo
         baseurl: https://downloads.whamcloud.com/public/e2fsprogs/latest/el7
         gpgcheck: no
+    - name: Install Lustre Server
+      yum:
+        name: "lustre-{{ lustre_release }}"
+        state: present
+    - name: Install Lustre Client
+      yum:
+        name: "lustre-client-{{ lustre_release }}"
+        state: present
 
 - hosts: all
   tasks:
