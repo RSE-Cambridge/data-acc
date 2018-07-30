@@ -39,32 +39,48 @@
         dest: ~/go/src/github.com/JohnGarbutt/data-acc
 
 - hosts: slurm-master[0]
+  vars:
+      recreate: false
   tasks:
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-master
-        pull: true
+        pull: yes
+        state: absent
+        remove_volumes: yes
+      when: recreate
+    - docker_service:
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-master
+        pull: yes
       register: output
-    - debug:
-        var: output
     - name: ensure slurm cluster registered in db
       shell: |
         sleep 10 && docker exec slurmctld bash -c "/usr/bin/sacctmgr --immediate add cluster name=linux" && docker restart slurmdbd slurmctld
       when: output.changed
 
 - hosts: slurm-workers
+  vars:
+      recreate: false
   tasks:
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-worker
-        pull: true
-      register: output
-    - debug:
-        var: output
+        pull: yes
+        state: absent
+        remove_volumes: yes
+      when: recreate
+    - docker_service:
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/slurm-worker
+        pull: yes
 
 - hosts: dac-workers
+  vars:
+      recreate: false
   tasks:
     - docker_service:
         project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/dac-worker
-        pull: true
-      register: output
-    - debug:
-        var: output
+        pull: yes
+        state: absent
+        remove_volumes: yes
+      when: recreate
+    - docker_service:
+        project_src: ~/go/src/github.com/JohnGarbutt/data-acc/ansible/dac-worker
+        pull: yes
