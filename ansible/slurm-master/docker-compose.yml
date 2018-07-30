@@ -44,7 +44,7 @@ services:
       - etcdproxy1
     environment:
       - ETCDCTL_API=3
-      - ETCD_ENDPOINTS=etcdproxy1:2379
+      - ETCD_ENDPOINTS=192.168.0.109:2381
     network_mode: host
 
   etcd1:
@@ -73,7 +73,7 @@ services:
     image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
-      - ETCDCTL_ENDPOINTS=localhost:2381
+      - ETCD_ENDPOINTS=192.168.0.109:2381
     command: sh -c "etcdctl watch --prefix /volume -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
@@ -83,7 +83,7 @@ services:
     image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
-      - ETCDCTL_ENDPOINTS=localhost:2381
+      - ETCD_ENDPOINTS=192.168.0.109:2381
     command: sh -c "etcdctl watch --prefix /job -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
@@ -93,7 +93,7 @@ services:
     image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
-      - ETCDCTL_ENDPOINTS=localhost:2381
+      - ETCD_ENDPOINTS=192.168.0.109:2381
     command: sh -c "etcdctl watch --prefix /brick -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
