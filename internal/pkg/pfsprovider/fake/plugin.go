@@ -22,13 +22,13 @@ func (*plugin) VolumeProvider() pfsprovider.VolumeProvider {
 
 type volumeProvider struct{}
 
-func (*volumeProvider) SetupVolume(volume registry.Volume) error {
+func (*volumeProvider) SetupVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE SetupVolume for:", volume.Name)
 	log.Println(volume)
 	return nil
 }
 
-func (*volumeProvider) TeardownVolume(volume registry.Volume) error {
+func (*volumeProvider) TeardownVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE TeardownVolume for:", volume.Name)
 	log.Println(volume)
 	return nil

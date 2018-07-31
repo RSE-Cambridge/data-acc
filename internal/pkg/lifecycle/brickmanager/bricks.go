@@ -15,7 +15,7 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 			if new.AllocatedVolume != "" && old.AllocatedVolume == "" && new.AllocatedIndex == 0 {
 				//log.Println("Dectected we host primary brick for:",
 				//	new.AllocatedVolume, "Must check for action.")
-				processNewPrimaryBlock(volumeRegistry, new)
+				processNewPrimaryBlock(poolRegistry, volumeRegistry, new)
 			}
 			if old.AllocatedVolume != "" {
 				if new.DeallocateRequested && !old.DeallocateRequested {
@@ -25,7 +25,8 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 		})
 }
 
-func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registry.BrickAllocation) {
+func processNewPrimaryBlock(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry,
+	new *registry.BrickAllocation) {
 	volume, err := volumeRegistry.Volume(new.AllocatedVolume)
 	if err != nil {
 		log.Printf("Could not file volume: %s because: %s\n", new.AllocatedVolume, err)
@@ -45,7 +46,7 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 				case registry.DataOutRequested:
 					processDataOut(volumeRegistry, *new)
 				case registry.DeleteRequested:
-					processDelete(volumeRegistry, *new)
+					processDelete(poolRegistry, volumeRegistry, *new)
 				default:
 					// Ignore the state changes we triggered
 					log.Println(". ingore volume:", volume.Name, "state move:", old.State, "->", new.State)
@@ -88,7 +89,7 @@ func processNewPrimaryBlock(volumeRegistry registry.VolumeRegistry, new *registr
 	})
 
 	// Move to new state, ignored by above watch
-	provisionNewVolume(volumeRegistry, volume)
+	provisionNewVolume(poolRegistry, volumeRegistry, volume)
 }
 
 func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume, err error) {
@@ -104,13 +105,19 @@ func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume,
 // TODO: should not be hardcoded here
 var plugin = fake.GetPlugin()
 
-func provisionNewVolume(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
+func provisionNewVolume(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	if volume.State != registry.Registered {
 		log.Println("Volume in bad initial state:", volume.Name)
 		return
 	}
 
-	err := plugin.VolumeProvider().SetupVolume(volume)
+	bricks, err := poolRegistry.GetAllocationsForVolume(volume.Name)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+		return
+	}
+
+	err = plugin.VolumeProvider().SetupVolume(volume, bricks)
 	if err != nil {
 		handleError(volumeRegistry, volume, err)
 		return
@@ -179,8 +186,14 @@ func processDataOut(volumeRegistry registry.VolumeRegistry, volume registry.Volu
 	handleError(volumeRegistry, volume, err)
 }
 
-func processDelete(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	err := plugin.VolumeProvider().TeardownVolume(volume)
+func processDelete(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
+	bricks, err := poolRegistry.GetAllocationsForVolume(volume.Name)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+		return
+	}
+
+	err = plugin.VolumeProvider().TeardownVolume(volume, bricks)
 	if err != nil {
 		handleError(volumeRegistry, volume, err)
 	}

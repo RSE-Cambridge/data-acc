@@ -12,8 +12,8 @@ type Plugin interface {
 
 // Actions on the host assigned to the primary brick
 type VolumeProvider interface {
-	SetupVolume(volume registry.Volume) error
-	TeardownVolume(volume registry.Volume) error
+	SetupVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error
+	TeardownVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error
 
 	CopyDataIn(volume registry.Volume) error
 	CopyDataOut(volume registry.Volume) error
