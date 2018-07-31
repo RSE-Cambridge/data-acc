@@ -1,5 +1,4 @@
 ---
-
 - name: Format MDT/MGS
   command: /usr/sbin/mkfs.lustre --mgs --mdt --reformat --fsname={{ group_names[0] }} --index={{ index }} --mgsnode={{ mgsnode }} /dev/{{ item }}
   loop: "{{ mdts }}"
@@ -15,26 +14,3 @@
   when:
     - osts is defined
   tags: [ 'never', 'format_osts']
-
-- name: Create MGSDT mount dir
-  file: 
-    path: /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
-    state: directory
-    recurse: yes
-  with_items: "{{ mdts }}"
-  when:
-    - mdts is defined
-  tags: [ 'never', 'format_mdtmgs']
-
-
-- name: Create OST mount dir
-  file: 
-    path: /lustre/{{ group_names[0] }}/OST{{ item }}
-    state: directory
-    recurse: yes
-  with_items: "{{ osts }}"
-  when:
-    - osts is defined
-  tags: [ 'never', 'format_osts']
-
-

@@ -3,46 +3,97 @@
   command: modprobe -v lustre
   tags: [ 'never', 'start_lustre']
 
-- name: mount MDT/MGS
-  command: mount -t lustre /dev/{{ item }} /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
-  loop: "{{ mdts }}"
+
+- name: Start MDT/MGS
+  block:
+    - name: Create MGSDT mount dir
+      file:
+        path: /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
+        state: directory
+        recurse: yes
+      with_items: "{{ mdts }}"
+
+    - name: mount MDT/MGS
+      command: mount -t lustre /dev/{{ item }} /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
+      loop: "{{ mdts }}"
+
   when:
     - mdts is defined
-  tags: [ 'never', 'start_mgsdt', 'start_lustre']
+  tags: [ 'never', 'start_mgsdt']
 
-- name: mount OSTs
-  command: mount -t lustre /dev/{{ item }} /lustre/{{ group_names[0] }}/OST{{ item }}
-  with_items: "{{ osts }}"
+
+- name: Start OST
+  block:
+    - name: Create OST mount dir
+      file:
+        path: /lustre/{{ group_names[0] }}/OST{{ item }}
+        state: directory
+        recurse: yes
+      with_items: "{{ osts }}"
+
+    - name: mount OSTs
+      command: mount -t lustre /dev/{{ item }} /lustre/{{ group_names[0] }}/OST{{ item }}
+      with_items: "{{ osts }}"
+
   when:
     - osts is defined
-  tags: [ 'never', 'start_osts', 'start_lustre']
+  tags: [ 'never', 'start_osts']
 
-- name: ensure mount dir exists
-  file:
-    path: "/mnt/lustre/{{ group_names[0] }}"
-    state: directory
-  tags: [ 'never', 'mount_fs']
-- name: mount lustre fs
-  command: "mount -t lustre {{ mgsnode }}:/{{ group_names[0] }} /mnt/lustre/{{ group_names[0] }}"
+
+- name: Mount FS
+  block:
+    - name: ensure mount dir exists
+      file:
+        path: "/mnt/lustre/{{ group_names[0] }}"
+        state: directory
+        recurse: yes
+    - name: mount lustre fs
+      command: "mount -t lustre {{ mgsnode }}:/{{ group_names[0] }} /mnt/lustre/{{ group_names[0] }}"
   tags: [ 'never', 'mount_fs']
 
-- name: umount MDT/MGS
-  command: umount /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
-  loop: "{{ mdts }}"
+
+- name: Stop MDT/MGS
+  block:
+    - name: umount MDT/MGS
+      command: umount /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
+      loop: "{{ mdts }}"
+
+    - name: MGSDT mount dir
+      file:
+        path: /lustre/{{ group_names[0] }}/MGSDT
+        state: absent
+        recurse: yes
   when:
     - mdts is defined
   tags: [ 'never', 'stop_mgsdt']
 
-- name: umount OSTs
-  command: umount /lustre/{{ group_names[0] }}/OST{{ item }}
-  with_items: "{{ osts }}"
+
+- name: Stop OST
+  block:
+    - name: umount OSTs
+      command: umount /lustre/{{ group_names[0] }}/OST{{ item }}
+      with_items: "{{ osts }}"
+    - name: Create OST mount dir
+      file:
+        path: /lustre/{{ group_names[0] }}/OST
+        state: absent
+        recurse: yes
   when:
     - osts is defined
   tags: [ 'never', 'stop_osts']
 
-- name: umount lustre fs
-  command: "umount /mnt/lustre/{{ group_names[0] }}"
+
+- name: umount FS
+  block:
+    - name: umount lustre fs
+      command: "umount /mnt/lustre/{{ group_names[0] }}"
+    - name: ensure mount dir deleted
+      file:
+        path: "/mnt/lustre/{{ group_names[0] }}"
+        state: absent
+        recurse: yes
   tags: [ 'never', 'umount_fs']
+
 
 - name: umount all lustre
   command: umount -a -t lustre
