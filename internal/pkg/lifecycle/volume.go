@@ -78,10 +78,11 @@ func getBricksForBuffer(poolRegistry registry.PoolRegistry,
 				goodCandidate = false
 				break
 			}
-			if brick.Hostname == candidateBrick.Hostname {
-				goodCandidate = false
-				break
-			}
+			// TODO: avoid two bricks on the same host?
+			//if brick.Hostname == candidateBrick.Hostname {
+			//	goodCandidate = false
+			//	break
+			//}
 		}
 		if goodCandidate {
 			chosenBricks = append(chosenBricks, candidateBrick)
