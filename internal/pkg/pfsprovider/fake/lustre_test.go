@@ -29,3 +29,23 @@ func TestPlugin_PrintLustreInfo(t *testing.T) {
 `
 	assert.Equal(t, expected, result)
 }
+
+func TestPlugin_PrintLustreInfo_Simple(t *testing.T) {
+	volume := registry.Volume{Name: "1"}
+	brickAllocations := []registry.BrickAllocation{
+		{Hostname: "dac1", Device: "nvme0n1", AllocatedIndex: 0},
+		{Hostname: "dac2", Device: "nvme2n1", AllocatedIndex: 1},
+	}
+	result := printLustreInfo(volume, brickAllocations)
+	expected := `all:
+  children:
+    fs1:
+      hosts:
+        dac1:
+          mdts: [nvme0n1]
+        dac2:
+          osts: {nvme2n1: 1}
+      vars: {mgsnode: dac1}
+`
+	assert.Equal(t, expected, result)
+}

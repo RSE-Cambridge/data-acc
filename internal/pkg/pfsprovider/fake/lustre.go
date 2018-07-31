@@ -31,6 +31,11 @@ func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAl
 	for _, allocation := range brickAllocations {
 		if allocation.AllocatedIndex == 0 {
 			mdt = allocation
+			current, success := osts[allocation.Hostname]
+			if !success {
+				// ensure hostname will be iterated through below to output mdt if required
+				osts[allocation.Hostname] = current
+			}
 		} else {
 			osts[allocation.Hostname] = append(osts[allocation.Hostname], allocation)
 		}
