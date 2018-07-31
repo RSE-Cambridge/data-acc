@@ -15,6 +15,9 @@
 
     - name: mount MDT/MGS
       command: mount -t lustre /dev/{{ item }} /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
       loop: "{{ mdts }}"
 
   when:
@@ -33,6 +36,9 @@
 
     - name: mount OSTs
       command: mount -t lustre /dev/{{ item }} /lustre/{{ group_names[0] }}/OST{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
       with_items: "{{ osts }}"
 
   when:
@@ -49,6 +55,9 @@
         recurse: yes
     - name: mount lustre fs
       command: "mount -t lustre {{ mgsnode }}:/{{ group_names[0] }} /mnt/lustre/{{ group_names[0] }}"
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
   tags: [ 'never', 'mount_fs']
 
 
