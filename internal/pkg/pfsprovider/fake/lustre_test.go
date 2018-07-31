@@ -49,3 +49,15 @@ func TestPlugin_PrintLustreInfo_Simple(t *testing.T) {
 `
 	assert.Equal(t, expected, result)
 }
+
+func TestPlugin_PrintLustrePlaybook(t *testing.T) {
+	volume := registry.Volume{Name: "1"}
+	result := printLustrePlaybook(volume)
+	assert.Equal(t, `---
+- name: Install Lustre
+  hosts: fs1
+  become: yes
+  gather_facts: no
+  roles:
+    - role: lustre`, result)
+}

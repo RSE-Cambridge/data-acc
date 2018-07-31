@@ -26,6 +26,7 @@ func (*volumeProvider) SetupVolume(volume registry.Volume, brickAllocations []re
 	log.Println("FAKE SetupVolume for:", volume.Name)
 	log.Println(volume)
 	log.Println(printLustreInfo(volume, brickAllocations))
+	log.Println(printLustrePlaybook(volume))
 	return nil
 }
 
@@ -33,6 +34,7 @@ func (*volumeProvider) TeardownVolume(volume registry.Volume, brickAllocations [
 	log.Println("FAKE TeardownVolume for:", volume.Name)
 	log.Println(volume)
 	log.Println(printLustreInfo(volume, brickAllocations))
+	log.Println(printLustrePlaybook(volume))
 	return nil
 }
 

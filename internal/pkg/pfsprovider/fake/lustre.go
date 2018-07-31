@@ -66,3 +66,13 @@ func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAl
 	}
 	return string(output)
 }
+
+func printLustrePlaybook(volume registry.Volume) string {
+	return fmt.Sprintf(`---
+- name: Install Lustre
+  hosts: fs%s
+  become: yes
+  gather_facts: no
+  roles:
+    - role: lustre`, volume.Name)
+}
