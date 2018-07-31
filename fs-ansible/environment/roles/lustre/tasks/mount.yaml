@@ -55,7 +55,7 @@
 - name: umount FS
   block:
     - name: umount lustre fs
-      command: "umount /mnt/lustre/{{ group_names[0] }}"
+      command: "umount -l /mnt/lustre/{{ group_names[0] }}"
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
