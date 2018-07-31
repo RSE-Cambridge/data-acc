@@ -58,6 +58,7 @@
       command: umount /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
       loop: "{{ mdts }}"
 
     - name: Remove MGSDT mount dir
@@ -75,6 +76,7 @@
       command: umount /lustre/{{ group_names[0] }}/OST{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
       with_items: "{{ osts }}"
 
     - name: Remove OST mount dir
@@ -92,6 +94,7 @@
       command: "umount /mnt/lustre/{{ group_names[0] }}"
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
 
     - name: ensure mount dir deleted
       file:
