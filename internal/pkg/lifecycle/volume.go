@@ -41,7 +41,8 @@ func (vlm *volumeLifecycleManager) ProvisionBricks(pool registry.Pool) error {
 	return err
 }
 
-func getBricksForBuffer(poolRegistry registry.PoolRegistry,
+// TODO: delete me?
+func getBricksForBufferOld(poolRegistry registry.PoolRegistry,
 	pool registry.Pool, volume registry.Volume) error {
 
 	if volume.SizeBricks == 0 {
@@ -78,11 +79,67 @@ func getBricksForBuffer(poolRegistry registry.PoolRegistry,
 				goodCandidate = false
 				break
 			}
-			// TODO: avoid two bricks on the same host?
-			//if brick.Hostname == candidateBrick.Hostname {
-			//	goodCandidate = false
-			//	break
-			//}
+			if brick.Hostname == candidateBrick.Hostname {
+				goodCandidate = false
+				break
+			}
+		}
+		if goodCandidate {
+			chosenBricks = append(chosenBricks, candidateBrick)
+		}
+		if uint(len(chosenBricks)) >= volume.SizeBricks {
+			break
+		}
+	}
+
+	if uint(len(chosenBricks)) != volume.SizeBricks {
+		return fmt.Errorf("unable to get number of requested bricks (%d) for given pool (%s)",
+			volume.SizeBricks, pool.Name)
+	}
+
+	var allocations []registry.BrickAllocation
+	for _, brick := range chosenBricks {
+		allocations = append(allocations, registry.BrickAllocation{
+			Device:              brick.Device,
+			Hostname:            brick.Hostname,
+			AllocatedVolume:     volume.Name,
+			DeallocateRequested: false,
+		})
+	}
+	err := poolRegistry.AllocateBricks(allocations)
+	if err != nil {
+		return err
+	}
+	_, err = poolRegistry.GetAllocationsForVolume(volume.Name) // TODO return result, wait for updates
+	return err
+}
+
+func getBricksForBuffer(poolRegistry registry.PoolRegistry,
+	pool registry.Pool, volume registry.Volume) error {
+
+	if volume.SizeBricks == 0 {
+		// No bricks requested, so return right away
+		return nil
+	}
+
+	availableBricks := pool.AvailableBricks
+	var chosenBricks []registry.BrickInfo
+
+	// pick some of the available bricks
+	s := rand.NewSource(time.Now().Unix())
+	r := rand.New(s) // initialize local pseudorandom generator
+
+	randomWalk := r.Perm(len(availableBricks))
+	for _, i := range randomWalk {
+		candidateBrick := availableBricks[i]
+
+		// TODO: should not the random walk mean this isn't needed!
+		goodCandidate := true
+		for _, brick := range chosenBricks {
+			if brick == candidateBrick {
+				goodCandidate = false
+				break
+			}
 		}
 		if goodCandidate {
 			chosenBricks = append(chosenBricks, candidateBrick)
