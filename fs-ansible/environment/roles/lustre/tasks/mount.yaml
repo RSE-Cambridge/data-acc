@@ -17,16 +17,35 @@
     - osts is defined
   tags: [ 'never', 'start_osts', 'start_lustre']
 
+- name: ensure mount dir exists
+  file:
+    path: "/mnt/lustre/{{ group_names[0] }}"
+    state: directory
+  tags: [ 'never', 'mount_fs']
+- name: mount lustre fs
+  command: "mount -t lustre {{ mgsnode }}:/{{ group_names[0] }} /mnt/lustre/{{ group_names[0] }}"
+  tags: [ 'never', 'mount_fs']
+
+- name: umount MDT/MGS
+  command: umount /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
+  loop: "{{ mdts }}"
+  when:
+    - mdts is defined
+  tags: [ 'never', 'stop_mgsdt']
+
+- name: umount OSTs
+  command: umount /lustre/{{ group_names[0] }}/OST{{ item }}
+  with_items: "{{ osts }}"
+  when:
+    - osts is defined
+  tags: [ 'never', 'stop_osts']
+
+- name: umount lustre fs
+  command: "umount /mnt/lustre/{{ group_names[0] }}"
+  tags: [ 'never', 'umount_fs']
+
 - name: umount all lustre
   command: umount -a -t lustre
   when:
     - osts is defined
   tags: [ 'never', 'stop_alllustre']
-
-- name: ensure mount dir exists
-  file:
-    path: "/mnt/lustre/{{ group_names[0] }}"
-    state: directory
-
-- name: mount lustre fs
-  command: "mount -t lustre {{ mgsnode }}:/{{ group_names[0] }} /mnt/lustre/{{ group_names[0] }}"
