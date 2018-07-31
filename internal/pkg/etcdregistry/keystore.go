@@ -199,14 +199,6 @@ func (client *etcKeystore) WatchKey(ctxt context.Context, key string,
 }
 
 func (client *etcKeystore) KeepAliveKey(key string) error {
-	// TODO what about configure timeout and ttl?
-	var ttl int64 = 10
-	grantResponse, err := client.Grant(context.Background(), ttl)
-	if err != nil {
-		log.Fatal(err)
-	}
-	leaseID := grantResponse.ID
-
 	kvc := clientv3.NewKV(client.Client)
 
 	getResponse, err := kvc.Get(context.Background(), key)
@@ -214,6 +206,14 @@ func (client *etcKeystore) KeepAliveKey(key string) error {
 		// if another host seems to exist, back off for 10 seconds incase we just did a quick restart
 		time.Sleep(time.Second * 10)
 	}
+
+	// TODO what about configure timeout and ttl?
+	var ttl int64 = 10
+	grantResponse, err := client.Grant(context.Background(), ttl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	leaseID := grantResponse.ID
 
 	txnResponse, err := kvc.Txn(context.Background()).
 		If(clientv3util.KeyMissing(key)).
