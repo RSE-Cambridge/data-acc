@@ -56,6 +56,8 @@
   block:
     - name: umount MDT/MGS
       command: umount /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and 'not mounted' not in command_result.stderr"
       loop: "{{ mdts }}"
 
     - name: MGSDT mount dir
@@ -71,7 +73,10 @@
   block:
     - name: umount OSTs
       command: umount /lustre/{{ group_names[0] }}/OST{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and 'not mounted' not in command_result.stderr"
       with_items: "{{ osts }}"
+
     - name: Create OST mount dir
       file:
         path: /lustre/{{ group_names[0] }}/OST
@@ -85,6 +90,9 @@
   block:
     - name: umount lustre fs
       command: "umount /mnt/lustre/{{ group_names[0] }}"
+      register: command_result
+      failed_when: "command_result.rc != 0 and 'not mounted' not in command_result.stderr"
+
     - name: ensure mount dir deleted
       file:
         path: "/mnt/lustre/{{ group_names[0] }}"
