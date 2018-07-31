@@ -62,7 +62,6 @@
       file:
         path: /lustre/{{ group_names[0] }}/MGSDT
         state: absent
-        recurse: yes
   when:
     - mdts is defined
   tags: [ 'never', 'stop_mgsdt']
@@ -77,7 +76,6 @@
       file:
         path: /lustre/{{ group_names[0] }}/OST
         state: absent
-        recurse: yes
   when:
     - osts is defined
   tags: [ 'never', 'stop_osts']
@@ -91,7 +89,6 @@
       file:
         path: "/mnt/lustre/{{ group_names[0] }}"
         state: absent
-        recurse: yes
   tags: [ 'never', 'umount_fs']
 
 
