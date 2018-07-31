@@ -25,12 +25,14 @@ type volumeProvider struct{}
 func (*volumeProvider) SetupVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE SetupVolume for:", volume.Name)
 	log.Println(volume)
+	log.Println(printLustreInfo(volume, brickAllocations))
 	return nil
 }
 
 func (*volumeProvider) TeardownVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE TeardownVolume for:", volume.Name)
 	log.Println(volume)
+	log.Println(printLustreInfo(volume, brickAllocations))
 	return nil
 }
 
