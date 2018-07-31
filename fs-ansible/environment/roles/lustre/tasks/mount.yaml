@@ -52,22 +52,19 @@
   tags: [ 'never', 'mount_fs']
 
 
-- name: Stop MDT/MGS
+- name: umount FS
   block:
-    - name: umount MDT/MGS
-      command: umount /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
+    - name: umount lustre fs
+      command: "umount /mnt/lustre/{{ group_names[0] }}"
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
-      loop: "{{ mdts }}"
 
-    - name: Remove MGSDT mount dir
+    - name: ensure mount dir deleted
       file:
-        path: /lustre/{{ group_names[0] }}/MGSDT
+        path: "/mnt/lustre/{{ group_names[0] }}"
         state: absent
-  when:
-    - mdts is defined
-  tags: [ 'never', 'stop_mgsdt']
+  tags: [ 'never', 'umount_fs']
 
 
 - name: Stop OST
@@ -88,19 +85,22 @@
   tags: [ 'never', 'stop_osts']
 
 
-- name: umount FS
+- name: Stop MDT/MGS
   block:
-    - name: umount lustre fs
-      command: "umount /mnt/lustre/{{ group_names[0] }}"
+    - name: umount MDT/MGS
+      command: umount /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
+      loop: "{{ mdts }}"
 
-    - name: ensure mount dir deleted
+    - name: Remove MGSDT mount dir
       file:
-        path: "/mnt/lustre/{{ group_names[0] }}"
+        path: /lustre/{{ group_names[0] }}/MGSDT
         state: absent
-  tags: [ 'never', 'umount_fs']
+  when:
+    - mdts is defined
+  tags: [ 'never', 'stop_mgsdt']
 
 
 - name: umount all lustre
