@@ -87,7 +87,7 @@
 
     - name: Remove OST mount dir
       file:
-        path: /lustre/{{ group_names[0] }}/OST
+        path: /lustre/{{ group_names[0] }}
         state: absent
   when:
     - osts is defined
