@@ -98,41 +98,39 @@ func executeTempAnsible(volume registry.Volume, brickAllocations []registry.Bric
 	if err := ioutil.WriteFile(tmpPlaybook, bytes.NewBufferString(playbook).Bytes(), 0666); err != nil {
 		return err
 	}
+	log.Println(playbook)
 
 	inventory := printLustreInfo(volume, brickAllocations)
 	tmpInventory := filepath.Join(dir, "inventory")
 	if err := ioutil.WriteFile(tmpInventory, bytes.NewBufferString(inventory).Bytes(), 0666); err != nil {
 		return err
 	}
+	log.Println(inventory)
 
 	cmd := exec.Command("cp", "-r",
 		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment/roles", dir)
-	err = cmd.Run()
+	output, err := cmd.CombinedOutput()
+	log.Println(string(output))
 	if err != nil {
 		return err
 	}
 	cmd = exec.Command("cp", "-r",
 		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment/.venv", dir)
-	err = cmd.Run()
+	output, err = cmd.CombinedOutput()
+	log.Println(string(output))
 	if err != nil {
 		return err
 	}
 
 	if !teardown {
-		cmd = exec.Command(fmt.Sprintf(`/bin/sh -c 'cd %s
-. .venv/bin/activate
-ansible-playbook test-dac.yml -i test-inventory --tag format_mdtmgs --tag format_osts
-ansible-playbook test-dac.yml -i test-inventory --tag start_osts --tag start_mgsdt --tag mount_fs`, dir))
+		cmd = exec.Command(fmt.Sprintf(`/bin/bash -c "cd %s; . .venv/bin/activate; ansible-playbook dac.yml -i inventory --tag format_mdtmgs --tag format_osts; ansible-playbook yml -i inventory --tag start_osts --tag start_mgsdt --tag mount_fs"`, dir))
 		output, err := cmd.CombinedOutput()
-		log.Println(output)
+		log.Println(string(output))
 		return err
 	} else {
-		cmd = exec.Command(fmt.Sprintf(`/bin/sh -c 'cd %s
-. .venv/bin/activate
-ansible-playbook test-dac.yml -i test-inventory --tag stop_osts --tag stop_mgsdt --tag umount_fs
-ansible-playbook test-dac.yml -i test-inventory --tag format_mdtmgs --tag format_osts`, dir))
+		cmd = exec.Command(fmt.Sprintf(`/bin/bash -c "cd %s; . .venv/bin/activate; ansible-playbook dac.yml -i inventory --tag stop_osts --tag stop_mgsdt --tag umount_fs; ansible-playbook dac.yml -i inventory --tag format_mdtmgs --tag format_osts"`, dir))
 		output, err := cmd.CombinedOutput()
-		log.Println(output)
+		log.Println(string(output))
 		return err
 	}
 }

@@ -24,14 +24,12 @@ type volumeProvider struct{}
 
 func (*volumeProvider) SetupVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE SetupVolume for:", volume.Name)
-	executeTempAnsible(volume, brickAllocations, false)
-	return nil
+	return executeTempAnsible(volume, brickAllocations, false)
 }
 
 func (*volumeProvider) TeardownVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE TeardownVolume for:", volume.Name)
-	executeTempAnsible(volume, brickAllocations, true)
-	return nil
+	return executeTempAnsible(volume, brickAllocations, true)
 }
 
 func (*volumeProvider) CopyDataIn(volume registry.Volume) error {
