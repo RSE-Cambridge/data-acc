@@ -83,7 +83,7 @@ func printLustrePlaybook(volume registry.Volume) string {
 }
 
 func executeTempAnsible(volume registry.Volume, brickAllocations []registry.BrickAllocation, teardown bool) error {
-	dir, err := ioutil.TempDir("", fmt.Sprintf("fs%s", volume.Name))
+	dir, err := ioutil.TempDir("", fmt.Sprintf("fs%s_", volume.Name))
 	if err != nil {
 		return err
 	}
@@ -123,12 +123,16 @@ func executeTempAnsible(volume registry.Volume, brickAllocations []registry.Bric
 	}
 
 	if !teardown {
-		cmd = exec.Command(fmt.Sprintf(`/bin/bash -c "cd %s; . .venv/bin/activate; ansible-playbook dac.yml -i inventory --tag format_mdtmgs --tag format_osts; ansible-playbook yml -i inventory --tag start_osts --tag start_mgsdt --tag mount_fs"`, dir))
+		cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook dac.yml -i inventory --tag format_mdtmgs --tag format_osts; ansible-playbook yml -i inventory --tag start_osts --tag start_mgsdt --tag mount_fs`, dir)
+		log.Println(cmdStr)
+		cmd = exec.Command("bash", "-c", cmdStr)
 		output, err := cmd.CombinedOutput()
 		log.Println(string(output))
 		return err
 	} else {
-		cmd = exec.Command(fmt.Sprintf(`/bin/bash -c "cd %s; . .venv/bin/activate; ansible-playbook dac.yml -i inventory --tag stop_osts --tag stop_mgsdt --tag umount_fs; ansible-playbook dac.yml -i inventory --tag format_mdtmgs --tag format_osts"`, dir))
+		cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook dac.yml -i inventory --tag stop_osts --tag stop_mgsdt --tag umount_fs; ansible-playbook dac.yml -i inventory --tag format_mdtmgs --tag format_osts`, dir)
+		log.Println(cmdStr)
+		cmd = exec.Command("bash", "-c", cmdStr)
 		output, err := cmd.CombinedOutput()
 		log.Println(string(output))
 		return err
