@@ -5,6 +5,8 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/lifecycle"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"log"
+	"strings"
 	"time"
 )
 
@@ -13,6 +15,10 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry
 
 	job, err := volumeRegistry.Job(token)
 	if err != nil {
+		if strings.Contains(err.Error(), "unable to find any values for key") {
+			log.Println("Unable to find job, must be deleted already or never created.")
+			return nil
+		}
 		return err
 	}
 
