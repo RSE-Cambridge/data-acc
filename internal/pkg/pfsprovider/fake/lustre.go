@@ -151,6 +151,11 @@ func executeTempAnsible(volume registry.Volume, brickAllocations []registry.Bric
 }
 
 func executeAnsiblePlaybook(dir string, args string) error {
+	// TODO: downgrade debug log!
+	cmd := exec.Command("mount")
+	output, _ := cmd.CombinedOutput()
+	log.Println("Current mounts:", string(output))
+
 	cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook %s;`, dir, args)
 	log.Println("Starting ansible:", cmdStr)
 
