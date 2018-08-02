@@ -163,19 +163,8 @@
   become: true
   vars:
     nvme_devices:
-      - nvme0n1
-      - nvme1n1
-      - nvme2n1
-      - nvme3n1
-      - nvme4n1
-      - nvme5n1
-      - nvme6n1
-      - nvme7n1
-      - nvme8n1
       - nvme9n1
       - nvme10n1
-      - nvme11n1
-      - nvme12n1
   tasks:
     - yum:
         name: lvm2
@@ -205,3 +194,19 @@
       modprobe:
         name: lustre
         state: present
+
+- hosts: dac-workers
+  become: true
+  vars:
+    nvme_devices:
+        nvme1n1: "/dev/vdd"
+        nvme2n1: "/dev/vde"
+        nvme4n1: "/dev/vdf"
+        nvme4n1: "/dev/vdg"
+  tasks:
+    - name: create nvme symlinks
+      file:
+        src: "{{ item.value }}"
+        dest: "/dev/{{ item.key }}"
+        state: link
+      with_dict: "{{ nvme_devices }}"

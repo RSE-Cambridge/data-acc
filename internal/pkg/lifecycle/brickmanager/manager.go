@@ -56,7 +56,8 @@ const FakePoolName = "default"
 
 func getDevices() []string {
 	// TODO: check for real devices!
-	devices := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	//devices := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	devices := []int{1, 2, 3, 4}
 	var bricks []string
 	for _, i := range devices {
 		device := fmt.Sprintf(FakeDeviceAddress, i)
