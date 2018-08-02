@@ -152,25 +152,26 @@ func executeTempAnsible(volume registry.Volume, brickAllocations []registry.Bric
 
 func executeAnsiblePlaybook(dir string, args string) error {
 	// TODO: downgrade debug log!
-	cmd := exec.Command("mount")
-	output, _ := cmd.CombinedOutput()
-	log.Println("Current mounts:", string(output))
-
 	cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook %s;`, dir, args)
-	log.Println("Starting ansible:", cmdStr)
+	log.Println("Requested ansible:", cmdStr)
 
 	var err error
 	for i := 1; i <= 3; i++ {
-		cmd := exec.Command("bash", "-c", cmdStr)
-		output, err := cmd.CombinedOutput()
+		cmdMount := exec.Command("mount")
+		output, _ := cmdMount.CombinedOutput()
+		log.Println("Current mounts:", string(output))
 
-		if err == nil {
+		log.Println("Attempt", i, "of ansible:", cmdStr)
+		cmd := exec.Command("bash", "-c", cmdStr)
+		output, currentErr := cmd.CombinedOutput()
+
+		if currentErr == nil {
 			log.Println("Completed ansible run:", cmdStr)
 			log.Println(string(output))
 			return nil
 		} else {
 			log.Println("Error in ansible run:", string(output))
-			log.Println("Retry attempt:", i)
+			err = currentErr
 		}
 	}
 	return err
