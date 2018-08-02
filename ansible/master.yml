@@ -201,7 +201,7 @@
     nvme_devices:
         nvme1n1: "/dev/vdd"
         nvme2n1: "/dev/vde"
-        nvme4n1: "/dev/vdf"
+        nvme3n1: "/dev/vdf"
         nvme4n1: "/dev/vdg"
   tasks:
     - name: create nvme symlinks
