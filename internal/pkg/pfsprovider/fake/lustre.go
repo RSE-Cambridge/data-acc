@@ -88,10 +88,6 @@ func executeTempAnsible(volume registry.Volume, brickAllocations []registry.Bric
 		return err
 	}
 	log.Println("Using ansible tempdir:", dir)
-	if !teardown {
-		// TODO... do this properly!
-		defer os.RemoveAll(dir)
-	}
 
 	playbook := printLustrePlaybook(volume)
 	tmpPlaybook := filepath.Join(dir, "dac.yml")
@@ -110,31 +106,66 @@ func executeTempAnsible(volume registry.Volume, brickAllocations []registry.Bric
 	cmd := exec.Command("cp", "-r",
 		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment/roles", dir)
 	output, err := cmd.CombinedOutput()
-	log.Println(string(output))
+	log.Println("copy roles", string(output))
 	if err != nil {
 		return err
 	}
 	cmd = exec.Command("cp", "-r",
 		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment/.venv", dir)
 	output, err = cmd.CombinedOutput()
-	log.Println(string(output))
+	log.Println("copy venv", string(output))
 	if err != nil {
 		return err
 	}
 
 	if !teardown {
-		cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook dac.yml -i inventory --tag format_mdtmgs --tag format_osts; ansible-playbook dac.yml -i inventory --tag start_osts --tag start_mgsdt --tag mount_fs`, dir)
-		log.Println(cmdStr)
-		cmd = exec.Command("bash", "-c", cmdStr)
-		output, err := cmd.CombinedOutput()
-		log.Println(string(output))
-		return err
+		formatArgs := "dac.yml -i inventory --tag format_mdtmgs --tag format_osts"
+		err = executeAnsiblePlaybook(dir, formatArgs)
+		if err != nil {
+			return err
+		}
+
+		startupArgs := "dac.yml -i inventory --tag start_osts --tag start_mgsdt --tag mount_fs"
+		err = executeAnsiblePlaybook(dir, startupArgs)
+		if err != nil {
+			log.Println("Error running ansible, doing a retry:", err)
+			err = executeAnsiblePlaybook(dir, startupArgs)
+			if err != nil {
+				return err
+			}
+		}
+
 	} else {
-		cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook dac.yml -i inventory --tag stop_osts --tag stop_mgsdt --tag umount_fs; ansible-playbook dac.yml -i inventory --tag format_mdtmgs --tag format_osts`, dir)
-		log.Println(cmdStr)
-		cmd = exec.Command("bash", "-c", cmdStr)
-		output, err := cmd.CombinedOutput()
-		log.Println(string(output))
-		return err
+		stopArgs := "dac.yml -i inventory --tag stop_osts --tag stop_mgsdt --tag umount_fs"
+		err = executeAnsiblePlaybook(dir, stopArgs)
+		if err != nil {
+			log.Println("Error running ansible, doing a retry:", err)
+			err = executeAnsiblePlaybook(dir, stopArgs)
+			if err != nil {
+				return err
+			}
+		}
+
+		formatArgs := "dac.yml -i inventory --tag format_mdtmgs --tag format_osts"
+		err = executeAnsiblePlaybook(dir, formatArgs)
+		if err != nil {
+			return err
+		}
 	}
+
+	// only delete if everything worked, to aid debugging
+	os.RemoveAll(dir)
+	return nil
+}
+
+func executeAnsiblePlaybook(dir string, args string) error {
+	cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook %s;`, dir, args)
+	log.Println("Starting ansible:", cmdStr)
+
+	cmd := exec.Command("bash", "-c", cmdStr)
+	output, err := cmd.CombinedOutput()
+
+	log.Println("Completed ansible:", cmdStr)
+	log.Println(string(output))
+	return err
 }
