@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -176,7 +177,22 @@ func getVolumeKey(volumeName string) string {
 	return fmt.Sprintf("%s%s/", volumeKeyPrefix, volumeName)
 }
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func GetNewUUID() string {
+	b := make([]byte, 8)
+	for i := range b {
+		b[i] = letters[rand.Int63()%int64(len(letters))]
+	}
+	return string(b)
+}
+
 func (volRegistry *volumeRegistry) AddVolume(volume registry.Volume) error {
+	volume.UUID = GetNewUUID()
 	return volRegistry.keystore.Add([]KeyValue{{
 		Key:   getVolumeKey(string(volume.Name)),
 		Value: toJson(volume),

@@ -62,7 +62,7 @@ func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAl
 		Vars:  map[string]string{"mgsnode": mdt.Hostname},
 		Hosts: hosts,
 	}
-	fsname := fmt.Sprintf("fs%s", volume.Name)
+	fsname := fmt.Sprintf("fs%s", volume.UUID)
 	data := Wrapper{All: FileSystems{Children: map[string]FSInfo{fsname: fsinfo}}}
 
 	output, err := yaml.Marshal(data)
@@ -79,7 +79,7 @@ func printLustrePlaybook(volume registry.Volume) string {
   become: yes
   gather_facts: no
   roles:
-    - role: lustre`, volume.Name)
+    - role: lustre`, volume.UUID)
 }
 
 func executeTempAnsible(volume registry.Volume, brickAllocations []registry.BrickAllocation, teardown bool) error {

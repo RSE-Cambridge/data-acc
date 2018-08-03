@@ -86,6 +86,8 @@ type VolumeName string
 type Volume struct {
 	// e.g. job1 or Foo
 	Name VolumeName
+	// its 8 characters long, so works nicely with lustre
+	UUID string
 	// True if multiple jobs can attach to this volume
 	MultiJob bool
 
