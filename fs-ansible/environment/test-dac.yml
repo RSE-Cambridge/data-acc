@@ -3,11 +3,17 @@
   hosts: fs1
   become: yes
   gather_facts: no
+  vars:
+    - fsname: fs1
+    - mgsnode: dac1
   roles:
     - role: lustre
 - name: Install Lustre for fs2
   hosts: fs2
   become: yes
   gather_facts: no
+  vars:
+    - fsname: fs2
+    - mgsnode: dac1
   roles:
     - role: lustre

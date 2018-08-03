@@ -7,8 +7,6 @@ all:
           mdts: [nvme1n1]
         dac2:
           osts: {nvme3n1: 1}
-      vars: {mgsnode: dac1}
-
     fs2:
       hosts:
         dac1:
@@ -17,4 +15,3 @@ all:
           osts: {nvme4n1: 2}
         dac2:
           osts: {nvme2n1: 1}
-      vars: {mgsnode: dac1}
