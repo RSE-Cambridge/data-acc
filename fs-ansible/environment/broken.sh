@@ -2,6 +2,20 @@
 
 . .venv/bin/activate
 
+mount | grep lustre
+
+for i in $( ls /dev/nvme* ); do
+    echo dac1 $i
+    sudo e2label $i
+done
+
+ssh dac2 bash -c "mount | grep lustre"
+
+for i in $( ssh dac2 ls /dev/nvme* ); do
+    echo dac2 $i
+    ssh dac2 "sudo e2label $i"
+done
+
 set -eux
 
 echo Get FS1 up
