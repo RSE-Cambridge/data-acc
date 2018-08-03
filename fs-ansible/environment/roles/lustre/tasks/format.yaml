@@ -1,12 +1,18 @@
 ---
-- name: Format MDT/MGS
-  command: /usr/sbin/mkfs.lustre --mgs --mdt --reformat --fsname={{ group_names[0] }} --index={{ index }} --mgsnode={{ mgsnode }} /dev/{{ item }}
+- name: Format MGS
+  command: /usr/sbin/mkfs.lustre --mgs /dev/{{ mgs }}
+  when:
+    - mgs is defined
+  tags: [ 'never', 'format_mgs']
+
+- name: Format MDT
+  command: /usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ group_names[0] }} --index={{ index }} --mgsnode={{ mgsnode }} /dev/{{ item }}
   loop: "{{ mdts }}"
   loop_control:
     index_var: index
   when:
     - mdts is defined
-  tags: [ 'never', 'format_mdtmgs']
+  tags: [ 'never', 'format_mdts']
 
 - name: Format OSTs
   command: /usr/sbin/mkfs.lustre --ost --reformat --fsname={{ group_names[0] }} --index={{ item.value }} --mgsnode={{ mgsnode }} /dev/{{ item.key }}

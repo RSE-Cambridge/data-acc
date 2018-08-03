@@ -163,6 +163,7 @@
   become: true
   vars:
     nvme_devices:
+      - nvme0n1
       - nvme9n1
       - nvme10n1
   tasks:
