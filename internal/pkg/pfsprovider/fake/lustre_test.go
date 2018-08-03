@@ -56,6 +56,7 @@ func TestPlugin_PrintLustrePlaybook(t *testing.T) {
 	assert.Equal(t, `---
 - name: Install Lustre
   hosts: abcdefgh
+  any_errors_fatal: true
   become: yes
   gather_facts: no
   roles:

@@ -77,6 +77,7 @@ func printLustrePlaybook(volume registry.Volume) string {
 	return fmt.Sprintf(`---
 - name: Install Lustre
   hosts: %s
+  any_errors_fatal: true
   become: yes
   gather_facts: no
   roles:
