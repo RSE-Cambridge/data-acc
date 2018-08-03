@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -eux
-
 . .venv/bin/activate
+
+set -eux
 
 echo Get FS1 up
 echo
