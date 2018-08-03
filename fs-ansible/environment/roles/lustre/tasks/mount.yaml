@@ -1,7 +1,7 @@
 ---
 - name: load lustre module
   command: modprobe -v lustre
-  tags: [ 'never', 'start_lustre', 'start_mgs']
+  tags: [ 'never', 'start_lustre']
 
 
 - name: Start MGS
