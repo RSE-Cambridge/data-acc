@@ -248,7 +248,7 @@ func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, 
 	err := volRegistry.WaitForCondition(volumeName, func(old *registry.Volume, new *registry.Volume) bool {
 		return new.State == state
 	})
-	log.Println("Stopeed waiting for volume", volumeName, "to reach state", state, err.Error())
+	log.Println("Stopped waiting for volume", volumeName, "to reach state", state, err)
 	return err
 }
 
