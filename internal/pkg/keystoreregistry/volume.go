@@ -257,13 +257,18 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(1)
-	ctxt, cancelFunc := context.WithTimeout(context.Background(), time.Minute)
+	ctxt, cancelFunc := context.WithTimeout(context.Background(), time.Minute*10)
 	// TODO should we always need to call cancel? or is timeout enough?
 
 	err := fmt.Errorf("error waiting for volume %s to meet supplied condition", volumeName)
 
 	volRegistry.keystore.WatchKey(ctxt, getVolumeKey(string(volumeName)),
 		func(old *KeyValueVersion, new *KeyValueVersion) {
+			if old == nil && new == nil {
+				// TODO: attempt to signal error on timeout
+				cancelFunc()
+				waitGroup.Done()
+			}
 			oldVolume := &registry.Volume{}
 			newVolume := &registry.Volume{}
 			if old != nil {
@@ -292,6 +297,7 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 		return nil
 	}
 
+	// TODO do we get stuck in a forever loop here when we hit the timeout above?
 	waitGroup.Wait()
 	return err
 }

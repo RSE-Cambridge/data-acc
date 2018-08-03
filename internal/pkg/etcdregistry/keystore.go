@@ -182,6 +182,7 @@ func (client *etcKeystore) WatchKey(ctxt context.Context, key string,
 	go func() {
 		for watchResponse := range rch {
 			if watchResponse.Canceled {
+				onUpdate(nil, nil) // signal we are done
 				return
 			}
 			for _, ev := range watchResponse.Events {
