@@ -244,10 +244,12 @@ func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
 }
 
 func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, state registry.VolumeState) error {
-	log.Println("Waiting for volume", volumeName, "to reach state", state)
-	return volRegistry.WaitForCondition(volumeName, func(old *registry.Volume, new *registry.Volume) bool {
+	log.Println("Start waiting for volume", volumeName, "to reach state", state)
+	err := volRegistry.WaitForCondition(volumeName, func(old *registry.Volume, new *registry.Volume) bool {
 		return new.State == state
 	})
+	log.Println("Stopeed waiting for volume", volumeName, "to reach state", state, err.Error())
+	return err
 }
 
 func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeName,
