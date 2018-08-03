@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 )
 
 type HostInfo struct {
@@ -156,7 +157,7 @@ func executeAnsiblePlaybook(dir string, args string) error {
 	log.Println("Requested ansible:", cmdStr)
 
 	var err error
-	for i := 1; i <= 3; i++ {
+	for i := 1; i <= 5; i++ {
 		cmdMount := exec.Command("mount")
 		output, _ := cmdMount.CombinedOutput()
 		log.Println("Current mounts:", string(output))
@@ -172,6 +173,7 @@ func executeAnsiblePlaybook(dir string, args string) error {
 		} else {
 			log.Println("Error in ansible run:", string(output))
 			err = currentErr
+			time.Sleep(time.Second * 2)
 		}
 	}
 	return err
