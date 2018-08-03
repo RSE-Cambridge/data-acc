@@ -6,7 +6,7 @@
   tags: [ 'never', 'format_mgs']
 
 - name: Reformat MGS
-  command: /usr/sbin/mkfs.lustre --mgs /dev/{{ mgs }} --reformat
+  command: /usr/sbin/mkfs.lustre --mgs --reformat /dev/{{ mgs }}
   when:
     - mgs is defined
   tags: [ 'never', 'reformat_mgs']
