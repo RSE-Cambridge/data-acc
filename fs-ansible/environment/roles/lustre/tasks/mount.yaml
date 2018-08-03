@@ -112,10 +112,10 @@
   tags: [ 'never', 'stop_osts']
 
 
-- name: Stop MDT/MGS
+- name: Stop MDTs
   block:
-    - name: umount MDT/MGS
-      command: umount /lustre/{{ group_names[0] }}/MGSDT/{{ item }}
+    - name: umount MDTs
+      command: umount /lustre/{{ group_names[0] }}/MDT/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
@@ -123,11 +123,28 @@
 
     - name: Remove MGSDT mount dir
       file:
-        path: /lustre/{{ group_names[0] }}/MGSDT
+        path: /lustre/{{ group_names[0] }}/MDT
         state: absent
   when:
     - mdts is defined
-  tags: [ 'never', 'stop_mgsdt']
+  tags: [ 'never', 'stop_mdts']
+
+
+- name: Stop MGS
+  block:
+    - name: umount MGS
+      command: umount /lustre/MGS
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+
+    - name: Remove MGSDT mount dir
+      file:
+        path: /lustre/MGS
+        state: absent
+  when:
+    - mgs is defined
+  tags: [ 'never', 'stop_mgs']
 
 
 - name: umount all lustre
