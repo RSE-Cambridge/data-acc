@@ -26,14 +26,14 @@ cat /mnt/lustre/fs2/demo
 echo Get FS2 down
 
 ansible-playbook test-dac2.yml -i test-inventory2 --tag umount_fs --tag stop_osts --tag stop_mdts
-ansible-playbook test-dac2.yml -i test-inventory2 --tag reformat_mdts --tag reformat_osts
+#ansible-playbook test-dac2.yml -i test-inventory2 --tag reformat_mdts --tag reformat_osts
 
 cat /mnt/lustre/fs2/demo || true
 
 echo Get FS1 down
 
 ansible-playbook test-dac.yml -i test-inventory --tag umount_fs --tag stop_osts --tag stop_mdts
-ansible-playbook test-dac.yml -i test-inventory --tag reformat_mdts --tag reformat_osts
+#ansible-playbook test-dac.yml -i test-inventory --tag reformat_mdts --tag reformat_osts
 
 
 cat /mnt/lustre/fs1/demo || true
