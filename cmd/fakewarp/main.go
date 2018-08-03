@@ -5,6 +5,7 @@ import (
 	"github.com/urfave/cli"
 	"log"
 	"os"
+	"strings"
 )
 
 func stripFunctionArg(systemArgs []string) []string {
@@ -155,6 +156,15 @@ func runCli(args []string) error {
 }
 
 func main() {
+	f, err := os.OpenFile("/var/log/fakewarp.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+
+	log.SetOutput(f)
+	log.Println("fakewarp called with:", strings.Join(os.Args, " "))
+
 	if err := runCli(os.Args); err != nil {
 		log.Fatal(err)
 	}

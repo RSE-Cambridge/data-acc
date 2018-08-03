@@ -112,6 +112,10 @@ COPY bin/fakewarp /usr/local/bin/fakewarp
 RUN install -D -m755 /usr/local/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli
 COPY bin/data-acc-brick-host /usr/local/bin/data-acc-brick-host
 
+RUN touch /var/log/fakewarp.log \
+    && chown slurm /var/log/fakewarp.log \
+    && chgrp slurm /var/log/fakewarp.log
+
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
