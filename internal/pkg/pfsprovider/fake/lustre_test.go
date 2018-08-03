@@ -9,7 +9,7 @@ import (
 func TestPlugin_PrintLustreInfo(t *testing.T) {
 	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
 	brickAllocations := []registry.BrickAllocation{
-		{Hostname: "dac1", Device: "nvme0n1", AllocatedIndex: 0},
+		{Hostname: "dac1", Device: "nvme1n1", AllocatedIndex: 0},
 		{Hostname: "dac1", Device: "nvme2n1", AllocatedIndex: 1},
 		{Hostname: "dac1", Device: "nvme3n1", AllocatedIndex: 2},
 		{Hostname: "dac2", Device: "nvme2n1", AllocatedIndex: 3},
@@ -21,7 +21,8 @@ func TestPlugin_PrintLustreInfo(t *testing.T) {
     abcdefgh:
       hosts:
         dac1:
-          mdts: [nvme0n1]
+          mgs: nvme0n1
+          mdts: [nvme1n1]
           osts: {nvme2n1: 1, nvme3n1: 2}
         dac2:
           osts: {nvme2n1: 3, nvme3n1: 4}
@@ -33,7 +34,7 @@ func TestPlugin_PrintLustreInfo(t *testing.T) {
 func TestPlugin_PrintLustreInfo_Simple(t *testing.T) {
 	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
 	brickAllocations := []registry.BrickAllocation{
-		{Hostname: "dac1", Device: "nvme0n1", AllocatedIndex: 0},
+		{Hostname: "dac1", Device: "nvme1n1", AllocatedIndex: 0},
 		{Hostname: "dac2", Device: "nvme2n1", AllocatedIndex: 1},
 	}
 	result := printLustreInfo(volume, brickAllocations)
@@ -42,7 +43,8 @@ func TestPlugin_PrintLustreInfo_Simple(t *testing.T) {
     abcdefgh:
       hosts:
         dac1:
-          mdts: [nvme0n1]
+          mgs: nvme0n1
+          mdts: [nvme1n1]
         dac2:
           osts: {nvme2n1: 1}
       vars: {mgsnode: dac1}

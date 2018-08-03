@@ -14,6 +14,7 @@ import (
 )
 
 type HostInfo struct {
+	MGS  string         `yaml:"mgs,omitempty"`
 	MDTS []string       `yaml:"mdts,omitempty,flow"`
 	OSTS map[string]int `yaml:"osts,omitempty,flow"`
 }
@@ -56,6 +57,7 @@ func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAl
 		hostInfo := HostInfo{OSTS: osts}
 		if mdt.Hostname == host {
 			hostInfo.MDTS = []string{mdt.Device}
+			hostInfo.MGS = "nvme0n1" // TODO: horrible hack!!
 		}
 		hosts[host] = hostInfo
 	}
