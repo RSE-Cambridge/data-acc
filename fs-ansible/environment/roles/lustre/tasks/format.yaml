@@ -15,7 +15,7 @@
   tags: [ 'never', 'reformat_mgs']
 
 - name: Reformat MDT
-  command: /usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fsname }} --index={{ index }} --mgsnode={{ mgsnode }} /dev/{{ item }}
+  command: /usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ group_names[0] }} --index={{ index }} --mgsnode={{ mgsnode }} /dev/{{ item }}
   loop: "{{ mdts }}"
   loop_control:
     index_var: index
@@ -24,7 +24,7 @@
   tags: [ 'never', 'reformat_mdts']
 
 - name: Reformat OSTs
-  command: /usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fsname }} --index={{ item.value }} --mgsnode={{ mgsnode }} /dev/{{ item.key }}
+  command: /usr/sbin/mkfs.lustre --ost --reformat --fsname={{ group_names[0] }} --index={{ item.value }} --mgsnode={{ mgsnode }} /dev/{{ item.key }}
   loop: "{{ osts|default({})|dict2items }}"
   when:
     - osts is defined
