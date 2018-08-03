@@ -163,9 +163,12 @@ func main() {
 	defer f.Close()
 
 	log.SetOutput(f)
-	log.Println("fakewarp called with:", strings.Join(os.Args, " "))
+	log.Println("fakewarp start, called with:", strings.Join(os.Args, " "))
 
 	if err := runCli(os.Args); err != nil {
+		log.Println("fakewarp error, called with:", strings.Join(os.Args, " "))
 		log.Fatal(err)
+	} else {
+		log.Println("fakewarp complete, called with:", strings.Join(os.Args, " "))
 	}
 }

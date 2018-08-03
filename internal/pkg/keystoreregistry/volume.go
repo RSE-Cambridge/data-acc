@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"log"
 	"math/rand"
 	"sync"
 	"time"
@@ -243,6 +244,7 @@ func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
 }
 
 func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, state registry.VolumeState) error {
+	log.Println("Waiting for volume", volumeName, "to reach state", state)
 	return volRegistry.WaitForCondition(volumeName, func(old *registry.Volume, new *registry.Volume) bool {
 		return new.State == state
 	})
@@ -282,6 +284,7 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 		// NOTE this forces the volume to existing before you wait, seems OK
 		return err
 	}
+	log.Printf("About to wait for condition on volume: %s", volume)
 	if condition(&volume, &volume) {
 		cancelFunc()
 		return nil
