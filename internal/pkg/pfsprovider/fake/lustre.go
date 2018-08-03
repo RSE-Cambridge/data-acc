@@ -63,7 +63,7 @@ func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAl
 		Vars:  map[string]string{"mgsnode": mdt.Hostname},
 		Hosts: hosts,
 	}
-	fsname := fmt.Sprintf("fs%s", volume.UUID)
+	fsname := fmt.Sprintf("%s", volume.UUID)
 	data := Wrapper{All: FileSystems{Children: map[string]FSInfo{fsname: fsinfo}}}
 
 	output, err := yaml.Marshal(data)
@@ -76,7 +76,7 @@ func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAl
 func printLustrePlaybook(volume registry.Volume) string {
 	return fmt.Sprintf(`---
 - name: Install Lustre
-  hosts: fs%s
+  hosts: %s
   become: yes
   gather_facts: no
   roles:

@@ -7,7 +7,7 @@ import (
 )
 
 func TestPlugin_PrintLustreInfo(t *testing.T) {
-	volume := registry.Volume{Name: "1"}
+	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
 	brickAllocations := []registry.BrickAllocation{
 		{Hostname: "dac1", Device: "nvme0n1", AllocatedIndex: 0},
 		{Hostname: "dac1", Device: "nvme2n1", AllocatedIndex: 1},
@@ -18,7 +18,7 @@ func TestPlugin_PrintLustreInfo(t *testing.T) {
 	result := printLustreInfo(volume, brickAllocations)
 	expected := `all:
   children:
-    fs1:
+    abcdefgh:
       hosts:
         dac1:
           mdts: [nvme0n1]
@@ -31,7 +31,7 @@ func TestPlugin_PrintLustreInfo(t *testing.T) {
 }
 
 func TestPlugin_PrintLustreInfo_Simple(t *testing.T) {
-	volume := registry.Volume{Name: "1"}
+	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
 	brickAllocations := []registry.BrickAllocation{
 		{Hostname: "dac1", Device: "nvme0n1", AllocatedIndex: 0},
 		{Hostname: "dac2", Device: "nvme2n1", AllocatedIndex: 1},
@@ -39,7 +39,7 @@ func TestPlugin_PrintLustreInfo_Simple(t *testing.T) {
 	result := printLustreInfo(volume, brickAllocations)
 	expected := `all:
   children:
-    fs1:
+    abcdefgh:
       hosts:
         dac1:
           mdts: [nvme0n1]
@@ -51,11 +51,11 @@ func TestPlugin_PrintLustreInfo_Simple(t *testing.T) {
 }
 
 func TestPlugin_PrintLustrePlaybook(t *testing.T) {
-	volume := registry.Volume{Name: "1"}
+	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
 	result := printLustrePlaybook(volume)
 	assert.Equal(t, `---
 - name: Install Lustre
-  hosts: fs1
+  hosts: abcdefgh
   become: yes
   gather_facts: no
   roles:
