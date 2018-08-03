@@ -24,7 +24,7 @@
 
 - name: Start MDTs
   block:
-    - name: Create MGSDT mount dir
+    - name: Create MDT mount dir
       file:
         path: /lustre/{{ group_names[0] }}/MDT/{{ item }}
         state: directory
