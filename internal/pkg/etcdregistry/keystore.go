@@ -29,6 +29,7 @@ func getEndpoints() []string {
 func newEtcdClient() *clientv3.Client {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints: getEndpoints(),
+		DialTimeout: 10 * time.Second,
 	})
 	if err != nil {
 		fmt.Println("failed to create client")
@@ -181,10 +182,6 @@ func (client *etcKeystore) WatchKey(ctxt context.Context, key string,
 	rch := client.Watch(ctxt, key, clientv3.WithPrevKV())
 	go func() {
 		for watchResponse := range rch {
-			if watchResponse.Canceled {
-				onUpdate(nil, nil) // signal we are done
-				return
-			}
 			for _, ev := range watchResponse.Events {
 				new := getKeyValueVersion(ev.Kv)
 				if new != nil && new.CreateRevision == 0 {
@@ -193,9 +190,11 @@ func (client *etcKeystore) WatchKey(ctxt context.Context, key string,
 				}
 				old := getKeyValueVersion(ev.PrevKv)
 
-				onUpdate(old, new)
+				onUpdate(old, new) // TODO if returns something cancel context? duno?
 			}
 		}
+		// TODO... chanel to receiver instead? // TODO... what about watchResponse.Cancelled or Err()?
+		onUpdate(nil, nil) // signal we are done
 	}()
 }
 
