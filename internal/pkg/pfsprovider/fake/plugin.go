@@ -34,16 +34,35 @@ func (*volumeProvider) TeardownVolume(volume registry.Volume, brickAllocations [
 	return executeTempAnsible(volume, brickAllocations, true)
 }
 
-func (*volumeProvider) CopyDataIn(volume registry.Volume) error {
-	log.Println("FAKE CopyDataIn for:", volume.Name)
-	log.Println(volume.StageIn)
+func processDataCopy(volumeName registry.VolumeName, request registry.DataCopyRequest) error {
+	if request.Source == "" && request.Destination == "" {
+		log.Println("No files to copy for:", volumeName)
+		return nil
+	}
+
+	var flags string
+	if request.SourceType != registry.Directory {
+		flags = "-r"
+	} else if request.SourceType == registry.File {
+		flags = ""
+	} else {
+		log.Println("Unspported source type", request.SourceType, "for volume:", volumeName)
+		return nil
+	}
+
+	log.Printf("FAKE rsync %s %s %s", flags, request.Source, request.Destination)
 	return nil
+}
+
+func (*volumeProvider) CopyDataIn(volume registry.Volume) error {
+	// TODO we should support multiple stagein commands! oops!
+	log.Println("FAKE CopyDataIn for:", volume.Name)
+	return processDataCopy(volume.Name, volume.StageIn)
 }
 
 func (*volumeProvider) CopyDataOut(volume registry.Volume) error {
 	log.Println("FAKE CopyDataOut for:", volume.Name)
-	log.Println(volume.StageOut)
-	return nil
+	return processDataCopy(volume.Name, volume.StageOut)
 }
 
 type mounter struct{}
