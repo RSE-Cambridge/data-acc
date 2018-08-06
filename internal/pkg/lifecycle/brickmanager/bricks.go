@@ -4,6 +4,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/pfsprovider/fake"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
+	"strings"
 )
 
 func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry,
@@ -26,7 +27,9 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 
 	allocations, err := poolRegistry.GetAllocationsForHost(hostname)
 	if err != nil {
-		log.Panic(err)
+		if !strings.Contains(err.Error(), "unable to find any values") {
+			log.Panic(err)
+		}
 	}
 
 	for _, allocation := range allocations {
