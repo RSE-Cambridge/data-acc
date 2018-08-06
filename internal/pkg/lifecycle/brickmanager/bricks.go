@@ -23,6 +23,31 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 				}
 			}
 		})
+
+	allocations, err := poolRegistry.GetAllocationsForHost(hostname)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	for _, allocation := range allocations {
+		if allocation.AllocatedIndex == 0 {
+			volume, err := volumeRegistry.Volume(allocation.AllocatedVolume)
+			if err != nil {
+				log.Panicf("unable to find volume for allocation %s", allocation)
+			}
+			log.Println("We host a primary brick for:", volume.Name, volume)
+			if volume.State == registry.BricksProvisioned || volume.State == registry.DataInComplete {
+				log.Println("Start watch for changes to volume again:", volume.Name)
+				watchForVolumeChanges(poolRegistry, volumeRegistry, volume)
+			}
+			if volume.State == registry.DeleteRequested {
+				log.Println("Complete pending delete request for volume:", volume.Name)
+				processDelete(poolRegistry, volumeRegistry, volume)
+			}
+		}
+	}
+
+	// TODO what about catching up with changes while we were down, make sure system in correct state!!
 }
 
 func processNewPrimaryBlock(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry,
@@ -34,6 +59,15 @@ func processNewPrimaryBlock(poolRegistry registry.PoolRegistry, volumeRegistry r
 	}
 	log.Println("Found new volume to watch:", volume.Name)
 	log.Println(volume)
+
+	watchForVolumeChanges(poolRegistry, volumeRegistry, volume)
+
+	// Move to new state, ignored by above watch
+	provisionNewVolume(poolRegistry, volumeRegistry, volume)
+}
+
+func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry,
+	volume registry.Volume) {
 
 	// TODO: watch from version associated with above volume to avoid any missed events
 	// TODO: leaking goroutines here, should cancel the watch when volume is deleted
@@ -87,9 +121,6 @@ func processNewPrimaryBlock(poolRegistry registry.PoolRegistry, volumeRegistry r
 			// TODO spot data in or data out requested?
 		}
 	})
-
-	// Move to new state, ignored by above watch
-	provisionNewVolume(poolRegistry, volumeRegistry, volume)
 }
 
 func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume, err error) {
