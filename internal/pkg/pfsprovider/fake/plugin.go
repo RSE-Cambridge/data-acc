@@ -48,6 +48,13 @@ func (*volumeProvider) CopyDataOut(volume registry.Volume) error {
 
 type mounter struct{}
 
+func getMountDir(volume registry.Volume) string {
+	if volume.MultiJob {
+		return fmt.Sprintf("/mnt/multi_job_buffer/%s", volume.UUID)
+	}
+	return fmt.Sprintf("/mnt/job_buffer/%s", volume.UUID)
+}
+
 func (*mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE Mount for:", volume.Name)
 
@@ -63,22 +70,17 @@ func (*mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickA
 		log.Panicf("failed to find primary brick for volume: %s", volume.Name)
 	}
 
-	var mountDir string
-	if volume.MultiJob {
-		mountDir = fmt.Sprintf("/mnt/multi_job_buffer/%s", volume.UUID)
-	} else {
-		mountDir = fmt.Sprintf("/mnt/job_buffer/%s", volume.UUID)
-	}
+	var mountDir = getMountDir(volume)
 	for _, attachment := range volume.Attachments {
-		log.Printf("Fake ssh %s mount -t lustre %s:/%s %s",
-			primaryBrickHost, attachment.Hostname, volume.UUID, mountDir)
+		log.Printf("FAKE ssh %s mount -t lustre %s:/%s %s",
+			attachment.Hostname, primaryBrickHost, volume.UUID, mountDir)
 		// TODO: what about the environment variables that are being set? should share logic with here
 
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
 			swapDir := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname))
-			log.Printf("dd if=/dev/zero of=%s bs=1024 count=%d && chmod 0600 %s && mkswap %s",
+			log.Printf("FAKE dd if=/dev/zero of=%s bs=1024 count=%d && chmod 0600 %s && mkswap %s",
 				swapDir, int(volume.AttachAsSwapBytes/1024), swapDir, swapDir)
-			log.Printf("swapon %s", swapDir)
+			log.Printf("FAKE swapon %s", swapDir)
 		}
 
 		if !volume.MultiJob && volume.AttachPrivateNamespace {
@@ -96,7 +98,7 @@ func (*mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickA
 
 func (*mounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE Umount for:", volume.Name)
-	mountDir := fmt.Sprintf("/mnt/lustre/%s", volume.Name) // TODO fix to match above in func
+	var mountDir = getMountDir(volume)
 	for _, attachment := range volume.Attachments {
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
 			swapDir := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname))
