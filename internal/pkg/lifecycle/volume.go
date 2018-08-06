@@ -258,7 +258,7 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string) error {
 	}
 	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, updates)
 
-	return vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
+	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
 		allDettached := false
 		for _, host := range hosts {
 			attachment, ok := new.Attachments[host]
@@ -271,6 +271,12 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string) error {
 		}
 		return allDettached
 	})
+	if err != nil {
+		return err
+	}
+
+	// Delete attachments, so we can easily detect new multi-job volume attachments
+	return vlm.volumeRegistry.DeleteVolumeAttachments(vlm.volume.Name, hosts)
 }
 
 func (vlm *volumeLifecycleManager) DataOut() error {

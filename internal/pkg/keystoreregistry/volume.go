@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
@@ -131,6 +132,26 @@ func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeN
 		} else {
 			for key, value := range attachments {
 				volume.Attachments[key] = value
+			}
+		}
+		return nil
+	}
+	return volRegistry.updateVolume(name, update)
+}
+
+func (volRegistry *volumeRegistry) DeleteVolumeAttachments(name registry.VolumeName, hostnames []string) error {
+
+	update := func(volume *registry.Volume) error {
+		if volume.Attachments == nil {
+			return errors.New("no attachments to delete")
+		} else {
+			for _, hostname := range hostnames {
+				_, ok := volume.Attachments[hostname]
+				if ok {
+					delete(volume.Attachments, hostname)
+				} else {
+					return fmt.Errorf("unable to find attachment for volume %s and host %s", name, hostname)
+				}
 			}
 		}
 		return nil

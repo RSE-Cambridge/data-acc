@@ -82,27 +82,27 @@ func (m *MockVolumeProvider) EXPECT() *MockVolumeProviderMockRecorder {
 }
 
 // SetupVolume mocks base method
-func (m *MockVolumeProvider) SetupVolume(volume registry.Volume) error {
-	ret := m.ctrl.Call(m, "SetupVolume", volume)
+func (m *MockVolumeProvider) SetupVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	ret := m.ctrl.Call(m, "SetupVolume", volume, brickAllocations)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SetupVolume indicates an expected call of SetupVolume
-func (mr *MockVolumeProviderMockRecorder) SetupVolume(volume interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetupVolume", reflect.TypeOf((*MockVolumeProvider)(nil).SetupVolume), volume)
+func (mr *MockVolumeProviderMockRecorder) SetupVolume(volume, brickAllocations interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetupVolume", reflect.TypeOf((*MockVolumeProvider)(nil).SetupVolume), volume, brickAllocations)
 }
 
 // TeardownVolume mocks base method
-func (m *MockVolumeProvider) TeardownVolume(volume registry.Volume) error {
-	ret := m.ctrl.Call(m, "TeardownVolume", volume)
+func (m *MockVolumeProvider) TeardownVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	ret := m.ctrl.Call(m, "TeardownVolume", volume, brickAllocations)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // TeardownVolume indicates an expected call of TeardownVolume
-func (mr *MockVolumeProviderMockRecorder) TeardownVolume(volume interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TeardownVolume", reflect.TypeOf((*MockVolumeProvider)(nil).TeardownVolume), volume)
+func (mr *MockVolumeProviderMockRecorder) TeardownVolume(volume, brickAllocations interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TeardownVolume", reflect.TypeOf((*MockVolumeProvider)(nil).TeardownVolume), volume, brickAllocations)
 }
 
 // CopyDataIn mocks base method
@@ -153,25 +153,25 @@ func (m *MockMounter) EXPECT() *MockMounterMockRecorder {
 }
 
 // Mount mocks base method
-func (m *MockMounter) Mount(volume registry.Volume) error {
-	ret := m.ctrl.Call(m, "Mount", volume)
+func (m *MockMounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	ret := m.ctrl.Call(m, "Mount", volume, brickAllocations)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Mount indicates an expected call of Mount
-func (mr *MockMounterMockRecorder) Mount(volume interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mount", reflect.TypeOf((*MockMounter)(nil).Mount), volume)
+func (mr *MockMounterMockRecorder) Mount(volume, brickAllocations interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mount", reflect.TypeOf((*MockMounter)(nil).Mount), volume, brickAllocations)
 }
 
 // Unmount mocks base method
-func (m *MockMounter) Unmount(volume registry.Volume) error {
-	ret := m.ctrl.Call(m, "Unmount", volume)
+func (m *MockMounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	ret := m.ctrl.Call(m, "Unmount", volume, brickAllocations)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Unmount indicates an expected call of Unmount
-func (mr *MockMounterMockRecorder) Unmount(volume interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unmount", reflect.TypeOf((*MockMounter)(nil).Unmount), volume)
+func (mr *MockMounterMockRecorder) Unmount(volume, brickAllocations interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unmount", reflect.TypeOf((*MockMounter)(nil).Unmount), volume, brickAllocations)
 }

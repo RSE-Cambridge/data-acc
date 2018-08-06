@@ -169,6 +169,18 @@ func (mr *MockVolumeRegistryMockRecorder) UpdateVolumeAttachments(name, attachme
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateVolumeAttachments", reflect.TypeOf((*MockVolumeRegistry)(nil).UpdateVolumeAttachments), name, attachments)
 }
 
+// DeleteVolumeAttachments mocks base method
+func (m *MockVolumeRegistry) DeleteVolumeAttachments(name registry.VolumeName, hostnames []string) error {
+	ret := m.ctrl.Call(m, "DeleteVolumeAttachments", name, hostnames)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteVolumeAttachments indicates an expected call of DeleteVolumeAttachments
+func (mr *MockVolumeRegistryMockRecorder) DeleteVolumeAttachments(name, hostnames interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteVolumeAttachments", reflect.TypeOf((*MockVolumeRegistry)(nil).DeleteVolumeAttachments), name, hostnames)
+}
+
 // WaitForState mocks base method
 func (m *MockVolumeRegistry) WaitForState(name registry.VolumeName, state registry.VolumeState) error {
 	ret := m.ctrl.Call(m, "WaitForState", name, state)

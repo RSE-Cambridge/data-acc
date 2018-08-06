@@ -44,6 +44,9 @@ type VolumeRegistry interface {
 	// if attachment doesn't exist, attachment is added
 	UpdateVolumeAttachments(name VolumeName, attachments map[string]Attachment) error
 
+	// Delete all the specified attachments
+	DeleteVolumeAttachments(name VolumeName, hostnames []string) error
+
 	// Wait for a specific state, error returned if not possible
 	WaitForState(name VolumeName, state VolumeState) error
 
