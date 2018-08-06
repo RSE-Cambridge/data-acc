@@ -162,6 +162,14 @@ func main() {
 	}
 	defer f.Close()
 
+	// be sure to log any panic
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Panic detected:", r)
+			panic(r)
+		}
+	}()
+
 	log.SetOutput(f)
 	log.Println("fakewarp start, called with:", strings.Join(os.Args, " "))
 

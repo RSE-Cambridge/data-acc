@@ -262,12 +262,17 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 
 	err := fmt.Errorf("error waiting for volume %s to meet supplied condition", volumeName)
 
+	var finished bool
 	volRegistry.keystore.WatchKey(ctxt, getVolumeKey(string(volumeName)),
 		func(old *KeyValueVersion, new *KeyValueVersion) {
 			if old == nil && new == nil {
-				// TODO: attempt to signal error on timeout
+				// TODO: attempt to signal error on timeout, should move to channel!!
 				cancelFunc()
-				waitGroup.Done()
+				if !finished {
+					// at the end we always get called with nil, nil
+					// but sometimes we will have already found the condition
+					waitGroup.Done()
+				}
 			}
 			oldVolume := &registry.Volume{}
 			newVolume := &registry.Volume{}
@@ -282,6 +287,7 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 				err = nil
 				cancelFunc()
 				waitGroup.Done()
+				finished = true
 			}
 		})
 
