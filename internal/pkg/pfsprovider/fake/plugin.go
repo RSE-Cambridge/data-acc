@@ -48,8 +48,21 @@ func (*volumeProvider) CopyDataOut(volume registry.Volume) error {
 
 type mounter struct{}
 
-func (*mounter) Mount(volume registry.Volume) error {
+func (*mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE Mount for:", volume.Name)
+
+	var primaryBrickHost string
+	for _, allocation := range brickAllocations {
+		if allocation.AllocatedIndex == 0 {
+			primaryBrickHost = allocation.Hostname
+			break
+		}
+	}
+
+	if primaryBrickHost == "" {
+		log.Panicf("failed to find primary brick for volume: %s", volume.Name)
+	}
+
 	var mountDir string
 	if volume.MultiJob {
 		mountDir = fmt.Sprintf("/mnt/multi_job_buffer/%s", volume.UUID)
@@ -57,8 +70,8 @@ func (*mounter) Mount(volume registry.Volume) error {
 		mountDir = fmt.Sprintf("/mnt/job_buffer/%s", volume.UUID)
 	}
 	for _, attachment := range volume.Attachments {
-		// TODO: need brick directory
-		log.Printf("Fake ssh %s mount -t lustre TODO:/%s %s", attachment.Hostname, volume.UUID, mountDir)
+		log.Printf("Fake ssh %s mount -t lustre %s:/%s %s",
+			primaryBrickHost, attachment.Hostname, volume.UUID, mountDir)
 		// TODO: what about the environment variables that are being set? should share logic with here
 
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
@@ -81,7 +94,7 @@ func (*mounter) Mount(volume registry.Volume) error {
 	return nil
 }
 
-func (*mounter) Unmount(volume registry.Volume) error {
+func (*mounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE Umount for:", volume.Name)
 	mountDir := fmt.Sprintf("/mnt/lustre/%s", volume.Name) // TODO fix to match above in func
 	for _, attachment := range volume.Attachments {

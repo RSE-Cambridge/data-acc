@@ -22,6 +22,6 @@ type VolumeProvider interface {
 // Actions that are sent to remote hosts,
 // typically compute nodes and primary brick hosts
 type Mounter interface {
-	Mount(volume registry.Volume) error
-	Unmount(volume registry.Volume) error
+	Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error
+	Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error
 }

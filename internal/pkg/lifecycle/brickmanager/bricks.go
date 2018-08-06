@@ -68,7 +68,7 @@ func processNewPrimaryBlock(poolRegistry registry.PoolRegistry, volumeRegistry r
 					}
 				}
 				if len(attachRequested) > 0 {
-					processAttach(volumeRegistry, *new, attachRequested)
+					processAttach(poolRegistry, volumeRegistry, *new, attachRequested)
 				}
 			}
 
@@ -80,7 +80,7 @@ func processNewPrimaryBlock(poolRegistry registry.PoolRegistry, volumeRegistry r
 					}
 				}
 				if len(detachRequested) > 0 {
-					processDetach(volumeRegistry, *new, detachRequested)
+					processDetach(poolRegistry, volumeRegistry, *new, detachRequested)
 				}
 			}
 
@@ -138,10 +138,16 @@ func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volum
 	handleError(volumeRegistry, volume, err)
 }
 
-func processAttach(volumeRegistry registry.VolumeRegistry, volume registry.Volume,
+func processAttach(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume,
 	attachments map[string]registry.Attachment) {
 
-	err := plugin.Mounter().Mount(volume) // TODO pass down specific attachments?
+	bricks, err := poolRegistry.GetAllocationsForVolume(volume.Name)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+		return
+	}
+
+	err = plugin.Mounter().Mount(volume, bricks) // TODO pass down specific attachments?
 	if err != nil {
 		handleError(volumeRegistry, volume, err)
 		return
@@ -157,10 +163,16 @@ func processAttach(volumeRegistry registry.VolumeRegistry, volume registry.Volum
 	volumeRegistry.UpdateVolumeAttachments(volume.Name, updates)
 }
 
-func processDetach(volumeRegistry registry.VolumeRegistry, volume registry.Volume,
+func processDetach(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume,
 	attachments map[string]registry.Attachment) {
 
-	err := plugin.Mounter().Unmount(volume) // TODO pass down specific attachments?
+	bricks, err := poolRegistry.GetAllocationsForVolume(volume.Name)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+		return
+	}
+
+	err = plugin.Mounter().Unmount(volume, bricks) // TODO pass down specific attachments?
 	if err != nil {
 		// TODO: update specific attachment into an error state?
 		handleError(volumeRegistry, volume, err)
