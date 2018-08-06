@@ -247,10 +247,10 @@ func (volRegistry *volumeRegistry) DeleteVolume(name registry.VolumeName) error 
 }
 
 func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
-	callback func(old *registry.Volume, new *registry.Volume)) error {
+	callback func(old *registry.Volume, new *registry.Volume) bool) error {
 	key := getVolumeKey(volumeName)
-	volRegistry.keystore.WatchPrefix(key, func(old *KeyValueVersion, new *KeyValueVersion) {
-		// TODO watching prefix but really just want to watch a key
+	ctxt, cancelFunc := context.WithCancel(context.Background())
+	volRegistry.keystore.WatchKey(ctxt, key, func(old *KeyValueVersion, new *KeyValueVersion) {
 		oldVolume := &registry.Volume{}
 		newVolume := &registry.Volume{}
 		if old != nil {
@@ -259,7 +259,10 @@ func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
 		if new != nil {
 			volumeFromKeyValue(*new, newVolume)
 		}
-		callback(oldVolume, newVolume)
+		if callback(oldVolume, newVolume) {
+			log.Println("stopping watching volume", volumeName)
+			cancelFunc()
+		}
 	})
 	return nil // TODO check key is present
 }

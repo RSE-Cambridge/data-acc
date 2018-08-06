@@ -73,8 +73,7 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 	volume registry.Volume) {
 
 	// TODO: watch from version associated with above volume to avoid any missed events
-	// TODO: leaking goroutines here, should cancel the watch when volume is deleted
-	volumeRegistry.WatchVolumeChanges(string(volume.Name), func(old *registry.Volume, new *registry.Volume) {
+	volumeRegistry.WatchVolumeChanges(string(volume.Name), func(old *registry.Volume, new *registry.Volume) bool {
 		if old != nil && new != nil {
 			if new.State != old.State {
 				switch new.State {
@@ -85,8 +84,8 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 				case registry.DeleteRequested:
 					processDelete(poolRegistry, volumeRegistry, *new)
 				case registry.BricksDeleted:
-					// TODO: we should stop watching the volume now!!?
-					log.Println("Volume deleted, need to stop listening now.")
+					log.Println("Volume", new.Name, "deleted, stop listening for events now.")
+					return true
 				default:
 					// Ignore the state changes we triggered
 					log.Println(". ingore volume:", volume.Name, "state move:", old.State, "->", new.State)
@@ -123,9 +122,9 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 					processDetach(poolRegistry, volumeRegistry, *new, detachRequested)
 				}
 			}
-
-			// TODO spot data in or data out requested?
 		}
+		// keep watching
+		return false
 	})
 }
 

@@ -206,7 +206,7 @@ func (mr *MockVolumeRegistryMockRecorder) WaitForCondition(volumeName, condition
 }
 
 // WatchVolumeChanges mocks base method
-func (m *MockVolumeRegistry) WatchVolumeChanges(volumeName string, callback func(*registry.Volume, *registry.Volume)) error {
+func (m *MockVolumeRegistry) WatchVolumeChanges(volumeName string, callback func(*registry.Volume, *registry.Volume) bool) error {
 	ret := m.ctrl.Call(m, "WatchVolumeChanges", volumeName, callback)
 	ret0, _ := ret[0].(error)
 	return ret0

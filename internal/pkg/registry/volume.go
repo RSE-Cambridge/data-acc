@@ -57,7 +57,7 @@ type VolumeRegistry interface {
 	// Get all callback on all volume changes
 	// If the volume is new, old = nil
 	// used by the primary brick to get volume updates
-	WatchVolumeChanges(volumeName string, callback func(old *Volume, new *Volume)) error
+	WatchVolumeChanges(volumeName string, callback func(old *Volume, new *Volume) bool) error
 }
 
 // TODO: Attachment request, or session is probably a better name here...
