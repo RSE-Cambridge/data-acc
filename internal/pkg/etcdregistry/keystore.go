@@ -28,7 +28,7 @@ func getEndpoints() []string {
 
 func newEtcdClient() *clientv3.Client {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints: getEndpoints(),
+		Endpoints:   getEndpoints(),
 		DialTimeout: 10 * time.Second,
 	})
 	if err != nil {
