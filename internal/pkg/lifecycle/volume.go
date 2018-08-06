@@ -220,9 +220,6 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 		return nil
 	}
 
-	if vlm.volume.Attachments != nil {
-		return fmt.Errorf("per job volume already attached")
-	}
 	attachments := make(map[string]registry.Attachment)
 	for _, host := range hosts {
 		attachments[host] = registry.Attachment{Hostname: host, State: registry.RequestAttach}
