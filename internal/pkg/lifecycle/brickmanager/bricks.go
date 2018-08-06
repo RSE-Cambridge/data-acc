@@ -84,6 +84,9 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 					processDataOut(volumeRegistry, *new)
 				case registry.DeleteRequested:
 					processDelete(poolRegistry, volumeRegistry, *new)
+				case registry.BricksDeleted:
+					// TODO: we should stop watching the volume now!!?
+					log.Println("Volume deleted, need to stop listening now.")
 				default:
 					// Ignore the state changes we triggered
 					log.Println(". ingore volume:", volume.Name, "state move:", old.State, "->", new.State)
