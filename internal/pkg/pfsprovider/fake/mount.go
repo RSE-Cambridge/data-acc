@@ -86,6 +86,7 @@ func removeSubtree(hostname string, directory string) error {
 }
 
 func mountLustre(hostname string, mgtHost string, fsname string, directory string) error {
+	return remoteExecuteCmd(hostname, "modprobe -v lustre")
 	return remoteExecuteCmd(hostname, fmt.Sprintf(
 		"mount -t lustre %s:/%s %s", mgtHost, fsname, directory))
 }

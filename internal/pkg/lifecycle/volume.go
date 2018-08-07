@@ -173,7 +173,13 @@ func getBricksForBuffer(poolRegistry registry.PoolRegistry,
 
 func (vlm *volumeLifecycleManager) Delete() error {
 	// TODO convert errors into volume related errors, somewhere?
-	if vlm.volume.SizeBricks != 0 {
+	log.Println("Deleting volume:", vlm.volume.Name, vlm.volume)
+
+	if vlm.volume.SizeBricks == 0 {
+		log.Println("No bricks to delete, skipping request delete bricks for:", vlm.volume.Name)
+
+	} else {
+		log.Printf("Requested delete of %d bricks for %s", vlm.volume.SizeBricks, vlm.volume.Name)
 		err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.DeleteRequested)
 		if err != nil {
 			return err
@@ -182,6 +188,7 @@ func (vlm *volumeLifecycleManager) Delete() error {
 		if err != nil {
 			return err
 		}
+		log.Println("Bricks deleted by brick manager for:", vlm.volume.Name)
 
 		// TODO should we error out here when one of these steps fail?
 		err = vlm.poolRegistry.DeallocateBricks(vlm.volume.Name)
@@ -197,7 +204,10 @@ func (vlm *volumeLifecycleManager) Delete() error {
 		if err != nil {
 			return err
 		}
+		log.Println("Allocations all deleted, count:", len(allocations))
 	}
+
+	log.Println("Deleting volume record in registry for:", vlm.volume.Name)
 	return vlm.volumeRegistry.DeleteVolume(vlm.volume.Name)
 }
 
