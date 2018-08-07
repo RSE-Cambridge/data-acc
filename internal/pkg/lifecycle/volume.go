@@ -219,6 +219,9 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 		log.Println("skipping mount for:", vlm.volume.Name) // TODO: should never happen now?
 		return nil
 	}
+	if vlm.volume.State != registry.BricksProvisioned && vlm.volume.State != registry.DataInComplete {
+		return fmt.Errorf("unable to mount volume: %s in state: %s", vlm.volume.Name, vlm.volume.State)
+	}
 
 	attachments := make(map[string]registry.Attachment)
 	for _, host := range hosts {
@@ -226,7 +229,12 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 	}
 	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, attachments)
 
-	return vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
+	var volumeInErrorState bool
+	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
+		if new.State == registry.Error {
+			volumeInErrorState = true
+			return true
+		}
 		allAttached := false
 		for _, host := range hosts {
 			attachment, ok := new.Attachments[host]
@@ -239,12 +247,19 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 		}
 		return allAttached
 	})
+	if volumeInErrorState {
+		return fmt.Errorf("unable to mount volume: %s", vlm.volume.Name)
+	}
+	return err
 }
 
 func (vlm *volumeLifecycleManager) Unmount(hosts []string) error {
 	if vlm.volume.SizeBricks == 0 {
 		log.Println("skipping postrun for:", vlm.volume.Name) // TODO return error type and handle outside?
 		return nil
+	}
+	if vlm.volume.State != registry.BricksProvisioned && vlm.volume.State != registry.DataInComplete {
+		return fmt.Errorf("unable to unmount volume: %s in state: %s", vlm.volume.Name, vlm.volume.State)
 	}
 
 	updates := make(map[string]registry.Attachment)
