@@ -24,12 +24,20 @@ func (s jobSummary) String() string {
 
 // Parse a given job file
 func ParseJobFile(disk fileio.Disk, filename string) (jobSummary, error) {
-	var summary jobSummary
 	lines, err := disk.Lines(filename)
+	if err != nil {
+		return jobSummary{}, err
+	}
+	return getJobSummary(lines)
+}
+
+func getJobSummary(lines []string) (jobSummary, error) {
+	var summary jobSummary
+	jobCommands, err := parseJobRequest(lines)
 	if err != nil {
 		return summary, err
 	}
-	jobCommands, err := parseJobRequest(lines)
+
 	for _, cmd := range jobCommands {
 		switch c := cmd.(type) {
 		case cmdPerJobBuffer:
@@ -62,7 +70,7 @@ func ParseJobFile(disk fileio.Disk, filename string) (jobSummary, error) {
 			// do nothing
 		}
 	}
-	return summary, err
+	return summary, nil
 }
 
 type jobCommand interface{}

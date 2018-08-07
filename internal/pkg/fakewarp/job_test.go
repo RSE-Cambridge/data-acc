@@ -31,3 +31,19 @@ func TestParseJobRequest(t *testing.T) {
 		}
 	}
 }
+
+func TestGetJobSummary(t *testing.T) {
+	lines := []string{
+		`#DW persistentdw name=myBBname1`,
+		`#DW persistentdw name=myBBname2`,
+		`#DW jobdw capacity=4TiB access_mode=striped,private type=scratch`,
+		`#DW swap 3TiB`,
+		`#DW stage_in source=/global/cscratch1/filename1 destination=$DW_JOB_STRIPED/filename1 type=file`,
+		`#DW stage_out source=$DW_JOB_STRIPED/outdir destination=/global/scratch1/outdir type=directory`,
+	}
+	result, err := getJobSummary(lines)
+
+	assert.Nil(t, err)
+	assert.EqualValues(t, "/global/cscratch1/filename1", result.DataIn.Source)
+	assert.EqualValues(t, "$DW_JOB_STRIPED/outdir", result.DataOut.Source)
+}
