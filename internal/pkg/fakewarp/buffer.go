@@ -60,6 +60,7 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 
 	for _, attachment := range summary.Attachments {
 		name := registry.VolumeName(attachment.Name)
+		// TODO: need to check permissions and not just
 		_, err := volumeRegistry.Volume(name)
 		if err != nil {
 			return err
