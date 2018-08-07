@@ -40,23 +40,37 @@ func mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) 
 		}
 
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
-			swapDir := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname))
+			swapDir := path.Join(mountDir, "/swap")
+			if err := mkdir(attachment.Hostname, swapDir); err != nil {
+				return err
+			}
+			swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
 			log.Printf("FAKE dd if=/dev/zero of=%s bs=1024 count=%d && chmod 0600 %s && mkswap %s",
-				swapDir, int(volume.AttachAsSwapBytes/1024), swapDir, swapDir)
-			log.Printf("FAKE swapon %s", swapDir)
+				swapFile, int(volume.AttachAsSwapBytes/1024), swapFile, swapFile)
+			log.Printf("FAKE swapon %s", swapFile)
 		}
 
 		if !volume.MultiJob && volume.AttachPrivateNamespace {
 			privateDir := path.Join(mountDir, fmt.Sprintf("/private/%s", attachment.Hostname))
-			log.Printf("FAKE mkdir -p %s", privateDir)
-			log.Printf("FAKE chown %d %s", volume.Owner, privateDir)
+			if err := mkdir(attachment.Hostname, privateDir); err != nil {
+				return err
+			}
+			chown(attachment.Hostname, volume.Owner, privateDir)
 		}
 
 		sharedDir := path.Join(mountDir, "/shared")
-		log.Printf("FAKE mkdir -p %s", sharedDir)
-		log.Printf("FAKE chown %d %s", volume.Owner, sharedDir)
+		if err := mkdir(attachment.Hostname, sharedDir); err != nil {
+			return err
+		}
+		chown(attachment.Hostname, volume.Owner, sharedDir)
 	}
+	// TODO on error should we always call umount? maybe?
+	// TODO move to ansible style automation or preamble?
 	return nil
+}
+
+func chown(hostname string, owner uint, directory string) error {
+	return remoteExecuteCmd(hostname, fmt.Sprintf("chown %d %s", owner, directory))
 }
 
 func umount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
@@ -64,8 +78,8 @@ func umount(volume registry.Volume, brickAllocations []registry.BrickAllocation)
 	var mountDir = getMountDir(volume)
 	for _, attachment := range volume.Attachments {
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
-			swapDir := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname))
-			log.Printf("FAKE swapoff %s", swapDir)
+			swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?
+			log.Printf("FAKE swapoff %s", swapFile)
 		}
 		if err := umountLustre(attachment.Hostname, mountDir); err != nil {
 			return err
@@ -86,7 +100,9 @@ func removeSubtree(hostname string, directory string) error {
 }
 
 func mountLustre(hostname string, mgtHost string, fsname string, directory string) error {
-	return remoteExecuteCmd(hostname, "modprobe -v lustre")
+	if err := remoteExecuteCmd(hostname, "modprobe -v lustre"); err != nil {
+		return err
+	}
 	return remoteExecuteCmd(hostname, fmt.Sprintf(
 		"mount -t lustre %s:/%s %s", mgtHost, fsname, directory))
 }
