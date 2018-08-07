@@ -97,7 +97,7 @@ func umount(volume registry.Volume, brickAllocations []registry.BrickAllocation)
 }
 
 func createSwap(hostname string, swapMb int, filename string) error {
-	cmd := fmt.Sprintf("dd if=/dev/zero of=%s bs=1024 count=%d && chmod 0600 %s && mkswap %s",
+	cmd := fmt.Sprintf("dd if=/dev/zero of=%s bs=1024 count=%d && sudo chmod 0600 %s && sudo mkswap %s",
 		filename, swapMb, filename, filename)
 	return remoteExecuteCmd(hostname, cmd)
 }
