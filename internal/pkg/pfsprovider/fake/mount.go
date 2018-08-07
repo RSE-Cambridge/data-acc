@@ -1,8 +1,8 @@
 package fake
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"path"
 )
