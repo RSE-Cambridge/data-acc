@@ -111,13 +111,13 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 		}
 		if summary.DataOut != nil && summary.DataOut.Source != "" {
 			// TODO check source includes striped buffer path?
-			perJobVolume.StageOut.Source = summary.DataIn.Source
-			perJobVolume.StageOut.Destination = summary.DataIn.Destination
-			switch summary.DataIn.StageType {
+			perJobVolume.StageOut.Source = summary.DataOut.Source
+			perJobVolume.StageOut.Destination = summary.DataOut.Destination
+			switch summary.DataOut.StageType {
 			case file:
-				perJobVolume.StageIn.SourceType = registry.File
+				perJobVolume.StageOut.SourceType = registry.File
 			case directory:
-				perJobVolume.StageIn.SourceType = registry.Directory
+				perJobVolume.StageOut.SourceType = registry.Directory
 			}
 		}
 
