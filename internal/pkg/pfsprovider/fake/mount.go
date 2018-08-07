@@ -44,10 +44,17 @@ func mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) 
 			if err := mkdir(attachment.Hostname, swapDir); err != nil {
 				return err
 			}
+
+			// TODO: swapmb := int(volume.AttachAsSwapBytes/1024)
+			swapmb := 2
 			swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
-			log.Printf("FAKE dd if=/dev/zero of=%s bs=1024 count=%d && chmod 0600 %s && mkswap %s",
-				swapFile, int(volume.AttachAsSwapBytes/1024), swapFile, swapFile)
-			log.Printf("FAKE swapon %s", swapFile)
+			if err := createSwap(attachment.Hostname, swapmb, swapFile); err != nil {
+				return err
+			}
+
+			if err := swapOn(attachment.Hostname, swapFile); err != nil {
+				return err
+			}
 		}
 
 		if !volume.MultiJob && volume.AttachPrivateNamespace {
@@ -69,17 +76,15 @@ func mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) 
 	return nil
 }
 
-func chown(hostname string, owner uint, directory string) error {
-	return remoteExecuteCmd(hostname, fmt.Sprintf("chown %d %s", owner, directory))
-}
-
 func umount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE Umount for:", volume.Name)
 	var mountDir = getMountDir(volume)
 	for _, attachment := range volume.Attachments {
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
 			swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?
-			log.Printf("FAKE swapoff %s", swapFile)
+			if err := swapOff(attachment.Hostname, swapFile); err != nil {
+				return err
+			}
 		}
 		if err := umountLustre(attachment.Hostname, mountDir); err != nil {
 			return err
@@ -89,6 +94,24 @@ func umount(volume registry.Volume, brickAllocations []registry.BrickAllocation)
 		}
 	}
 	return nil
+}
+
+func createSwap(hostname string, swapMb int, filename string) error {
+	cmd := fmt.Sprintf("dd if=/dev/zero of=%s bs=1024 count=%d && chmod 0600 %s && mkswap %s",
+		filename, swapMb, filename, filename)
+	return remoteExecuteCmd(hostname, cmd)
+}
+
+func swapOn(hostname string, filename string) error {
+	return remoteExecuteCmd(hostname, fmt.Sprintf("swapon %s", filename))
+}
+
+func swapOff(hostname string, filename string) error {
+	return remoteExecuteCmd(hostname, fmt.Sprintf("swapoff %s", filename))
+}
+
+func chown(hostname string, owner uint, directory string) error {
+	return remoteExecuteCmd(hostname, fmt.Sprintf("chown %d %s", owner, directory))
 }
 
 func umountLustre(hostname string, directory string) error {
