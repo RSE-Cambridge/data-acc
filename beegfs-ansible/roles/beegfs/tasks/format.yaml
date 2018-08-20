@@ -67,3 +67,22 @@
     - disks is defined
     - mgs_host == ansible_host
   tags: [ 'never', 'mount']
+
+- name: Unmount disks
+  block:
+
+    - name: Mount EXT4 OSTs
+      command: umount -l /data/{{ group_names[0] }}/{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+      loop: "{{ disks }}"
+
+    - name: Remove mount point dir
+      file:
+        path: /data/{{ group_names[0] }}
+        state: absent
+
+  when:
+    - disks is defined
+  tags: [ 'never', 'unmount']
