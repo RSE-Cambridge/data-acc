@@ -18,6 +18,9 @@
 
     - name: Mount EXT4 OSTs
       command: mount -onoatime,nodiratime,nobarrier,user_xattr /dev/{{item}} /data/{{ group_names[0] }}/{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
       loop: "{{ disks }}"
 
   when:
