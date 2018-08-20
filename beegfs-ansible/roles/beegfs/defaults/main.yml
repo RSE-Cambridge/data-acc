@@ -1,6 +1,6 @@
 ---
 beegfs_host_info:
-  dac-3-1:
+  dac-e-3:
       ib0: 10.47.18.1
       ib1: 10.47.18.25
       nvme0n1:
@@ -42,3 +42,45 @@ beegfs_host_info:
       nvme11n1:
           if: ib1
           storage_index: 311
+  dac-e-23:
+      ib0: 10.47.18.1
+      ib1: 10.47.18.25
+      nvme0n1:
+          if: ib0
+          storage_index: 2300
+          ost_port: 10300
+          mgs_port: 10400
+          mds_port: 10500
+      nvme1n1:
+          if: ib0
+          storage_index: 2301
+      nvme2n1:
+          if: ib0
+          storage_index: 2302
+      nvme3n1:
+          if: ib0
+          storage_index: 2303
+      nvme4n1:
+          if: ib0
+          storage_index: 2304
+      nvme5n1:
+          if: ib0
+          storage_index: 2305
+      nvme6n1:
+          if: ib1
+          storage_index: 2306
+      nvme7n1:
+          if: ib1
+          storage_index: 2307
+      nvme8n1:
+          if: ib1
+          storage_index: 2308
+      nvme9n1:
+          if: ib1
+          storage_index: 2309
+      nvme10n1:
+          if: ib1
+          storage_index: 2310
+      nvme11n1:
+          if: ib1
+          storage_index: 2311

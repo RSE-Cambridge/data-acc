@@ -2,12 +2,14 @@ all:
   children:
     fs1:
       hosts:
-        dac-e-1:
+        dac-e-3:
           mgs: 'true'
           mdt: 'true'
-          osts: [nvme1n1, nvme2n1, nvme3n1, nvme4n1, nvme5n1, nvme6n1, nvme7n1, nvme8n1, nvme9n1, nvme10n1, nvme11n1]
+          osts: [nvme0n1, nvme1n1, nvme10n1, nvme11n1]
+        dac-e-23:
+          osts: [nvme1n1, nvme11n1]
       vars:
-          mgs_host: dac-e-1
-          mgs_disk: nvme1n1
-          mdt_host: dac-e-1
-          mdt_disk: nvme1n1
+          mgs_host: dac-e-3
+          mgs_disk: nvme0n1
+          mdt_host: dac-e-3
+          mdt_disk: nvme0n1
