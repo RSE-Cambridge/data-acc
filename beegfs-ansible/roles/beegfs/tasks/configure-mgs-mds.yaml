@@ -1,0 +1,77 @@
+---
+
+- name: BeeGFS mgmtd
+  command: /opt/beegfs/sbin/beegfs-setup-mgmtd -f -p /data/mgmtd
+  when:
+    - mgs is defined
+  tags: [ 'never', 'create_mgs']
+
+- name: BeeGFS mgmtd conf
+  lineinfile:
+    path: /etc/beegfs/beegfs-mgmtd.conf
+    regexp: '^storeMgmtdDirectory'
+    line: 'storeMgmtdDirectory=/data/mgmtd'
+  when:
+    - mgs is defined
+  tags: [ 'never', 'create_mgs']
+
+
+- name: Format mds ext4 volume
+  command: mkfs.ext4 -i 2048 -I 512 -J size=400 -Odir_index,filetype /dev/{{ item }}
+  loop: "{{ mds }}"
+  when:
+    - mds is defined
+  tags: [ 'never', 'format_mds_ext4']
+
+- name: mount mds volume
+  command: mount -onoatime,nodiratime,nobarrier,user_xattr /dev/{{item}} /data/mds/{{item}}
+  loop: "{{ mds }}"
+  when:
+    - mds is defined
+  tags: [ 'never', 'format_mds_ext4']
+
+- name: Beegfs Format MDS
+  lineinfile:
+    path: /etc/beegfs/beegfs-meta.conf
+    regexp: '^sysMgmtdHost'
+    line: "sysMgmtdHost={{ ansible_ib0.ipv4.address}}"
+  when:
+    - mds is defined
+  tags: [ 'never', 'create_mds']
+
+- name: Beegfs Format MDS
+  lineinfile:
+    path: /etc/beegfs/beegfs-meta.conf
+    regexp: '^storeMetaDirectory'
+    line: "storeMetaDirectory=/data/mds/{{ item}}"
+  loop: "{{ mds }}"
+  when:
+    - mds is defined
+  tags: [ 'never', 'create_mds']
+
+- name: Beegfs Format MDS
+  lineinfile:
+    path: /etc/beegfs/beegfs-meta.conf
+    regexp: '^storeAllowFirstRunInit'
+    line: "storeAllowFirstRunInit=true"
+  when:
+    - mds is defined
+  tags: [ 'never', 'create_mds']
+
+- name: Start services mgmtd
+  systemd:
+    state: started
+    name: beegfs-mgmtd
+  when:
+    - mgs is defined
+  tags: [ 'never', 'start_service']
+
+- name: Start services meta
+  systemd:
+    state: started
+    name: beegfs-meta
+  when:
+    - mds is defined
+  tags: [ 'never', 'start_service']
+
+
