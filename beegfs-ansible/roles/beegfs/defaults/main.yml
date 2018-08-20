@@ -7,8 +7,8 @@ beegfs_host_info:
           if: ib0
           storage_index: 300
           ost_port: 8300
-          mgs_port: 8400
-          mds_port: 8500
+          mdt_port: 8400
+          mgs_port: 8500
       nvme1n1:
           if: ib0
           storage_index: 301
@@ -49,8 +49,8 @@ beegfs_host_info:
           if: ib0
           storage_index: 2300
           ost_port: 10300
-          mgs_port: 10400
-          mds_port: 10500
+          mdt_port: 10400
+          mgs_port: 10500
       nvme1n1:
           if: ib0
           storage_index: 2301
