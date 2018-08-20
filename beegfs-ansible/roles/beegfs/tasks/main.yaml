@@ -1,0 +1,9 @@
+---
+- include: repo.yaml
+- include: client-build-ops.yaml
+- include: mkdir-mgs-mdt.yaml
+- include: format-mds.yaml
+- include: format-oss.yaml
+- include: ib.yaml
+- include: tune.yaml
+- include: stop-fs.yaml

@@ -1,0 +1,11 @@
+all:
+  children:
+    fs1:
+      hosts:
+        dac-e-1:
+          ip: {ib0: 10.47.18.1, ib1: 10.47.18.25}
+          mds: [nvme0n1]
+          mgs: 'true'
+          osts: [[nvme1n1, nvme2n1, nvme3n1, nvme4n1, nvme5n1],[nvme6n1, nvme7n1, nvme8n1, nvme9n1, nvme10n1, nvme11n1]]
+      vars: {mgsnode: 10.47.18.1}
+

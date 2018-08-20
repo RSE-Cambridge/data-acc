@@ -1,0 +1,79 @@
+---
+
+- name: connInterfacesFile
+  blockinfile:
+    create: yes
+    path: /etc/beegfs/connInterfacesFile
+    block: |
+      ib0
+  tags: [ 'never', 'update_ib']
+
+- name: connNetFilterFile
+  blockinfile:
+    create: yes
+    path: /etc/beegfs/connNetFilterFile
+    block: |
+      10.47.18.0/16
+  tags: [ 'never', 'update_ib']
+
+
+- name: connInterfacesFile
+  lineinfile:
+    create: yes
+    state: present
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/connInterfacesFile
+    line: "ib{{index}}"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  tags: [ 'never', 'update_ib']
+
+
+- name: connInterfacesFile
+  lineinfile:
+    create: yes
+    state: present
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/connNetFilterFile
+    line: "10.47.18.0/16"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  tags: [ 'never', 'update_ib']
+
+- name: set meta interfaces
+  lineinfile:
+    path: /etc/beegfs/beegfs-meta.conf
+    regexp: '^connInterfacesFile'
+    line: 'connInterfacesFile=/etc/beegfs/connInterfacesFile'
+  tags: [ 'never', 'update_ib']
+
+- name: set storage interfaces
+  lineinfile:
+    create: yes
+    state: present
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/beegfs-storage.conf
+    regexp: '^connInterfacesFile'
+    line: "connInterfacesFile=/etc/beegfs/{{ group_names[0]}}/{{index}}.d/connInterfacesFile"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  tags: [ 'never', 'update_ib']
+
+- name: set meta interfaces
+  lineinfile:
+    path: /etc/beegfs/beegfs-meta.conf
+    regexp: '^connNetFilterFile'
+    line: 'connNetFilterFile=/etc/beegfs/connNetFilterFile'
+  tags: [ 'never', 'update_ib']
+
+- name: set storage interfaces
+  lineinfile:
+    create: yes
+    state: present
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/beegfs-storage.conf
+    regexp: '^connNetFilterFile'
+    line: "connNetFilterFile=/etc/beegfs/{{ group_names[0]}}/{{index}}.d/connNetFilterFile"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  tags: [ 'never', 'update_ib']

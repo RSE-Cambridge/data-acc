@@ -1,0 +1,8 @@
+---
+- name: Install BeeGFS
+  hosts: fs1
+  gather_facts: yes
+  roles:
+    - role: beegfs
+
+

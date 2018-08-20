@@ -1,0 +1,12 @@
+---
+- name: set ib enable for building client
+  lineinfile:
+    path: /etc/beegfs/beegfs-client-autobuild.conf
+    regexp: '^buildArgs='
+    line: 'buildArgs=-j8 BEEGFS_OPENTK_IBVERBS=1'
+  tags: ['never', 'rebuild_client']
+
+- name: rebuild client
+  command: '/etc/init.d/beegfs-client rebuild'
+  tags: ['never', 'rebuild_client']
+ 
