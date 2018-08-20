@@ -25,7 +25,7 @@
   when:
     - disks is defined
     - mds_host == ansible_host
-  tags: [ 'never', 'create_mgs']
+  tags: [ 'never', 'create_mds', 'format']
 
 - name: make metadata dir
   file:
@@ -41,7 +41,7 @@
   when:
     - disks is defined
     - mgs_host == ansible_host
-  tags: [ 'never', 'create_mgs']
+  tags: [ 'never', 'create_mgs', 'format']
 
 - name: make management dir
   file:
