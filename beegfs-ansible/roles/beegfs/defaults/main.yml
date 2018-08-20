@@ -1,17 +1,44 @@
 ---
 beegfs_host_info:
   dac-3-1:
+      ib0: 10.47.18.1
+      ib1: 10.47.18.25
       nvme0n1:
           if: ib0
-          ip: 10.47.18.1
-          storage_index: 1
-          storage_port: 8010
-          mgs_port: 8011
-          mds_port: 8012
+          storage_index: 300
+          ost_port: 8300
+          mgs_port: 8400
+          mds_port: 8500
+      nvme1n1:
+          if: ib0
+          storage_index: 301
+      nvme2n1:
+          if: ib0
+          storage_index: 302
+      nvme3n1:
+          if: ib0
+          storage_index: 303
+      nvme4n1:
+          if: ib0
+          storage_index: 304
+      nvme5n1:
+          if: ib0
+          storage_index: 305
+      nvme6n1:
+          if: ib1
+          storage_index: 306
+      nvme7n1:
+          if: ib1
+          storage_index: 307
+      nvme8n1:
+          if: ib1
+          storage_index: 308
+      nvme9n1:
+          if: ib1
+          storage_index: 309
+      nvme10n1:
+          if: ib1
+          storage_index: 310
       nvme11n1:
           if: ib1
-          ip: 10.47.18.25
-          storage_index: 11
-          storage_port: 8110
-          mgs_port: 8111
-          mds_port: 8112
+          storage_index: 311
