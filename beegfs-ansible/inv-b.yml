@@ -13,3 +13,17 @@ all:
           mgs_disk: nvme0n1
           mdt_host: dac-e-3
           mdt_disk: nvme0n1
+
+    fs2:
+      hosts:
+        dac-e-3:
+          mgs: 'true'
+          mdt: 'true'
+          osts: [nvme6n1, nvme7n1]
+        dac-e-23:
+          osts: [nvme2n1]
+      vars:
+          mgs_host: dac-e-3
+          mgs_disk: nvme6n1
+          mdt_host: dac-e-3
+          mdt_disk: nvme6n1
