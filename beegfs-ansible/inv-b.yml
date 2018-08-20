@@ -3,27 +3,19 @@ all:
     fs1:
       hosts:
         dac-e-3:
-          mgs: 'true'
-          mdt: 'true'
-          osts: [nvme0n1, nvme1n1, nvme10n1, nvme11n1]
+          disks: [nvme0n1, nvme1n1, nvme10n1, nvme11n1]
         dac-e-23:
-          osts: [nvme1n1, nvme11n1]
+          disks: [nvme1n1, nvme11n1]
       vars:
           mgs_host: dac-e-3
-          mgs_disk: nvme0n1
-          mdt_host: dac-e-3
-          mdt_disk: nvme0n1
+          mds_host: dac-e-3
 
     fs2:
       hosts:
         dac-e-3:
-          mgs: 'true'
-          mdt: 'true'
-          osts: [nvme6n1, nvme7n1]
+          disks: [nvme6n1, nvme7n1]
         dac-e-23:
-          osts: [nvme2n1]
+          disks: [nvme2n1]
       vars:
           mgs_host: dac-e-3
-          mgs_disk: nvme6n1
-          mdt_host: dac-e-3
-          mdt_disk: nvme6n1
+          mds_host: dac-e-3

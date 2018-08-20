@@ -1,0 +1,50 @@
+---
+- name: Setup disks
+  block:
+
+    - name: Format disks
+      command: mkfs.ext4 -i 16384 -I 512 -J size=400 -Odir_index,filetype /dev/{{item}}
+    - name: Create mount point dir
+      file:
+        path: /data/{{ group_names[0] }}/{{ item }}
+        state: directory
+        recurse: yes
+    - name: Mount EXT4 OSTs
+      command: mount -onoatime,nodiratime,nobarrier,user_xattr /dev/{{item}} /data/{{ group_names[0] }}/{{ item }}
+
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'format']
+
+
+- set_fact:
+    mds_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/mds"
+  when:
+    - disks is defined
+    - mds_host == ansible_host
+  tags: [ 'never', 'create_mgs']
+
+- name: make metadata dir
+  file:
+    path: "{{ mds_dir }}"
+    state: directory
+    recurse: yes
+  when:
+    - mds_dir is defined
+
+
+- set_fact:
+    mgs_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/mgs"
+  when:
+    - disks is defined
+    - mgs_host == ansible_host
+  tags: [ 'never', 'create_mgs']
+
+- name: make management dir
+  file:
+    path: "{{ mgs_dir }}"
+    state: directory
+    recurse: yes
+  when:
+    - mgs_dir is defined
