@@ -1,23 +1,28 @@
 ---
+- name: Format disks
+  command: mkfs.ext4 -i 16384 -I 512 -J size=400 -Odir_index,filetype /dev/{{item}}
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'format']
+
 - name: Setup disks
   block:
 
-    - name: Format disks
-      command: mkfs.ext4 -i 16384 -I 512 -J size=400 -Odir_index,filetype /dev/{{item}}
-      loop: "{{ disks }}"
     - name: Create mount point dir
       file:
         path: /data/{{ group_names[0] }}/{{ item }}
         state: directory
         recurse: yes
       loop: "{{ disks }}"
+
     - name: Mount EXT4 OSTs
       command: mount -onoatime,nodiratime,nobarrier,user_xattr /dev/{{item}} /data/{{ group_names[0] }}/{{ item }}
       loop: "{{ disks }}"
 
   when:
     - disks is defined
-  tags: [ 'never', 'format']
+  tags: [ 'never', 'mount']
 
 
 - block:
@@ -30,7 +35,7 @@
         recurse: yes
   when:
     - disks is defined
-  tags: [ 'never', 'format']
+  tags: [ 'never', 'mount']
 
 
 - block:
@@ -44,7 +49,7 @@
   when:
     - disks is defined
     - mds_host == ansible_host
-  tags: [ 'never', 'create_mds', 'format']
+  tags: [ 'never', 'mount']
 
 
 - block:
@@ -58,4 +63,4 @@
   when:
     - disks is defined
     - mgs_host == ansible_host
-  tags: [ 'never', 'create_mgs', 'format']
+  tags: [ 'never', 'mount']

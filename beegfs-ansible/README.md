@@ -2,7 +2,8 @@
 
 To run this set of playbooks, please try these:
 
-    ansible-playbook dac-b.yml -i inv-b.yml --tag format --tag create_mgs --tag create_mds
+    ansible-playbook dac-b.yml -i inv-b.yml --tag format --tag mount
+    ansible-playbook dac-b.yml -i inv-b.yml --tag mount
 
 ## Install notes
 
