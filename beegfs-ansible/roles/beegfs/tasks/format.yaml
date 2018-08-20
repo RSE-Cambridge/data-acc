@@ -22,6 +22,19 @@
 
 - block:
     - set_fact:
+        data_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/data"
+    - name: make data dir
+      file:
+        path: "{{ data_dir }}"
+        state: directory
+        recurse: yes
+  when:
+    - disks is defined
+  tags: [ 'never', 'format']
+
+
+- block:
+    - set_fact:
         mds_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/mds"
     - name: make metadata dir
       file:
@@ -45,17 +58,4 @@
   when:
     - disks is defined
     - mgs_host == ansible_host
-  tags: [ 'never', 'create_mgs', 'format']
-
-
-- block:
-    - set_fact:
-        data_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/data"
-    - name: make data dir
-      file:
-        path: "{{ mgs_dir }}"
-        state: directory
-        recurse: yes
-  when:
-    - disks is defined
   tags: [ 'never', 'create_mgs', 'format']
