@@ -11,7 +11,7 @@ beegfs_host_info:
       nvme11n1:
           if: ib1
           ip: 10.47.18.25
-          storage_index: 10
-          storage_port: 8010
-          mgs_port: 8011
-          mds_port: 8012
+          storage_index: 11
+          storage_port: 8110
+          mgs_port: 8111
+          mds_port: 8112
