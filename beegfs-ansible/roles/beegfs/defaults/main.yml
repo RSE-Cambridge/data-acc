@@ -1,0 +1,17 @@
+---
+beegfs_host_info:
+  dac-3-1:
+      nvme0n1:
+          if: ib0
+          ip: 10.47.18.1
+          storage_index: 1
+          storage_port: 8010
+          mgs_port: 8011
+          mds_port: 8012
+      nvme11n1:
+          if: ib1
+          ip: 10.47.18.25
+          storage_index: 10
+          storage_port: 8010
+          mgs_port: 8011
+          mds_port: 8012
