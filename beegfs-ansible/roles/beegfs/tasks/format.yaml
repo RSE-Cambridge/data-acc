@@ -20,33 +20,42 @@
   tags: [ 'never', 'format']
 
 
-- set_fact:
-    mds_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/mds"
+- block:
+    - set_fact:
+        mds_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/mds"
+    - name: make metadata dir
+      file:
+        path: "{{ mds_dir }}"
+        state: directory
+        recurse: yes
   when:
     - disks is defined
     - mds_host == ansible_host
   tags: [ 'never', 'create_mds', 'format']
 
-- name: make metadata dir
-  file:
-    path: "{{ mds_dir }}"
-    state: directory
-    recurse: yes
-  when:
-    - mds_dir is defined
 
-
-- set_fact:
-    mgs_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/mgs"
+- block:
+    - set_fact:
+        mgs_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/mgs"
+    - name: make management dir
+      file:
+        path: "{{ mgs_dir }}"
+        state: directory
+        recurse: yes
   when:
     - disks is defined
     - mgs_host == ansible_host
   tags: [ 'never', 'create_mgs', 'format']
 
-- name: make management dir
-  file:
-    path: "{{ mgs_dir }}"
-    state: directory
-    recurse: yes
+
+- block:
+    - set_fact:
+        data_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/data"
+    - name: make data dir
+      file:
+        path: "{{ mgs_dir }}"
+        state: directory
+        recurse: yes
   when:
-    - mgs_dir is defined
+    - disks is defined
+  tags: [ 'never', 'create_mgs', 'format']
