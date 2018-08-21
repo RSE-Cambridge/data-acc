@@ -11,7 +11,6 @@
     mgs_ip: "{{ beegfs_host_info[mgs_host][mgs_disk_interface] }}"
   tags: [ 'never', 'create_mgs_mds']
 
-
 - name: create fs config dir
   file:
     path: "{{ fs_config_dir }}"

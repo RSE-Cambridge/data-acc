@@ -6,6 +6,8 @@ To run this set of playbooks, please try these:
     ansible-playbook dac-b.yml -i inv-b.yml --tag mount
     ansible-playbook dac-b.yml -i inv-b.yml --tag create_mgs_mds
     ansible-playbook dac-b.yml -i inv-b.yml --tag create_mgs_mds
+    ansible-playbook dac-b.yml -i inv-b.yml --tag create_storage
+    ansible-playbook dac-b.yml -i inv-b.yml --tag create_storage
     ansible-playbook dac-b.yml -i inv-b.yml --tag unmount
     ansible-playbook dac-b.yml -i inv-b.yml --tag unmount
     ansible-playbook dac-b.yml -i inv-b.yml --tag format
