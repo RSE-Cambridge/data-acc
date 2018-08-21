@@ -6,13 +6,13 @@ beegfs_host_info:
           if: eth0
           storage_index: 10
           ost_port: 8100
-          mdt_port: 8200
+          mds_port: 8200
           mgs_port: 8300
       nvme1n1:
           if: eth0
           storage_index: 11
           ost_port: 8101
-          mdt_port: 8201
+          mds_port: 8201
           mgs_port: 8301
       nvme2n1:
           if: eth0
