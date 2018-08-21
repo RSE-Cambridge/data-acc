@@ -1,7 +1,15 @@
 ---
 
 - set_fact:
+    fs_name: "{{ group_names[0] }}"
+  tags: [ 'never', 'create_mgs_mds']
+
+- set_fact:
     fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
+    mgs_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mgs"
+    mds_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mds"
+  tags: [ 'never', 'create_mgs_mds']
+
 
 - name: create fs config dir
   file:
@@ -17,6 +25,9 @@
 
 - name: BeeGFS mgmtd
   command: "/opt/beegfs/sbin/beegfs-setup-mgmtd -p {{ mgs_dir }} -n -S {{ fs_name }} -c {{fs_config_dir}}beegfs-mgmtd.conf"
+  register: command_result
+  failed_when: "command_result.rc != 0 and ('ERROR: Storage directory is not empty.' not in command_result.stderr)"
+  changed_when: "command_result.rc == 0"
   when:
     - mgs_host == ansible_host
   tags: [ 'never', 'create_mgs_mds']
