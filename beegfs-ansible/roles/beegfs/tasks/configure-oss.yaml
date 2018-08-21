@@ -6,14 +6,7 @@
 
 - set_fact:
     mgs_ip: "{{ beegfs_host_info[mgs_host][mgs_disk_interface] }}"
-  tags: [ 'never', 'create_storage']
-
-- set_fact:
-     disk_info: "{{ disks|map('extract', beegfs_host_info[ansible_host])|list }}"
-  tags: [ 'never', 'create_storage']
-
-- set_fact:
-     storage_interfaces: "{{ disk_info|map(attribute='if')|unique|list }}"
+    storage_interfaces: "{{ disks|map('extract', beegfs_host_info[ansible_host])||map(attribute='if')|unique|list }}"
   tags: [ 'never', 'create_storage']
 
 - debug:
