@@ -46,7 +46,7 @@
 
 
 - name: Configure BeeGFS primary mds
-  command: "/opt/beegfs/sbin/beegfs-setup-meta -p {{ mgs_dir }} -s 1 -m {{ mgs_ip }} -S {{ fs_name }} -c {{fs_config_dir}}beegfs-meta.conf"
+  command: "/opt/beegfs/sbin/beegfs-setup-meta -p {{ mds_dir }} -s 1 -m {{ mgs_ip }} -S {{ fs_name }} -c {{fs_config_dir}}beegfs-meta.conf"
   register: command_result
   failed_when: "command_result.rc != 0 and ('ERROR: Storage directory is not empty.' not in command_result.stdout)"
   changed_when: "command_result.rc == 0"
