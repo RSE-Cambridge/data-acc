@@ -26,7 +26,7 @@
 - name: BeeGFS mgmtd
   command: "/opt/beegfs/sbin/beegfs-setup-mgmtd -p {{ mgs_dir }} -n -S {{ fs_name }} -c {{fs_config_dir}}beegfs-mgmtd.conf"
   register: command_result
-  failed_when: "command_result.rc != 0 and ('ERROR: Storage directory is not empty.' not in command_result.stderr)"
+  failed_when: "command_result.rc != 0 and ('ERROR: Storage directory is not empty.' not in command_result.stdout)"
   changed_when: "command_result.rc == 0"
   when:
     - mgs_host == ansible_host
