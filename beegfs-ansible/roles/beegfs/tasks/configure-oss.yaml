@@ -48,6 +48,9 @@
       -c /etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf
       -I {{ item }}
       -S {{ ansible_host }}-{{ item }}
+  register: command_result
+  failed_when: "command_result.rc != 0 and ('ERROR: Storage directory is not empty.' not in command_result.stdout)"
+  changed_when: "command_result.rc == 0"
   loop: "{{ disks }}"
   when:
     - disks is defined
