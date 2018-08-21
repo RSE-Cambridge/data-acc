@@ -21,6 +21,7 @@
 # TODO... create new config file to replace beegfs-client.conf
 - name: setup client config
   command: /opt/beegfs/sbin/beegfs-setup-client -m {{ mgs_ip }}
+  tags: [ 'never', 'client_mount']
 
 - name: Start client
   systemd:
