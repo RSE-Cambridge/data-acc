@@ -58,7 +58,7 @@
     path: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
     regexp: '^connStoragePortTCP.*'
     line: "connStoragePortTCP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
-  loop: "{{ disk }}"
+  loop: "{{ disks }}"
   when:
     - disks is defined
   tags: [ 'never', 'create_storage']
@@ -68,7 +68,7 @@
     path: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
     regexp: '^connStoragePortUDP.*'
     line: "connStoragePortUDP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
-  loop: "{{ disk }}"
+  loop: "{{ disks }}"
   when:
     - disks is defined
   tags: [ 'never', 'create_storage']
@@ -77,7 +77,7 @@
   systemd:
     state: started
     name: "beegfs-storage@{{ fs_name }}-{{ item }}.service"
-  loop: "{{ storage_interfaces }}"
+  loop: "{{ disks }}"
   when:
     - disks is defined
   tags: [ 'never', 'create_storage']
