@@ -32,23 +32,18 @@
   loop:
     - "connMgmtdPortTCP"
     - "connMgmtdPortUDP"
+  tags: [ 'never', 'client_mount']
 
 - name: Start helperd
   systemd:
     state: started
     name: "beegfs-helperd"
-  loop: "{{ disks }}"
-  when:
-    - disks is defined
   tags: [ 'never', 'client_mount']
 
 - name: Start client
   systemd:
     state: started
     name: "beegfs-client"
-  loop: "{{ disks }}"
-  when:
-    - disks is defined
   tags: [ 'never', 'client_mount']
 
 - name: Stop client
@@ -56,15 +51,10 @@
     state: stopped
     name: "beegfs-client"
   loop: "{{ disks }}"
-  when:
-    - disks is defined
   tags: [ 'never', 'client_unmount']
 
 - name: Stop helperd
   systemd:
     state: stopped
     name: "beegfs-helperd"
-  loop: "{{ disks }}"
-  when:
-    - disks is defined
   tags: [ 'never', 'client_unmount']
