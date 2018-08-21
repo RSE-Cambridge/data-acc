@@ -2,7 +2,7 @@
 - set_fact:
     fs_name: "{{ group_names[0] }}"
     mgs_disk_interface: "{{ beegfs_host_info[mgs_host][disks[0]]['if'] }}"
-  tags: [ 'never', 'create_mgs_mds']
+  tags: [ 'never', 'create_mgs_mds', 'stop']
 
 - set_fact:
     fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"

@@ -2,7 +2,7 @@
 - set_fact:
     fs_name: "{{ group_names[0] }}"
     mgs_disk_interface: "{{ beegfs_host_info[mgs_host][disks[0]]['if'] }}"
-  tags: [ 'never', 'create_storage']
+  tags: [ 'never', 'create_storage', 'stop']
 
 - set_fact:
     mgs_ip: "{{ beegfs_host_info[mgs_host][mgs_disk_interface] }}"
