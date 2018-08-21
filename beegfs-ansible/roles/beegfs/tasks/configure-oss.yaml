@@ -75,7 +75,7 @@
   lineinfile:
     path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
     regexp: '^connMgmtdPortTCP.*'
-    line: "{{ item }} = {{ mgs_port }}"
+    line: "connMgmtdPortTCP = {{ mgs_port }}"
   loop: "{{ disks }}"
   when:
     - disks is defined
@@ -84,7 +84,7 @@
   lineinfile:
     path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
     regexp: '^connMgmtdPortUDP.*'
-    line: "{{ item }} = {{ mgs_port }}"
+    line: "connMgmtdPortUDP = {{ mgs_port }}"
   loop: "{{ disks }}"
   when:
     - disks is defined
