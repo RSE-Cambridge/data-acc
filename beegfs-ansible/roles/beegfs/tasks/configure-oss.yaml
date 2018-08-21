@@ -76,6 +76,16 @@
     - disks is defined
   tags: [ 'never', 'create_storage']
 
+- name: set storage log
+  lineinfile:
+    path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+    regexp: '^logStdFile.*'
+    line: "logStdFile = /var/log/beegfs-storage-{{ fs_name }}-{{ item }}.log"
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'create_storage']
+
 - name: Start Services storage
   systemd:
     state: started
