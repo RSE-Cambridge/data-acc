@@ -16,15 +16,15 @@
 
 - name: create storage config dirs
   file:
-    path: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/"
+    path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/"
     state: directory
   loop: "{{ disks }}"
   tags: [ 'never', 'create_storage']
 
 - name: add template storage conf
-  command: "cp /etc/beegfs/beegfs-storage.conf /etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
+  command: "cp /etc/beegfs/beegfs-storage.conf /etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
   args:
-    creates: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
+    creates: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
   loop: "{{ disks }}"
   tags: [ 'never', 'create_storage']
 
@@ -45,7 +45,7 @@
       -i {{ beegfs_host_info[ansible_host][item]['storage_index'] }} \
       -s {{ beegfs_host_info[ansible_host][item]['storage_index'] }} \
       -m {{ mgs_ip }}
-      -c /etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf
+      -c /etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf
       -I {{ item }}
       -S {{ ansible_host }}-{{ item }}
   register: command_result
@@ -58,7 +58,7 @@
 
 - name: set TCP storage port
   lineinfile:
-    path: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
+    path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
     regexp: '^connStoragePortTCP.*'
     line: "connStoragePortTCP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
   loop: "{{ disks }}"
@@ -68,7 +68,7 @@
 
 - name: set UDP storage port
   lineinfile:
-    path: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
+    path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
     regexp: '^connStoragePortUDP.*'
     line: "connStoragePortUDP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
   loop: "{{ disks }}"
