@@ -37,11 +37,11 @@
 - name: set mgmtd port
   lineinfile:
     path: "{{ fs_config_dir }}beegfs-mgmtd.conf"
-    regexp: '^{{ item }}'
+    regexp: '^{{ item }}.*'
     line: "{{ item }}={{ '%s'|format(beegfs_host_info[mgs_host][disks[0]]['mgs_port']) }}"
   loop:
-    - "connStoragePortTCP"
-    - "connStoragePortUDP"
+    - "connMgmtdPortTCP"
+    - "connMgmtdPortUDP"
   when:
     - mgs_host == ansible_host
   tags: [ 'never', 'create_mgs_mds']
