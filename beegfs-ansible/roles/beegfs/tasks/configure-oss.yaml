@@ -6,6 +6,7 @@
 
 - set_fact:
     mgs_ip: "{{ beegfs_host_info[mgs_host][mgs_disk_interface] }}"
+    mgs_port: "{{ beegfs_host_info[mgs_host][disks[0]]['mgs_port'] }}"
   tags: [ 'never', 'create_storage']
 
 - name: create storage config dirs
@@ -65,6 +66,25 @@
     path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
     regexp: '^connStoragePortUDP.*'
     line: "connStoragePortUDP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'create_storage']
+
+- name: set mgmtd tcp port for storage
+  lineinfile:
+    path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+    regexp: '^connMgmtdPortTCP.*'
+    line: "{{ item }} = {{ mgs_port }}"
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'create_storage']
+- name: set mgmtd udp port for storage
+  lineinfile:
+    path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+    regexp: '^connMgmtdPortUDP.*'
+    line: "{{ item }} = {{ mgs_port }}"
   loop: "{{ disks }}"
   when:
     - disks is defined
