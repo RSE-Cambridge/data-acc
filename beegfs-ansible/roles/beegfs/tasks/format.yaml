@@ -28,45 +28,48 @@
   tags: [ 'never', 'mount']
 
 
+- set_fact:
+    fs_name: "{{ group_names[0] }}"
+
 - block:
     - set_fact:
-        data_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/data"
+        data_dir: "/data/{{ fs_name }}/{{ disks[0] }}/data"
     - name: make data dir
       file:
         path: "{{ data_dir }}"
         state: directory
         recurse: yes
+      tags: [ 'never', 'mount']
   when:
     - disks is defined
-  tags: [ 'never', 'mount']
 
 
 - block:
     - set_fact:
-        mds_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/mds"
+        mds_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mds"
     - name: make metadata dir
       file:
         path: "{{ mds_dir }}"
         state: directory
         recurse: yes
+      tags: [ 'never', 'mount']
   when:
     - disks is defined
     - mds_host == ansible_host
-  tags: [ 'never', 'mount']
 
 
 - block:
     - set_fact:
-        mgs_dir: "/data/{{ group_names[0] }}/{{ disks[0] }}/mgs"
+        mgs_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mgs"
     - name: make management dir
       file:
         path: "{{ mgs_dir }}"
         state: directory
         recurse: yes
+      tags: [ 'never', 'mount']
   when:
     - disks is defined
     - mgs_host == ansible_host
-  tags: [ 'never', 'mount']
 
 - name: Unmount disks
   block:

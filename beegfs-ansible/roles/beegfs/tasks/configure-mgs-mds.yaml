@@ -1,10 +1,36 @@
 ---
 
+- set_fact:
+    fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
+
+- name: create fs config dir
+  file:
+    path: "{{ fs_config_dir }}"
+    state: directory
+  tags: [ 'never', 'create_mgs_mds']
+
+- name: Copy default config
+  shell: "cp /etc/beegfs/*.conf {{ fs_config_dir }}"
+  args:
+    creates: "{{ fs_config_dir }}beegfs-admon.conf"
+  tags: [ 'never', 'create_mgs_mds']
+
 - name: BeeGFS mgmtd
-  command: /opt/beegfs/sbin/beegfs-setup-mgmtd -f -p /data/mgmtd
+  command: "/opt/beegfs/sbin/beegfs-setup-mgmtd -p {{ mgs_dir }} -n -S {{ fs_name }} -c {{fs_config_dir}}beegfs-mgmtd.conf"
   when:
-    - mgs is defined
-  tags: [ 'never', 'create_mgs']
+    - mgs_host == ansible_host
+  tags: [ 'never', 'create_mgs_mds']
+
+# TODO: update port in config file...?
+
+- name: Start services mgmtd
+  systemd:
+    state: started
+    name: "beegfs-mgmtd@{{ fs_name }}.service"
+  when:
+    - mgs_host == ansible_host
+  tags: [ 'never', 'create_mgs_mds']
+
 
 - name: BeeGFS mgmtd conf
   lineinfile:
@@ -12,25 +38,11 @@
     regexp: '^storeMgmtdDirectory'
     line: 'storeMgmtdDirectory=/data/mgmtd'
   when:
-    - mgs is defined
+    - false
   tags: [ 'never', 'create_mgs']
 
 
-- name: Format mds ext4 volume
-  command: mkfs.ext4 -i 2048 -I 512 -J size=400 -Odir_index,filetype /dev/{{ item }}
-  loop: "{{ mds }}"
-  when:
-    - mds is defined
-  tags: [ 'never', 'format_mds_ext4']
-
-- name: mount mds volume
-  command: mount -onoatime,nodiratime,nobarrier,user_xattr /dev/{{item}} /data/mds/{{item}}
-  loop: "{{ mds }}"
-  when:
-    - mds is defined
-  tags: [ 'never', 'format_mds_ext4']
-
-- name: Beegfs Format MDS
+- name: Add MDS address
   lineinfile:
     path: /etc/beegfs/beegfs-meta.conf
     regexp: '^sysMgmtdHost'
@@ -39,7 +51,7 @@
     - mds is defined
   tags: [ 'never', 'create_mds']
 
-- name: Beegfs Format MDS
+- name: Set MDS dir
   lineinfile:
     path: /etc/beegfs/beegfs-meta.conf
     regexp: '^storeMetaDirectory'
@@ -65,13 +77,4 @@
   when:
     - mgs is defined
   tags: [ 'never', 'start_service']
-
-- name: Start services meta
-  systemd:
-    state: started
-    name: beegfs-meta
-  when:
-    - mds is defined
-  tags: [ 'never', 'start_service']
-
 
