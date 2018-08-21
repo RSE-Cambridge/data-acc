@@ -38,7 +38,7 @@
   lineinfile:
     path: "{{ fs_config_dir }}beegfs-mgmtd.conf"
     regexp: '^{{ item }}'
-    line: "{{ item }}={{ '%s'|format(beegfs_host_info[mgs_host][mgs_port]) }}"
+    line: "{{ item }}={{ '%s'|format(beegfs_host_info[mgs_host]['mgs_port']) }}"
   loop:
     - "connStoragePortTCP"
     - "connStoragePortUDP"
