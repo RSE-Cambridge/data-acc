@@ -68,7 +68,17 @@
 
     - name: Remove mount point dir
       file:
-        path: /data/{{ group_names[0] }}
+        path: /data/{{ fs_name }}
+        state: absent
+
+    - name: Remove old config dir
+      file:
+        path: /etc/beegfs/{{ fs_name }}.d
+        state: absent
+
+    - name: Remove old config dir
+      file:
+        path: /etc/beegfs/{{ fs_name }}
         state: absent
 
   when:
