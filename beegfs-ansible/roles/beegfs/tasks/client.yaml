@@ -1,0 +1,41 @@
+---
+- set_fact:
+    fs_name: "{{ group_names[0] }}"
+    mgs_disk_interface: "{{ beegfs_host_info[mgs_host][disks[0]]['if'] }}"
+  tags: [ 'never', 'client_mount']
+
+- set_fact:
+    mgs_ip: "{{ beegfs_host_info[mgs_host][mgs_disk_interface] }}"
+  tags: [ 'never', 'client_mount']
+
+# TODO... use this dir, i.e. modify beegfs-mounts.conf
+- name: create mount dir
+  file:
+    path: /mnt/beegfs/{{ fs_name }}
+    state: directory
+    recurse: yes
+  when:
+    - disks is defined
+  tags: [ 'never', 'client_mount']
+
+# TODO... create new config file to replace beegfs-client.conf
+- name: setup client config
+  command: /opt/beegfs/sbin/beegfs-setup-client -m {{ mgs_ip }}
+
+- name: Start client
+  systemd:
+    state: started
+    name: "beegfs-client"
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'client_mount']
+
+- name: Stop client
+  systemd:
+    state: stopped
+    name: "beegfs-client"
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'client_unmount']
