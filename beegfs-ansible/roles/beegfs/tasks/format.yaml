@@ -30,7 +30,7 @@
 
 - set_fact:
     fs_name: "{{ group_names[0] }}"
-  tags: ['never', 'mount', 'umount']
+  tags: ['never', 'mount']
 
 - name: make metadata dir
   file:
@@ -55,6 +55,9 @@
 
 - name: Unmount disks
   block:
+
+    - set_fact:
+        fs_name: "{{ group_names[0] }}"
 
     - name: Mount EXT4 OSTs
       command: "umount -l /data/{{ fs_name }}/{{ item }}"
