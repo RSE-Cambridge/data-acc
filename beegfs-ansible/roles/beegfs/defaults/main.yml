@@ -1,17 +1,25 @@
 ---
 beegfs_host_info:
   dac1:
-     eth0: 192.168.0.116
-     nvme0n1:
-         if: eth0
-     nvme1n1:
-         if: eth0
-     nvme2n1:
-         if: eth0
-     nvme3n1:
-         if: eth0
-     nvme4n1:
-         if: eth0
+      eth0: 192.168.0.116
+      nvme0n1:
+          if: eth0
+          storage_index: 10
+          ost_port: 8100
+          mdt_port: 8200
+          mgs_port: 8300
+      nvme1n1:
+          if: eth0
+          storage_index: 11
+          ost_port: 8101
+          mdt_port: 8201
+          mgs_port: 8301
+      nvme2n1:
+          if: eth0
+      nvme3n1:
+          if: eth0
+      nvme4n1:
+          if: eth0
 
   dac-e-3:
       ib0: 10.47.18.1
