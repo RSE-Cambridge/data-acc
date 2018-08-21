@@ -6,6 +6,7 @@
 
 - set_fact:
     mgs_ip: "{{ beegfs_host_info[mgs_host][mgs_disk_interface] }}"
+    mgs_port: "{{ beegfs_host_info[mgs_host][disks[0]]['mgs_port'] }}"
   tags: [ 'never', 'client_mount']
 
 # TODO... use this dir, i.e. modify beegfs-mounts.conf
@@ -23,6 +24,24 @@
   command: /opt/beegfs/sbin/beegfs-setup-client -m {{ mgs_ip }}
   tags: [ 'never', 'client_mount']
 
+- name: set mgmtd port
+  lineinfile:
+    path: "/etc/beegfs/beegfs-client.conf"
+    regexp: '^{{ item }}.*'
+    line: "{{ item }} = {{ mgs_port }}"
+  loop:
+    - "connMgmtdPortTCP"
+    - "connMgmtdPortUDP"
+
+- name: Start helperd
+  systemd:
+    state: started
+    name: "beegfs-helperd"
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'client_mount']
+
 - name: Start client
   systemd:
     state: started
@@ -36,6 +55,15 @@
   systemd:
     state: stopped
     name: "beegfs-client"
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'client_unmount']
+
+- name: Stop helperd
+  systemd:
+    state: stopped
+    name: "beegfs-helperd"
   loop: "{{ disks }}"
   when:
     - disks is defined
