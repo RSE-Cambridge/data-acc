@@ -1,5 +1,18 @@
 ---
 beegfs_host_info:
+  dac1:
+     eth0: 192.168.0.116
+     nvme0n1:
+         if: eth0
+     nvme1n1:
+         if: eth0
+     nvme2n1:
+         if: eth0
+     nvme3n1:
+         if: eth0
+     nvme4n1:
+         if: eth0
+
   dac-e-3:
       ib0: 10.47.18.1
       ib1: 10.47.18.25

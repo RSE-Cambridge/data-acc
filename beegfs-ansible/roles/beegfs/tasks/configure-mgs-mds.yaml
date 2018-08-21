@@ -1,13 +1,14 @@
 ---
-
 - set_fact:
     fs_name: "{{ group_names[0] }}"
+    mgs_disk_interface: "{{ beegfs_host_info[mgs_host][disks[0]]['if'] }}"
   tags: [ 'never', 'create_mgs_mds']
 
 - set_fact:
     fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
     mgs_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mgs"
     mds_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mds"
+    mgs_ip: "{{ beegfs_host_info[mgs_host][disk_interface] }}"
   tags: [ 'never', 'create_mgs_mds']
 
 
@@ -23,6 +24,7 @@
     creates: "{{ fs_config_dir }}beegfs-admon.conf"
   tags: [ 'never', 'create_mgs_mds']
 
+
 - name: BeeGFS mgmtd
   command: "/opt/beegfs/sbin/beegfs-setup-mgmtd -p {{ mgs_dir }} -n -S {{ fs_name }} -c {{fs_config_dir}}beegfs-mgmtd.conf"
   register: command_result
@@ -34,10 +36,30 @@
 
 # TODO: update port in config file...?
 
-- name: Start services mgmtd
+- name: Start mgmtd
   systemd:
     state: started
     name: "beegfs-mgmtd@{{ fs_name }}.service"
+  when:
+    - mgs_host == ansible_host
+  tags: [ 'never', 'create_mgs_mds']
+
+
+- name: Configure BeeGFS primary mds
+  command: "/opt/beegfs/sbin/beegfs-setup-meta -p {{ mgs_dir }} -s 1 -m {{ mgs_ip }} -S {{ fs_name }} -c {{fs_config_dir}}beegfs-meta.conf"
+  register: command_result
+  failed_when: "command_result.rc != 0 and ('ERROR: Storage directory is not empty.' not in command_result.stdout)"
+  changed_when: "command_result.rc == 0"
+  when:
+    - mgs_host == ansible_host
+  tags: [ 'never', 'create_mgs_mds']
+
+# TODO: update port in config file...?
+
+- name: Start meta
+  systemd:
+    state: started
+    name: "beegfs-meta@{{ fs_name }}.service"
   when:
     - mgs_host == ansible_host
   tags: [ 'never', 'create_mgs_mds']
