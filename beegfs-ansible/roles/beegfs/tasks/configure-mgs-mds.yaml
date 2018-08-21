@@ -8,7 +8,7 @@
     fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
     mgs_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mgs"
     mds_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mds"
-    mgs_ip: "{{ beegfs_host_info[mgs_host][disk_interface] }}"
+    mgs_ip: "{{ beegfs_host_info[mgs_host][mgs_disk_interface] }}"
   tags: [ 'never', 'create_mgs_mds']
 
 
