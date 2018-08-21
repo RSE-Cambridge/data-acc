@@ -13,29 +13,77 @@
     msg: "{{ storage_interfaces }}"
   tags: [ 'never', 'create_storage']
 
+
 - name: create storage config dirs
   file:
     path: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/"
     state: directory
-  loop: "{{ storage_interfaces }}"
+  loop: "{{ disks }}"
   tags: [ 'never', 'create_storage']
 
 - name: add template storage conf
   command: "cp /etc/beegfs/beegfs-storage.conf /etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
   args:
     creates: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
-  loop: "{{ storage_interfaces }}"
+  loop: "{{ disks }}"
   tags: [ 'never', 'create_storage']
 
-- name: set mgs BeeGFS storage conf
+- name: make data dir
+  file:
+    path: "/data/{{ fs_name }}/{{ item }}/data"
+    state: directory
+    recurse: yes
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'create_storage']
+
+- name: setup target
+  command: |
+      /opt/beegfs/sbin/beegfs-setup-storage \
+      -p /data/{{ fs_name }}/{{ item }}/data \
+      -i {{ beegfs_host_info[ansible_host][item]['storage_index'] }} \
+      -s {{ beegfs_host_info[ansible_host][item]['storage_index'] }} \
+      -m {{ mgs_ip }}
+      -c /etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf
+      -I {{ item }}
+      -S {{ ansible_host }}-{{ item }}
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'create_storage']
+
+- name: set TCP storage port
   lineinfile:
     path: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
-    regexp: '^sysMgmtdHost'
-    line: "sysMgmtdHost={{ mgs_ip }}"
-  loop: "{{ storage_interfaces }}"
+    regexp: '^connStoragePortTCP.*'
+    line: "connStoragePortTCP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
+  loop: "{{ disk }}"
+  when:
+    - disks is defined
   tags: [ 'never', 'create_storage']
 
-#TODO...
+- name: set UDP storage port
+  lineinfile:
+    path: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
+    regexp: '^connStoragePortUDP.*'
+    line: "connStoragePortUDP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
+  loop: "{{ disk }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'create_storage']
+
+- name: Start Services storage
+  systemd:
+    state: started
+    name: "beegfs-storage@{{ fs_name }}-{{ item }}.service"
+  loop: "{{ storage_interfaces }}"
+  when:
+    - disks is defined
+  tags: [ 'never', 'create_storage']
+
+#TODO... rest of config!!
+
 
 - name: get node ides
   debug:

@@ -33,19 +33,6 @@
 
 - block:
     - set_fact:
-        data_dir: "/data/{{ fs_name }}/{{ disks[0] }}/data"
-    - name: make data dir
-      file:
-        path: "{{ data_dir }}"
-        state: directory
-        recurse: yes
-      tags: [ 'never', 'mount']
-  when:
-    - disks is defined
-
-
-- block:
-    - set_fact:
         mds_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mds"
     - name: make metadata dir
       file:
