@@ -13,31 +13,29 @@
     msg: "{{ storage_interfaces }}"
   tags: [ 'never', 'create_storage']
 
-- name: create multi dir
+- name: create storage config dirs
   file:
-    path: "/etc/beegfs/{{ group_names[0] }}/{{index}}.d/"
+    path: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/"
     state: directory
-  loop: "{{ osts }}"
-  loop_control:
-    index_var: index
-  tags: [ 'never', 'create_osts']
+  loop: "{{ storage_interfaces }}"
+  tags: [ 'never', 'create_storage']
 
-- name: create multi dir
-  command: "cp /etc/beegfs/beegfs-storage.conf /etc/beegfs/{{ group_names[0] }}/{{index}}.d/beegfs-storage.conf"
-  loop: "{{ osts }}"
-  loop_control:
-    index_var: index
-  tags: [ 'never', 'create_osts']
+- name: add template storage conf
+  command: "cp /etc/beegfs/beegfs-storage.conf /etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
+  args:
+    creates: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
+  loop: "{{ storage_interfaces }}"
+  tags: [ 'never', 'create_storage']
 
 - name: set mgs BeeGFS storage conf
   lineinfile:
-    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/beegfs-storage.conf
+    path: "/etc/beegfs/{{ fs_name }}-{{ item }}.d/beegfs-storage.conf"
     regexp: '^sysMgmtdHost'
-    line: "sysMgmtdHost={{ mgsnode }}"
-  loop: "{{ osts }}"
-  loop_control:
-    index_var: index
-  tags: [ 'never', 'create_osts']
+    line: "sysMgmtdHost={{ mgs_ip }}"
+  loop: "{{ storage_interfaces }}"
+  tags: [ 'never', 'create_storage']
+
+#TODO...
 
 - name: get node ides
   debug:
