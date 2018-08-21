@@ -4,7 +4,7 @@
   loop: "{{ disks }}"
   when:
     - disks is defined
-  tags: [ 'never', 'format']
+  tags: ['never', 'format']
 
 - name: Setup disks
   block:
@@ -25,11 +25,12 @@
 
   when:
     - disks is defined
-  tags: [ 'never', 'mount']
+  tags: ['never', 'mount']
 
 
 - set_fact:
     fs_name: "{{ group_names[0] }}"
+  tags: ['never', 'mount', 'umount']
 
 - name: make metadata dir
   file:
@@ -39,7 +40,7 @@
   when:
     - disks is defined
     - mds_host == ansible_host
-  tags: [ 'never', 'mount']
+  tags: ['never', 'mount']
 
 
 - name: make management dir
@@ -50,13 +51,13 @@
   when:
     - disks is defined
     - mgs_host == ansible_host
-  tags: [ 'never', 'mount']
+  tags: ['never', 'mount']
 
 - name: Unmount disks
   block:
 
     - name: Mount EXT4 OSTs
-      command: umount -l /data/{{ group_names[0] }}/{{ item }}
+      command: "umount -l /data/{{ fs_name }}/{{ item }}"
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
@@ -69,4 +70,4 @@
 
   when:
     - disks is defined
-  tags: [ 'never', 'unmount']
+  tags: ['never', 'unmount']
