@@ -5,7 +5,7 @@
 
 - name: make mgmtd dir
   file:
-    path: /data/{{ fs_name }}/mgmtd
+    path: /data/{{ fs_name }}/{{ mgs }} mgmtd
     state: directory
     recurse: yes
   when:

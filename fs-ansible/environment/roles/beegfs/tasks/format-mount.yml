@@ -1,16 +1,16 @@
 ---
 - set_fact:
     fs_name: "{{ group_names[0] }}"
-    mdts: "{{ mdts | default([]) | list }}"
-    mgs: "{{ mgs | default([]) | list }}"
+    mdts: "{{ mdts | default([]) }}"
+    mgs: "{{ mgs | default([]) }}"
   tags: ['never', 'format', 'mount']
 
 - set_fact:
-    all_disks: "{{ osts.keys() | union(mdts) | union(mgs) | unique | list  }}"
+    all_disks: "{{ osts.keys() | union(mdts) | union(mgs) | flatten | unique | list  }}"
   tags: ['never', 'format', 'mount']
 
 - name: Format disks
-  command: "mkfs.ext4 -i 16384 -I 512 -J size=400 -Odir_index,filetype /dev/{{ item }}"
+  command: "mkfs.ext4 -i 8192 -I 512 -J size=400 -Odir_index,filetype /dev/{{ item }}"
   loop: "{{ all_disks }}"
   tags: ['never', 'format']
 

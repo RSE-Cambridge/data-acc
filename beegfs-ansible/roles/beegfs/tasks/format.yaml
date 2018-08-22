@@ -1,6 +1,6 @@
 ---
 - name: Format disks
-  command: mkfs.ext4 -i 16384 -I 512 -J size=400 -Odir_index,filetype /dev/{{item}}
+  command: mkfs.ext4 -i 8192 -I 512 -J size=400 -Odir_index,filetype /dev/{{item}}
   loop: "{{ disks }}"
   when:
     - disks is defined
