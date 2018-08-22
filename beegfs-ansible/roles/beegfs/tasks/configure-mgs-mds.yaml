@@ -10,6 +10,7 @@
     mds_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mds"
     mgs_ip: "{{ beegfs_host_info[mgs_host][mgs_disk_interface] }}"
     mgs_port: "{{ beegfs_host_info[mgs_host][disks[0]]['mgs_port'] }}"
+    mds_port: "{{ beegfs_host_info[mgs_host][disks[0]]['mds_port'] }}"
   tags: [ 'never', 'create_mgs_mds']
 
 - name: create fs config dir
@@ -77,7 +78,7 @@
   lineinfile:
     path: "{{ fs_config_dir }}beegfs-meta.conf"
     regexp: '^{{ item }}.*'
-    line: "{{ item }} = {{ mgs_port }}"
+    line: "{{ item }} = {{ mds_port }}"
   loop:
     - "connMetaPortTCP"
     - "connMetaPortUDP"
@@ -89,7 +90,7 @@
   lineinfile:
     path: "{{ fs_config_dir }}beegfs-meta.conf"
     regexp: '^{{ item }}.*'
-    line: "{{ item }} = {{ '%s'|format(beegfs_host_info[mgs_host][disks[0]]['mgs_port']) }}"
+    line: "{{ item }} = {{ mgs_port }}"
   loop:
     - "connMgmtdPortTCP"
     - "connMgmtdPortUDP"
