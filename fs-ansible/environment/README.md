@@ -19,6 +19,12 @@ To run this set of playbooks, please try these:
     ansible-playbook test-dac.yml -i test-inventory --tag stop_mgs
     ansible-playbook test-dac.yml -i test-inventory --tag reformat_mgs
 
+
+For beegfs we have:
+
+    ansible-playbook test-dac-beegfs.yml -i test-inventory --tag format
+    ansible-playbook test-dac-beegfs-2.yml -i test-inventory2 --tag format
+
 ## Install notes
 
 You may find this useful to run the above ansible-playbook command:

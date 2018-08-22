@@ -3,6 +3,7 @@
     fs_name: "{{ group_names[0] }}"
     mdts: "{{ mdts | default([]) }}"
     mgs: "{{ mgs | default([]) }}"
+    osts: "{{ osts | default({}) }}"
   tags: ['never', 'format', 'mount']
 
 - set_fact:

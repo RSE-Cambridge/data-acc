@@ -1,0 +1,7 @@
+---
+- name: Install beegfs for fs1
+  hosts: fs2
+  become: yes
+  gather_facts: no
+  roles:
+    - role: beegfs
