@@ -1,49 +1,179 @@
 ---
 
 - name: Format OSTs XFS
-  command: mkfs.xfs -f /dev/{{item.name}}
-  with_items: "{{ osts }}"
+  command: mkfs.xfs -f /dev/{{item}}
+  loop: "{{ osts|flatten }}"
   when:
     - osts is defined
-    - item.name is match(target|default(".*"))
-  tags: [ 'never', 'create_osts']
+  tags: [ 'never', 'format_osts_xfs']
 
 - name: OSS mount point
-  file: 
-    path: /data/oss/{{item.name}}
+  file:
+    path: /data/oss/{{item}}
     state: directory
     recurse: yes
-  with_items: "{{ osts }}"
+  loop: "{{ osts|flatten }}"
   when:
     - osts is defined
-    - item.name is match(target|default(".*"))
-  tags: [ 'never', 'create_osts']
+  tags: [ 'never', 'format_osts_xfs']
 
-
-
-- name: Mount XFS OSTs
-  command: mount -onoatime,nodiratime,logbufs=8,logbsize=256k,largeio,inode64,swalloc,allocsize=131072k,nobarrier /dev/{{item.name}} /data/oss/{{item.name}}
-  with_items: "{{ osts }}"
+- name: Mount XFS OSTs%
+  command: mount -onoatime,nodiratime,logbufs=8,logbsize=256k,largeio,inode64,swalloc,allocsize=131072k,nobarrier /dev/{{item}} /data/oss/{{item}}
+  loop: "{{ osts|flatten }}"
   when:
     - osts is defined
-    - item.name is match(target|default(".*"))
+  tags: [ 'never', 'format_osts_xfs']
+
+
+
+
+- name: Format OSTs EXT4
+  command: mkfs.ext4 -i 16384 -I 512 -J size=400 -Odir_index,filetype /dev/{{item}}
+  loop: "{{ osts|flatten }}"
+  when:
+    - osts is defined
+  tags: [ 'never', 'format_osts_ext4']
+
+- name: OSS mount point
+  file:
+    path: /data/oss/{{item}}
+    state: directory
+    recurse: yes
+  loop: "{{ osts|flatten }}"
+  when:
+    - osts is defined
+  tags: [ 'never', 'format_osts_ext4']
+
+- name: Mount EXT4 OSTs
+  command: mount -onoatime,nodiratime,nobarrier,user_xattr /dev/{{item}} /data/oss/{{item}}
+  loop: "{{ osts|flatten }}"
+  when:
+    - osts is defined
+  tags: [ 'never', 'format_osts_ext4']
+
+
+- name: create multi dir
+  file:
+    path: "/etc/beegfs/{{ group_names[0] }}/{{index}}.d/"
+    state: directory
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
   tags: [ 'never', 'create_osts']
 
-- name: clean BeeGFS storage conf
+- name: create multi dir
+  command: "cp /etc/beegfs/beegfs-storage.conf /etc/beegfs/{{ group_names[0] }}/{{index}}.d/beegfs-storage.conf"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  tags: [ 'never', 'create_osts']
+
+- name: set mgs BeeGFS storage conf
   lineinfile:
-    path: /etc/beegfs/beegfs-storage.conf
-    regexp: '^storeStorageDirectory'
-    line: "storeStorageDirectory = "
-  tags: [ 'never', 'format_osts']
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/beegfs-storage.conf
+    regexp: '^sysMgmtdHost'
+    line: "sysMgmtdHost={{ mgsnode }}"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  tags: [ 'never', 'create_osts']
+
+- name: get node ides
+  debug:
+    msg: "{{ index%2+1  }}"
+  loop: "{{ osts|flatten }}"
+  loop_control:
+    index_var: index
+  register: index_mod
+  tags: [ 'never', 'create_osts']
+
+- set_fact:
+    node_id: "{{ index_mod.results | map(attribute='msg') | list}}"
+  tags: [ 'never', 'create_osts']
 
 
-
-- name: Format BeeGFS OSTs
-  command: /opt/beegfs/sbin/beegfs-setup-storage -f -p /data/oss/{{item.name}} -s {{ item.sid }} -i {{item.index}} -m {{inventory_hostname}}
-  with_items: "{{ osts }}"
+- name: setup target
+  command: /opt/beegfs/sbin/beegfs-setup-storage -f -p /data/oss/{{item.0}} -s {{item.1}} -S {{inventory_hostname}}-{{item.1}}
+  loop : "{{ (osts|flatten)|zip((node_id|sort()))|list }}"
   when:
     - osts is defined
-    - item.name is match(target|default(".*"))
-  tags: [ 'never', 'format_osts']
+  tags: [ 'never', 'create_osts']
 
 
+- name: set targets BeeGFS storage conf
+  lineinfile:
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/beegfs-storage.conf
+    regexp: '^storeStorageDirectory'
+    line: "storeStorageDirectory=,/data/oss/{{ ' ,/data/oss/'.join(item) }}"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  when:
+    - osts is defined
+  tags: [ 'never', 'create_osts']
+
+- name: set beegfs storage port
+  lineinfile:
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/beegfs-storage.conf
+    regexp: '^connStoragePortTCP'
+    line: "connStoragePortTCP={{'80%s3'|format(index)}}"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  when:
+    - osts is defined
+  tags: [ 'never', 'create_osts']
+
+- name: set beegfs storage port
+  lineinfile:
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/beegfs-storage.conf
+    regexp: '^connStoragePortUDP'
+    line: "connStoragePortUDP={{'80%s3'|format(index)}}"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  when:
+    - osts is defined
+  tags: [ 'never', 'create_osts']
+
+
+- name: init on start BeeGFS storage conf
+  lineinfile:
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/beegfs-storage.conf
+    regexp: '^storeAllowFirstRunInit'
+    line: "storeAllowFirstRunInit=true"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  tags: [ 'never', 'create_osts']
+
+- name: init on start BeeGFS storage conf
+  lineinfile:
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/beegfs-storage.conf
+    regexp: '^tuneNumWorkers'
+    line: "tuneNumWorkers=12"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  tags: [ 'never', 'create_osts']
+
+- name: set log location
+  lineinfile:
+    path: /etc/beegfs/{{ group_names[0]}}/{{index}}.d/beegfs-storage.conf
+    regexp: '^logStdFile'
+    line: "logStdFile=/var/log/beegfs-storage-{{group_names[0]}}-{{index}}.log"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  tags: [ 'never', 'create_osts']
+
+- name: Start Services storage
+  systemd:
+    state: started
+    name: "beegfs-storage@{{group_names[0]}}-{{index}}.service"
+  loop: "{{ osts }}"
+  loop_control:
+    index_var: index
+  when:
+    - osts is defined
+  tags: [ 'never', 'start_service']

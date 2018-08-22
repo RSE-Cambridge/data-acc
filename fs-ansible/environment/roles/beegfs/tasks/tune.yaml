@@ -2,7 +2,13 @@
 
 - name: tuneBindToNumaZone
   lineinfile:
-    path: /etc/beegfs/beegfs-storage.conf
-    regexp: '^tuneBindToNumaZone'
-    line: 'tuneBindToNumaZone=0'
+    path: "/etc/beegfs/{{group_names[0]}}/{{index}}.d/beegfs-storage.conf"
+    regexp: "^tuneBindToNumaZone"
+    line: "tuneBindToNumaZone={{index}}"
+  loop: "{{osts}}"
+  loop_control:
+    index_var: index
+  when:
+    - osts is defined
+  tags: ['never', 'bind_numa']
 

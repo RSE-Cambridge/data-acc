@@ -1,0 +1,20 @@
+---
+
+- name: make mgmtd dir
+  file:
+    path: /data/mgmtd
+    state: directory
+    recurse: yes
+  when:
+    - mgs is defined
+  tags: [ 'never', 'create_mgs']
+
+- name: make mds data dir
+  file:
+    path: /data/mds/{{item}}
+    state: directory
+    recurse: yes
+  loop: "{{ mds }}"
+  when:
+    - mds is defined
+  tags: [ 'never', 'create_mds']
