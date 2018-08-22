@@ -1,20 +1,23 @@
 ---
+- set_fact:
+    fs_name: "{{ group_names[0] }}"
+  tags: ['never', 'create_mgs', 'create_mds']
 
 - name: make mgmtd dir
   file:
-    path: /data/mgmtd
+    path: /data/{{ fs_name }}/mgmtd
     state: directory
     recurse: yes
   when:
     - mgs is defined
-  tags: [ 'never', 'create_mgs']
+  tags: ['never', 'create_mgs']
 
 - name: make mds data dir
   file:
-    path: /data/mds/{{item}}
+    path: /data/{{ fs_name }}/mds/{{item}}
     state: directory
     recurse: yes
   loop: "{{ mds }}"
   when:
     - mds is defined
-  tags: [ 'never', 'create_mds']
+  tags: ['never', 'create_mds']
