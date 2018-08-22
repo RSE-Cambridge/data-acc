@@ -1,6 +1,7 @@
 ---
 - include: repo.yaml
 - include: client-build-ops.yaml
+- include: format-mount.yaml
 - include: mkdir-mgs-mdt.yaml
 - include: format-mds.yaml
 - include: format-oss.yaml

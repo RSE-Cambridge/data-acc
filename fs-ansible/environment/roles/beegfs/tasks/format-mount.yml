@@ -1,0 +1,35 @@
+---
+- set_fact:
+    fs_name: "{{ group_names[0] }}"
+    mdts: "{{ mdts | default([]) | list }}"
+    mgs: "{{ mgs | default([]) | list }}"
+  tags: ['never', 'format', 'mount']
+
+- set_fact:
+    all_disks: "{{ osts.keys() | union(mdts) | union(mgs) | unique | list  }}"
+  tags: ['never', 'format', 'mount']
+
+- name: Format disks
+  command: "mkfs.ext4 -i 16384 -I 512 -J size=400 -Odir_index,filetype /dev/{{ item }}"
+  loop: "{{ all_disks }}"
+  tags: ['never', 'format']
+
+- name: Setup disks
+  block:
+
+    - name: Create mount point dir
+      file:
+        path: /data/{{ fs_name }}/{{ item }}
+        state: directory
+        recurse: yes
+      loop: "{{ all_disks }}"
+
+    - name: Mount EXT4 OSTs
+      command: mount -onoatime,nodiratime,nobarrier,user_xattr /dev/{{ item }} /data/{{ fs_name }}/{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+      loop: "{{ all_disks }}"
+
+  tags: ['never', 'mount']
+
