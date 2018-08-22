@@ -4,7 +4,7 @@ all:
       hosts:
         dac1:
           mgs: nvme0n1
-          mdts: [nvme1n1]
+          mdt: nvme1n1
         dac2:
           osts: {nvme3n1: 1}
       vars: {mgsnode: dac1}
