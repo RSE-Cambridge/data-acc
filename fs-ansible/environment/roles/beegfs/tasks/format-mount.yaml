@@ -7,8 +7,11 @@
   tags: ['never', 'format', 'mount']
 
 - set_fact:
-    all_disks: "{{ osts.keys() | union(mdts) | union(mgs) | flatten | unique | list  }}"
+    all_disks: "{{ osts.keys() | union([mdts]) | union([mgs]) | flatten | unique | list  }}"
   tags: ['never', 'format', 'mount']
+
+- debug:
+    msg: "{{ all_disks }}"
 
 - name: Format disks
   command: "mkfs.ext4 -i 8192 -I 512 -J size=400 -Odir_index,filetype /dev/{{ item }}"
