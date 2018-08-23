@@ -78,22 +78,26 @@
 
   tags: [ 'never', 'client_mount']
 
-- name: Remove mount point
-  lineinfile:
-    path: "/etc/beegfs/beegfs-mounts.conf"
-    regexp: '^/mnt/beegfs/{{ fs_name }}.*'
-    state: absent
+
+- name: unmount beegfs fs
+  block:
+
+    - name: Remove mount point
+      lineinfile:
+        path: "/etc/beegfs/beegfs-mounts.conf"
+        regexp: '^/mnt/beegfs/{{ fs_name }}.*'
+        state: absent
+
+    - name: umount fs
+      command: umount -l /mnt/beegfs/{{ fs_name }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+
+    - name: Delete mount point dir
+      file:
+        path: /mnt/beegfs/{{ fs_name }}
+        state: absent
+
   tags: [ 'never', 'client_unmount', 'stop_all']
 
-- name: Reload client to remove mount point
-  systemd:
-    state: reloaded
-    name: "beegfs-client@{{ fs_name }}.service"
-  loop: "{{ disks }}"
-  tags: [ 'never', 'client_unmount', 'stop_all']
-
-- name: Stop helperd
-  systemd:
-    state: stopped
-    name: "beegfs-helperd"
-  tags: [ 'never', 'stop_all']
