@@ -11,7 +11,7 @@
     - set_fact:
         mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
         mgs_ip: "{{ beegfs_host_info[mgsnode][mgs_disk_info['if']] }}"
-  tags: ['never', 'client_mount', 'stop_all']
+  tags: ['never', 'client_mount', 'client_unmount', 'stop_all']
 
 - name: setup client
   block:
@@ -78,12 +78,19 @@
 
   tags: [ 'never', 'client_mount']
 
-- name: Stop client
+- name: Remove mount point
+  lineinfile:
+    path: "/etc/beegfs/beegfs-mounts.conf"
+    regexp: '^/mnt/beegfs/{{ fs_name }}.*'
+    state: absent
+  tags: [ 'never', 'client_unmount', 'stop_all']
+
+- name: Reload client to remove mount point
   systemd:
-    state: stopped
+    state: reloaded
     name: "beegfs-client@{{ fs_name }}.service"
   loop: "{{ disks }}"
-  tags: [ 'never', 'stop_all']
+  tags: [ 'never', 'client_unmount', 'stop_all']
 
 - name: Stop helperd
   systemd:
