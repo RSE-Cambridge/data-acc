@@ -26,8 +26,8 @@ For beegfs we have:
     ansible-playbook test-dac-beegfs-2.yml -i test-inventory2 --tag format
     ansible-playbook test-dac-beegfs.yml -i test-inventory --tag format --tag mount
     ansible-playbook test-dac-beegfs.yml -i test-inventory --tag mount
-    ansible-playbook test-dac-beegfs.yml -i test-inventory --tag create_mdt --tag create_mgs
-    ansible-playbook test-dac-beegfs.yml -i test-inventory --tag create_mdt --tag create_mgs
+    ansible-playbook test-dac-beegfs.yml -i test-inventory --tag create_mdt --tag create_mgs --tag create_osts
+    ansible-playbook test-dac-beegfs.yml -i test-inventory --tag create_mdt --tag create_mgs --tag create_osts
     ansible-playbook test-dac-beegfs.yml -i test-inventory --tag stop_all
     ansible-playbook test-dac-beegfs.yml -i test-inventory --tag stop_all
     ansible-playbook test-dac-beegfs.yml -i test-inventory --tag unmount

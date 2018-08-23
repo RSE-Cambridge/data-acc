@@ -35,7 +35,6 @@
       file:
         path: "{{ mgs_dir }}"
         state: directory
-        recurse: yes
 
     - name: BeeGFS mgmtd
       command: "/opt/beegfs/sbin/beegfs-setup-mgmtd -p {{ mgs_dir }} -n -S {{ fs_name }} -c {{fs_config_dir}}beegfs-mgmtd.conf"

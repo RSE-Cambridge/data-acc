@@ -3,7 +3,7 @@
 - include: client-build-ops.yaml
 - include: format-mount.yaml
 - include: create-mgs-mdt.yaml
-#- include: format-oss.yaml
+- include: create-ost.yaml
 #- include: ib.yaml
 #- include: tune.yaml
 #- include: stop-fs.yaml

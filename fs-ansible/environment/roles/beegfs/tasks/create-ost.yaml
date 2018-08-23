@@ -1,0 +1,102 @@
+---
+- block:
+    - set_fact:
+        fs_name: "{{ group_names[0] }}"
+        mgs_hostvars: "{{ hostvars[mgsnode] }}"
+    - set_fact:
+        fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
+        mgs_disk: "{{ mgs_hostvars['mgs'] }}"
+    - set_fact:
+        mgs_disk_info: "{{ beegfs_host_info[mgsnode][mgs_disk] }}"
+    - set_fact:
+        mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
+        mgs_ip: "{{ beegfs_host_info[mgsnode][mgs_disk_info['if']] }}"
+  tags: [ 'never', 'create_osts', 'stop_all']
+
+- name: setup storage osts
+  block:
+
+    - name: create storage config dirs
+      file:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/"
+        state: directory
+      loop: "{{ osts }}"
+
+    - name: add template storage conf
+      command: "cp /etc/beegfs/beegfs-storage.conf /etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+      args:
+        creates: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+      loop: "{{ osts }}"
+
+    - name: make data dir
+      file:
+        path: "/data/{{ fs_name }}/{{ item }}/data"
+        state: directory
+      loop: "{{ osts }}"
+
+    - name: setup target
+      command: |
+          /opt/beegfs/sbin/beegfs-setup-storage \
+          -p /data/{{ fs_name }}/{{ item }}/data \
+          -i {{ beegfs_host_info[ansible_host][item]['storage_index'] }} \
+          -s {{ beegfs_host_info[ansible_host][item]['storage_index'] }} \
+          -m {{ mgs_ip }}
+          -c /etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf
+          -I {{ item }}
+          -S {{ ansible_host }}-{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('ERROR: Storage target directory is not empty.' not in command_result.stdout)"
+      changed_when: "command_result.rc == 0"
+      loop: "{{ osts }}"
+
+          - name: set TCP storage port
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^connStoragePortTCP.*'
+        line: "connStoragePortTCP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
+      loop: "{{ osts }}"
+    - name: set UDP storage port
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^connStoragePortUDP.*'
+        line: "connStoragePortUDP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
+      loop: "{{ osts }}"
+
+    - name: set mgmtd tcp port for storage
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^connMgmtdPortTCP.*'
+        line: "connMgmtdPortTCP = {{ mgs_port }}"
+      loop: "{{ osts }}"
+    - name: set mgmtd udp port for storage
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^connMgmtdPortUDP.*'
+        line: "connMgmtdPortUDP = {{ mgs_port }}"
+      loop: "{{ osts }}"
+
+    - name: set storage log
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^logStdFile.*'
+        line: "logStdFile = /var/log/beegfs-storage-{{ fs_name }}-{{ item }}.log"
+      loop: "{{ osts }}"
+
+    - name: Start Services storage
+      systemd:
+        state: started
+        name: "beegfs-storage@{{ fs_name }}-{{ item }}.service"
+      loop: "{{ osts }}"
+
+  when:
+    - osts is defined
+  tags: [ 'never', 'create_osts']
+
+- name: stop storage service
+  systemd:
+    state: stopped
+    name: "beegfs-storage@{{ fs_name }}-{{ item }}.service"
+  loop: "{{ disks }}"
+  when:
+    - disks is defined
+  tags: ['never', 'stop_all']
