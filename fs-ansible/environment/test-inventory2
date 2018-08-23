@@ -10,3 +10,4 @@ all:
           osts: {nvme2n1: 1}
       vars:
         mgsnode: dac1
+        client_port: 1002

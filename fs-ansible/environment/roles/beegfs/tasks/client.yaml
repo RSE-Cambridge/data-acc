@@ -13,47 +13,80 @@
         mgs_ip: "{{ beegfs_host_info[mgsnode][mgs_disk_info['if']] }}"
   tags: ['never', 'client_mount', 'stop_all']
 
-# TODO... use this dir, i.e. modify beegfs-mounts.conf
-- name: create mount dir
-  file:
-    path: /mnt/beegfs/{{ fs_name }}
-    state: directory
-    recurse: yes
-  when:
-    - disks is defined
-  tags: [ 'never', 'client_mount']
+- name: setup client
+  block:
 
-# TODO... create new config file to replace beegfs-client.conf
-- name: setup client config
-  command: /opt/beegfs/sbin/beegfs-setup-client -m {{ mgs_ip }}
-  tags: [ 'never', 'client_mount']
+    - name: create fs config dir
+      file:
+        path: "{{ fs_config_dir }}"
+        state: directory
 
-- name: set mgmtd port
-  lineinfile:
-    path: "/etc/beegfs/beegfs-client.conf"
-    regexp: '^{{ item }}.*'
-    line: "{{ item }} = {{ mgs_port }}"
-  loop:
-    - "connMgmtdPortTCP"
-    - "connMgmtdPortUDP"
-  tags: [ 'never', 'client_mount']
+    - name: copy default config
+      shell: "cp /etc/beegfs/beegfs-client.conf {{ fs_config_dir }}"
+      args:
+        creates: "{{ fs_config_dir }}beegfs-client.conf"
 
-- name: Start helperd
-  systemd:
-    state: started
-    name: "beegfs-helperd"
-  tags: [ 'never', 'client_mount']
+    - name: setup client config
+      command: |
+          /opt/beegfs/sbin/beegfs-setup-client -m {{ mgs_ip }}
+          -c {{ fs_config_dir }}beegfs-client.conf
 
-- name: Start client
-  systemd:
-    state: started
-    name: "beegfs-client"
+    - name: set mgmtd port
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-client.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = {{ mgs_port }}"
+      loop:
+        - "connMgmtdPortTCP"
+        - "connMgmtdPortUDP"
+
+    - name: set client port
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-client.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = {{ client_port }}"
+      loop:
+        - "connClientPortUDP"
+
+    - name: create mount dir
+      file:
+        path: /mnt/beegfs/{{ fs_name }}
+        state: directory
+        recurse: yes
+
+    - name: remove default mount
+      lineinfile:
+        path: "/etc/beegfs/beegfs-mounts.conf"
+        regexp: '^/mnt/beegfs /.*'
+        state: absent
+
+    - name: setup mountpoint in beegfs-mounts
+      lineinfile:
+        path: "/etc/beegfs/beegfs-mounts.conf"
+        regexp: '^/mnt/beegfs/{{ fs_name }}.*'
+        line: "/mnt/beegfs/{{ fs_name }} {{ fs_config_dir }}beegfs-client.conf"
+
+    - name: Start helperd
+      systemd:
+        state: started
+        name: "beegfs-helperd"
+
+    - name: ensure default client stopped
+      systemd:
+        state: stopped
+        name: "beegfs-client"
+
+    - name: Start client
+      systemd:
+        state: started
+        name: "beegfs-client@{{ fs_name }}.service"
+
   tags: [ 'never', 'client_mount']
 
 - name: Stop client
   systemd:
     state: stopped
-    name: "beegfs-client"
+    name: "beegfs-client@{{ fs_name }}.service"
   loop: "{{ disks }}"
   tags: [ 'never', 'stop_all']
 

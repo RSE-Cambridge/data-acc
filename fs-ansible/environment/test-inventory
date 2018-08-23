@@ -8,4 +8,6 @@ all:
           osts: {nvme0n1: 2}
         dac2:
           osts: {nvme3n1: 1}
-      vars: {mgsnode: dac1}
+      vars:
+        mgsnode: dac1
+        client_port: 1001
