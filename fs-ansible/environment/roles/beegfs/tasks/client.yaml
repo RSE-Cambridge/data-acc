@@ -11,7 +11,7 @@
     - set_fact:
         mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
         mgs_ip: "{{ beegfs_host_info[mgsnode][mgs_disk_info['if']] }}"
-  tags: ['never', 'client_mount']
+  tags: ['never', 'client_mount', 'stop_all']
 
 # TODO... use this dir, i.e. modify beegfs-mounts.conf
 - name: create mount dir
@@ -55,10 +55,10 @@
     state: stopped
     name: "beegfs-client"
   loop: "{{ disks }}"
-  tags: [ 'never', 'client_unmount']
+  tags: [ 'never', 'stop_all']
 
 - name: Stop helperd
   systemd:
     state: stopped
     name: "beegfs-helperd"
-  tags: [ 'never', 'client_unmount']
+  tags: [ 'never', 'stop_all']
