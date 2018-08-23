@@ -1,16 +1,16 @@
 ---
 - set_fact:
     fs_name: "{{ group_names[0] }}"
-    mgs_disk_interface: "{{ beegfs_host_info[mgs_host][disks[0]]['if'] }}"
+    mgs_disk_interface: "{{ beegfs_host_info[mgsnode][disks[0]]['if'] }}"
   tags: [ 'never', 'create_mgs_mds', 'stop']
 
 - set_fact:
     fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
     mgs_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mgs"
     mds_dir: "/data/{{ fs_name }}/{{ disks[0] }}/mds"
-    mgs_ip: "{{ beegfs_host_info[mgs_host][mgs_disk_interface] }}"
-    mgs_port: "{{ beegfs_host_info[mgs_host][disks[0]]['mgs_port'] }}"
-    mds_port: "{{ beegfs_host_info[mgs_host][disks[0]]['mds_port'] }}"
+    mgs_ip: "{{ beegfs_host_info[mgsnode][mgs_disk_interface] }}"
+    mgs_port: "{{ beegfs_host_info[mgsnode][disks[0]]['mgs_port'] }}"
+    mds_port: "{{ beegfs_host_info[mgsnode][disks[0]]['mds_port'] }}"
   tags: [ 'never', 'create_mgs_mds']
 
 - name: create fs config dir

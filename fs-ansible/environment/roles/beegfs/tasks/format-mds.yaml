@@ -1,4 +1,71 @@
 ---
+- set_fact:
+    fs_name: "{{ group_names[0] }}"
+  tags: ['never', 'create_mgs', 'create_mdt', 'stop_all']
+
+- set_fact:
+    fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
+  tags: ['never', 'create_mgs', 'create_mdt', 'stop_all']
+
+
+- name: create template config
+  block:
+    - name: create fs config dir
+      file:
+        path: "{{ fs_config_dir }}"
+        state: directory
+    - name: copy default config
+      shell: "cp /etc/beegfs/*.conf {{ fs_config_dir }}"
+      args:
+        creates: "{{ fs_config_dir }}beegfs-admon.conf"
+  tags: ['never', 'create_mgs', 'create_mdt']
+
+
+- name: create mgmtd service
+  block:
+    - set_fact:
+        mgs_dir: "/data/{{ fs_name }}/{{ mgs }}/mgs"
+        mgs_port: "TODO!!"
+
+    - name: make mgs dir
+      file:
+        path: "{{ mgs_dir }}"
+        state: directory
+        recurse: yes
+
+    - name: BeeGFS mgmtd
+      command: "/opt/beegfs/sbin/beegfs-setup-mgmtd -p {{ mgs_dir }} -n -S {{ fs_name }} -c {{fs_config_dir}}beegfs-mgmtd.conf"
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('ERROR: Storage directory is not empty.' not in command_result.stdout)"
+      changed_when: "command_result.rc == 0"
+
+    - name: set mgmtd port
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-mgmtd.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = {{ mgs_port }}"
+      loop:
+        - "connMgmtdPortTCP"
+        - "connMgmtdPortUDP"
+
+    - name: Start mgmtd
+      systemd:
+        state: started
+        name: "beegfs-mgmtd@{{ fs_name }}.service"
+
+  when:
+    - mgs is defined
+  tags: ['never', 'create_mgs']
+
+- name: make mdt dir
+  file:
+    path: /data/{{ fs_name }}/{{ mdt }}/mdt
+    state: directory
+    recurse: yes
+  when:
+    - mdt is defined
+  tags: ['never', 'create_mdt']
+
 
 - name: BeeGFS mgmtd
   command: /opt/beegfs/sbin/beegfs-setup-mgmtd -f -p /data/mgmtd
