@@ -49,7 +49,7 @@
       changed_when: "command_result.rc == 0"
       loop: "{{ osts }}"
 
-          - name: set TCP storage port
+    - name: set TCP storage port
       lineinfile:
         path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
         regexp: '^connStoragePortTCP.*'
