@@ -5,6 +5,7 @@ all:
         dac1:
           mgs: nvme0n1
           mdt: nvme1n1
+          osts: {nvme0n1: 2}
         dac2:
           osts: {nvme3n1: 1}
       vars: {mgsnode: dac1}

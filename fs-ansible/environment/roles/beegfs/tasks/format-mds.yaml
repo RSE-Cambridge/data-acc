@@ -1,10 +1,18 @@
 ---
-- set_fact:
-    fs_name: "{{ group_names[0] }}"
-  tags: ['never', 'create_mgs', 'create_mdt', 'stop_all']
-
-- set_fact:
-    fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
+- block:
+    - set_fact:
+        fs_name: "{{ group_names[0] }}"
+        mgs_hostvars: "{{ hostvars[mgsnode] }}"
+    - set_fact:
+        fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
+        mgs_disk: "{{ mgs_hostvars['mgs'] }}"
+    - set_fact:
+        mgs_disk_info: "{{ beegfs_host_info[mgsnode][mgs_disk] }}"
+    - set_fact:
+        mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
+        mgs_ip: "{{ beegfs_host_info[mgsnode][mgs_disk_info['if']] }}"
+    - set_fact:
+        mgs_dir: "/data/{{ fs_name }}/{{ mgs_disk }}/mgs"
   tags: ['never', 'create_mgs', 'create_mdt', 'stop_all']
 
 
@@ -23,10 +31,6 @@
 
 - name: create mgmtd service
   block:
-    - set_fact:
-        mgs_dir: "/data/{{ fs_name }}/{{ mgs }}/mgs"
-        mgs_port: "TODO!!"
-
     - name: make mgs dir
       file:
         path: "{{ mgs_dir }}"
@@ -48,6 +52,22 @@
         - "connMgmtdPortTCP"
         - "connMgmtdPortUDP"
 
+    - name: set mgmtd ip
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-mgmtd.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = {{ mgs_ip }}"
+      loop:
+        - "sysMgmtdHost"
+
+    - name: set mgmtd logfile
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-mgmtd.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = /var/log/{{ fs_name }}-beegfs-mgmtd.log"
+      loop:
+        - "logStdFile"
+
     - name: Start mgmtd
       systemd:
         state: started
@@ -57,90 +77,69 @@
     - mgs is defined
   tags: ['never', 'create_mgs']
 
-- name: make mdt dir
-  file:
-    path: /data/{{ fs_name }}/{{ mdt }}/mdt
-    state: directory
-    recurse: yes
+
+- name: create meta service
+  block:
+    - set_fact:
+        mdt_dir: "/data/{{ fs_name }}/{{ mdt }}/mdt"
+        mdt_disk_info: "{{ beegfs_host_info[ansible_host][mdt] }}"
+    - set_fact:
+        mdt_port: "{{ mdt_disk_info['mdt_port'] }}"
+        mdt_index: "{{ mdt_disk_info['storage_index'] }}"
+        mdt_ip: "{{ beegfs_host_info[ansible_host][ mdt_disk_info['if'] ] }}"
+
+    - name: Configure BeeGFS meta
+      command: "/opt/beegfs/sbin/beegfs-setup-meta -p {{ mdt_dir }} -s {{ mdt_index }} -m {{ mgs_ip }} -S {{ fs_name }} -c {{fs_config_dir}}beegfs-meta.conf"
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('ERROR: Storage directory is not empty.' not in command_result.stdout)"
+      changed_when: "command_result.rc == 0"
+
+    - name: set meta port
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-meta.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = {{ mdt_port }}"
+      loop:
+        - "connMetaPortTCP"
+        - "connMetaPortUDP"
+
+    - name: set mgmtd port for meta
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-meta.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = {{ mgs_port }}"
+      loop:
+        - "connMgmtdPortTCP"
+        - "connMgmtdPortUDP"
+
+    - name: set mgmtd logfile
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-meta.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = /var/log/{{ fs_name }}-beegfs-meta.log"
+      loop:
+        - "logStdFile"
+
+    - name: Start services meta
+      systemd:
+        state: started
+        name: "beegfs-meta@{{ fs_name }}.service"
   when:
     - mdt is defined
-  tags: ['never', 'create_mdt']
+  tags: [ 'never', 'create_mdt']
 
-
-- name: BeeGFS mgmtd
-  command: /opt/beegfs/sbin/beegfs-setup-mgmtd -f -p /data/mgmtd
-  when:
-    - mgs is defined
-  tags: [ 'never', 'create_mgs']
-
-- name: BeeGFS mgmtd conf
-  lineinfile:
-    path: /etc/beegfs/beegfs-mgmtd.conf
-    regexp: '^storeMgmtdDirectory'
-    line: 'storeMgmtdDirectory=/data/mgmtd'
-  when:
-    - mgs is defined
-  tags: [ 'never', 'create_mgs']
-
-
-- name: Format mds ext4 volume
-  command: mkfs.ext4 -i 2048 -I 512 -J size=400 -Odir_index,filetype /dev/{{ item }}
-  loop: "{{ mds }}"
-  when:
-    - mds is defined
-  tags: [ 'never', 'format_mds_ext4']
-
-- name: mount mds volume
-  command: mount -onoatime,nodiratime,nobarrier,user_xattr /dev/{{item}} /data/mds/{{item}}
-  loop: "{{ mds }}"
-  when:
-    - mds is defined
-  tags: [ 'never', 'format_mds_ext4']
-
-- name: Beegfs Format MDS
-  lineinfile:
-    path: /etc/beegfs/beegfs-meta.conf
-    regexp: '^sysMgmtdHost'
-    line: "sysMgmtdHost={{ ansible_ib0.ipv4.address}}"
-  when:
-    - mds is defined
-  tags: [ 'never', 'create_mds']
-
-- name: Beegfs Format MDS
-  lineinfile:
-    path: /etc/beegfs/beegfs-meta.conf
-    regexp: '^storeMetaDirectory'
-    line: "storeMetaDirectory=/data/mds/{{ item}}"
-  loop: "{{ mds }}"
-  when:
-    - mds is defined
-  tags: [ 'never', 'create_mds']
-
-- name: Beegfs Format MDS
-  lineinfile:
-    path: /etc/beegfs/beegfs-meta.conf
-    regexp: '^storeAllowFirstRunInit'
-    line: "storeAllowFirstRunInit=true"
-  when:
-    - mds is defined
-  tags: [ 'never', 'create_mds']
-
-- name: Start services mgmtd
+# TODO split out to get correct ordering re storage services!
+- name: stop meta service
   systemd:
-    state: started
-    name: beegfs-mgmtd
+    state: stopped
+    name: "beegfs-meta@{{ fs_name }}.service"
+  when:
+    - mdt is defined
+  tags: ['never', 'stop_all']
+- name: stop mgmtd service
+  systemd:
+    state: stopped
+    name: "beegfs-mgmtd@{{ fs_name }}.service"
   when:
     - mgs is defined
-  tags: [ 'never', 'start_service']
-
-- name: Start services meta
-  systemd:
-    state: started
-    name: beegfs-meta
-  when:
-    - mds is defined
-  tags: [ 'never', 'start_service']
-
-
-
-
+  tags: ['never', 'stop_all']
