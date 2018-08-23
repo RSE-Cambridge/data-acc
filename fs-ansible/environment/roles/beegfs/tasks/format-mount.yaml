@@ -1,8 +1,8 @@
 ---
 - set_fact:
     fs_name: "{{ group_names[0] }}"
-    mdt_disk: "{{ mdt | default([]) }}"
-    mgs_disk: "{{ mgs | default({}) }}"
+    mdt: "{{ mdt | default([]) }}"
+    mgs: "{{ mgs | default([]) }}"
     osts: "{{ osts | default({}) }}"
   tags: ['never', 'format', 'mount']
 
