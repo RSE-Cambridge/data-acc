@@ -71,15 +71,10 @@
         state: started
         name: "beegfs-helperd"
 
-    - name: ensure default client stopped
+    - name: ensure default client is restarted to update mounts
       systemd:
-        state: stopped
+        state: restarted
         name: "beegfs-client"
-
-    - name: Start client
-      systemd:
-        state: started
-        name: "beegfs-client@{{ fs_name }}.service"
 
   tags: [ 'never', 'client_mount']
 
