@@ -25,7 +25,3 @@ beegfs_host_info:
       str_port: 8104
       mdt_port: 8204
       mgs_port: 8304
-  dac1:
-      eth0: 192.168.0.116
-  dac2:
-      eth0: 192.168.0.117
