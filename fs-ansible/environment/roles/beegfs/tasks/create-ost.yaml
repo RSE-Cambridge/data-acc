@@ -1,16 +1,21 @@
 ---
 - block:
     - set_fact:
-        fs_name: "{{ group_names[0] }}"
+        osts: "{{ vars[fs_name + '_osts'] }}"
+        mgs: "{{ vars[fs_name + '_mgs'] }}"
+        mgt: "{{ vars[fs_name + '_mgt'] }}"
+        mgs_node: "{{ vars[fs_name + '_mgt'] }}"
+        client_port: "{{ vars[fs_name + '_mgt'] }}"
+    - set_fact:
         mgs_hostvars: "{{ hostvars[mgsnode] }}"
     - set_fact:
         fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
         mgs_disk: "{{ mgs_hostvars['mgs'] }}"
     - set_fact:
-        mgs_disk_info: "{{ beegfs_host_info[mgsnode][mgs_disk] }}"
+        mgs_disk_info: "{{ beegfs_host_info[mgs_disk] }}"
     - set_fact:
         mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
-        mgs_ip: "{{ beegfs_host_info[mgsnode][mgs_disk_info['if']] }}"
+        mgs_ip: hostvars[inventory_hostname]['ansible_{{ mgs_disk_info["if"] }}']['ipv4']['address']
   tags: [ 'never', 'create_osts', 'stop_all']
 
 - name: setup storage osts
@@ -53,13 +58,13 @@
       lineinfile:
         path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
         regexp: '^connStoragePortTCP.*'
-        line: "connStoragePortTCP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
+        line: "connStoragePortTCP = {{ beegfs_host_info[item]['str_port'] }}"
       loop: "{{ osts.keys() }}"
     - name: set UDP storage port
       lineinfile:
         path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
         regexp: '^connStoragePortUDP.*'
-        line: "connStoragePortUDP = {{ beegfs_host_info[ansible_host][item]['str_port'] }}"
+        line: "connStoragePortUDP = {{ beegfs_host_info[item]['str_port'] }}"
       loop: "{{ osts.keys() }}"
 
     - name: set mgmtd tcp port for storage
@@ -84,15 +89,15 @@
 
     - name: write out interfaces file
       copy:
-        content: "{{ beegfs_host_info[ansible_host][item]['if'] }}"
-        dest: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/connInterfacesFile{{ beegfs_host_info[ansible_host][item]['if'] }}"
+        content: "{{ beegfs_host_info[item]['if'] }}"
+        dest: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/connInterfacesFile{{ beegfs_host_info[item]['if'] }}"
       loop: "{{ osts.keys() }}"
 
     - name: set conInterfacesFile in config
       lineinfile:
         path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
         regexp: '^connInterfacesFile.*'
-        line: "connInterfacesFile = /etc/beegfs/{{ fs_name }}/{{ item }}.d/connInterfacesFile{{ beegfs_host_info[ansible_host][item]['if'] }}"
+        line: "connInterfacesFile = /etc/beegfs/{{ fs_name }}/{{ item }}.d/connInterfacesFile{{ beegfs_host_info[item]['if'] }}"
       loop: "{{ osts.keys() }}"
 
     - name: Start Services storage

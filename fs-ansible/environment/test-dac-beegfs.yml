@@ -2,7 +2,6 @@
 - name: Setup beegfs for fs1
   hosts: fs1
   become: yes
-  gather_facts: no
   roles:
     - role: beegfs
       vars:
@@ -11,7 +10,6 @@
 - name: Setup beegfs for fs2
   hosts: fs2
   become: yes
-  gather_facts: no
   roles:
     - role: beegfs
       vars:
