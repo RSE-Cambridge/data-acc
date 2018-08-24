@@ -15,7 +15,7 @@
         mgs_disk_info: "{{ beegfs_host_info[mgs_disk] }}"
     - set_fact:
         mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
-        mgs_ip: hostvars[inventory_hostname]['ansible_{{ mgs_disk_info["if"] }}']['ipv4']['address']
+        mgs_ip: {{ hostvars[inventory_hostname]['ansible_{{ mgs_disk_info["if"] }}']['ipv4']['address'] }}
     - set_fact:
         mgs_dir: "/data/{{ fs_name }}/{{ mgs_disk }}/mgs"
   tags: ['never', 'create_mgs', 'create_mdt', 'stop_all']
