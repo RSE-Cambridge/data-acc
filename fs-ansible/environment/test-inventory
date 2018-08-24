@@ -1,13 +1,30 @@
-all:
+dac-fake:
   children:
     fs1:
       hosts:
         dac1:
-          mgs: nvme0n1
-          mdt: nvme1n1
-          osts: {nvme0n1: 2}
+          fs1:
+            mgs: nvme0n1
+            mdt: nvme1n1
+            osts: {nvme0n1: 2}
         dac2:
-          osts: {nvme3n1: 1}
+          fs1:
+            osts: {nvme3n1: 1}
       vars:
-        mgsnode: dac1
-        client_port: 1001
+        fs1:
+          mgsnode: dac1
+          client_port: 1001
+    fs2:
+      hosts:
+        dac1:
+          fs2:
+            mgs: nvme3n1
+            mdt: nvme3n1
+            osts: {nvme4n1: 2}
+        dac2:
+          fs2:
+            osts: {nvme2n1: 1}
+      vars:
+        fs2:
+          mgsnode: dac1
+          client_port: 1002

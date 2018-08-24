@@ -101,7 +101,7 @@
         mdt_disk_info: "{{ beegfs_host_info[ansible_host][mdt] }}"
     - set_fact:
         mdt_port: "{{ mdt_disk_info['mdt_port'] }}"
-        mdt_index: "{{ mdt_disk_info['storage_index'] }}"
+        mdt_index: 1
         mdt_ip: "{{ beegfs_host_info[ansible_host][ mdt_disk_info['if'] ] }}"
 
     - name: Configure BeeGFS meta

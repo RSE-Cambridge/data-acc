@@ -1,0 +1,71 @@
+---
+beegfs_host_info:
+  nvme0n1:
+      if: ib0
+      str_port: 8100
+      mdt_port: 8200
+      mgs_port: 8300
+  nvme1n1:
+      if: ib0
+      str_port: 8101
+      mdt_port: 8201
+      mgs_port: 8301
+  nvme2n1:
+      if: ib0
+      str_port: 8102
+      mdt_port: 8202
+      mgs_port: 8302
+  nvme3n1:
+      if: ib0
+      str_port: 8103
+      mdt_port: 8203
+      mgs_port: 8303
+  nvme4n1:
+      if: ib0
+      str_port: 8104
+      mdt_port: 8204
+      mgs_port: 8304
+  nvme5n1:
+      if: ib0
+      str_port: 8105
+      mdt_port: 8205
+      mgs_port: 8305
+  nvme6n1:
+      if: ib1
+      str_port: 8106
+      mdt_port: 8206
+      mgs_port: 8306
+  nvme7n1:
+      if: ib1
+      str_port: 8107
+      mdt_port: 8207
+      mgs_port: 8307
+  nvme8n1:
+      if: ib1
+      str_port: 8108
+      mdt_port: 8208
+      mgs_port: 8308
+  nvme9n1:
+      if: ib1
+      str_port: 8109
+      mdt_port: 8209
+      mgs_port: 8309
+  nvme10n1:
+      if: ib1
+      str_port: 8110
+      mdt_port: 8210
+      mgs_port: 8310
+  nvme11n1:
+      if: ib1
+      str_port: 8111
+      mdt_port: 8211
+      mgs_port: 8311
+  dac-e-1:
+      ib0: 10.47.18.1
+      ib1: 10.47.18.25
+  dac-e-2:
+      ib0: 10.47.18.2
+      ib1: 10.47.18.26
+  dac-e-3:
+      ib0: 10.47.18.2
+      ib1: 10.47.18.27
