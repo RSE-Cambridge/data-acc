@@ -37,7 +37,11 @@
         state: directory
 
     - name: BeeGFS mgmtd
-      command: "/opt/beegfs/sbin/beegfs-setup-mgmtd -p {{ mgs_dir }} -n -S {{ fs_name }} -c {{fs_config_dir}}beegfs-mgmtd.conf"
+      command: |
+          /opt/beegfs/sbin/beegfs-setup-mgmtd \
+          -p {{ mgs_dir }} -n \
+          -S {{ fs_name }}-{{ ansible_host }}-{{ mgs_disk }} \
+          -c {{fs_config_dir}}beegfs-mgmtd.conf"
       register: command_result
       failed_when: "command_result.rc != 0 and ('ERROR: Storage directory is not empty.' not in command_result.stdout)"
       changed_when: "command_result.rc == 0"
@@ -101,7 +105,13 @@
         mdt_ip: "{{ beegfs_host_info[ansible_host][ mdt_disk_info['if'] ] }}"
 
     - name: Configure BeeGFS meta
-      command: "/opt/beegfs/sbin/beegfs-setup-meta -p {{ mdt_dir }} -s {{ mdt_index }} -m {{ mgs_ip }} -S {{ fs_name }} -c {{fs_config_dir}}beegfs-meta.conf"
+      command: |
+          /opt/beegfs/sbin/beegfs-setup-meta \
+          -p {{ mdt_dir }} \
+          -s {{ mdt_index }} \
+          -m {{ mgs_ip }} \
+          -S {{ fs_name }}-{{ ansible_host }}-{{ mdt }} \
+          -c {{fs_config_dir}}beegfs-meta.conf"
       register: command_result
       failed_when: "command_result.rc != 0 and ('ERROR: Storage directory is not empty.' not in command_result.stdout)"
       changed_when: "command_result.rc == 0"
