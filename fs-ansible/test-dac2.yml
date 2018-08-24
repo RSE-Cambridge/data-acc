@@ -1,7 +1,0 @@
----
-- name: Install Lustre for fs2
-  hosts: fs2
-  become: yes
-  gather_facts: no
-  roles:
-    - role: lustre

@@ -31,9 +31,6 @@ For beegfs we have:
     ansible-playbook test-dac-beegfs.yml -i test-inventory --tag unmount
     ansible-playbook test-dac-beegfs.yml -i test-inventory --tag format
 
-    ansible-playbook test-dac-beegfs-2.yml -i test-inventory2 --tag format
-    etc...
-
 ## Install notes
 
 You may find this useful to run the above ansible-playbook command:
