@@ -17,7 +17,7 @@
         mgs_if_key: "ansible_{{ mgs_disk_info['if'] }}"
     - set_fact:
         mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
-        mgs_ip: "{{ hostvars[inventory_hostname][mgs_if_key]['ipv4']['address'] }}"
+        mgs_ip: "{{ hostvars[mgsnode][mgs_if_key]['ipv4']['address'] }}"
   tags: [ 'never', 'create_osts', 'stop_all']
 
 - name: setup storage osts
