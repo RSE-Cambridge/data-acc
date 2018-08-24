@@ -1,7 +1,12 @@
 ---
 - block:
     - set_fact:
-        fs_name: "{{ group_names[0] }}"
+        osts: "{{ vars[fs_name + '_osts'] | default(omit) }}"
+        mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
+        mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
+        mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
+        client_port: "{{ vars[fs_name + '_client_port'] }}"
+    - set_fact:
         mgs_hostvars: "{{ hostvars[mgsnode] }}"
     - set_fact:
         fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
