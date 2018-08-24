@@ -12,10 +12,10 @@
         fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
         mgs_disk: "{{ mgs_hostvars['mgs'] }}"
     - set_fact:
-        mgs_disk_info: "{{ beegfs_host_info[mgsnode][mgs_disk] }}"
+        mgs_disk_info: "{{ beegfs_host_info[mgs_disk] }}"
     - set_fact:
         mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
-        mgs_ip: "{{ beegfs_host_info[mgsnode][mgs_disk_info['if']] }}"
+        mgs_ip: hostvars[inventory_hostname]['ansible_{{ mgs_disk_info["if"] }}']['ipv4']['address']
     - set_fact:
         mgs_dir: "/data/{{ fs_name }}/{{ mgs_disk }}/mgs"
   tags: ['never', 'create_mgs', 'create_mdt', 'stop_all']
@@ -103,11 +103,11 @@
   block:
     - set_fact:
         mdt_dir: "/data/{{ fs_name }}/{{ mdt }}/mdt"
-        mdt_disk_info: "{{ beegfs_host_info[ansible_host][mdt] }}"
+        mdt_disk_info: "{{ beegfs_host_info[mdt] }}"
     - set_fact:
         mdt_port: "{{ mdt_disk_info['mdt_port'] }}"
         mdt_index: 1
-        mdt_ip: "{{ beegfs_host_info[ansible_host][ mdt_disk_info['if'] ] }}"
+        mdt_ip: hostvars[inventory_hostname]['ansible_{{ mdt_disk_info["if"] }}']['ipv4']['address']
 
     - name: Configure BeeGFS meta
       command: |

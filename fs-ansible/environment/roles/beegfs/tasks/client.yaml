@@ -12,10 +12,10 @@
         fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
         mgs_disk: "{{ mgs_hostvars['mgs'] }}"
     - set_fact:
-        mgs_disk_info: "{{ beegfs_host_info[mgsnode][mgs_disk] }}"
+        mgs_disk_info: "{{ beegfs_host_info[mgs_disk] }}"
     - set_fact:
         mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
-        mgs_ip: "{{ beegfs_host_info[mgsnode][mgs_disk_info['if']] }}"
+        mgs_ip: hostvars[inventory_hostname]['ansible_{{ mgs_disk_info["if"] }}']['ipv4']['address']
   tags: ['never', 'client_mount', 'client_unmount', 'stop_all']
 
 - name: setup client
