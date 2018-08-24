@@ -82,6 +82,19 @@
         line: "logStdFile = /var/log/beegfs-storage-{{ fs_name }}-{{ item }}.log"
       loop: "{{ osts.keys() }}"
 
+    - name: write out interfaces file
+      copy:
+        content: "{{ beegfs_host_info[ansible_host][item]['if'] }}"
+        dest: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/connInterfacesFile{{ beegfs_host_info[ansible_host][item]['if'] }}"
+      loop: "{{ osts.keys() }}"
+
+    - name: set conInterfacesFile in config
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^connInterfacesFile.*'
+        line: "connInterfacesFile = /etc/beegfs/{{ fs_name }}/{{ item }}.d/connInterfacesFile{{ beegfs_host_info[ansible_host][item]['if'] }}"
+      loop: "{{ osts.keys() }}"
+
     - name: Start Services storage
       systemd:
         state: started

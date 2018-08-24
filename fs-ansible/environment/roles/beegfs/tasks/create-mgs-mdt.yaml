@@ -67,6 +67,19 @@
       loop:
         - "logStdFile"
 
+    - name: write out interfaces file
+      copy:
+        content: "{{ mgs_disk_info['if'] }}"
+        dest: "{{ fs_config_dir }}connInterfacesFile{{ mgs_disk_info['if'] }}"
+
+    - name: set conInterfacesFile in config
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-mgmtd.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = {{ fs_config_dir }}connInterfacesFile{{ mgs_disk_info['if'] }}"
+      loop:
+        - "connInterfacesFile"
+
     - name: Start mgmtd
       systemd:
         state: started
@@ -118,6 +131,19 @@
         line: "{{ item }} = /var/log/{{ fs_name }}-beegfs-meta.log"
       loop:
         - "logStdFile"
+
+    - name: write out interfaces file
+      copy:
+        content: "{{ mdt_disk_info['if'] }}"
+        dest: "{{ fs_config_dir }}connInterfacesFile{{ mdt_disk_info['if'] }}"
+
+    - name: set conInterfacesFile in config
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-meta.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = {{ fs_config_dir }}connInterfacesFile{{ mdt_disk_info['if'] }}"
+      loop:
+        - "connInterfacesFile"
 
     - name: Start services meta
       systemd:
