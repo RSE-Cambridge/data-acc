@@ -3,8 +3,8 @@
     - set_fact:
         osts: "{{ vars[fs_name + '_osts'] | default(omit) }}"
         mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
-        mdt: "{{ vars[fs_name + '_mdt'] }}"
-        mgs_node: "{{ vars[fs_name + '_mgsnode'] }}"
+        mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
+        mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
         client_port: "{{ vars[fs_name + '_client_port'] }}"
     - set_fact:
         mgs_hostvars: "{{ hostvars[mgsnode] }}"
