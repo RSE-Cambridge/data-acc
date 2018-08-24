@@ -13,6 +13,7 @@
         mgs_disk: "{{ mgs_hostvars['mgs'] }}"
     - set_fact:
         mgs_disk_info: "{{ beegfs_host_info[mgs_disk] }}"
+    - set_fact:
         mgs_if_key: "ansible_{{ mgs_disk_info['if'] }}"
     - set_fact:
         mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
