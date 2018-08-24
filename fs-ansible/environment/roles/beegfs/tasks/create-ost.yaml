@@ -111,5 +111,5 @@
     name: "beegfs-storage@{{ fs_name }}-{{ item }}.service"
   loop: "{{ osts.keys() }}"
   when:
-    - disks is defined
+    - osts is defined
   tags: ['never', 'stop_all']
