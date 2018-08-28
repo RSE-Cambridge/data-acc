@@ -1,6 +1,0 @@
----
-  lustre:
-     fsname: dac1
-     release: lustre-2.10.3
-     servertype: server
-     mgsnode: 10.47.18.1@o2ib1

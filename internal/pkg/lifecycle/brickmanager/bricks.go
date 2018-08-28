@@ -1,7 +1,7 @@
 package brickmanager
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/pfsprovider/fake"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/pfsprovider/ansible"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"strings"
@@ -139,7 +139,7 @@ func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume,
 }
 
 // TODO: should not be hardcoded here
-var plugin = fake.GetPlugin()
+var plugin = ansible.GetPlugin(ansible.BeegFS)
 
 func provisionNewVolume(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	if volume.State != registry.Registered {

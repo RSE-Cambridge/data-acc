@@ -214,7 +214,9 @@ func GetNewUUID() string {
 }
 
 func (volRegistry *volumeRegistry) AddVolume(volume registry.Volume) error {
+	// TODO: both uuid and client port might clash, need to check they don't!!
 	volume.UUID = GetNewUUID()
+	volume.ClientPort = rand.Intn(50000) + 10000
 	return volRegistry.keystore.Add([]KeyValue{{
 		Key:   getVolumeKey(string(volume.Name)),
 		Value: toJson(volume),

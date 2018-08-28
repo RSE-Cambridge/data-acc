@@ -1,0 +1,8 @@
+---
+- name: Setup beegfs for io500
+  hosts: fs1001
+  become: yes
+  roles:
+    - role: beegfs
+      vars:
+        fs_name: fs1001

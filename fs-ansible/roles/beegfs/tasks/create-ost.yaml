@@ -1,0 +1,120 @@
+---
+- block:
+    - set_fact:
+        osts: "{{ vars[fs_name + '_osts'] | default(omit) }}"
+        mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
+        mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
+        mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
+        client_port: "{{ vars[fs_name + '_client_port'] }}"
+    - set_fact:
+        mgs_hostvars: "{{ hostvars[mgsnode] }}"
+    - set_fact:
+        fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
+        mgs_disk: "{{ mgs_hostvars['mgs'] }}"
+    - set_fact:
+        mgs_disk_info: "{{ beegfs_host_info[mgs_disk] }}"
+    - set_fact:
+        mgs_if_key: "ansible_{{ mgs_disk_info['if'] }}"
+    - set_fact:
+        mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
+        mgs_ip: "{{ hostvars[mgsnode][mgs_if_key]['ipv4']['address'] }}"
+  tags: [ 'never', 'create_osts', 'stop_all']
+
+- name: setup storage osts
+  block:
+
+    - name: create storage config dirs
+      file:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/"
+        state: directory
+      loop: "{{ osts.keys() }}"
+
+    - name: add template storage conf
+      command: "cp /etc/beegfs/beegfs-storage.conf /etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+      args:
+        creates: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+      loop: "{{ osts.keys() }}"
+
+    - name: make data dir
+      file:
+        path: "/data/{{ fs_name }}/{{ item }}/data"
+        state: directory
+      loop: "{{ osts.keys() }}"
+
+    - name: setup target
+      command: |
+          /opt/beegfs/sbin/beegfs-setup-storage \
+          -p /data/{{ fs_name }}/{{ item.key }}/data -r \
+          -i {{ item.value }} \
+          -s {{ item.value }} \
+          -m {{ mgs_ip }}
+          -c /etc/beegfs/{{ fs_name }}/{{ item.key }}.d/beegfs-storage.conf
+          -I {{ fs_name }}-{{ ansible_host }}-{{ item.key }}
+          -S {{ fs_name }}-{{ ansible_host }}-{{ item.key }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('ERROR: Storage target directory is not empty.' not in command_result.stdout)"
+      changed_when: "command_result.rc == 0"
+      with_dict: "{{ osts }}"
+
+    - name: set TCP storage port
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^connStoragePortTCP.*'
+        line: "connStoragePortTCP = {{ beegfs_host_info[item]['str_port'] }}"
+      loop: "{{ osts.keys() }}"
+    - name: set UDP storage port
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^connStoragePortUDP.*'
+        line: "connStoragePortUDP = {{ beegfs_host_info[item]['str_port'] }}"
+      loop: "{{ osts.keys() }}"
+
+    - name: set mgmtd tcp port for storage
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^connMgmtdPortTCP.*'
+        line: "connMgmtdPortTCP = {{ mgs_port }}"
+      loop: "{{ osts.keys() }}"
+    - name: set mgmtd udp port for storage
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^connMgmtdPortUDP.*'
+        line: "connMgmtdPortUDP = {{ mgs_port }}"
+      loop: "{{ osts.keys() }}"
+
+    - name: set storage log
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^logStdFile.*'
+        line: "logStdFile = /var/log/beegfs-storage-{{ fs_name }}-{{ item }}.log"
+      loop: "{{ osts.keys() }}"
+
+    - name: write out interfaces file
+      copy:
+        content: "{{ beegfs_host_info[item]['if'] }}"
+        dest: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/connInterfacesFile{{ beegfs_host_info[item]['if'] }}"
+      loop: "{{ osts.keys() }}"
+
+    - name: set conInterfacesFile in config
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: '^connInterfacesFile.*'
+        line: "connInterfacesFile = /etc/beegfs/{{ fs_name }}/{{ item }}.d/connInterfacesFile{{ beegfs_host_info[item]['if'] }}"
+      loop: "{{ osts.keys() }}"
+
+    - name: Set appropriate tuneBindToNumaZone
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: "^tuneBindToNumaZone.*"
+        line: "tuneBindToNumaZone={{ beegfs_host_info[item]['numa'] }}"
+      loop: "{{ osts.keys() }}"
+
+    - name: Start Services storage
+      systemd:
+        state: started
+        name: "beegfs-storage@{{ fs_name }}-{{ item }}.service"
+      loop: "{{ osts.keys() }}"
+
+  when:
+    - osts is defined
+  tags: [ 'never', 'create_osts']

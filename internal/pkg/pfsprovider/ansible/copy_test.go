@@ -1,4 +1,4 @@
-package fake
+package ansible
 
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"

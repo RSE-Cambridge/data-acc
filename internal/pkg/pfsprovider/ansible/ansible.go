@@ -1,4 +1,4 @@
-package fake
+package ansible
 
 import (
 	"bytes"
@@ -10,18 +10,19 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
 type HostInfo struct {
 	MGS  string         `yaml:"mgs,omitempty"`
-	MDTS []string       `yaml:"mdts,omitempty,flow"`
+	MDTS string         `yaml:"mdt,omitempty"`
 	OSTS map[string]int `yaml:"osts,omitempty,flow"`
 }
 
 type FSInfo struct {
 	Hosts map[string]HostInfo `yaml:"hosts"`
-	Vars  map[string]string   `yaml:"vars,flow"`
+	Vars  map[string]string   `yaml:"vars"`
 }
 
 type FileSystems struct {
@@ -32,7 +33,10 @@ type Wrapper struct {
 	All FileSystems
 }
 
-func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
+// TODO: should come from configuration?
+var hostGroup = "dac-fake"
+
+func getInventory(volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
 	var mdt registry.BrickAllocation
 	osts := make(map[string][]registry.BrickAllocation)
 	for _, allocation := range brickAllocations {
@@ -56,13 +60,15 @@ func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAl
 		}
 		hostInfo := HostInfo{OSTS: osts}
 		if mdt.Hostname == host {
-			hostInfo.MDTS = []string{mdt.Device}
+			hostInfo.MDTS = mdt.Device
 			hostInfo.MGS = "nvme0n1" // TODO: horrible hack!!
 		}
 		hosts[host] = hostInfo
 	}
 	fsinfo := FSInfo{
-		Vars:  map[string]string{"mgsnode": mdt.Hostname},
+		Vars: map[string]string{
+			"mgsnode":     mdt.Hostname,
+			"client_port": fmt.Sprintf("%d", volume.ClientPort)},
 		Hosts: hosts,
 	}
 	fsname := fmt.Sprintf("%s", volume.UUID)
@@ -72,35 +78,47 @@ func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAl
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return string(output)
+	strOut := string(output)
+	strOut = strings.Replace(strOut, " mgs:", fmt.Sprintf(" %s_mgs:", fsname), -1)
+	strOut = strings.Replace(strOut, " mdt:", fmt.Sprintf(" %s_mdt:", fsname), -1)
+	strOut = strings.Replace(strOut, " osts:", fmt.Sprintf(" %s_osts:", fsname), -1)
+	strOut = strings.Replace(strOut, " mgsnode:", fmt.Sprintf(" %s_mgsnode:", fsname), -1)
+	strOut = strings.Replace(strOut, " client_port:", fmt.Sprintf(" %s_client_port:", fsname), -1)
+	strOut = strings.Replace(strOut, "all:", hostGroup+":", -1)
+	return strOut
 }
 
-func printLustrePlaybook(volume registry.Volume) string {
+func getPlaybook(fsType FSType, volume registry.Volume) string {
+	role := "lustre"
+	if fsType == BeegFS {
+		role = "beegfs"
+	}
 	return fmt.Sprintf(`---
-- name: Install Lustre
+- name: Setup FS
   hosts: %s
   any_errors_fatal: true
   become: yes
-  gather_facts: no
   roles:
-    - role: lustre`, volume.UUID)
+    - role: %s
+      vars:
+        fs_name: %s`, volume.UUID, role, volume.UUID)
 }
 
-func executeTempAnsible(volume registry.Volume, brickAllocations []registry.BrickAllocation, teardown bool) error {
+func executeTempAnsible(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, teardown bool) error {
 	dir, err := ioutil.TempDir("", fmt.Sprintf("fs%s_", volume.Name))
 	if err != nil {
 		return err
 	}
 	log.Println("Using ansible tempdir:", dir)
 
-	playbook := printLustrePlaybook(volume)
+	playbook := getPlaybook(fsType, volume)
 	tmpPlaybook := filepath.Join(dir, "dac.yml")
 	if err := ioutil.WriteFile(tmpPlaybook, bytes.NewBufferString(playbook).Bytes(), 0666); err != nil {
 		return err
 	}
 	log.Println(playbook)
 
-	inventory := printLustreInfo(volume, brickAllocations)
+	inventory := getInventory(volume, brickAllocations)
 	tmpInventory := filepath.Join(dir, "inventory")
 	if err := ioutil.WriteFile(tmpInventory, bytes.NewBufferString(inventory).Bytes(), 0666); err != nil {
 		return err
@@ -108,41 +126,48 @@ func executeTempAnsible(volume registry.Volume, brickAllocations []registry.Bric
 	log.Println(inventory)
 
 	cmd := exec.Command("cp", "-r",
-		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment/roles", dir)
+		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/roles", dir)
 	output, err := cmd.CombinedOutput()
 	log.Println("copy roles", string(output))
 	if err != nil {
 		return err
 	}
 	cmd = exec.Command("cp", "-r",
-		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment/.venv", dir)
+		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/.venv", dir)
 	output, err = cmd.CombinedOutput()
 	log.Println("copy venv", string(output))
 	if err != nil {
 		return err
 	}
+	cmd = exec.Command("cp", "-r",
+		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/group_vars", dir)
+	output, err = cmd.CombinedOutput()
+	log.Println("copy group vars", string(output))
+	if err != nil {
+		return err
+	}
 
 	if !teardown {
-		formatArgs := "dac.yml -i inventory --tag format_mgs --tag reformat_mdts --tag reformat_osts"
+		formatArgs := "dac.yml -i inventory --tag format"
 		err = executeAnsiblePlaybook(dir, formatArgs)
 		if err != nil {
 			return err
 		}
 
-		startupArgs := "dac.yml -i inventory --tag start_mgs --tag start_mdts --tag start_osts --tag mount_fs"
+		startupArgs := "dac.yml -i inventory --tag mount,create_mdt,create_mgs,create_osts,client_mount"
 		err = executeAnsiblePlaybook(dir, startupArgs)
 		if err != nil {
 			return err
 		}
 
 	} else {
-		stopArgs := "dac.yml -i inventory --tag umount_fs --tag stop_osts --tag stop_mdts"
+		stopArgs := "dac.yml -i inventory --tag stop_all,unmount,client_unmount"
 		err = executeAnsiblePlaybook(dir, stopArgs)
 		if err != nil {
 			return err
 		}
 
-		formatArgs := "dac.yml -i inventory --tag reformat_mdts --tag reformat_osts"
+		formatArgs := "dac.yml -i inventory --tag format"
 		err = executeAnsiblePlaybook(dir, formatArgs)
 		if err != nil {
 			return err

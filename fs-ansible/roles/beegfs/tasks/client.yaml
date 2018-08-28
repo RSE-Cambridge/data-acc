@@ -1,0 +1,110 @@
+---
+- block:
+    - set_fact:
+        osts: "{{ vars[fs_name + '_osts'] | default(omit) }}"
+        mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
+        mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
+        mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
+        client_port: "{{ vars[fs_name + '_client_port'] }}"
+    - set_fact:
+        mgs_hostvars: "{{ hostvars[mgsnode] }}"
+    - set_fact:
+        fs_config_dir: "/etc/beegfs/{{ fs_name }}.d/"
+        mgs_disk: "{{ mgs_hostvars['mgs'] }}"
+    - set_fact:
+        mgs_disk_info: "{{ beegfs_host_info[mgs_disk] }}"
+    - set_fact:
+        mgs_if_key: "ansible_{{ mgs_disk_info['if'] }}"
+    - set_fact:
+        mgs_port: "{{ mgs_disk_info['mgs_port'] }}"
+        mgs_ip: "{{ hostvars[mgsnode][mgs_if_key]['ipv4']['address'] }}"
+  tags: ['never', 'client_mount', 'client_unmount', 'stop_all']
+
+- name: setup client
+  block:
+
+    - name: create fs config dir
+      file:
+        path: "{{ fs_config_dir }}"
+        state: directory
+
+    - name: copy default config
+      shell: "cp /etc/beegfs/beegfs-client.conf {{ fs_config_dir }}"
+      args:
+        creates: "{{ fs_config_dir }}beegfs-client.conf"
+
+    - name: setup client config
+      command: |
+          /opt/beegfs/sbin/beegfs-setup-client -m {{ mgs_ip }}
+          -c {{ fs_config_dir }}beegfs-client.conf
+
+    - name: set mgmtd port
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-client.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = {{ mgs_port }}"
+      loop:
+        - "connMgmtdPortTCP"
+        - "connMgmtdPortUDP"
+
+    - name: set client port
+      lineinfile:
+        path: "{{ fs_config_dir }}beegfs-client.conf"
+        regexp: '^{{ item }}.*'
+        line: "{{ item }} = {{ client_port }}"
+      loop:
+        - "connClientPortUDP"
+
+    - name: create mount dir
+      file:
+        path: /mnt/beegfs/{{ fs_name }}
+        state: directory
+        recurse: yes
+
+    - name: remove default mount
+      lineinfile:
+        path: "/etc/beegfs/beegfs-mounts.conf"
+        regexp: '^/mnt/beegfs /.*'
+        state: absent
+
+    - name: setup mountpoint in beegfs-mounts
+      lineinfile:
+        path: "/etc/beegfs/beegfs-mounts.conf"
+        regexp: '^/mnt/beegfs/{{ fs_name }}.*'
+        line: "/mnt/beegfs/{{ fs_name }} {{ fs_config_dir }}beegfs-client.conf"
+
+    - name: Start helperd
+      systemd:
+        state: started
+        name: "beegfs-helperd"
+
+    - name: ensure default client is restarted to update mounts
+      systemd:
+        state: restarted
+        name: "beegfs-client"
+
+  tags: [ 'never', 'client_mount']
+
+
+- name: unmount beegfs fs
+  block:
+
+    - name: Remove mount point
+      lineinfile:
+        path: "/etc/beegfs/beegfs-mounts.conf"
+        regexp: '^/mnt/beegfs/{{ fs_name }}.*'
+        state: absent
+
+    - name: umount fs
+      command: umount -l /mnt/beegfs/{{ fs_name }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+
+    - name: Delete mount point dir
+      file:
+        path: /mnt/beegfs/{{ fs_name }}
+        state: absent
+
+  tags: [ 'never', 'client_unmount', 'stop_all']
+

@@ -142,6 +142,9 @@ type Volume struct {
 	// Not currently allowed for multi job volumes
 	StageOut DataCopyRequest
 
+	// BeeGFS wants each fs to be assigned a unique port number
+	ClientPort int
+
 	// TODO: data model currently does not do these things well:
 	// 1. correctly track multiple jobs at the same time attach to the same persistent buffer
 	// 2. data in/out requests for persistent buffer

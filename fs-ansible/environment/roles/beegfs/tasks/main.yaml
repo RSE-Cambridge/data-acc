@@ -1,7 +1,0 @@
----
-- include: repo.yaml
-- include: client-build-ops.yaml
-- include: format-mds.yaml
-- include: format-oss.yaml
-- include: ib.yaml
-- include: tune.yaml

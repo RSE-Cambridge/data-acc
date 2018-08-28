@@ -24,33 +24,32 @@ type volumeProvider struct{}
 
 func (*volumeProvider) SetupVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("SetupVolume for:", volume.Name)
-	return executeTempAnsible(volume, brickAllocations, false)
+	return nil
 }
 
 func (*volumeProvider) TeardownVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("TeardownVolume for:", volume.Name)
-	return executeTempAnsible(volume, brickAllocations, true)
+	return nil
 }
 
 func (*volumeProvider) CopyDataIn(volume registry.Volume) error {
-	// TODO we should support multiple stagein commands! oops!
 	log.Println("CopyDataIn for:", volume.Name)
-	return processDataCopy(volume.Name, volume.StageIn)
+	return nil
 }
 
 func (*volumeProvider) CopyDataOut(volume registry.Volume) error {
 	log.Println("CopyDataOut for:", volume.Name)
-	return processDataCopy(volume.Name, volume.StageOut)
+	return nil
 }
 
 type mounter struct{}
 
 func (*mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("Mount for:", volume.Name)
-	return mount(volume, brickAllocations)
+	return nil
 }
 
 func (*mounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("Umount for:", volume.Name)
-	return umount(volume, brickAllocations)
+	return nil
 }

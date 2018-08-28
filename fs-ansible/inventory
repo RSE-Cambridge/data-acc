@@ -1,0 +1,13 @@
+dac-prod:
+  children:
+    fs1001:
+      hosts:
+        dac-e-1:
+          fs1001_mgs: nvme0n1
+          fs1001_mdt: nvme1n1
+          fs1001_osts: {nvme0n1: 2}
+        dac2:
+          fs1001_osts: {nvme3n1: 1}
+      vars:
+        fs1001_mgsnode: dac-e-1
+        fs1001_client_port: 1001
