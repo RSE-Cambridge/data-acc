@@ -1,0 +1,18 @@
+---
+# facts are set in format-mount.yaml
+- name: Unmount disks
+  block:
+
+    - name: Mount EXT4 OSTs
+      command: umount -l /data/{{ fs_name }}/{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+      loop: "{{ all_disks }}"
+
+    - name: Delete mount point dir
+      file:
+        path: /data/{{ fs_name }}
+        state: absent
+
+  tags: ['never', 'unmount']

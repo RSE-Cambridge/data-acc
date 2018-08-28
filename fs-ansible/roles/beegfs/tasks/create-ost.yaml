@@ -118,12 +118,3 @@
   when:
     - osts is defined
   tags: [ 'never', 'create_osts']
-
-- name: stop storage service
-  systemd:
-    state: stopped
-    name: "beegfs-storage@{{ fs_name }}-{{ item }}.service"
-  loop: "{{ osts.keys() }}"
-  when:
-    - osts is defined
-  tags: ['never', 'stop_all']

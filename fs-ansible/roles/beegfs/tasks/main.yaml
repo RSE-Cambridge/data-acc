@@ -5,3 +5,5 @@
 - include: create-mgs-mdt.yaml
 - include: create-ost.yaml
 - include: client.yaml
+- include: stop-all.yaml
+- include: unmount.yaml

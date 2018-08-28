@@ -1,0 +1,26 @@
+---
+# facts set in create-ost and create-mgs-mdt
+- name: stop storage service
+  systemd:
+    state: stopped
+    name: "beegfs-storage@{{ fs_name }}-{{ item }}.service"
+  loop: "{{ osts.keys() }}"
+  when:
+    - osts is defined
+  tags: ['never', 'stop_all']
+
+- name: stop meta service
+  systemd:
+    state: stopped
+    name: "beegfs-meta@{{ fs_name }}.service"
+  when:
+    - mdt is defined
+  tags: ['never', 'stop_all']
+
+- name: stop mgmtd service
+  systemd:
+    state: stopped
+    name: "beegfs-mgmtd@{{ fs_name }}.service"
+  when:
+    - mgs is defined
+  tags: ['never', 'stop_all']
