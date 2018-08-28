@@ -139,6 +139,13 @@ func executeTempAnsible(fsType FSType, volume registry.Volume, brickAllocations 
 	if err != nil {
 		return err
 	}
+	cmd = exec.Command("cp", "-r",
+		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/group_vars", dir)
+	output, err = cmd.CombinedOutput()
+	log.Println("copy group vars", string(output))
+	if err != nil {
+		return err
+	}
 
 	if !teardown {
 		formatArgs := "dac.yml -i inventory --tag format"
