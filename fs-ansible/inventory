@@ -9,5 +9,5 @@ dac-prod:
         dac2:
           fs1001_osts: {nvme3n1: 1}
       vars:
-        fs1001_mgsnode: dac1
+        fs1001_mgsnode: dac-e-1
         fs1001_client_port: 1001
