@@ -15,4 +15,4 @@
         path: /data/{{ fs_name }}
         state: absent
 
-  tags: ['never', 'unmount']
+  tags: ['never', 'unmount', 'stop_all']

@@ -5,15 +5,15 @@
     mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
     mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
     client_port: "{{ vars[fs_name + '_client_port'] }}"
-  tags: ['never', 'format', 'mount', 'unmount']
+  tags: ['never', 'format', 'mount', 'unmount', 'stop_all']
 - set_fact:
     mdt_disk: "{{ mdt | default([]) }}"
     mgs_disk: "{{ mgs | default([]) }}"
     osts: "{{ osts | default({}) }}"
-  tags: ['never', 'format', 'mount', 'unmount']
+  tags: ['never', 'format', 'mount', 'unmount', 'stop_all']
 - set_fact:
     all_disks: "{{ osts.keys() | union([mdt_disk]) | union([mgs_disk]) | flatten | unique | list }}"
-  tags: ['never', 'format', 'mount', 'unmount']
+  tags: ['never', 'format', 'mount', 'unmount', 'stop_all']
 
 - name: Format disks
   command: "mkfs.ext4 -i 8192 -I 512 -J size=400 -Odir_index,filetype /dev/{{ item }}"
