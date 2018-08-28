@@ -5,5 +5,3 @@
 - include: create-mgs-mdt.yaml
 - include: create-ost.yaml
 - include: client.yaml
-#- include: ib.yaml
-#- include: stop-fs.yaml
