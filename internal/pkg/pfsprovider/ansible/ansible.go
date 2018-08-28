@@ -123,14 +123,14 @@ func executeTempAnsible(fsType FSType, volume registry.Volume, brickAllocations 
 	log.Println(inventory)
 
 	cmd := exec.Command("cp", "-r",
-		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment/roles", dir)
+		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/roles", dir)
 	output, err := cmd.CombinedOutput()
 	log.Println("copy roles", string(output))
 	if err != nil {
 		return err
 	}
 	cmd = exec.Command("cp", "-r",
-		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/environment/.venv", dir)
+		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/.venv", dir)
 	output, err = cmd.CombinedOutput()
 	log.Println("copy venv", string(output))
 	if err != nil {
