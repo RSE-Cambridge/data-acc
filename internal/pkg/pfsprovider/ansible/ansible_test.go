@@ -58,11 +58,12 @@ func TestPlugin_GetPlaybook(t *testing.T) {
 	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
 	result := getPlaybook(volume)
 	assert.Equal(t, `---
-- name: Install Lustre
+- name: Setup FS
   hosts: abcdefgh
   any_errors_fatal: true
   become: yes
-  gather_facts: no
   roles:
-    - role: lustre`, result)
+    - role: beegfs
+      vars:
+        fs_name: abcdefgh`, result)
 }

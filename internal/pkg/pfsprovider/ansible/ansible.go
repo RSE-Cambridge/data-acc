@@ -87,13 +87,14 @@ func getInventory(volume registry.Volume, brickAllocations []registry.BrickAlloc
 
 func getPlaybook(volume registry.Volume) string {
 	return fmt.Sprintf(`---
-- name: Install Lustre
+- name: Setup FS
   hosts: %s
   any_errors_fatal: true
   become: yes
-  gather_facts: no
   roles:
-    - role: lustre`, volume.UUID)
+    - role: %s
+      vars:
+        fs_name: %s`, volume.UUID, "beegfs", volume.UUID)
 }
 
 func executeTempAnsible(volume registry.Volume, brickAllocations []registry.BrickAllocation, teardown bool) error {
