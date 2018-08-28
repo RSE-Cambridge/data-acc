@@ -6,5 +6,4 @@
 - include: create-ost.yaml
 - include: client.yaml
 #- include: ib.yaml
-#- include: tune.yaml
 #- include: stop-fs.yaml

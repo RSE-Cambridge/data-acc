@@ -102,6 +102,13 @@
         line: "connInterfacesFile = /etc/beegfs/{{ fs_name }}/{{ item }}.d/connInterfacesFile{{ beegfs_host_info[item]['if'] }}"
       loop: "{{ osts.keys() }}"
 
+    - name: Set appropriate tuneBindToNumaZone
+      lineinfile:
+        path: "/etc/beegfs/{{ fs_name }}/{{ item }}.d/beegfs-storage.conf"
+        regexp: "^tuneBindToNumaZone.*"
+        line: "tuneBindToNumaZone={{ beegfs_host_info[item]['numa'] }}"
+      loop: "{{ osts.keys() }}"
+
     - name: Start Services storage
       systemd:
         state: started
