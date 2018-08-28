@@ -10,8 +10,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"time"
 	"strings"
+	"time"
 )
 
 type HostInfo struct {
@@ -66,7 +66,9 @@ func getInventory(volume registry.Volume, brickAllocations []registry.BrickAlloc
 		hosts[host] = hostInfo
 	}
 	fsinfo := FSInfo{
-		Vars:  map[string]string{"mgsnode": mdt.Hostname},
+		Vars: map[string]string{
+			"mgsnode":     mdt.Hostname,
+			"client_port": fmt.Sprintf("%d", volume.ClientPort)},
 		Hosts: hosts,
 	}
 	fsname := fmt.Sprintf("%s", volume.UUID)
@@ -81,7 +83,8 @@ func getInventory(volume registry.Volume, brickAllocations []registry.BrickAlloc
 	strOut = strings.Replace(strOut, " mdt:", fmt.Sprintf(" %s_mdt:", fsname), -1)
 	strOut = strings.Replace(strOut, " osts:", fmt.Sprintf(" %s_osts:", fsname), -1)
 	strOut = strings.Replace(strOut, " mgsnode:", fmt.Sprintf(" %s_mgsnode:", fsname), -1)
-	strOut = strings.Replace(strOut, "all:", hostGroup + ":", -1)
+	strOut = strings.Replace(strOut, " client_port:", fmt.Sprintf(" %s_client_port:", fsname), -1)
+	strOut = strings.Replace(strOut, "all:", hostGroup+":", -1)
 	return strOut
 }
 

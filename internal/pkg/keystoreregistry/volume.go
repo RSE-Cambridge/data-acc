@@ -215,6 +215,7 @@ func GetNewUUID() string {
 
 func (volRegistry *volumeRegistry) AddVolume(volume registry.Volume) error {
 	volume.UUID = GetNewUUID()
+	volume.ClientPort = 10001
 	return volRegistry.keystore.Add([]KeyValue{{
 		Key:   getVolumeKey(string(volume.Name)),
 		Value: toJson(volume),

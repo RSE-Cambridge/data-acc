@@ -7,7 +7,7 @@ import (
 )
 
 func TestPlugin_GetInventory(t *testing.T) {
-	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
+	volume := registry.Volume{Name: "1", UUID: "abcdefgh", ClientPort: 10002}
 	brickAllocations := []registry.BrickAllocation{
 		{Hostname: "dac1", Device: "nvme1n1", AllocatedIndex: 0},
 		{Hostname: "dac1", Device: "nvme2n1", AllocatedIndex: 1},
@@ -27,13 +27,14 @@ func TestPlugin_GetInventory(t *testing.T) {
         dac2:
           abcdefgh_osts: {nvme2n1: 3, nvme3n1: 4}
       vars:
+        abcdefgh_client_port: "10002"
         abcdefgh_mgsnode: dac1
 `
 	assert.Equal(t, expected, result)
 }
 
 func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
-	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
+	volume := registry.Volume{Name: "1", UUID: "abcdefgh", ClientPort: 10002}
 	brickAllocations := []registry.BrickAllocation{
 		{Hostname: "dac1", Device: "nvme1n1", AllocatedIndex: 0},
 		{Hostname: "dac2", Device: "nvme2n1", AllocatedIndex: 1},
@@ -49,6 +50,7 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
         dac2:
           abcdefgh_osts: {nvme2n1: 1}
       vars:
+        abcdefgh_client_port: "10002"
         abcdefgh_mgsnode: dac1
 `
 	assert.Equal(t, expected, result)
