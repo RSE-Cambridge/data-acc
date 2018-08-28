@@ -25,7 +25,7 @@ def main():
            dac['dac-prod']['children']['fs1001']['hosts']["dac-e-{}".format(i)]['fs1001_osts']["nvme{}n1".format(j)] = 0
 
     #globaly index all nvmes
-    n = 0
+    n = 1
     for i in range(1,dac_no+1):
         for key in dac['dac-prod']['children']['fs1001']['hosts']["dac-e-{}".format(i)]['fs1001_osts']:
             dac['dac-prod']['children']['fs1001']['hosts']["dac-e-{}".format(i)]['fs1001_osts'][key] = n
