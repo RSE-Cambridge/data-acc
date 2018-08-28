@@ -44,12 +44,12 @@
     - name: setup target
       command: |
           /opt/beegfs/sbin/beegfs-setup-storage \
-          -p /data/{{ fs_name }}/{{ item.key }}/data \
+          -p /data/{{ fs_name }}/{{ item.key }}/data -r \
           -i {{ item.value }} \
           -s {{ item.value }} \
           -m {{ mgs_ip }}
           -c /etc/beegfs/{{ fs_name }}/{{ item.key }}.d/beegfs-storage.conf
-          -I {{ item.key }}
+          -I {{ fs_name }}-{{ ansible_host }}-{{ item.key }}
           -S {{ fs_name }}-{{ ansible_host }}-{{ item.key }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('ERROR: Storage target directory is not empty.' not in command_result.stdout)"
