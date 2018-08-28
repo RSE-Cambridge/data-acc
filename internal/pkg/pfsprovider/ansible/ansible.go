@@ -11,17 +11,18 @@ import (
 	"os/exec"
 	"path/filepath"
 	"time"
+	"strings"
 )
 
 type HostInfo struct {
 	MGS  string         `yaml:"mgs,omitempty"`
-	MDTS []string       `yaml:"mdts,omitempty,flow"`
+	MDTS string         `yaml:"mdt,omitempty"`
 	OSTS map[string]int `yaml:"osts,omitempty,flow"`
 }
 
 type FSInfo struct {
 	Hosts map[string]HostInfo `yaml:"hosts"`
-	Vars  map[string]string   `yaml:"vars,flow"`
+	Vars  map[string]string   `yaml:"vars"`
 }
 
 type FileSystems struct {
@@ -32,7 +33,10 @@ type Wrapper struct {
 	All FileSystems
 }
 
-func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
+// TODO: should come from configuration?
+var hostGroup = "dac-fake"
+
+func getInventory(volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
 	var mdt registry.BrickAllocation
 	osts := make(map[string][]registry.BrickAllocation)
 	for _, allocation := range brickAllocations {
@@ -56,7 +60,7 @@ func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAl
 		}
 		hostInfo := HostInfo{OSTS: osts}
 		if mdt.Hostname == host {
-			hostInfo.MDTS = []string{mdt.Device}
+			hostInfo.MDTS = mdt.Device
 			hostInfo.MGS = "nvme0n1" // TODO: horrible hack!!
 		}
 		hosts[host] = hostInfo
@@ -72,10 +76,16 @@ func printLustreInfo(volume registry.Volume, brickAllocations []registry.BrickAl
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return string(output)
+	strOut := string(output)
+	strOut = strings.Replace(strOut, " mgs:", fmt.Sprintf(" %s_mgs:", fsname), -1)
+	strOut = strings.Replace(strOut, " mdt:", fmt.Sprintf(" %s_mdt:", fsname), -1)
+	strOut = strings.Replace(strOut, " osts:", fmt.Sprintf(" %s_osts:", fsname), -1)
+	strOut = strings.Replace(strOut, " mgsnode:", fmt.Sprintf(" %s_mgsnode:", fsname), -1)
+	strOut = strings.Replace(strOut, "all:", hostGroup + ":", -1)
+	return strOut
 }
 
-func printLustrePlaybook(volume registry.Volume) string {
+func getPlaybook(volume registry.Volume) string {
 	return fmt.Sprintf(`---
 - name: Install Lustre
   hosts: %s
@@ -93,14 +103,14 @@ func executeTempAnsible(volume registry.Volume, brickAllocations []registry.Bric
 	}
 	log.Println("Using ansible tempdir:", dir)
 
-	playbook := printLustrePlaybook(volume)
+	playbook := getPlaybook(volume)
 	tmpPlaybook := filepath.Join(dir, "dac.yml")
 	if err := ioutil.WriteFile(tmpPlaybook, bytes.NewBufferString(playbook).Bytes(), 0666); err != nil {
 		return err
 	}
 	log.Println(playbook)
 
-	inventory := printLustreInfo(volume, brickAllocations)
+	inventory := getInventory(volume, brickAllocations)
 	tmpInventory := filepath.Join(dir, "inventory")
 	if err := ioutil.WriteFile(tmpInventory, bytes.NewBufferString(inventory).Bytes(), 0666); err != nil {
 		return err
