@@ -138,26 +138,26 @@ func executeTempAnsible(fsType FSType, volume registry.Volume, brickAllocations 
 	}
 
 	if !teardown {
-		formatArgs := "dac.yml -i inventory --tag format_mgs --tag reformat_mdts --tag reformat_osts"
+		formatArgs := "dac.yml -i inventory --tag format"
 		err = executeAnsiblePlaybook(dir, formatArgs)
 		if err != nil {
 			return err
 		}
 
-		startupArgs := "dac.yml -i inventory --tag start_mgs --tag start_mdts --tag start_osts --tag mount_fs"
+		startupArgs := "dac.yml -i inventory --tag mount,create_mdt,create_mgs,create_osts,client_mount"
 		err = executeAnsiblePlaybook(dir, startupArgs)
 		if err != nil {
 			return err
 		}
 
 	} else {
-		stopArgs := "dac.yml -i inventory --tag umount_fs --tag stop_osts --tag stop_mdts"
+		stopArgs := "dac.yml -i inventory --tag stop_all,unmount,client_unmount"
 		err = executeAnsiblePlaybook(dir, stopArgs)
 		if err != nil {
 			return err
 		}
 
-		formatArgs := "dac.yml -i inventory --tag reformat_mdts --tag reformat_osts"
+		formatArgs := "dac.yml -i inventory --tag format"
 		err = executeAnsiblePlaybook(dir, formatArgs)
 		if err != nil {
 			return err
