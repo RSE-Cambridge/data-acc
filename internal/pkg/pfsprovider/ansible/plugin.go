@@ -66,12 +66,12 @@ type volumeProvider struct {
 	FSType FSType
 }
 
-func (*volumeProvider) SetupVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	return executeTempAnsible(volume, brickAllocations, false)
+func (volProvider *volumeProvider) SetupVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	return executeTempAnsible(volProvider.FSType, volume, brickAllocations, false)
 }
 
-func (*volumeProvider) TeardownVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	return executeTempAnsible(volume, brickAllocations, true)
+func (volProvider *volumeProvider) TeardownVolume(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	return executeTempAnsible(volProvider.FSType, volume, brickAllocations, true)
 }
 
 func (*volumeProvider) CopyDataIn(volume registry.Volume) error {

@@ -85,7 +85,11 @@ func getInventory(volume registry.Volume, brickAllocations []registry.BrickAlloc
 	return strOut
 }
 
-func getPlaybook(volume registry.Volume) string {
+func getPlaybook(fsType FSType, volume registry.Volume) string {
+	role := "lustre"
+	if fsType == BeegFS {
+		role = "beegfs"
+	}
 	return fmt.Sprintf(`---
 - name: Setup FS
   hosts: %s
@@ -94,17 +98,17 @@ func getPlaybook(volume registry.Volume) string {
   roles:
     - role: %s
       vars:
-        fs_name: %s`, volume.UUID, "beegfs", volume.UUID)
+        fs_name: %s`, volume.UUID, role, volume.UUID)
 }
 
-func executeTempAnsible(volume registry.Volume, brickAllocations []registry.BrickAllocation, teardown bool) error {
+func executeTempAnsible(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, teardown bool) error {
 	dir, err := ioutil.TempDir("", fmt.Sprintf("fs%s_", volume.Name))
 	if err != nil {
 		return err
 	}
 	log.Println("Using ansible tempdir:", dir)
 
-	playbook := getPlaybook(volume)
+	playbook := getPlaybook(fsType, volume)
 	tmpPlaybook := filepath.Join(dir, "dac.yml")
 	if err := ioutil.WriteFile(tmpPlaybook, bytes.NewBufferString(playbook).Bytes(), 0666); err != nil {
 		return err

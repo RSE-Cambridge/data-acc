@@ -54,9 +54,9 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
-func TestPlugin_GetPlaybook(t *testing.T) {
+func TestPlugin_GetPlaybook_beegfs(t *testing.T) {
 	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
-	result := getPlaybook(volume)
+	result := getPlaybook(BeegFS, volume)
 	assert.Equal(t, `---
 - name: Setup FS
   hosts: abcdefgh
@@ -64,6 +64,20 @@ func TestPlugin_GetPlaybook(t *testing.T) {
   become: yes
   roles:
     - role: beegfs
+      vars:
+        fs_name: abcdefgh`, result)
+}
+
+func TestPlugin_GetPlaybook_lustre(t *testing.T) {
+	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
+	result := getPlaybook(Lustre, volume)
+	assert.Equal(t, `---
+- name: Setup FS
+  hosts: abcdefgh
+  any_errors_fatal: true
+  become: yes
+  roles:
+    - role: lustre
       vars:
         fs_name: abcdefgh`, result)
 }
