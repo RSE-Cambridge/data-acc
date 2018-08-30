@@ -5,7 +5,7 @@
     mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
     mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
     client_port: "{{ vars[fs_name + '_client_port'] }}"
-  tags: [ 'never', 'start_mgs', 'start_mdts', 'start_osts']
+  tags: [ 'never', 'start_mgs', 'start_mdts', 'start_osts', 'create_mgs', 'create_mdt', 'create_osts', 'stop_all', 'client_mount','client_unmount']
 
 - name: load lustre module
   command: modprobe -v lustre

@@ -5,7 +5,7 @@
     mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
     mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
     client_port: "{{ vars[fs_name + '_client_port'] }}"
-  tags: [ 'never', 'format_mgs']
+  tags: [ 'never', 'format_mgs', 'reformat_mgs', 'format']
 
 - name: Ensure MGS has been formatted
   command: /usr/sbin/mkfs.lustre --mgs /dev/{{ mgs }}
