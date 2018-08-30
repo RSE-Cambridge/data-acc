@@ -23,7 +23,7 @@
   tags: [ 'never', 'reformat_mgs']
 
 - name: Reformat MDT
-  command: /usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index=1 --mgsnode={{ mgsnode }} /dev/{{ item }}
+  command: /usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index=1 --mgsnode={{ mgsnode }} /dev/{{ mdt }}
   when:
     - mdt is defined
   tags: [ 'never', 'reformat_mdts', 'format']
