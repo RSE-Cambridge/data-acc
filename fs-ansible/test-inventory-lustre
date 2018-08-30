@@ -5,7 +5,7 @@ dac-fake:
         dac1:
           fs1_mgs: nvme0n1
           fs1_mdt: nvme1n1
-          fs1_osts: {nvme0n1: 2}
+          fs1_osts: {nvme2n1: 2}
         dac2:
           fs1_osts: {nvme3n1: 1}
       vars:
@@ -14,7 +14,7 @@ dac-fake:
     fs2:
       hosts:
         dac1:
-          fs2_mgs: nvme3n1
+          fs2_mgs: nvme0n1
           fs2_mdt: nvme3n1
           fs2_osts: {nvme4n1: 2}
         dac2:
