@@ -33,7 +33,7 @@
   block:
     - name: Create MDT mount dir
       file:
-        path: /lustre/{{ group_names[0] }}/MDT/{{ mdt }}
+        path: /lustre/{{ fs_name }}/MDT/{{ mdt }}
         state: directory
         recurse: yes
 
