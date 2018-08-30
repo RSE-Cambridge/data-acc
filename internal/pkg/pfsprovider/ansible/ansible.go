@@ -36,7 +36,7 @@ type Wrapper struct {
 // TODO: should come from configuration?
 var hostGroup = "dac-fake"
 
-func getInventory(volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
+func getInventory(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
 	var mdt registry.BrickAllocation
 	osts := make(map[string][]registry.BrickAllocation)
 	for _, allocation := range brickAllocations {
@@ -61,7 +61,11 @@ func getInventory(volume registry.Volume, brickAllocations []registry.BrickAlloc
 		hostInfo := HostInfo{OSTS: osts}
 		if mdt.Hostname == host {
 			hostInfo.MDTS = mdt.Device
-			hostInfo.MGS = "nvme0n1" // TODO: horrible hack!!
+			if fsType == Lustre {
+				hostInfo.MGS = "nvme0n1" // TODO: horrible hack!!
+			} else {
+				hostInfo.MGS = mdt.Device
+			}
 		}
 		hosts[host] = hostInfo
 	}
@@ -118,7 +122,7 @@ func executeTempAnsible(fsType FSType, volume registry.Volume, brickAllocations 
 	}
 	log.Println(playbook)
 
-	inventory := getInventory(volume, brickAllocations)
+	inventory := getInventory(fsType, volume, brickAllocations)
 	tmpInventory := filepath.Join(dir, "inventory")
 	if err := ioutil.WriteFile(tmpInventory, bytes.NewBufferString(inventory).Bytes(), 0666); err != nil {
 		return err
