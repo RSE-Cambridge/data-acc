@@ -9,8 +9,7 @@
 
 - name: load lustre module
   command: modprobe -v lustre
-  tags: [ 'never', 'start_lustre']
-
+  tags: [ 'never', 'start_lustre', 'mount']
 
 - name: Start MGS
   block:
@@ -27,115 +26,112 @@
       changed_when: "command_result.rc == 0"
   when:
     - mgs is defined
-  tags: [ 'never', 'start_mgs']
+  tags: [ 'never', 'start_mgs', 'create_mgs']
 
 
 - name: Start MDTs
   block:
     - name: Create MDT mount dir
       file:
-        path: /lustre/{{ group_names[0] }}/MDT/{{ item }}
+        path: /lustre/{{ group_names[0] }}/MDT/{{ mdt }}
         state: directory
         recurse: yes
-      with_items: "{{ mdts }}"
 
     - name: mount MDTs
-      command: mount -t lustre /dev/{{ item }} /lustre/{{ group_names[0] }}/MDT/{{ item }}
+      command: mount -t lustre /dev/{{ mdt }} /lustre/{{ fs_name }}/MDT/{{ mdt }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
-      loop: "{{ mdts }}"
 
   when:
-    - mdts is defined
-  tags: [ 'never', 'start_mdts']
+    - mdt is defined
+  tags: [ 'never', 'start_mdts', 'create_mdt']
 
 
 - name: Start OST
   block:
     - name: Create OST mount dir
       file:
-        path: /lustre/{{ group_names[0] }}/OST/{{ item }}
+        path: /lustre/{{ fs_name }}/OST/{{ item }}
         state: directory
         recurse: yes
-      with_items: "{{ osts }}"
+      with_items: "{{ osts.keys() }}"
 
     - name: mount OSTs
-      command: mount -t lustre /dev/{{ item }} /lustre/{{ group_names[0] }}/OST/{{ item }}
+      command: mount -t lustre /dev/{{ item }} /lustre/{{ fs_name }}/OST/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
-      with_items: "{{ osts }}"
+      with_items: "{{ osts.keys() }}"
 
   when:
     - osts is defined
-  tags: [ 'never', 'start_osts']
+  tags: [ 'never', 'start_osts', 'create_osts']
 
 
 - name: Mount FS
   block:
     - name: ensure mount dir exists
       file:
-        path: "/mnt/lustre/{{ group_names[0] }}"
+        path: "/mnt/lustre/{{ fs_name }}"
         state: directory
         recurse: yes
     - name: mount lustre fs
-      command: "mount -t lustre {{ mgsnode }}:/{{ group_names[0] }} /mnt/lustre/{{ group_names[0] }}"
+      command: "mount -t lustre {{ mgsnode }}:/{{ fs_name }} /mnt/lustre/{{ fs_name }}"
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
-  tags: [ 'never', 'mount_fs']
+  tags: [ 'never', 'mount_fs', 'client_mount']
 
 
 - name: umount FS
   block:
     - name: umount lustre fs
-      command: "umount -l /mnt/lustre/{{ group_names[0] }}"
+      command: "umount -l /mnt/lustre/{{ fs_name }}"
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
 
     - name: ensure mount dir deleted
       file:
-        path: "/mnt/lustre/{{ group_names[0] }}"
+        path: "/mnt/lustre/{{ fs_name }}"
         state: absent
-  tags: [ 'never', 'umount_fs']
+  tags: [ 'never', 'umount_fs', 'client_unmount']
 
 
 - name: Stop OST
   block:
     - name: umount OSTs
-      command: umount /lustre/{{ group_names[0] }}/OST/{{ item }}
+      command: umount /lustre/{{ fs_name }}/OST/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
-      with_items: "{{ osts }}"
+      with_items: "{{ osts.keys() }}"
 
     - name: Remove OST mount dir
       file:
-        path: /lustre/{{ group_names[0] }}/OST
+        path: /lustre/{{ fs_name }}/OST
         state: absent
   when:
     - osts is defined
-  tags: [ 'never', 'stop_osts']
+  tags: [ 'never', 'stop_osts', 'stop_all']
 
 
 - name: Stop MDTs
   block:
     - name: umount MDTs
-      command: umount /lustre/{{ group_names[0] }}/MDT/{{ item }}
+      command: umount /lustre/{{ fs_name }}/MDT/{{ mdt }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
-      loop: "{{ mdts }}"
 
-    - name: Remove MGSDT mount dir
+    - name: Remove MDT mount dir
       file:
-        path: /lustre/{{ group_names[0] }}/MDT
+        path: /lustre/{{ fs_name }}/MDT
         state: absent
   when:
     - mdts is defined
-  tags: [ 'never', 'stop_mdts']
+  tags: [ 'never', 'stop_mdts', 'stop_all']
 
 
 - name: Stop MGS
