@@ -2,7 +2,7 @@
 
 For lustre we have:
 
-    ansible-playbook test-dac-lustre.yml -i test-inventory-lustre --tag format
+    ansible-playbook test-dac-lustre.yml -i test-inventory-lustre --tag format --tag reformat_mgs
     ansible-playbook test-dac-lustre.yml -i test-inventory-lustre --tag mount,create_mdt,create_mgs,create_osts,client_mount
     ansible-playbook test-dac-lustre.yml -i test-inventory-lustre --tag mount,create_mdt,create_mgs,create_osts,client_mount
     ansible-playbook test-dac-beegfs.yml -i test-inventory-lustre --tag stop_all,unmount,client_unmount
