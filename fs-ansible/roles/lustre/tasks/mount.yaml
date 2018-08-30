@@ -130,7 +130,7 @@
         path: /lustre/{{ fs_name }}/MDT
         state: absent
   when:
-    - mdts is defined
+    - mdt is defined
   tags: [ 'never', 'stop_mdts', 'stop_all']
 
 
