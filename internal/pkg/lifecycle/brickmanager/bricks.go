@@ -139,7 +139,8 @@ func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume,
 }
 
 // TODO: should not be hardcoded here
-var plugin = ansible.GetPlugin(ansible.BeegFS)
+var FSType = ansible.BeegFS
+var plugin = ansible.GetPlugin(FSType)
 
 func provisionNewVolume(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
 	if volume.State != registry.Registered {
