@@ -1,4 +1,12 @@
 ---
+- set_fact:
+    osts: "{{ vars[fs_name + '_osts'] | default(omit) }}"
+    mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
+    mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
+    mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
+    client_port: "{{ vars[fs_name + '_client_port'] }}"
+  tags: [ 'never', 'start_mgs', 'start_mdts', 'start_osts']
+
 - name: load lustre module
   command: modprobe -v lustre
   tags: [ 'never', 'start_lustre']
