@@ -111,24 +111,24 @@ func getPlaybook(fsType FSType, volume registry.Volume) string {
         fs_name: %s`, volume.UUID, role, volume.UUID)
 }
 
-func executeTempAnsible(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, teardown bool) error {
+func setupAnsible(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) (string, error) {
 	dir, err := ioutil.TempDir("", fmt.Sprintf("fs%s_", volume.Name))
 	if err != nil {
-		return err
+		return dir, err
 	}
 	log.Println("Using ansible tempdir:", dir)
 
 	playbook := getPlaybook(fsType, volume)
 	tmpPlaybook := filepath.Join(dir, "dac.yml")
 	if err := ioutil.WriteFile(tmpPlaybook, bytes.NewBufferString(playbook).Bytes(), 0666); err != nil {
-		return err
+		return dir, err
 	}
 	log.Println(playbook)
 
 	inventory := getInventory(fsType, volume, brickAllocations)
 	tmpInventory := filepath.Join(dir, "inventory")
 	if err := ioutil.WriteFile(tmpInventory, bytes.NewBufferString(inventory).Bytes(), 0666); err != nil {
-		return err
+		return dir, err
 	}
 	log.Println(inventory)
 
@@ -137,19 +137,24 @@ func executeTempAnsible(fsType FSType, volume registry.Volume, brickAllocations 
 	output, err := cmd.CombinedOutput()
 	log.Println("copy roles", string(output))
 	if err != nil {
-		return err
+		return dir, err
 	}
 	cmd = exec.Command("cp", "-r",
 		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/.venv", dir)
 	output, err = cmd.CombinedOutput()
 	log.Println("copy venv", string(output))
 	if err != nil {
-		return err
+		return dir, err
 	}
 	cmd = exec.Command("cp", "-r",
 		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/group_vars", dir)
 	output, err = cmd.CombinedOutput()
 	log.Println("copy group vars", string(output))
+	return dir, err
+}
+
+func executeTempAnsible(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, teardown bool) error {
+	dir, err := setupAnsible(fsType, volume, brickAllocations)
 	if err != nil {
 		return err
 	}
