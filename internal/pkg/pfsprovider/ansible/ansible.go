@@ -199,6 +199,38 @@ func executeAnsibleTeardown(fsType FSType, volume registry.Volume, brickAllocati
 	return nil
 }
 
+func executeAnsibleMount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	dir, err := setupAnsible(fsType, volume, brickAllocations)
+	if err != nil {
+		return err
+	}
+
+	startupArgs := "dac.yml -i inventory --tag client_mount"
+	err = executeAnsiblePlaybook(dir, startupArgs)
+	if err != nil {
+		return err
+	}
+
+	os.RemoveAll(dir)
+	return nil
+}
+
+func executeAnsibleUnmount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	dir, err := setupAnsible(fsType, volume, brickAllocations)
+	if err != nil {
+		return err
+	}
+
+	stopArgs := "dac.yml -i inventory --tag client_unmount"
+	err = executeAnsiblePlaybook(dir, stopArgs)
+	if err != nil {
+		return err
+	}
+
+	os.RemoveAll(dir)
+	return nil
+}
+
 func executeAnsiblePlaybook(dir string, args string) error {
 	// TODO: downgrade debug log!
 	cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook %s;`, dir, args)

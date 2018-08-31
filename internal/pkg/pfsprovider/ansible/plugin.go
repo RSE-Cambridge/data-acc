@@ -91,14 +91,10 @@ type mounter struct {
 	FSType FSType
 }
 
-func (*mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	// return mount(volume, brickAllocations)
-	log.Println("FAKE Mount:", volume.Name, volume.Attachments)
-	return nil
+func (mounter *mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	return executeAnsibleMount(mounter.FSType, volume, brickAllocations)
 }
 
-func (*mounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	// return umount(volume, brickAllocations)
-	log.Println("FAKE Unmount:", volume.Name, volume.Attachments)
-	return nil
+func (mounter *mounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	return executeAnsibleUnmount(mounter.FSType, volume, brickAllocations)
 }
