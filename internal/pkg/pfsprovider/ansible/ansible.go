@@ -153,37 +153,45 @@ func setupAnsible(fsType FSType, volume registry.Volume, brickAllocations []regi
 	return dir, err
 }
 
-func executeTempAnsible(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, teardown bool) error {
+func executeAnsibleSetup(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	dir, err := setupAnsible(fsType, volume, brickAllocations)
 	if err != nil {
 		return err
 	}
 
-	if !teardown {
-		formatArgs := "dac.yml -i inventory --tag format"
-		err = executeAnsiblePlaybook(dir, formatArgs)
-		if err != nil {
-			return err
-		}
+	formatArgs := "dac.yml -i inventory --tag format"
+	err = executeAnsiblePlaybook(dir, formatArgs)
+	if err != nil {
+		return err
+	}
 
-		startupArgs := "dac.yml -i inventory --tag mount,create_mdt,create_mgs,create_osts,client_mount"
-		err = executeAnsiblePlaybook(dir, startupArgs)
-		if err != nil {
-			return err
-		}
+	startupArgs := "dac.yml -i inventory --tag mount,create_mdt,create_mgs,create_osts,client_mount"
+	err = executeAnsiblePlaybook(dir, startupArgs)
+	if err != nil {
+		return err
+	}
 
-	} else {
-		stopArgs := "dac.yml -i inventory --tag stop_all,unmount,client_unmount"
-		err = executeAnsiblePlaybook(dir, stopArgs)
-		if err != nil {
-			return err
-		}
+	// only delete if everything worked, to aid debugging
+	os.RemoveAll(dir)
+	return nil
+}
 
-		formatArgs := "dac.yml -i inventory --tag format"
-		err = executeAnsiblePlaybook(dir, formatArgs)
-		if err != nil {
-			return err
-		}
+func executeAnsibleTeardown(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	dir, err := setupAnsible(fsType, volume, brickAllocations)
+	if err != nil {
+		return err
+	}
+
+	stopArgs := "dac.yml -i inventory --tag stop_all,unmount,client_unmount"
+	err = executeAnsiblePlaybook(dir, stopArgs)
+	if err != nil {
+		return err
+	}
+
+	formatArgs := "dac.yml -i inventory --tag format"
+	err = executeAnsiblePlaybook(dir, formatArgs)
+	if err != nil {
+		return err
 	}
 
 	// only delete if everything worked, to aid debugging
