@@ -69,6 +69,9 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 		}
 		hosts[host] = hostInfo
 	}
+	for host := range volume.Attachments {
+		hosts[host] = HostInfo{}
+	}
 	fsinfo := FSInfo{
 		Vars: map[string]string{
 			"mgsnode":     mdt.Hostname,

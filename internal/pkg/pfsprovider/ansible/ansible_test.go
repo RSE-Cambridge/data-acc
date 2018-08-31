@@ -7,7 +7,13 @@ import (
 )
 
 func TestPlugin_GetInventory(t *testing.T) {
-	volume := registry.Volume{Name: "1", UUID: "abcdefgh", ClientPort: 10002}
+	volume := registry.Volume{
+		Name: "1", UUID: "abcdefgh", ClientPort: 10002,
+		Attachments: map[string]registry.Attachment{
+			"cpu1": {Hostname: "cpu1"},
+			"cpu2": {Hostname: "cpu3"},
+		},
+	}
 	brickAllocations := []registry.BrickAllocation{
 		{Hostname: "dac1", Device: "nvme1n1", AllocatedIndex: 0},
 		{Hostname: "dac1", Device: "nvme2n1", AllocatedIndex: 1},
@@ -20,6 +26,8 @@ func TestPlugin_GetInventory(t *testing.T) {
   children:
     abcdefgh:
       hosts:
+        cpu1: {}
+        cpu2: {}
         dac1:
           abcdefgh_mgs: nvme1n1
           abcdefgh_mdt: nvme1n1
