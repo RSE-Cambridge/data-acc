@@ -51,14 +51,14 @@ spinning disk based Lustre to an NVMe backed burst buffer.
 
 The data accelerator project does not change how users interact with Slurm
 requesting a burst buffer. NERSC have published a useful guide
-on (how to use a burst buffer via slurm)[http://www.nersc.gov/users/computational-systems/cori/burst-buffer/example-batch-scripts]
+on [how to use a burst buffer via slurm](http://www.nersc.gov/users/computational-systems/cori/burst-buffer/example-batch-scripts)
 
 ## Operator
 
 There are two key binaries:
 
-* dacd - runs on storage nodes, manages each host, watches keys in etcd
-* dac_cli - cli tool used by Slurm burst buffer plugin
+* **dacd** - runs on storage nodes, manages each host, watches keys in etcd
+* **dac_cli** - cli tool used by Slurm burst buffer plugin
 
 To show what is added to a typical Slurm deployment when
 you add the data accelerator [dac deployment diagram](https://drive.google.com/a/stackhpc.com/file/d/1UUrjlMtoyWETQuwdK1Pg0gyDe85GliGR/view?usp=sharing)
@@ -88,8 +88,8 @@ README](https://github.com/RSE-Cambridge/data-acc/blob/master/docker-slurm/READM
 
 #### Fake Demo
 
-When using the [./update_burstbuffer.sh](docker-slurm/update_burstbuffer.sh) script
-you get the following demo of the burst buffer:
+When using the [./update_burstbuffer.sh](https://github.com/RSE-Cambridge/data-acc/blob/master/docker-slurm/update_burstbuffer.sh)
+script you get the following demo of the burst buffer:
 
 ```Console
 ***Show current system state***
