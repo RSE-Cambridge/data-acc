@@ -16,7 +16,7 @@
   tags: ['never', 'format', 'mount', 'unmount', 'stop_all']
 
 - name: Format disks
-  command: "mkfs.ext4 -i 8192 -I 512 -J size=400 -Odir_index,filetype /dev/{{ item }}"
+  command: "mkfs.ext4 -E lazy_itable_init=0,lazy_journal_init=0,discard -b 4096 -i 8192 -I 512 -Odir_index,filetype,^has_journal /dev/{{ item }}"
   loop: "{{ all_disks }}"
   tags: ['never', 'format']
 
@@ -31,7 +31,7 @@
       loop: "{{ all_disks }}"
 
     - name: Mount EXT4 OSTs
-      command: mount -onoatime,nodiratime,nobarrier,user_xattr /dev/{{ item }} /data/{{ fs_name }}/{{ item }}
+      command: mount -onoatime,nodiratime,nobarrier,user_xattr,discard /dev/{{ item }} /data/{{ fs_name }}/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
