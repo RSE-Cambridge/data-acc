@@ -16,7 +16,7 @@ func getMountDir(volume registry.Volume) string {
 	return fmt.Sprintf("/mnt/job_buffer/%s", volume.UUID)
 }
 
-func mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	var primaryBrickHost string
 	for _, allocation := range brickAllocations {
 		if allocation.AllocatedIndex == 0 {
@@ -35,7 +35,8 @@ func mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) 
 		if err := mkdir(attachment.Hostname, mountDir); err != nil {
 			return err
 		}
-		if err := mountLustre(attachment.Hostname, primaryBrickHost, volume.UUID, mountDir); err != nil {
+		if err := mountRemoteFilesystem(fsType, attachment.Hostname,
+			primaryBrickHost, volume.UUID, mountDir); err != nil {
 			return err
 		}
 
@@ -76,7 +77,7 @@ func mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) 
 	return nil
 }
 
-func umount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE Umount for:", volume.Name)
 	var mountDir = getMountDir(volume)
 	for _, attachment := range volume.Attachments {
@@ -120,6 +121,13 @@ func umountLustre(hostname string, directory string) error {
 
 func removeSubtree(hostname string, directory string) error {
 	return remoteExecuteCmd(hostname, fmt.Sprintf("rm -rf %s", directory))
+}
+
+func mountRemoteFilesystem(fsType FSType, hostname string, mgtHost string, fsname string, directory string) error {
+	if fsType == Lustre {
+		return mountLustre(hostname, mgtHost, fsname, directory)
+	}
+	return fmt.Errorf("mount unsuported by filesystem type %s", fsType)
 }
 
 func mountLustre(hostname string, mgtHost string, fsname string, directory string) error {
