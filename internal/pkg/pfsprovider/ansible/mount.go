@@ -55,11 +55,12 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 			// TODO: swapmb := int(volume.AttachAsSwapBytes/1024)
 			swapmb := 2
 			swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
-			if err := createSwap(attachment.Hostname, swapmb, swapFile); err != nil {
+			loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)
+			if err := createSwap(attachment.Hostname, swapmb, swapFile, loopback); err != nil {
 				return err
 			}
 
-			if err := swapOn(attachment.Hostname, swapFile); err != nil {
+			if err := swapOn(attachment.Hostname, loopback); err != nil {
 				return err
 			}
 		}
@@ -87,15 +88,17 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 	log.Println("FAKE Umount for:", volume.Name)
 	var mountDir = getMountDir(volume)
 
-	if fsType == BeegFS {
-		// TODO: Move Lustre unmount here that is done below
-		executeAnsibleUnmount(fsType, volume, brickAllocations)
-	}
-
 	for _, attachment := range volume.Attachments {
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
 			swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?
-			if err := swapOff(attachment.Hostname, swapFile); err != nil {
+			loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)                     // TODO share?
+			if err := swapOff(attachment.Hostname, loopback); err != nil {
+				return err
+			}
+			if err := detachLoopback(attachment.Hostname, loopback); err != nil {
+				return err
+			}
+			if err := removeSubtree(attachment.Hostname, swapFile); err != nil {
 				return err
 			}
 		}
@@ -108,21 +111,40 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 			return err
 		}
 	}
+
+	if fsType == BeegFS {
+		// TODO: Move Lustre unmount here that is done below
+		executeAnsibleUnmount(fsType, volume, brickAllocations)
+		// TODO: this makes copy out much harder in its current form :(
+	}
+
 	return nil
 }
 
-func createSwap(hostname string, swapMb int, filename string) error {
-	cmd := fmt.Sprintf("dd if=/dev/zero of=%s bs=1024 count=%d && sudo chmod 0600 %s && sudo mkswap %s",
-		filename, swapMb*1024, filename, filename)
-	return remoteExecuteCmd(hostname, cmd)
+func createSwap(hostname string, swapMb int, filename string, loopback string) error {
+	file := fmt.Sprintf("dd if=/dev/zero of=%s bs=1024 count=%d && sudo chmod 0600 %s",
+		filename, swapMb*1024, filename)
+	if err := remoteExecuteCmd(hostname, file); err != nil {
+		return err
+	}
+	device := fmt.Sprintf("losetup %s %s", loopback, filename)
+	if err := remoteExecuteCmd(hostname, device); err != nil {
+		return err
+	}
+	swap := fmt.Sprintf("mkswap %s", loopback)
+	return remoteExecuteCmd(hostname, swap)
 }
 
-func swapOn(hostname string, filename string) error {
-	return remoteExecuteCmd(hostname, fmt.Sprintf("swapon %s", filename))
+func swapOn(hostname string, loopback string) error {
+	return remoteExecuteCmd(hostname, fmt.Sprintf("swapon %s", loopback))
 }
 
-func swapOff(hostname string, filename string) error {
-	return remoteExecuteCmd(hostname, fmt.Sprintf("swapoff %s", filename))
+func swapOff(hostname string, loopback string) error {
+	return remoteExecuteCmd(hostname, fmt.Sprintf("swapoff %s", loopback))
+}
+
+func detachLoopback(hostname string, loopback string) error {
+	return remoteExecuteCmd(hostname, fmt.Sprintf("losetup -d %s", loopback))
 }
 
 func chown(hostname string, owner uint, directory string) error {
@@ -156,6 +178,10 @@ func mountLustre(hostname string, mgtHost string, fsname string, directory strin
 
 func mountBeegFS(hostname string, mgtHost string, fsname string, directory string) error {
 	// Ansible mounts beegfs at /mnt/beegfs/<fsname>, link into above location here
+	// First remove the directory, then replace with a symbolic link
+	if err := removeSubtree(hostname, directory); err != nil {
+		return err
+	}
 	return remoteExecuteCmd(hostname, fmt.Sprintf("ln -s /mnt/beegfs/%s %s", fsname, directory))
 }
 
