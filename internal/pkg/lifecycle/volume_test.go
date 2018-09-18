@@ -13,7 +13,7 @@ func TestVolumeLifecycleManager_Mount(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
 
-	volume := registry.Volume{Name: "vol1", SizeBricks: 3}
+	volume := registry.Volume{Name: "vol1", SizeBricks: 3, State: registry.BricksProvisioned}
 	vlm := NewVolumeLifecycleManager(mockVolReg, nil, volume)
 	hosts := []string{"host1", "host2"}
 
