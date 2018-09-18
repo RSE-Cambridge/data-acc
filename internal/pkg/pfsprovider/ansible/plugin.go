@@ -92,9 +92,9 @@ type mounter struct {
 }
 
 func (mounter *mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	return executeAnsibleMount(mounter.FSType, volume, brickAllocations)
+	return mount(mounter.FSType, volume, brickAllocations)
 }
 
 func (mounter *mounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	return executeAnsibleUnmount(mounter.FSType, volume, brickAllocations)
+	return umount(mounter.FSType, volume, brickAllocations)
 }

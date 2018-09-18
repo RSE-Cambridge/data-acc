@@ -29,6 +29,12 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 		log.Panicf("failed to find primary brick for volume: %s", volume.Name)
 	}
 
+	if fsType == BeegFS {
+		// Write out the config needed, and do the mount using ansible
+		// TODO: Move Lustre mount here that is done below
+		executeAnsibleMount(fsType, volume, brickAllocations)
+	}
+
 	var mountDir = getMountDir(volume)
 	for _, attachment := range volume.Attachments {
 
@@ -80,6 +86,12 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("FAKE Umount for:", volume.Name)
 	var mountDir = getMountDir(volume)
+
+	if fsType == BeegFS {
+		// TODO: Move Lustre unmount here that is done below
+		executeAnsibleUnmount(fsType, volume, brickAllocations)
+	}
+
 	for _, attachment := range volume.Attachments {
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
 			swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?
@@ -87,8 +99,10 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 				return err
 			}
 		}
-		if err := umountLustre(attachment.Hostname, mountDir); err != nil {
-			return err
+		if fsType == Lustre {
+			if err := umountLustre(attachment.Hostname, mountDir); err != nil {
+				return err
+			}
 		}
 		if err := removeSubtree(attachment.Hostname, mountDir); err != nil {
 			return err
@@ -126,6 +140,8 @@ func removeSubtree(hostname string, directory string) error {
 func mountRemoteFilesystem(fsType FSType, hostname string, mgtHost string, fsname string, directory string) error {
 	if fsType == Lustre {
 		return mountLustre(hostname, mgtHost, fsname, directory)
+	} else if fsType == BeegFS {
+		return mountBeegFS(hostname, mgtHost, fsname, directory)
 	}
 	return fmt.Errorf("mount unsuported by filesystem type %s", fsType)
 }
@@ -136,6 +152,11 @@ func mountLustre(hostname string, mgtHost string, fsname string, directory strin
 	}
 	return remoteExecuteCmd(hostname, fmt.Sprintf(
 		"mount -t lustre %s:/%s %s", mgtHost, fsname, directory))
+}
+
+func mountBeegFS(hostname string, mgtHost string, fsname string, directory string) error {
+	// Ansible mounts beegfs at /mnt/beegfs/<fsname>, link into above location here
+	return remoteExecuteCmd(hostname, fmt.Sprintf("ln -s /mnt/beegfs/%s %s", fsname, directory))
 }
 
 func mkdir(hostname string, directory string) error {
