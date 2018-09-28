@@ -23,8 +23,8 @@
       unarchive:
         remote_src: yes
         src: /tmp/{{data_acc_tgz}}
-        dest: '{{data_acc_install_dir}}'
-        creates: '{{data_acc_install_dir}}/{{data_acc_name}}'
+        dest: '{{data_acc_install_dir}}/{{data_acc_version}}'
+        creates: '{{data_acc_install_dir}}/{{data_acc_version}}/{{data_acc_name}}'
   always:
     - name: delete archive
       become: yes
@@ -37,11 +37,12 @@
   become: yes
   become_user: root
   file:
-    src: '{{data_acc_install_dir}}/{{data_acc_name}}/{{item}}'
+    src: '{{data_acc_install_dir}}/{{data_acc_version}}/{{item}}'
     dest: '{{data_acc_install_dir}}/{{item}}'
     state: link
   with_items:
-    - data_acc
+    - data-acc-brick-host
+    - fakewarp
 
 - include_tasks: systemd.yml
   when: data_acc_install_dacd
