@@ -15,9 +15,14 @@
 - hosts: etcd-master[0]
   tasks:
     - copy:
-        src: /home/centos/pki-dir
-        dest: ~/pki-dir
+        src: /home/centos/pki-dir/{{item}}
+        dest: ~/pki-dir/{{item}}
         remote_src: yes
+      with_items:
+        - ca.pem
+        - ca-key.pem
+        - dac-etcd.dac.hpc.cam.ac.uk.pem
+        - dac-etcd.dac.hpc.cam.ac.uk-key.pem
 
 - hosts: all
   become: true
