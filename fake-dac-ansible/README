@@ -13,5 +13,5 @@ You may find this useful to run the above ansible-playbook command:
     virtualenv .venv
     . .venv/bin/activate
     pip install -U pip
-    pip install -U ansible docker
-    ansible-galaxy install -r requirements.yml
+    pip install -U ansible
+    ansible-galaxy install -r requirements.yml:
