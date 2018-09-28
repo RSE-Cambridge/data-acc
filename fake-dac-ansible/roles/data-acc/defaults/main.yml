@@ -9,9 +9,9 @@ data_acc_install_dacd: True
 data_acc_launch: True
 
 #data_acc_name: data_acc-{{data_acc_version}}-{{data_acc_platform}}
-data_acc_name: data-acc
+data_acc_name: data-acc-brick-host
 #data_acc_tgz: '{{data_acc_name}}.tar.gz'
 data_acc_tgz: 'data-acc.tgz'
 #data_acc_tgz_url: '{{data_acc_mirror}}/{{data_acc_version}}/{{data_acc_tgz}}'
 data_acc_tgz_url: 'https://downloads.hpc.private.cam.ac.uk/data-acc.tgz'
-#data_acc_checksum: ''
+data_acc_checksum: 'sha256:d1da295241c03de8fbade036940187c7fa3ba9dff531f39d3fe105d37792e103'

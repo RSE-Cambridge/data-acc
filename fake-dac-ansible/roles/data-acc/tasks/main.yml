@@ -14,7 +14,7 @@
       get_url:
         url: '{{data_acc_tgz_url}}'
         dest: /tmp/{{data_acc_tgz}}
-        #checksum: '{{data_acc_checksum}}'
+        checksum: '{{data_acc_checksum}}'
         timeout: '{{data_acc_download_timeout_seconds}}'
         mode: 0644
     - name: unachive data_acc
