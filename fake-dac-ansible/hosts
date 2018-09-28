@@ -5,6 +5,6 @@ dac-etcd ansible_host=10.43.101.30 ansible_user=centos
 etcd-master
 
 [dac-workers]
-dac1 ansible_host=10.43.101.28
-dac2 ansible_host=10.43.101.5
-dac3 ansible_host=10.43.101.31
+dac1 ansible_host=10.43.101.28 ansible_user=centos
+dac2 ansible_host=10.43.101.5 ansible_user=centos
+dac3 ansible_host=10.43.101.31 ansible_user=centos
