@@ -17,6 +17,12 @@
         checksum: '{{data_acc_checksum}}'
         timeout: '{{data_acc_download_timeout_seconds}}'
         mode: 0644
+    - name: create install dir
+      become: yes
+      become_user: root
+      file:
+        state: directory
+        path: '{{data_acc_install_dir}}/{{data_acc_version}}'
     - name: unachive data_acc
       become: yes
       become_user: root
