@@ -14,10 +14,10 @@
 
 - hosts: etcd-master[0]
   tasks:
-    - copy:
+    - fetch:
         src: /home/centos/pki-dir/{{item}}
-        dest: ~/pki-dir/{{item}}
-        remote_src: yes
+        dest: ~/pki-dir/
+        flat: yes
       with_items:
         - ca.pem
         - ca-key.pem
