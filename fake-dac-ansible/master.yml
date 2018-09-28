@@ -2,7 +2,7 @@
 - hosts: etcd-master[0]
   roles:
     - role: andrewrothstein.pki
-      pki_dir: /home/centos
+      pki_dir: /home/centos/pki-dir
       pki_self_sign: True
       pki_ca:
         cname: ca.dac.hpc.cam.ac.uk
@@ -12,6 +12,13 @@
         - cname: dac2.dac.hpc.cam.ac.uk
         - cname: dac3.dac.hpc.cam.ac.uk
 
+- hosts: etcd-master[0]
+  tasks:
+    - copy:
+        src: /home/centos/pki-dir
+        dest: ~/pki-dir
+        remote_src: yes
+
 - hosts: all
   become: true
   tasks:
@@ -20,4 +27,4 @@
 
 - hosts: etcd
   roles:
-    - andrewrothstein.etcd-cluster
+    - role: andrewrothstein.etcd-cluster
