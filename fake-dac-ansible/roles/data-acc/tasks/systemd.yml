@@ -25,7 +25,7 @@
     group: '{{data_acc_group}}'
     mode: 0755
   with_items:
-    - /etc/data_acc
+    - /etc/data-acc
     
 - name: install data_acc.service configuration
   become: yes

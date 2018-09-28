@@ -38,6 +38,7 @@
 - hosts: etcd
   roles:
     - role: andrewrothstein.etcd-cluster
+      etcd_secure: False
 
 - hosts: dac-workers
   roles:
