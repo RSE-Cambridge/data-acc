@@ -1,5 +1,5 @@
 [etcd-master]
-dac-etcd ansible_host=10.43.101.30 ansible_user=centos
+dac-etcd.dac.hpc.cam.ac.uk ansible_host=10.43.101.30 ansible_user=centos
 
 [etcd:children]
 etcd-master
