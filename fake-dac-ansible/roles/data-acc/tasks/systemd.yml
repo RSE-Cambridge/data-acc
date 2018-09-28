@@ -32,7 +32,7 @@
   become_user: root
   template:
     src: 'dacd.conf.j2'
-    dest: '/etc/data_acc/dacd.conf'
+    dest: '/etc/data-acc/dacd.conf'
     owner: '{{data_acc_user}}'
     group: '{{data_acc_group}}'
     mode: 0644
