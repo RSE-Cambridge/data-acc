@@ -3,12 +3,17 @@ Description=Data Accelerator Host
 After=network.target
 
 [Service]
-Type=notify
+Type=simple
 User={{data_acc_user}}
 EnvironmentFile=-/etc/data-acc/dacd.conf
 # set GOMAXPROCS to number of processors
 ExecStart=/usr/local/bin/dacd
 Restart=on-failure
+
+PermissionsStartOnly=true
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=dac
 
 [Install]
 WantedBy=multi-user.target
