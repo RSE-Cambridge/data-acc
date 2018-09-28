@@ -2,10 +2,7 @@
 - hosts: all
   tasks:
   - name: configure default gateway
-    net_static_route:
-      prefix: 10.43.0.0
-      mask: 255.255.0.0
-      next_hop: 10.43.255.1
+    command: route add -net 10.43.0.0 netmask 255.255.0.0 gw 10.43.255.1
 
 - hosts: etcd
   roles:
