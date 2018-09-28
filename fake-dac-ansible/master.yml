@@ -2,7 +2,7 @@
 - hosts: etcd-master[0]
   roles:
     - role: andrewrothstein.pki
-      pki_dir: ~/pki
+      pki_dir: /home/centos
       pki_self_sign: True
       pki_ca:
         cname: ca.dac.hpc.cam.ac.uk
