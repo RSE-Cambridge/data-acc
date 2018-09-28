@@ -14,8 +14,11 @@
           altips:
             - '10.43.101.30'
         - cname: dac1.dac.hpc.cam.ac.uk
+          include_localhost: True
         - cname: dac2.dac.hpc.cam.ac.uk
+          include_localhost: True
         - cname: dac3.dac.hpc.cam.ac.uk
+          include_localhost: True
 
 - hosts: etcd-master[0]
   tasks:
@@ -28,6 +31,12 @@
         - ca-key.pem
         - dac-etcd.dac.hpc.cam.ac.uk.pem
         - dac-etcd.dac.hpc.cam.ac.uk-key.pem
+        - dac1.dac.hpc.cam.ac.uk.pem
+        - dac1.dac.hpc.cam.ac.uk-key.pem
+        - dac2.dac.hpc.cam.ac.uk.pem
+        - dac2.dac.hpc.cam.ac.uk-key.pem
+        - dac3.dac.hpc.cam.ac.uk.pem
+        - dac3.dac.hpc.cam.ac.uk-key.pem
 
 - hosts: all
   become: true
@@ -38,7 +47,6 @@
 - hosts: etcd
   roles:
     - role: andrewrothstein.etcd-cluster
-      etcd_secure: False
 
 - hosts: dac-workers
   roles:

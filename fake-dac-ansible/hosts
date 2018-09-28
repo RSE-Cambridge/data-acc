@@ -1,7 +1,7 @@
 [dac-workers]
-dac1 ansible_host=10.43.101.28 ansible_user=centos
-dac2 ansible_host=10.43.101.5 ansible_user=centos
-dac3 ansible_host=10.43.101.31 ansible_user=centos
+dac1.dac.hpc.cam.ac.uk ansible_host=10.43.101.28 ansible_user=centos
+dac2.dac.hpc.cam.ac.uk ansible_host=10.43.101.5 ansible_user=centos
+dac3.dac.hpc.cam.ac.uk ansible_host=10.43.101.31 ansible_user=centos
 
 [etcd-master]
 dac-etcd.dac.hpc.cam.ac.uk ansible_host=10.43.101.30 ansible_user=centos
