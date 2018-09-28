@@ -14,4 +14,4 @@ You may find this useful to run the above ansible-playbook command:
     . .venv/bin/activate
     pip install -U pip
     pip install -U ansible
-    ansible-galaxy install -r requirements.yml:
+    ansible-galaxy install -r requirements.yml
