@@ -1,0 +1,10 @@
+[etcd-master]
+dac-etcd ansible_host=10.43.101.30 ansible_user=centos
+
+[etcd:children]
+etcd-master
+
+[dac-workers]
+dac1 ansible_host=10.43.101.28
+dac2 ansible_host=10.43.101.5
+dac3 ansible_host=10.43.101.31

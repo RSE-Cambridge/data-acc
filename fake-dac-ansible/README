@@ -1,0 +1,17 @@
+# install data-acc demo (no slurm)
+
+Install data-acc demo with ansible
+
+To run this set of playbooks, please execute:
+
+    ansible-playbook master.yml -i hosts
+
+## Install notes
+
+You may find this useful to run the above ansible-playbook command:
+
+    virtualenv .venv
+    . .venv/bin/activate
+    pip install -U pip
+    pip install -U ansible docker
+    ansible-galaxy install -r requirements.yml
