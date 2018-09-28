@@ -2,7 +2,7 @@
 - name: check for installation of data-acc
   become: yes
   stat:
-    path: '{{data_acc_install_dir}}/{{data_acc_name}}'
+    path: '{{data_acc_install_dir}}/{{data_acc_version}}/{{data_acc_name}}'
   changed_when: false
   register: data_acc_binary_dir
 
