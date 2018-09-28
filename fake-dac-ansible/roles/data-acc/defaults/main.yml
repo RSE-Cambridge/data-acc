@@ -13,5 +13,5 @@ data_acc_name: data-acc
 #data_acc_tgz: '{{data_acc_name}}.tar.gz'
 data_acc_tgz: 'data-acc.tgz'
 #data_acc_tgz_url: '{{data_acc_mirror}}/{{data_acc_version}}/{{data_acc_tgz}}'
-data_acc_tgz_url: 'https://downloads.hpc.private.cam.ac.uk/dac-acc.tgz'
+data_acc_tgz_url: 'https://downloads.hpc.private.cam.ac.uk/data-acc.tgz'
 #data_acc_checksum: ''
