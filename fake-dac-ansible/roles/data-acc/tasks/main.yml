@@ -1,0 +1,47 @@
+---
+- name: check for installation of data-acc
+  become: yes
+  stat:
+    path: '{{data_acc_install_dir}}/{{data_acc_name}}'
+  changed_when: false
+  register: data_acc_binary_dir
+
+- when: not data_acc_binary_dir.stat.exists
+  block:
+    - name: download data_acc
+      become: yes
+      become_user: root
+      get_url:
+        url: '{{data_acc_tgz_url}}'
+        dest: /tmp/{{data_acc_tgz}}
+        #checksum: '{{data_acc_checksum}}'
+        timeout: '{{data_acc_download_timeout_seconds}}'
+        mode: 0644
+    - name: unachive data_acc
+      become: yes
+      become_user: root
+      unarchive:
+        remote_src: yes
+        src: /tmp/{{data_acc_tgz}}
+        dest: '{{data_acc_install_dir}}'
+        creates: '{{data_acc_install_dir}}/{{data_acc_name}}'
+  always:
+    - name: delete archive
+      become: yes
+      become_user: root
+      file:
+        path: /tmp/{{data_acc_tgz}}
+        state: absent
+
+- name: link data_acc
+  become: yes
+  become_user: root
+  file:
+    src: '{{data_acc_install_dir}}/{{data_acc_name}}/{{item}}'
+    dest: '{{data_acc_install_dir}}/{{item}}'
+    state: link
+  with_items:
+    - data_acc
+
+- include_tasks: systemd.yml
+  when: data_acc_install_dacd

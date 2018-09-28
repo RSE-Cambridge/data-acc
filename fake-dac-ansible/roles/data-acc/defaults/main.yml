@@ -1,0 +1,17 @@
+---
+data_acc_version: v0.1
+data_acc_platform: linux-amd64
+data_acc_mirror: https://github.com/RSE-Cambridge/data-acc/releases/download
+data_acc_install_dir: /usr/local/bin
+data_acc_download_timeout_seconds: 600
+
+data_acc_install_dacd: True
+data_acc_launch: True
+
+#data_acc_name: data_acc-{{data_acc_version}}-{{data_acc_platform}}
+data_acc_name: data-acc
+#data_acc_tgz: '{{data_acc_name}}.tar.gz'
+data_acc_tgz: 'data-acc.tgz'
+#data_acc_tgz_url: '{{data_acc_mirror}}/{{data_acc_version}}/{{data_acc_tgz}}'
+data_acc_tgz_url: 'https://downloads.hpc.private.cam.ac.uk/dac-acc.tgz'
+#data_acc_checksum: ''

@@ -1,0 +1,62 @@
+---
+- name: create data_acc group
+  become: yes
+  become_user: root
+  group:
+    name: '{{data_acc_group}}'
+    state: present
+  
+- name: create data_acc user
+  become: yes
+  become_user: root
+  user:
+    name: '{{data_acc_user}}'
+    group: '{{data_acc_group}}'
+    home: '{{data_acc_data_dir}}'
+    state: present
+
+- name: create dirs...
+  become: yes
+  become_user: root
+  file:
+    state: directory
+    path: '{{item}}'
+    owner: '{{data_acc_user}}'
+    group: '{{data_acc_group}}'
+    mode: 0755
+  with_items:
+    - /etc/data_acc
+    
+- name: install data_acc.service configuration
+  become: yes
+  become_user: root
+  template:
+    src: 'dacd.conf.j2'
+    dest: '/etc/data_acc/dacd.conf'
+    owner: '{{data_acc_user}}'
+    group: '{{data_acc_group}}'
+    mode: 0644
+        
+- name: install dacd.service systemd unit
+  become: yes
+  become_user: root
+  register: data_acc_service_modified
+  template:
+    src: 'dacd.service.j2'
+    dest: '/etc/systemd/system/dacd.service'
+    mode: '0644'
+
+- name: systemctl daemon-reload
+  become: yes
+  become_user: root
+  when: data_acc_launch and data_acc_service_modified is changed
+  command: systemctl daemon-reload
+
+- name: launching data_acc...
+  when: data_acc_launch
+  become: yes
+  become_user: root
+  service:
+    name: dacd
+    enabled: yes
+    state: started

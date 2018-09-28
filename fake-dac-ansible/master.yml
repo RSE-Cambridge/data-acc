@@ -38,3 +38,7 @@
 - hosts: etcd
   roles:
     - role: andrewrothstein.etcd-cluster
+
+- hosts: dac-workers
+  roles:
+    - role: data-acc
