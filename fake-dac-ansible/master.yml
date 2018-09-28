@@ -8,6 +8,11 @@
         cname: ca.dac.hpc.cam.ac.uk
       pki_servers:
         - cname: dac-etcd.dac.hpc.cam.ac.uk
+          include_localhost: True
+          sans:
+            - dac-etcd.dac.hpc.cam.ac.uk
+          altips:
+            - '10.43.101.30'
         - cname: dac1.dac.hpc.cam.ac.uk
         - cname: dac2.dac.hpc.cam.ac.uk
         - cname: dac3.dac.hpc.cam.ac.uk
