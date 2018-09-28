@@ -1,9 +1,23 @@
 ---
+- hosts: localhost
+  connection: local
+  roles:
+    - role: andrewrothstein.pki
+	  pki_dir: ~/pki
+      pki_self_sign: Ture
+	  pki_ca:
+	    cname: ca.dac.hpc.cam.ac.uk
+	  pki_servers:
+	    - cname: dac-etcd.dac.hpc.cam.ac.uk
+	    - cname: dac1.dac.hpc.cam.ac.uk
+	    - cname: dac2.dac.hpc.cam.ac.uk
+	    - cname: dac3.dac.hpc.cam.ac.uk
+
 - hosts: all
   become: true
   tasks:
   - name: configure default gateway
-    command: route add default gw 10.43.255.1
+    command: route add default gw 10.43.255.1 || true
 
 - hosts: etcd
   roles:
