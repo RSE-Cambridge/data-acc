@@ -1,17 +1,16 @@
 ---
-- hosts: localhost
-  connection: local
+- hosts: etcd-master[0]
   roles:
     - role: andrewrothstein.pki
-        pki_dir: ~/pki
-        pki_self_sign: Ture
-        pki_ca:
-            cname: ca.dac.hpc.cam.ac.uk
-        pki_servers:
-            - cname: dac-etcd.dac.hpc.cam.ac.uk
-            - cname: dac1.dac.hpc.cam.ac.uk
-            - cname: dac2.dac.hpc.cam.ac.uk
-            - cname: dac3.dac.hpc.cam.ac.uk
+      pki_dir: ~/pki
+      pki_self_sign: True
+      pki_ca:
+        cname: ca.dac.hpc.cam.ac.uk
+      pki_servers:
+        - cname: dac-etcd.dac.hpc.cam.ac.uk
+        - cname: dac1.dac.hpc.cam.ac.uk
+        - cname: dac2.dac.hpc.cam.ac.uk
+        - cname: dac3.dac.hpc.cam.ac.uk
 
 - hosts: all
   become: true
