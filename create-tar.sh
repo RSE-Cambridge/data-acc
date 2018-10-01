@@ -2,5 +2,6 @@
 
 set -eux
 
-cd bin/amd64/
-tar -cvzf ../../data-acc.tgz ./data-acc-brick-host ./fakewarp
+cd ..
+tar -cvzf ./data-acc/data-acc.tgz ./data-acc/bin/amd64/data-acc-brick-host ./data-acc/bin/amd64/fakewarp ./data-acc/fs-ansible
+sha256sum ./data-acc/data-acc.tgz
