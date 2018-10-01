@@ -156,7 +156,11 @@ func runCli(args []string) error {
 }
 
 func main() {
-	f, err := os.OpenFile("/var/log/fakewarp.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logFilename := os.Getenv("FAKEWARP_LOG")
+	if logFilename == "" {
+		logFilename = "/var/log/fakewarp.log"
+	}
+	f, err := os.OpenFile(logFilename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
