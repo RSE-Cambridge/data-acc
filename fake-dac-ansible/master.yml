@@ -15,10 +15,16 @@
             - '10.43.101.30'
         - cname: dac1.dac.hpc.cam.ac.uk
           include_localhost: True
+          sans:
+            - dac1.dac.hpc.cam.ac.uk
         - cname: dac2.dac.hpc.cam.ac.uk
           include_localhost: True
+          sans:
+            - dac2.dac.hpc.cam.ac.uk
         - cname: dac3.dac.hpc.cam.ac.uk
           include_localhost: True
+          sans:
+            - dac3.dac.hpc.cam.ac.uk
 
 - hosts: etcd-master[0]
   tasks:
