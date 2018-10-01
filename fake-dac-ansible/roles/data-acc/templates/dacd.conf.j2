@@ -1,3 +1,6 @@
 ETCDCTL_API=3
 ETCDCTL_ENDPOINTS=https://localhost:2379
 #ETCD_CLIENT_DEBUG=1
+ETCDCTL_CERT_FILE=/var/lib/etcd/test-cluster-name.pki/{{ansible_hostname}}.pem
+ETCDCTL_KEY_FILE=/var/lib/etcd/test-cluster-name.pki/{{ansible_hostname}}-key.pem
+ETCDCTL_CA_FILE=/var/lib/etcd/test-cluster-name.pki/ca.pem
