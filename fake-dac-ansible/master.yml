@@ -74,18 +74,20 @@
     - role: data-acc
 
 - hosts: dac-workers[0]
+  become: true
+  become_user: dac
   tasks:
     - name: Create ssh key for dac user for fs-ansible
       shell: |
-        ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
-        cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+        ssh-keygen -f /var/lib/dac/.ssh/id_rsa -t rsa -N ''
+        cat /var/lib/dac/.ssh/id_rsa.pub >> /var/lib/dac/.ssh/authorized_keys
       args:
-         creates: /home/centos/.ssh/id_rsa
+         creates: /var/lib/dac/.ssh/id_rsa
     - name: Pull Keys
       synchronize:
         mode: pull
-        src:  ~/.ssh/
-        dest: /tmp/dac.ssh/
+        src:  /var/lib/dac/.ssh
+        dest: ~/dac.ssh/
         recursive: yes
 
 - hosts: dac-workers
@@ -95,13 +97,13 @@
     - name: Push Keys for dac user for fs-ansible
       synchronize:
         mode: push
-        src: /tmp/dac.ssh/
-        dest:  ~/.ssh/
+        src: ~/dac.ssh/
+        dest:  /var/lib/dac/.ssh/
         recursive: yes
     - name: trust host keys
       shell: |
-        ssh-keyscan -H {{ hostvars[item]['ansible_default_ipv4']['address'] }} >> ~/.ssh/known_hosts
-        touch ~/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}
+        ssh-keyscan -H {{ hostvars[item]['ansible_default_ipv4']['address'] }} >> /var/lib/dac/.ssh/known_hosts
+        touch /var/lib/dac/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}
       args:
-         creates: "~/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
+         creates: "/var/lib/dac/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
       with_items: "{{ ansible_play_hosts }}"
