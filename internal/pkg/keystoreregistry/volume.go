@@ -281,7 +281,7 @@ func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, 
 
 	// return error if we went to an error state
 	volume, err := volRegistry.Volume(volumeName)
-	if err != nil && volume.State == registry.Error {
+	if err == nil && volume.State == registry.Error {
 		return fmt.Errorf("stopped waiting as volume %s in error state", volumeName)
 	}
 	return err
