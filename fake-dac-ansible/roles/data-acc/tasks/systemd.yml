@@ -96,7 +96,7 @@
 - name: create loopback
   become: yes
   become_user: root
-  command: "loopback /dev/loop{{item.loop}} {{item.file}}"
+  command: "losetup /dev/loop{{item.loop}} {{item.file}}"
   args:
     creates: "{{item.loop}}"
   with_items:
@@ -113,7 +113,7 @@
 
 - name: create nvme symlinks
   file:
-    src: "{{ item.file }}"
+    src: "/dev/loop{{ item.loop }}"
     dest: "/dev/nvme{{ item.loop }}n1"
     state: link
   with_items:
