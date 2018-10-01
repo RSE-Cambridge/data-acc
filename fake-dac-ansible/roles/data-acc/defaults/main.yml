@@ -1,5 +1,5 @@
 ---
-data_acc_version: dac-0.2
+data_acc_version: dac-0.3
 data_acc_platform: linux-amd64
 data_acc_mirror: https://github.com/RSE-Cambridge/data-acc/releases/download
 data_acc_install_dir: /usr/local/bin
@@ -14,7 +14,7 @@ data_acc_name: data-acc-brick-host
 data_acc_tgz: 'data-acc.tgz'
 #data_acc_tgz_url: '{{data_acc_mirror}}/{{data_acc_version}}/{{data_acc_tgz}}'
 data_acc_tgz_url: 'https://downloads.hpc.private.cam.ac.uk/data-acc.tgz'
-data_acc_checksum: 'sha256:bb1fb694aaa3c9f2f1f6fb3451e1926695fdff2bb7d03cc96605bf7ca004e7e2'
+data_acc_checksum: 'sha256:101aa4a00b427a15b41147bf73c740a1a94a7c807a5ab6f230985b42d7170d3e'
 
 data_acc_user: dac
 data_acc_group: dac
