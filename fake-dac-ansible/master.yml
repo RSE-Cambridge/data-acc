@@ -72,3 +72,36 @@
 - hosts: dac-workers
   roles:
     - role: data-acc
+
+- hosts: dac-workers[0]
+  tasks:
+    - name: Create ssh key for dac user for fs-ansible
+      shell: |
+        ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+        cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+      args:
+         creates: /home/centos/.ssh/id_rsa
+    - name: Pull Keys
+      synchronize:
+        mode: pull
+        src:  ~/.ssh/
+        dest: /tmp/dac.ssh/
+        recursive: yes
+
+- hosts: dac-workers
+  become: true
+  become_user: dac
+  tasks:
+    - name: Push Keys for dac user for fs-ansible
+      synchronize:
+        mode: push
+        src: /tmp/dac.ssh/
+        dest:  ~/.ssh/
+        recursive: yes
+    - name: trust host keys
+      shell: |
+        ssh-keyscan -H {{ hostvars[item]['ansible_default_ipv4']['address'] }} >> ~/.ssh/known_hosts
+        touch ~/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}
+      args:
+         creates: "~/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
+      with_items: "{{ ansible_play_hosts }}"
