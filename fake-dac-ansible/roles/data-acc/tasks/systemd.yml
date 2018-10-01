@@ -12,7 +12,7 @@
   user:
     name: '{{data_acc_user}}'
     group: '{{data_acc_group}}'
-    groups: etcd # Get access to etcd private key
+    groups: etcd,wheel # Get access to etcd private key, and sudo for ansible
     home: '{{data_acc_data_dir}}'
     state: present
 
