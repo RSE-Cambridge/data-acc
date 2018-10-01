@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"path"
 )
 
 type HostInfo struct {
@@ -111,6 +112,14 @@ func getPlaybook(fsType FSType, volume registry.Volume) string {
         fs_name: %s`, volume.UUID, role, volume.UUID)
 }
 
+func getAnsibleDir(suffix string) string {
+	ansibleDir := os.Getenv("DAC_ANSIBLE_DIR")
+	if ansibleDir == "" {
+		ansibleDir = "/var/lib/data-acc/fs-ansbile/"
+	}
+	return path.Join(ansibleDir, suffix)
+}
+
 func setupAnsible(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) (string, error) {
 	dir, err := ioutil.TempDir("", fmt.Sprintf("fs%s_", volume.Name))
 	if err != nil {
@@ -132,22 +141,19 @@ func setupAnsible(fsType FSType, volume registry.Volume, brickAllocations []regi
 	}
 	log.Println(inventory)
 
-	cmd := exec.Command("cp", "-r",
-		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/roles", dir)
+	cmd := exec.Command("cp", "-r", getAnsibleDir("roles"), dir)
 	output, err := cmd.CombinedOutput()
 	log.Println("copy roles", string(output))
 	if err != nil {
 		return dir, err
 	}
-	cmd = exec.Command("cp", "-r",
-		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/.venv", dir)
+	cmd = exec.Command("cp", "-r", getAnsibleDir(".venv"), dir)
 	output, err = cmd.CombinedOutput()
 	log.Println("copy venv", string(output))
 	if err != nil {
 		return dir, err
 	}
-	cmd = exec.Command("cp", "-r",
-		"/home/centos/go/src/github.com/JohnGarbutt/data-acc/fs-ansible/group_vars", dir)
+	cmd = exec.Command("cp", "-r", getAnsibleDir("group_vars"), dir)
 	output, err = cmd.CombinedOutput()
 	log.Println("copy group vars", string(output))
 	return dir, err
