@@ -112,6 +112,8 @@
       file: "{{data_acc_data_dir}}/fake_nvme4"
 
 - name: create nvme symlinks
+  become: yes
+  become_user: root
   file:
     src: "/dev/loop{{ item.loop }}"
     dest: "/dev/nvme{{ item.loop }}n1"
