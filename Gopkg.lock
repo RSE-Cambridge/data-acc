@@ -10,6 +10,8 @@
     "etcdserver/api/v3rpc/rpctypes",
     "etcdserver/etcdserverpb",
     "mvcc/mvccpb",
+    "pkg/tlsutil",
+    "pkg/transport",
     "pkg/types"
   ]
   revision = "70c8726202dd91e482fb4029fd14af1d4ed1d5af"
@@ -149,6 +151,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2eba833f80e8719b2e5a76d8c7ae2816e53425ee7a2f9d0a6591349f71522519"
+  inputs-digest = "e139a94fab14aaa74ee5f5b772bdb2479ed3e951a6f1a4d1750af92fa8d53234"
   solver-name = "gps-cdcl"
   solver-version = 1

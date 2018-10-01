@@ -2,6 +2,7 @@ package etcdregistry
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
@@ -9,11 +10,33 @@ import (
 	"github.com/coreos/etcd/clientv3/clientv3util"
 	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/coreos/etcd/pkg/transport"
 	"log"
 	"os"
 	"strings"
 	"time"
 )
+
+func getTLSConfig() *tls.Config {
+	certFile := os.Getenv("ETCDCTL_CERT_FILE")
+	keyFile := os.Getenv("ETCDCTL_KEY_FILE")
+	caFile := os.Getenv("ETCDCTL_CA_FILE")
+
+	if certFile == "" || keyFile == "" || caFile == "" {
+		return nil
+	}
+
+	tlsInfo := transport.TLSInfo{
+		CertFile:      certFile,
+		KeyFile:       keyFile,
+		TrustedCAFile: caFile,
+	}
+	tlsConfig, err := tlsInfo.ClientConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return tlsConfig
+}
 
 func getEndpoints() []string {
 	endpoints := os.Getenv("ETCDCTL_ENDPOINTS")
@@ -30,6 +53,7 @@ func newEtcdClient() *clientv3.Client {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   getEndpoints(),
 		DialTimeout: 10 * time.Second,
+		TLS:         getTLSConfig(),
 	})
 	if err != nil {
 		fmt.Println("failed to create client")
