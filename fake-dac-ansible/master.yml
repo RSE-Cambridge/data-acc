@@ -49,6 +49,15 @@
   tasks:
   - name: configure default gateway
     command: route add default gw 10.43.255.1 || true
+  - name: Create entries in /etc/hosts for all nodes
+    lineinfile:
+      path: /etc/hosts
+      line: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{ item }}"
+      regexp: "^.* {{ item }}$"
+      create: no
+      state: present
+    with_items:
+      - "{{ ansible_play_hosts }}"
 
 - hosts: etcd
   roles:
