@@ -9,10 +9,10 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
-	"path"
 )
 
 type HostInfo struct {
