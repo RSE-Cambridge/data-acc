@@ -51,11 +51,15 @@
     - fakewarp
 
 - name: Install python-virtualenv
+  become: yes
+  become_user: root
   package:
     name: python-virtualenv
     state: present
 
 - name: Add ansible venv
+  become: yes
+  become_user: root
   shell: |
       cd {{data_acc_install_dir}}/{{data_acc_version}}/data-acc/fs-ansible
       virtualenv .venv
