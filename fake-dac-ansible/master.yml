@@ -96,7 +96,7 @@
     - name: Push Keys for dac user for fs-ansible
       synchronize:
         mode: push
-        src: ~/dac.ssh/
+        src: ~/.dac.ssh/
         dest:  /var/lib/dac/.ssh/
         recursive: yes
     - name: trust host keys
