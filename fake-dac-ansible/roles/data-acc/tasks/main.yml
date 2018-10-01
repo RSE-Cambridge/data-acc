@@ -63,7 +63,7 @@
       pip install -U pip
       pip install -U ansible
   args:
-    creates: {{data_acc_install_dir}}/{{data_acc_version}}/data-acc/fs-ansible/.venv
+    creates: "{{data_acc_install_dir}}/{{data_acc_version}}/data-acc/fs-ansible/.venv"
 
 - include_tasks: systemd.yml
   when: data_acc_install_dacd
