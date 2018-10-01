@@ -98,7 +98,7 @@
   become_user: root
   command: "losetup /dev/loop{{item.loop}} {{item.file}}"
   args:
-    creates: "{{item.loop}}"
+    creates: "/dev/loop{{item.loop}}"
   with_items:
     - loop: 0
       file: "{{data_acc_data_dir}}/fake_nvme0"
