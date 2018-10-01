@@ -12,6 +12,7 @@
   user:
     name: '{{data_acc_user}}'
     group: '{{data_acc_group}}'
+    groups: etcd # Get access to etcd private key
     home: '{{data_acc_data_dir}}'
     state: present
 
