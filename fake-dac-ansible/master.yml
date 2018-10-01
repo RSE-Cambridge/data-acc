@@ -86,13 +86,12 @@
     - name: Pull Keys
       synchronize:
         mode: pull
-        src:  /var/lib/dac/.ssh
-        dest: ~/dac.ssh/
+        src:  /var/lib/dac/.ssh/
+        dest: ~/.dac.ssh/
         recursive: yes
 
 - hosts: dac-workers
   become: true
-  become_user: dac
   tasks:
     - name: Push Keys for dac user for fs-ansible
       synchronize:
@@ -107,3 +106,9 @@
       args:
          creates: "/var/lib/dac/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
       with_items: "{{ ansible_play_hosts }}"
+    - name: Fix up permissions
+      file:
+        path: /var/lib/dac/.ssh
+        owner: dac
+        group: dac
+        recurse: yes
