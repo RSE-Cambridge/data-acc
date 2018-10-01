@@ -64,5 +64,11 @@
     - role: andrewrothstein.etcd-cluster
 
 - hosts: dac-workers
+  become: true
+  roles:
+    - geerlingguy.repo-epel
+    - geerlingguy.pip
+
+- hosts: dac-workers
   roles:
     - role: data-acc

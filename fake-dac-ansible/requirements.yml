@@ -1,3 +1,5 @@
 ---
 - src: andrewrothstein.etcd-cluster
 - src: andrewrothstein.pki
+- src: geerlingguy.repo-epel
+- src: geerlingguy.pip
