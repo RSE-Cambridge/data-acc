@@ -44,16 +44,16 @@
   become: yes
   become_user: root
   copy:
-    src: {{item}}
+    src: '{{item}}'
     dest: /etc/data-acc/pki
     remote_src: True
     owner: '{{data_acc_user}}'
     group: '{{data_acc_group}}'
     mode: 0700
   with_items:
-    - /var/lib/etcd/test-cluster-name.pki/{{ansible_fqdn}}.pem
-    - /var/lib/etcd/test-cluster-name.pki/{{ansible_fqdn}}-key.pem
-    - /var/lib/etcd/test-cluster-name.pki/ca.pem
+    - '/var/lib/etcd/test-cluster-name.pki/{{inventory_hostname}}.pem'
+    - '/var/lib/etcd/test-cluster-name.pki/{{inventory_hostname}}-key.pem'
+    - '/var/lib/etcd/test-cluster-name.pki/ca.pem'
 
 - name: install data_acc.service configuration
   become: yes
