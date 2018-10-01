@@ -16,7 +16,7 @@
     home: '{{data_acc_data_dir}}'
     state: present
 
-- name: create dirs...
+- name: create main config dir
   become: yes
   become_user: root
   file:
@@ -28,6 +28,33 @@
   with_items:
     - /etc/data-acc
     
+- name: create keys config dir
+  become: yes
+  become_user: root
+  file:
+    state: directory
+    path: '{{item}}'
+    owner: '{{data_acc_user}}'
+    group: '{{data_acc_group}}'
+    mode: 0700
+  with_items:
+    - /etc/data-acc/pki
+
+- name: copy keys
+  become: yes
+  become_user: root
+  copy:
+    src: {{item}}
+    dest: /etc/data-acc/pki
+    remote_src: True
+    owner: '{{data_acc_user}}'
+    group: '{{data_acc_group}}'
+    mode: 0700
+  with_items:
+    - /var/lib/etcd/test-cluster-name.pki/{{ansible_fqdn}}.pem
+    - /var/lib/etcd/test-cluster-name.pki/{{ansible_fqdn}}-key.pem
+    - /var/lib/etcd/test-cluster-name.pki/ca.pem
+
 - name: install data_acc.service configuration
   become: yes
   become_user: root
