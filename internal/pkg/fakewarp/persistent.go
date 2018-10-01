@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/lifecycle"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"log"
 	"math"
 	"strings"
 	"time"
@@ -121,15 +122,18 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 
 	err = volReg.AddJob(job)
 	if err != nil {
-		volReg.DeleteVolume(volume.Name)
+		delErr := volReg.DeleteVolume(volume.Name)
+		log.Println("volume deleted: ", delErr) // TODO: remove debug logs later, once understood
 		return err
 	}
 
 	vlm := lifecycle.NewVolumeLifecycleManager(volReg, poolRegistry, volume)
 	err = vlm.ProvisionBricks(*pool)
 	if err != nil {
-		volReg.DeleteVolume(volume.Name)
-		volReg.DeleteJob(job.Name)
+		delErr := volReg.DeleteVolume(volume.Name)
+		log.Println("volume deleted: ", delErr)
+		delErr = volReg.DeleteJob(job.Name)
+		log.Println("job deleted: ", delErr)
 	}
 	return err
 }
