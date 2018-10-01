@@ -43,7 +43,7 @@
   become: yes
   become_user: root
   file:
-    src: '{{data_acc_install_dir}}/{{data_acc_version}}/{{item}}'
+    src: '{{data_acc_install_dir}}/{{data_acc_version}}/data-acc/bin/amd64/{{item}}'
     dest: '{{data_acc_install_dir}}/{{item}}'
     state: link
   with_items:

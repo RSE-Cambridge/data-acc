@@ -115,7 +115,7 @@ func getPlaybook(fsType FSType, volume registry.Volume) string {
 func getAnsibleDir(suffix string) string {
 	ansibleDir := os.Getenv("DAC_ANSIBLE_DIR")
 	if ansibleDir == "" {
-		ansibleDir = "/var/lib/data-acc/fs-ansbile/"
+		ansibleDir = "/var/lib/data-acc/fs-ansible/"
 	}
 	return path.Join(ansibleDir, suffix)
 }
