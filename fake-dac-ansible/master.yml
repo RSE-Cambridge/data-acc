@@ -70,6 +70,13 @@
     - geerlingguy.pip
 
 - hosts: dac-workers
+  become: True
+  tasks:
+    - name: ensure kernel dev tools available for beegfs client autobuild
+      package:
+        name: kernel-devel
+
+- hosts: dac-workers
   roles:
     - role: data-acc
 
