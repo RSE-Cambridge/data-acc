@@ -75,6 +75,9 @@
     - name: ensure kernel dev tools available for beegfs client autobuild
       package:
         name: kernel-devel
+    - name: ensure dev tools available for beegfs client autobuild
+      package:
+        name: gcc
 
 - hosts: dac-workers
   roles:
