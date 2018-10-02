@@ -141,8 +141,7 @@ func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry reg
 		vlm := lifecycle.NewVolumeLifecycleManager(volumeRegistry, poolRegistry, volume)
 		err = vlm.ProvisionBricks(*pool)
 		if err != nil {
-			volumeRegistry.DeleteVolume(job.JobVolume)
-			volumeRegistry.DeleteJob(job.Name)
+			log.Println("Bricks may be left behnd, not deleting volume due to: ", err)
 			return err
 		}
 	}

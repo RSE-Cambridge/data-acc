@@ -130,10 +130,7 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 	vlm := lifecycle.NewVolumeLifecycleManager(volReg, poolRegistry, volume)
 	err = vlm.ProvisionBricks(*pool)
 	if err != nil {
-		delErr := volReg.DeleteVolume(volume.Name)
-		log.Println("volume deleted: ", delErr)
-		delErr = volReg.DeleteJob(job.Name)
-		log.Println("job deleted: ", delErr)
+		log.Println("Bricks may be left behnd, not deleting volume due to: ", err)
 	}
 	return err
 }
