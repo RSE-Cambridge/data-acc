@@ -78,6 +78,8 @@
     - name: ensure dev tools available for beegfs client autobuild
       package:
         name: gcc
+    - selinux:
+        state: disabled
 
 - hosts: dac-workers
   roles:
