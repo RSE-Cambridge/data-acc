@@ -114,7 +114,7 @@
         owner: dac
         group: dac
         recurse: yes
-    - name: Create entries in /etc/hosts for all nodes
+    - name: Ensure passwordless sudo for dac user
       lineinfile:
         path: /etc/sudoers.d/80-dac
         line: "dac ALL=(ALL) NOPASSWD:ALL"
