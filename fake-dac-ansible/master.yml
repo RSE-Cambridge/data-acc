@@ -52,7 +52,7 @@
   - name: Create entries in /etc/hosts for all nodes
     lineinfile:
       path: /etc/hosts
-      line: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{ hostvars[item]['ansible_hostname'] }} {{ item }}"
+      line: "{{ hostvars[item]['ansible_host'] }} {{ hostvars[item]['ansible_hostname'] }} {{ item }}"
       regexp: "^.* {{ item }}$"
       create: no
       state: present
