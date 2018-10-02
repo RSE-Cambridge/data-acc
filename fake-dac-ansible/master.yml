@@ -52,7 +52,7 @@
   - name: Create entries in /etc/hosts for all nodes
     lineinfile:
       path: /etc/hosts
-      line: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{ item }}"
+      line: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{ hostvars[item]['ansible_hostname'] }} {{ item }}"
       regexp: "^.* {{ item }}$"
       create: no
       state: present
@@ -108,9 +108,16 @@
       args:
          creates: "/var/lib/dac/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
       with_items: "{{ ansible_play_hosts }}"
-    - name: Fix up permissions
+    - name: Fix up permissions on .ssh
       file:
         path: /var/lib/dac/.ssh
         owner: dac
         group: dac
         recurse: yes
+    - name: Create entries in /etc/hosts for all nodes
+      lineinfile:
+        path: /etc/sudoers.d/80-dac
+        line: "dac ALL=(ALL) NOPASSWD:ALL"
+        regexp: "^dac.*$"
+        create: yes
+        state: present
