@@ -133,3 +133,73 @@
         regexp: "^dac.*$"
         create: yes
         state: present
+
+- hosts: slurm
+  become: true
+  vars:
+    pip_install_packages:
+      - name: docker
+    docker_users:
+      - "centos"
+    docker_compose_version: "1.22.0"
+  roles:
+    - geerlingguy.repo-epel
+    - geerlingguy.pip
+    - geerlingguy.docker
+
+- hosts: slurm-master[0]
+  become: true
+  vars:
+      recreate: false
+  tasks:
+    - file:
+        path: /var/lib/slurm-docker/slurm-master
+        state: directory
+        mode: 0755
+    - name: docker service description to host
+      synchronize:
+        mode: push
+        src: "{{ playbook_dir }}/slurm-master"
+        dest:  /var/lib/slurm-docker/slurm-master
+        recursive: yes
+    - docker_service:
+        project_src: /var/lib/slurm-docker/slurm-master
+        pull: yes
+        state: absent
+        remove_volumes: yes
+      when: recreate|bool
+    - docker_service:
+        project_src: /var/lib/slurm-docker/slurm-master
+        pull: yes
+      register: output
+    - name: ensure slurm cluster registered in db
+      shell: |
+        sleep 10 && docker exec slurmctld bash -c "/usr/bin/sacctmgr --immediate add cluster name=linux" && docker restart slurmdbd slurmctld
+      register: shell_result
+      changed_when: "shell_result.rc == 0"
+      failed_when: "shell_result.rc != 0 and ('already exists' not in shell_result.stdout)"
+      when: output.changed
+
+- hosts: slurm-workers
+  vars:
+      recreate: false
+  tasks:
+    - file:
+        path: /var/lib/slurm-docker/slurm-worker
+        state: directory
+        mode: 0755
+    - name: docker service description to host
+      synchronize:
+        mode: push
+        src: "{{ playbook_dir }}/slurm-worker"
+        dest:  /var/lib/slurm-docker/slurm-worker
+        recursive: yes
+    - docker_service:
+        project_src: /var/lib/slurm-docker/slurm-worker
+        pull: yes
+        state: absent
+        remove_volumes: yes
+      when: recreate|bool
+    - docker_service:
+        project_src: /var/lib/slurm-docker/slurm-worker
+        pull: yes
