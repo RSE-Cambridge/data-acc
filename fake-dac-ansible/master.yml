@@ -113,7 +113,7 @@
         recursive: yes
     - name: trust host keys
       shell: |
-        ssh-keyscan {{ hostvars[item]['ansible_default_ipv4']['address'] }} >> /var/lib/dac/.ssh/known_hosts
+        ssh-keyscan {{ hostvars[item]['ansible_host'] }} >> /var/lib/dac/.ssh/known_hosts
         ssh-keyscan {{ hostvars[item]['ansible_hostname'] }} >> /var/lib/dac/.ssh/known_hosts
         ssh-keyscan {{ item }} >> /var/lib/dac/.ssh/known_hosts
         touch /var/lib/dac/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}
