@@ -116,9 +116,9 @@
         ssh-keyscan {{ hostvars[item]['ansible_host'] }} >> /var/lib/dac/.ssh/known_hosts
         ssh-keyscan {{ hostvars[item]['ansible_hostname'] }} >> /var/lib/dac/.ssh/known_hosts
         ssh-keyscan {{ item }} >> /var/lib/dac/.ssh/known_hosts
-        touch /var/lib/dac/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}
+        touch /var/lib/dac/.ssh/.known{{ hostvars[item]['ansible_host'] }}
       args:
-         creates: "/var/lib/dac/.ssh/.known{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
+         creates: "/var/lib/dac/.ssh/.known{{ hostvars[item]['ansible_host'] }}"
       with_items: "{{ ansible_play_hosts }}"
     - name: Fix up permissions on .ssh
       file:
@@ -153,15 +153,17 @@
       recreate: false
   tasks:
     - file:
-        path: /var/lib/slurm-docker/slurm-master
+        path: /var/lib/slurm-docker
         state: directory
         mode: 0755
     - name: docker service description to host
       synchronize:
         mode: push
         src: "{{ playbook_dir }}/slurm-master"
-        dest:  /var/lib/slurm-docker/slurm-master
+        dest:  /var/lib/slurm-docker/
         recursive: yes
+        links: no
+        copy_links: yes
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-master
         pull: yes
@@ -181,19 +183,22 @@
       when: output.changed
 
 - hosts: slurm-workers
+  become: true
   vars:
       recreate: false
   tasks:
     - file:
-        path: /var/lib/slurm-docker/slurm-worker
+        path: /var/lib/slurm-docker/
         state: directory
         mode: 0755
     - name: docker service description to host
       synchronize:
         mode: push
         src: "{{ playbook_dir }}/slurm-worker"
-        dest:  /var/lib/slurm-docker/slurm-worker
+        dest:  /var/lib/slurm-docker/
         recursive: yes
+        links: no
+        copy_links: yes
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-worker
         pull: yes
