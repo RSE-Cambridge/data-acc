@@ -13,6 +13,8 @@ services:
     expose:
       - "6818"
       - "60001-63000"
+    environment:
+      - SLURM_CTL=10.43.101.34
     network_mode: host
 
 volumes:

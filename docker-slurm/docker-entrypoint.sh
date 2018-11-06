@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+MYSQL_HOST=${MYSQL_HOST:-"192.168.0.109"}
+SLURM_DB=${SLURM_DB:-"192.168.0.109"}
+SLURM_CTL=${SLURM_CTL:-"192.168.0.109"}
+
+# update config
+cat /etc/slurm/slurm.conf.tmpl | envsubst > /etc/slurm/slurm.conf
+cat /etc/slurm/slurmdbd.conf.tmpl | envsubst > /etc/slurm/slurmdbd.conf
+
 if [ "$1" = "slurmdbd" ]
 then
     echo "---> Starting the MUNGE Authentication service (munged) ..."
@@ -8,7 +16,7 @@ then
 
     echo "---> Starting the Slurm Database Daemon (slurmdbd) ..."
 
-    until echo "SELECT 1" | mysql -h 192.168.0.109 -uslurm -ppassword 2>&1 > /dev/null
+    until echo "SELECT 1" | mysql -h $MYSQL_HOST -uslurm -ppassword 2>&1 > /dev/null
     do
         echo "-- Waiting for database to become active ..."
         sleep 2
@@ -25,7 +33,7 @@ then
 
     echo "---> Waiting for slurmdbd to become active before starting slurmctld ..."
 
-    until 2>/dev/null >/dev/tcp/slurm-master/6819
+    until 2>/dev/null >/dev/tcp/${SLURM_DB}/6819
     do
         echo "-- slurmdbd is not available.  Sleeping ..."
         sleep 2
@@ -43,7 +51,7 @@ then
 
     echo "---> Waiting for slurmctld to become active before starting slurmd..."
 
-    until 2>/dev/null >/dev/tcp/192.168.0.109/6817
+    until 2>/dev/null >/dev/tcp/${SLURM_CTL}/6817
     do
         echo "-- slurmctld is not available.  Sleeping ..."
         sleep 2

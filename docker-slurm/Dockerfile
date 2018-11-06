@@ -91,10 +91,12 @@ RUN set -x \
     && chown -R slurm:slurm /var/*/slurm* \
     && /sbin/create-munge-key
 
-COPY slurm.conf /etc/slurm/slurm.conf
-COPY slurmdbd.conf /etc/slurm/slurmdbd.conf
-COPY burst_buffer.conf /etc/slurm/burst_buffer.conf
+# Install envsubst, used by docker-entrypoint.sh
+RUN yum install -y gettext
 
+COPY slurm.conf /etc/slurm/slurm.conf.tmpl
+COPY slurmdbd.conf /etc/slurm/slurmdbd.conf.tmpl
+COPY burst_buffer.conf /etc/slurm/burst_buffer.conf
 
 # Download and install etcd client
 ARG ETCD_VERSION=3.3.1
@@ -115,6 +117,10 @@ COPY bin/data-acc-brick-host /usr/local/bin/data-acc-brick-host
 RUN touch /var/log/fakewarp.log \
     && chown slurm /var/log/fakewarp.log \
     && chgrp slurm /var/log/fakewarp.log
+
+ENV MYSQL_HOST 192.168.0.109
+ENV SLURM_DB 192.168.0.109
+ENV SLURM_CTL 192.168.0.109
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

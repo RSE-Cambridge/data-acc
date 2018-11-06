@@ -25,6 +25,8 @@ services:
       - "6819"
     depends_on:
       - mysql
+    environment:
+      - MYSQL_HOST=10.43.101.34
     network_mode: host
 
   slurmctld:
@@ -45,6 +47,7 @@ services:
     environment:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=192.168.0.109:2381
+      - SLURM_DB=10.43.101.34
     network_mode: host
 
   etcd1:
