@@ -3,6 +3,7 @@ set -e
 
 MYSQL_HOST=${MYSQL_HOST:-"192.168.0.109"}
 SLURM_DB=${SLURM_DB:-"192.168.0.109"}
+SLURM_DB_HOST=${SLURM_DB_HOST:-"slurm-master"}
 SLURM_CTL=${SLURM_CTL:-"192.168.0.109"}
 
 # update config

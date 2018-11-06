@@ -27,6 +27,7 @@ services:
       - mysql
     environment:
       - MYSQL_HOST=10.43.101.34
+      - SLURM_DB_HOST=dac-slurm-master
       - SLURM_DB=10.43.101.34
     network_mode: host
 
