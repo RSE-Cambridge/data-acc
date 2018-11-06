@@ -94,9 +94,10 @@ RUN set -x \
 # Install envsubst, used by docker-entrypoint.sh
 RUN yum install -y gettext
 
-COPY slurm.conf /etc/slurm/slurm.conf.tmpl
-COPY slurmdbd.conf /etc/slurm/slurmdbd.conf.tmpl
+COPY slurm.conf /etc/slurm/slurm.conf.template
+COPY slurmdbd.conf /etc/slurm/slurmdbd.conf.template
 COPY burst_buffer.conf /etc/slurm/burst_buffer.conf
+
 
 # Download and install etcd client
 ARG ETCD_VERSION=3.3.1

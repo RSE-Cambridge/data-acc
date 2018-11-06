@@ -6,8 +6,8 @@ SLURM_DB=${SLURM_DB:-"192.168.0.109"}
 SLURM_CTL=${SLURM_CTL:-"192.168.0.109"}
 
 # update config
-cat /etc/slurm/slurm.conf.tmpl | envsubst > /etc/slurm/slurm.conf
-cat /etc/slurm/slurmdbd.conf.tmpl | envsubst > /etc/slurm/slurmdbd.conf
+cat /etc/slurm/slurm.conf.template | envsubst > /etc/slurm/slurm.conf
+cat /etc/slurm/slurmdbd.conf.template | envsubst > /etc/slurm/slurmdbd.conf
 
 if [ "$1" = "slurmdbd" ]
 then
