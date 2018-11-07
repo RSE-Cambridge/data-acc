@@ -48,7 +48,6 @@ services:
       - "60001-63000"
     depends_on:
       - "slurmdbd"
-      - etcdproxy1
     environment:
       - "MYSQL_HOST=10.43.101.34"
       - "SLURM_DB_HOST=dac-slurm-master"
@@ -73,8 +72,6 @@ services:
       - "ETCDCTL_KEY_FILE=/etc/data-acc/pki/dac-slurm-master.dac.hpc.cam.ac.uk-key.pem"
       - "ETCDCTL_CA_FILE=/etc/data-acc/pki/ca.pem"
     command: sh -c "etcdctl watch --prefix burstbuffer/volume -- sh -c 'env | grep ETCD_WATCH_'"
-    depends_on:
-      - etcdproxy1
     network_mode: host
 
   jobwatcher:
@@ -83,8 +80,6 @@ services:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=192.168.0.109:2381
     command: sh -c "etcdctl watch --prefix burstbuffer/job -- sh -c 'env | grep ETCD_WATCH_'"
-    depends_on:
-      - etcdproxy1
     network_mode: host
 
   brickwatcher:
@@ -93,8 +88,6 @@ services:
       - ETCDCTL_API=3
       - ETCD_ENDPOINTS=192.168.0.109:2381
     command: sh -c "etcdctl watch --prefix burstbuffer/brick -- sh -c 'env | grep ETCD_WATCH_'"
-    depends_on:
-      - etcdproxy1
     network_mode: host
 
 volumes:
