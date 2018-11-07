@@ -25,6 +25,14 @@
           include_localhost: True
           sans:
             - dac3.dac.hpc.cam.ac.uk
+        - cname: dac-slurm-master.dac.hpc.cam.ac.uk
+          include_localhost: True
+          sans:
+            - dac-slurm-master.dac.hpc.cam.ac.uk
+        - cname: slurm-cpu1.dac.hpc.cam.ac.uk
+          include_localhost: True
+          sans:
+            - slurm-cpu1.dac.hpc.cam.ac.uk
 
 - hosts: etcd-master[0]
   tasks:
@@ -43,6 +51,10 @@
         - dac2.dac.hpc.cam.ac.uk-key.pem
         - dac3.dac.hpc.cam.ac.uk.pem
         - dac3.dac.hpc.cam.ac.uk-key.pem
+        - dac-slurm-master.dac.hpc.cam.ac.uk.pem
+        - dac-slurm-master.dac.hpc.cam.ac.uk-key.pem
+        - slurm-cpu1.dac.hpc.cam.ac.uk.pem
+        - slurm-cpu1.dac.hpc.cam.ac.uk-key.pem
 
 - hosts: all
   become: true
@@ -164,6 +176,20 @@
         recursive: yes
         links: no
         copy_links: yes
+    - name: copy etcd keys
+      become: yes
+      become_user: root
+      copy:
+        src: '{{item}}'
+        dest: /etc/data-acc/pki
+        remote_src: True
+        owner: 'root' # TODO...
+        group: 'root'
+        mode: 0700
+      with_items:
+        - '/var/lib/etcd/test-cluster-name.pki/{{inventory_hostname}}.pem'
+        - '/var/lib/etcd/test-cluster-name.pki/{{inventory_hostname}}-key.pem'
+        - '/var/lib/etcd/test-cluster-name.pki/ca.pem'
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-master
         pull: yes
@@ -199,6 +225,20 @@
         recursive: yes
         links: no
         copy_links: yes
+    - name: copy etcd keys
+      become: yes
+      become_user: root
+      copy:
+        src: '{{item}}'
+        dest: /etc/data-acc/pki
+        remote_src: True
+        owner: 'root' # TODO...
+        group: 'root'
+        mode: 0700
+      with_items:
+        - '/var/lib/etcd/test-cluster-name.pki/{{inventory_hostname}}.pem'
+        - '/var/lib/etcd/test-cluster-name.pki/{{inventory_hostname}}-key.pem'
+        - '/var/lib/etcd/test-cluster-name.pki/ca.pem'
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-worker
         pull: yes

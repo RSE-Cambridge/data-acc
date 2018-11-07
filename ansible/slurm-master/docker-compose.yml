@@ -42,6 +42,7 @@ services:
       - etc_slurm:/etc/slurm
       - slurm_jobdir:/data
       - var_log_slurm:/var/log/slurm
+      - /etc/data-acc:/etc/data-acc
     expose:
       - "6817"
       - "60001-63000"
@@ -49,42 +50,28 @@ services:
       - "slurmdbd"
       - etcdproxy1
     environment:
-      - "ETCDCTL_API=3"
-      - "ETCD_ENDPOINTS=192.168.0.109:2381"
       - "MYSQL_HOST=10.43.101.34"
       - "SLURM_DB_HOST=dac-slurm-master"
       - "SLURM_DB=10.43.101.34"
       - "SLURM_CTL=10.43.101.34"
       - "SLURM_CTL_HOST=dac-slurm-master"
-    network_mode: host
-
-  etcd1:
-    image: quay.io/coreos/etcd
-    command: etcd --name etcd1 --data-dir=/etcd-data --initial-cluster-state new --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-cluster 'etcd1=http://192.168.0.109:2380'
-    container_name: etcd1
-    volumes:
-      - etcd1_data:/etcd-data
-    #expose:
-    #  - "2379:2379"
-    network_mode: host
-
-  etcdproxy1:
-    image: quay.io/coreos/etcd
-    command: etcd grpc-proxy start --endpoints=localhost:2379 --listen-addr=0.0.0.0:2381 --namespace=burstbuffer
-    container_name: etcdproxy1
-    expose:
-      - "2381"
-    ports:
-      - "2381:2381"
-    depends_on:
-      - etcd1
+      - "ETCDCTL_API=3"
+      - "ETCD_ENDPOINTS=https://10.43.101.30:2379"
+      - "ETCDCTL_CERT_FILE=/etc/data-acc/pki/dac-slurm-master.dac.hpc.cam.ac.uk.pem"
+      - "ETCDCTL_KEY_FILE=/etc/data-acc/pki/dac-slurm-master.dac.hpc.cam.ac.uk-key.pem"
+      - "ETCDCTL_CA_FILE=/etc/data-acc/pki/ca.pem"
     network_mode: host
 
   volumewatcher:
     image: johngarbutt/data-acc-slurm
+    volumes:
+      - /etc/data-acc:/etc/data-acc
     environment:
-      - ETCDCTL_API=3
-      - ETCD_ENDPOINTS=192.168.0.109:2381
+      - "ETCDCTL_API=3"
+      - "ETCD_ENDPOINTS=https://10.43.101.30:2379"
+      - "ETCDCTL_CERT_FILE=/etc/data-acc/pki/dac-slurm-master.dac.hpc.cam.ac.uk.pem"
+      - "ETCDCTL_KEY_FILE=/etc/data-acc/pki/dac-slurm-master.dac.hpc.cam.ac.uk-key.pem"
+      - "ETCDCTL_CA_FILE=/etc/data-acc/pki/ca.pem"
     command: sh -c "etcdctl watch --prefix burstbuffer/volume -- sh -c 'env | grep ETCD_WATCH_'"
     depends_on:
       - etcdproxy1
