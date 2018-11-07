@@ -182,14 +182,13 @@
       copy:
         src: '{{item}}'
         dest: /etc/data-acc/pki
-        remote_src: True
         owner: 'root' # TODO...
         group: 'root'
         mode: 0700
       with_items:
-        - '/var/lib/etcd/test-cluster-name.pki/{{inventory_hostname}}.pem'
-        - '/var/lib/etcd/test-cluster-name.pki/{{inventory_hostname}}-key.pem'
-        - '/var/lib/etcd/test-cluster-name.pki/ca.pem'
+        - '~/pki-dir/{{inventory_hostname}}.pem'
+        - '~/pki-dir/{{inventory_hostname}}-key.pem'
+        - '~/pki-dir/ca.pem'
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-master
         pull: yes
@@ -231,14 +230,14 @@
       copy:
         src: '{{item}}'
         dest: /etc/data-acc/pki
-        remote_src: True
         owner: 'root' # TODO...
         group: 'root'
         mode: 0700
       with_items:
-        - '/var/lib/etcd/test-cluster-name.pki/{{inventory_hostname}}.pem'
-        - '/var/lib/etcd/test-cluster-name.pki/{{inventory_hostname}}-key.pem'
-        - '/var/lib/etcd/test-cluster-name.pki/ca.pem'
+      with_items:
+        - '~/pki-dir/{{inventory_hostname}}.pem'
+        - '~/pki-dir/{{inventory_hostname}}-key.pem'
+        - '~/pki-dir/ca.pem'
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-worker
         pull: yes
