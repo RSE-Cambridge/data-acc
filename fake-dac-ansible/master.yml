@@ -180,16 +180,16 @@
         path: /etc/data-acc/pki
         state: directory
         mode: 0700
-        owner: root
-        group: root
+        owner: 995
+        group: 995
     - name: copy etcd keys
       become: yes
       become_user: root
       copy:
         src: '{{item}}'
         dest: /etc/data-acc/pki
-        owner: 'root' # TODO...
-        group: 'root'
+        owner: '995' # TODO...
+        group: '995'
         mode: 0700
       with_items:
         - '~/pki-dir/{{inventory_hostname}}.pem'
