@@ -30,7 +30,7 @@ services:
       - "SLURM_DB_HOST=dac-slurm-master"
       - "SLURM_DB=10.43.101.34"
       - "SLURM_CTL=10.43.101.34"
-      - "SLURM_CTL_HOST=10.43.101.34"
+      - "SLURM_CTL_HOST=dac-slurm-master"
     network_mode: host
 
   slurmctld:
@@ -55,7 +55,7 @@ services:
       - "SLURM_DB_HOST=dac-slurm-master"
       - "SLURM_DB=10.43.101.34"
       - "SLURM_CTL=10.43.101.34"
-      - "SLURM_CTL_HOST=10.43.101.34"
+      - "SLURM_CTL_HOST=dac-slurm-master"
     network_mode: host
 
   etcd1:
