@@ -5,6 +5,7 @@ MYSQL_HOST=${MYSQL_HOST:-"192.168.0.109"}
 SLURM_DB=${SLURM_DB:-"192.168.0.109"}
 SLURM_DB_HOST=${SLURM_DB_HOST:-"slurm-master"}
 SLURM_CTL=${SLURM_CTL:-"192.168.0.109"}
+SLURM_CTL_HOST=${SLURM_CTL_HOST:-"slurm-master"}
 
 # update config
 cat /etc/slurm/slurm.conf.template | envsubst > /etc/slurm/slurm.conf

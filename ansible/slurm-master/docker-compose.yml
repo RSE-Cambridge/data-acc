@@ -26,9 +26,9 @@ services:
     depends_on:
       - mysql
     environment:
-      - MYSQL_HOST=10.43.101.34
-      - SLURM_DB_HOST=dac-slurm-master
-      - SLURM_DB=10.43.101.34
+      - "MYSQL_HOST=10.43.101.34"
+      - "SLURM_DB_HOST=dac-slurm-master"
+      - "SLURM_DB=10.43.101.34"
     network_mode: host
 
   slurmctld:
@@ -47,10 +47,11 @@ services:
       - "slurmdbd"
       - etcdproxy1
     environment:
-      - ETCDCTL_API=3
-      - ETCD_ENDPOINTS=192.168.0.109:2381
-      - SLURM_DB=10.43.101.34
-      - SLURM_CTL=10.43.101.34
+      - "ETCDCTL_API=3"
+      - "ETCD_ENDPOINTS=192.168.0.109:2381"
+      - "SLURM_DB=10.43.101.34"
+      - "SLURM_CTL=10.43.101.34"
+      - "SLURM_CTL_HOST=10.43.101.34"
     network_mode: host
 
   etcd1:
