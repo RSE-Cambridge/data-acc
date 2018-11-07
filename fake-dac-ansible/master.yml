@@ -176,6 +176,12 @@
         recursive: yes
         links: no
         copy_links: yes
+    - file:
+        path: /etc/data-acc/pki
+        state: directory
+        mode: 0700
+        owner: root
+        group: root
     - name: copy etcd keys
       become: yes
       become_user: root
@@ -224,6 +230,12 @@
         recursive: yes
         links: no
         copy_links: yes
+    - file:
+        path: /etc/data-acc/pki
+        state: directory
+        mode: 0700
+        owner: root
+        group: root
     - name: copy etcd keys
       become: yes
       become_user: root
@@ -233,7 +245,6 @@
         owner: 'root' # TODO...
         group: 'root'
         mode: 0700
-      with_items:
       with_items:
         - '~/pki-dir/{{inventory_hostname}}.pem'
         - '~/pki-dir/{{inventory_hostname}}-key.pem'
