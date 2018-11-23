@@ -111,13 +111,13 @@ RUN set -x \
     && rm etcd.tar.gz \
     && rm -rf /usr/local/src/etcd
 
-COPY bin/fakewarp /usr/local/bin/fakewarp
-RUN install -D -m755 /usr/local/bin/fakewarp /opt/cray/dw_wlm/default/bin/dw_wlm_cli
+COPY bin/dacctl /usr/local/bin/dacctl
+RUN install -D -m755 /usr/local/bin/dacctl /opt/cray/dw_wlm/default/bin/dw_wlm_cli
 COPY bin/data-acc-brick-host /usr/local/bin/data-acc-brick-host
 
-RUN touch /var/log/fakewarp.log \
-    && chown slurm /var/log/fakewarp.log \
-    && chgrp slurm /var/log/fakewarp.log
+RUN touch /var/log/dacctl.log \
+    && chown slurm /var/log/dacctl.log \
+    && chgrp slurm /var/log/dacctl.log
 
 ENV MYSQL_HOST 192.168.0.109
 ENV SLURM_DB 192.168.0.109

@@ -158,7 +158,7 @@ func runCli(args []string) error {
 func main() {
 	logFilename := os.Getenv("FAKEWARP_LOG")
 	if logFilename == "" {
-		logFilename = "/var/log/fakewarp.log"
+		logFilename = "/var/log/dacctl.log"
 	}
 	f, err := os.OpenFile(logFilename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -175,12 +175,12 @@ func main() {
 	}()
 
 	log.SetOutput(f)
-	log.Println("fakewarp start, called with:", strings.Join(os.Args, " "))
+	log.Println("dacctl start, called with:", strings.Join(os.Args, " "))
 
 	if err := runCli(os.Args); err != nil {
-		log.Println("fakewarp error, called with:", strings.Join(os.Args, " "))
+		log.Println("dacctl error, called with:", strings.Join(os.Args, " "))
 		log.Fatal(err)
 	} else {
-		log.Println("fakewarp complete, called with:", strings.Join(os.Args, " "))
+		log.Println("dacctl complete, called with:", strings.Join(os.Args, " "))
 	}
 }

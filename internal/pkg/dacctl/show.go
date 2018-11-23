@@ -1,4 +1,4 @@
-package fakewarp
+package dacctl
 
 import "github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 

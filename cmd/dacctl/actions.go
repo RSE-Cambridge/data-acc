@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp/actions"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl/actions"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/urfave/cli"
