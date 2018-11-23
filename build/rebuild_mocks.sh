@@ -18,7 +18,7 @@ done
 
 items="job"
 for i in $items; do
-    mockgen -source=internal/pkg/fakewarp/${i}.go \
+    mockgen -source=internal/pkg/dacctl/${i}.go \
         -package mocks >internal/pkg/mocks/${i}_mock.go
 done
 

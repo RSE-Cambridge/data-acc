@@ -10,10 +10,22 @@ export ETCDCTL_API=3
 
 echo
 echo run tests:
-./bin/amd64/data-acc-host &
-./bin/amd64/etcd-keystore-func-test
-kill %1
+## if etcd is not running in docker or localy run etcd &
 
-echo
-echo see side effects:
-etcdctl get --prefix ""
+if [ ! -f ./bin/amd64/dacd ]; then
+  $GOPATH/bin/dacd &
+  $GOPATH/bin/etcd-keystore-func-test
+  kill %1
+
+  echo
+  echo see side effects:
+  etcdctl get --prefix ""
+else
+  ./bin/amd64/dacd &
+  ./bin/amd64/etcd-keystore-func-test
+  kill %1
+
+  echo
+  echo see side effects:
+  etcdctl get --prefix ""
+fi

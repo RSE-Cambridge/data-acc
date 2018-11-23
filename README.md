@@ -61,11 +61,11 @@ To aid unit testing, generally all concrete implementations are created in the e
 
 ### Executables
 
-There is a [brick host manager](cmd/data-acc-brick-host), running on every data accelerator (DAC) node.
+There is a [dacd](cmd/dacd), running on every data accelerator (DAC) node.
 It is responsible for reporting the installed disks, and watching for volume updates relating to any volume
 that has its primary brick (brick zero) assigned to that host.
 
-There is [fakewarp](cmd/fakewarp) that helps integrate with Slurm's burst buffer system. It users the libs provided in
+There is [dacctl](cmd/dacctl) that helps integrate with Slurm's burst buffer system. It users the libs provided in
 this repo to create jobs and volumes, including assigning bricks to volumes, and request and report on volume
 state changes. The volume state changes are generally responded to by the above brick host manager.
 
@@ -83,7 +83,7 @@ state changes. The volume state changes are generally responded to by the above 
 * "github.com/RSE-Cambridge/data-acc/internal/pkg/pfsprovider" provides a plugin interface, and various implementations
   that implement needed configuration and setup of the data accelerator node
 
-* "github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp" this does the main work of implementing the CLI tool.
+* "github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl" this does the main work of implementing the CLI tool.
   While we use "github.com/urfave/cli" is used to build the cli, we keep this at arms length via a CliContext interface.
 
 * "github.com/RSE-Cambridge/data-acc/internal/pkg/fileio" interfaces to help with unit testing file reading and writing

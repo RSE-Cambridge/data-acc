@@ -134,7 +134,7 @@ services:
     environment:
       - ETCDCTL_API=3
       - ETCDCTL_ENDPOINTS=etcdproxy1:2379
-    command: ["data-acc-brick-host"]
+    command: ["dacd"]
     depends_on:
       - etcdproxy1
 

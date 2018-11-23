@@ -20,5 +20,5 @@ func main() {
 	TestKeystoreVolumeRegistry(keystore)
 	fmt.Println("")
 
-	TestFakewarp(keystore)
+	TestDacctl(keystore)
 }

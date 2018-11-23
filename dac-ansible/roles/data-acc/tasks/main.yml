@@ -48,7 +48,7 @@
     state: link
   with_items:
     - data-acc-brick-host
-    - fakewarp
+    - dacctl
 
 - name: Install python-virtualenv
   become: yes
