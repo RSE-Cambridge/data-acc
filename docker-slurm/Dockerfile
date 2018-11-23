@@ -113,7 +113,7 @@ RUN set -x \
 
 COPY bin/dacctl /usr/local/bin/dacctl
 RUN install -D -m755 /usr/local/bin/dacctl /opt/cray/dw_wlm/default/bin/dw_wlm_cli
-COPY bin/data-acc-brick-host /usr/local/bin/data-acc-brick-host
+COPY bin/dacd /usr/local/bin/dacd
 
 RUN touch /var/log/dacctl.log \
     && chown slurm /var/log/dacctl.log \
