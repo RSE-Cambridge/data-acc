@@ -13,7 +13,7 @@ Data Accelerator uses commodity storage to accelerate HPC jobs.
 Currently targeting initial integration with the Slurm Burst Buffer plugin,
 with Lustre over Intel P4600 attached to Dell R730 with 2x100Gb/s OPA.
 
-## Demo
+## Demo (Docker)
 
 To see end to end demo with Slurm (not currently working):
 ```
@@ -28,9 +28,13 @@ docker-compose down --vol
 
 ## Build
 
+*Note* you can build this with or without docker, Use the Makefile.docker if you wish to use docker.
+
+Ensure you have your GOPATH setup. Create a *go* directory containing a *src* and *bin* directory in your $HOME and add it to your $PATH.
+
 To build it locally and run tests:
 ```
-dep ensure
+dep ensure -v 
 make
 make test
 ```
