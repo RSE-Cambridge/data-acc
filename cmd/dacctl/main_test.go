@@ -40,7 +40,7 @@ func TestStripFunctionArg(t *testing.T) {
 }
 
 func TestCreatePersistentBuffer(t *testing.T) {
-	testActions = &stubFakewarpActions{}
+	testActions = &stubDacctlActions{}
 	testKeystore = &stubKeystore{}
 	defer func() {
 		testActions = nil
@@ -60,7 +60,7 @@ func TestCreatePersistentBuffer(t *testing.T) {
 }
 
 func TestDeleteBuffer(t *testing.T) {
-	testActions = &stubFakewarpActions{}
+	testActions = &stubDacctlActions{}
 	testKeystore = &stubKeystore{}
 	defer func() {
 		testActions = nil
@@ -75,7 +75,7 @@ func TestDeleteBuffer(t *testing.T) {
 }
 
 func TestCreatePerJobBuffer(t *testing.T) {
-	testActions = &stubFakewarpActions{}
+	testActions = &stubDacctlActions{}
 	testKeystore = &stubKeystore{}
 	defer func() {
 		testActions = nil
@@ -90,7 +90,7 @@ func TestCreatePerJobBuffer(t *testing.T) {
 }
 
 func TestShow(t *testing.T) {
-	testActions = &stubFakewarpActions{}
+	testActions = &stubDacctlActions{}
 	testKeystore = &stubKeystore{}
 	defer func() {
 		testActions = nil
@@ -108,7 +108,7 @@ func TestShow(t *testing.T) {
 }
 
 func TestFlow(t *testing.T) {
-	testActions = &stubFakewarpActions{}
+	testActions = &stubDacctlActions{}
 	testKeystore = &stubKeystore{}
 	defer func() {
 		testActions = nil
@@ -170,47 +170,47 @@ func (*stubKeystore) KeepAliveKey(key string) error {
 	panic("implement me")
 }
 
-type stubFakewarpActions struct{}
+type stubDacctlActions struct{}
 
-func (*stubFakewarpActions) CreatePersistentBuffer(c actions.CliContext) error {
+func (*stubDacctlActions) CreatePersistentBuffer(c actions.CliContext) error {
 	return fmt.Errorf("CreatePersistentBuffer %s", c.String("token"))
 }
-func (*stubFakewarpActions) DeleteBuffer(c actions.CliContext) error {
+func (*stubDacctlActions) DeleteBuffer(c actions.CliContext) error {
 	return fmt.Errorf("DeleteBuffer %s", c.String("token"))
 }
-func (*stubFakewarpActions) CreatePerJobBuffer(c actions.CliContext) error {
+func (*stubDacctlActions) CreatePerJobBuffer(c actions.CliContext) error {
 	return errors.New("CreatePerJobBuffer")
 }
-func (*stubFakewarpActions) ShowInstances() error {
+func (*stubDacctlActions) ShowInstances() error {
 	return errors.New("ShowInstances")
 }
-func (*stubFakewarpActions) ShowSessions() error {
+func (*stubDacctlActions) ShowSessions() error {
 	return errors.New("ShowSessions")
 }
-func (*stubFakewarpActions) ListPools() error {
+func (*stubDacctlActions) ListPools() error {
 	return errors.New("ListPools")
 }
-func (*stubFakewarpActions) ShowConfigurations() error {
+func (*stubDacctlActions) ShowConfigurations() error {
 	return errors.New("ShowConfigurations")
 }
-func (*stubFakewarpActions) ValidateJob(c actions.CliContext) error {
+func (*stubDacctlActions) ValidateJob(c actions.CliContext) error {
 	return errors.New("ValidateJob")
 }
-func (*stubFakewarpActions) RealSize(c actions.CliContext) error {
+func (*stubDacctlActions) RealSize(c actions.CliContext) error {
 	return errors.New("RealSize")
 }
-func (*stubFakewarpActions) DataIn(c actions.CliContext) error {
+func (*stubDacctlActions) DataIn(c actions.CliContext) error {
 	return errors.New("DataIn")
 }
-func (*stubFakewarpActions) Paths(c actions.CliContext) error {
+func (*stubDacctlActions) Paths(c actions.CliContext) error {
 	return errors.New("Paths")
 }
-func (*stubFakewarpActions) PreRun(c actions.CliContext) error {
+func (*stubDacctlActions) PreRun(c actions.CliContext) error {
 	return errors.New("PreRun")
 }
-func (*stubFakewarpActions) PostRun(c actions.CliContext) error {
+func (*stubDacctlActions) PostRun(c actions.CliContext) error {
 	return errors.New("PostRun")
 }
-func (*stubFakewarpActions) DataOut(c actions.CliContext) error {
+func (*stubDacctlActions) DataOut(c actions.CliContext) error {
 	return errors.New("DataOut")
 }

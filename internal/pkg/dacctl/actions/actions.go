@@ -16,7 +16,7 @@ type CliContext interface {
 	Int(name string) int
 }
 
-type FakewarpActions interface {
+type DacctlActions interface {
 	CreatePersistentBuffer(c CliContext) error
 	DeleteBuffer(c CliContext) error
 	CreatePerJobBuffer(c CliContext) error
@@ -33,8 +33,8 @@ type FakewarpActions interface {
 	DataOut(c CliContext) error
 }
 
-func NewFakewarpActions(
-	poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, disk fileio.Disk) FakewarpActions {
+func NewDacctlActions(
+	poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, disk fileio.Disk) DacctlActions {
 
 	return &dacctlActions{poolRegistry, volumeRegistry, disk}
 }

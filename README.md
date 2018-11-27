@@ -59,7 +59,7 @@ To aid unit testing, generally all concrete implementations are created in the e
 
 ### Executables
 
-There is a [brick host manager](cmd/dacd), running on every data accelerator (DAC) node.
+There is a [dacd](cmd/dacd), running on every data accelerator (DAC) node.
 It is responsible for reporting the installed disks, and watching for volume updates relating to any volume
 that has its primary brick (brick zero) assigned to that host.
 

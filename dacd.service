@@ -1,18 +1,18 @@
 [Unit]
 Description=dacd
-ConditionPathExists=/home/centos/dacd
+ConditionPathExists=/usr/local/bin/dacd
 After=network.target
 
 [Service]
 Type=simple
-User=centos
-Group=centos
+User=dacd
+Group=dacd
 Restart=on-failure
 RestartSec=10
 
-WorkingDirectory=/home/centos
+WorkingDirectory=/var/lib/dacd
 Environment=ETCDCTL_ENDPOINTS=slurm-master:2381
-ExecStart=/home/centos/dacd
+ExecStart=/usr/local/bin/dacd
 
 # make sure log directory exists and owned by syslog
 PermissionsStartOnly=true

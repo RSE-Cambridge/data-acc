@@ -63,7 +63,7 @@ func TestCreatePersistentBufferReturnsError(t *testing.T) {
 	})
 	mockCtxt := &mockCliContext{}
 
-	actions := NewFakewarpActions(mockPool, mockObj, nil)
+	actions := NewDacctlActions(mockPool, mockObj, nil)
 
 	if err := actions.CreatePersistentBuffer(mockCtxt); err != nil {
 		assert.EqualValues(t, "unable to create buffer", fmt.Sprint(err))
@@ -71,13 +71,13 @@ func TestCreatePersistentBufferReturnsError(t *testing.T) {
 	}
 }
 
-func TestFakewarpActions_PreRun(t *testing.T) {
+func TestDacctlActions_PreRun(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
 	mockDisk := mocks.NewMockDisk(mockCtrl)
 	mockCtxt := &mockCliContext{}
-	actions := NewFakewarpActions(nil, mockVolReg, mockDisk)
+	actions := NewDacctlActions(nil, mockVolReg, mockDisk)
 	testVLM = &mockVLM{}
 	defer func() { testVLM = nil }()
 
@@ -103,13 +103,13 @@ func TestFakewarpActions_PreRun(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestFakewarpActions_Paths(t *testing.T) {
+func TestDacctlActions_Paths(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
 	mockDisk := mocks.NewMockDisk(mockCtrl)
 	mockCtxt := &mockCliContext{}
-	actions := NewFakewarpActions(nil, mockVolReg, mockDisk)
+	actions := NewDacctlActions(nil, mockVolReg, mockDisk)
 	testVLM = &mockVLM{}
 	defer func() { testVLM = nil }()
 
@@ -123,14 +123,14 @@ func TestFakewarpActions_Paths(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestFakewarpActions_CreatePerJobBuffer(t *testing.T) {
+func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockPoolReg := mocks.NewMockPoolRegistry(mockCtrl)
 	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
 	mockDisk := mocks.NewMockDisk(mockCtrl)
 	mockCtxt := &mockCliContext{capacity: 2}
-	actions := NewFakewarpActions(mockPoolReg, mockVolReg, mockDisk)
+	actions := NewDacctlActions(mockPoolReg, mockVolReg, mockDisk)
 
 	mockDisk.EXPECT().Lines("jobfile").DoAndReturn(func(string) ([]string, error) {
 		return []string{

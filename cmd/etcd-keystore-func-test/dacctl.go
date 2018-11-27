@@ -61,7 +61,7 @@ func testPersistent(volumeRegistry registry.VolumeRegistry, poolRegistry registr
 	debugStatus(volumeRegistry, poolRegistry)
 }
 
-func TestFakewarp(keystore keystoreregistry.Keystore) {
+func TestDacctl(keystore keystoreregistry.Keystore) {
 	log.Println("Testing dacctl")
 
 	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
