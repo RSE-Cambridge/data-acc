@@ -105,6 +105,9 @@ func TestShow(t *testing.T) {
 
 	err = runCli([]string{"--function", "show_sessions"})
 	assert.Equal(t, "ShowSessions", err.Error())
+
+	err = runCli([]string{"--function", "show_configurations"})
+	assert.Equal(t, "ShowConfigurations", err.Error())
 }
 
 func TestFlow(t *testing.T) {
