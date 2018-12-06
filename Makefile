@@ -1,5 +1,3 @@
-# Copyright 2016 The Kubernetes Authors.
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,37 +10,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# The binary to build (just the basename).
-BIN := dacctl
+all: deps buildlocal test
 
-# This repo's root import path (under GOPATH).
-export PKG := github.com/RSE-Cambridge/data-acc
+buildlocal:
+		mkdir -p `pwd`/bin
+		GOBIN=`pwd`/bin go install -v ./...
+		ls -l `pwd`/bin
 
-# This version-strategy uses git tags to set the version string
-VERSION := $(shell git describe --tags --always --dirty)
-#
-# This version-strategy uses a manual value to set the version string
-export CGO_ENABLED=0
-export GOARCH=amd64
+test: 
+		go test ./...
+		go vet ./...
 
-all: build
+clean: 
+		go clean
+		rm -rf `pwd`/bin
 
-build-%:
-	@$(MAKE) --no-print-directory ARCH=$* build
+deps:
+		dep ensure
 
-all-build: $(addprefix build-, $(ALL_ARCH))
+tar: clean buildlocal
+		tar -cvzf ./bin/data-acc-`git describe --tag`.tgz ./bin/dacd ./bin/dacctl ./fs-ansible ./tools/*.sh
 
-build: build-dirs
-	@go install -x -installsuffix "statiic" -ldflags "-X ${PKG}/pkg/version.VERSION=${VERSION}" ./...
+dockercmd=docker run --rm -it -v ~/go:/go -w /go/src/github.com/RSE-Cambridge/data-acc golang:1.11
 
-test: build-dirs
-	/bin/sh -c " ./build/test.sh $(SRC_DIRS)"
-
-build-dirs:
-	@mkdir -p bin/$(ARCH)
-	@mkdir -p .go/src/$(PKG) .go/pkg .go/bin .go/std/$(ARCH)
-
-clean: bin-clean
-
-bin-clean:
-	rm -rf .go bin
+docker:
+		$(dockercmd) go install -v ./...
