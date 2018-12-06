@@ -3,14 +3,21 @@
     osts: "{{ vars[fs_name + '_osts'] | default(omit) }}"
     mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
     mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
-    mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
+    mgs_host: "{{ vars[fs_name + '_mgsnode'] }}"
     client_port: "{{ vars[fs_name + '_client_port'] }}"
   tags: [ 'never', 'format_mgs', 'reformat_mgs', 'format']
+
+#sets up the correct interface and nid based on the hostname in the inv.
+#the nid is currently assumed and dose not reflect your enviroment
+- set_fact:
+    mgsnode: "{{hostvars[mgs_host]['facter_networking']['interfaces']['ib0']['ip']}}@o2ib1"
+  tags: [ 'never', 'format_mgs', 'reformat_mgs', 'format']
+
 
 - name: Ensure MGS has been formatted
   command: /usr/sbin/mkfs.lustre --mgs /dev/{{ mgs }}
   register: command_result
-  failed_when: "command_result.rc != 0 and ('was previously formatted for lustre' not in command_result.stderr)"
+  failed_when: "command_result.rc != 0 and ('was previously formatted for lustre' not in command_result.stderr) and command_result.rc != 17"
   changed_when: "command_result.rc == 0"
   when:
     - mgs is defined
@@ -23,7 +30,8 @@
   tags: [ 'never', 'reformat_mgs']
 
 - name: Reformat MDT
-  command: /usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index=0 --mgsnode={{ mgsnode }} /dev/{{ mdt }}
+  command: /usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }} /dev/{{ item.key }}
+  loop: "{{ mdt|default({})|dict2items }}"
   when:
     - mdt is defined
   tags: [ 'never', 'reformat_mdts', 'format']
@@ -34,3 +42,17 @@
   when:
     - osts is defined
   tags: [ 'never', 'reformat_osts', 'format']
+
+- name: Replacing  MDT
+  command: /usr/sbin/mkfs.lustre --mdt --reformat --replace --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }} /dev/{{ item.key }}
+  loop: "{{ mdt|default({})|dict2items }}"
+  when:
+    - mdt is defined
+  tags: [ 'never', 'replace_mdts']
+
+- name: Replacing OSTs
+  command: /usr/sbin/mkfs.lustre --ost --reformat --replace --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }} /dev/{{ item.key }}
+  loop: "{{ osts|dict2items }}"
+  when:
+    - osts is defined
+  tags: [ 'never', 'replace_osts']

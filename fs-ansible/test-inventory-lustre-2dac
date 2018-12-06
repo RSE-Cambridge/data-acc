@@ -6,5 +6,7 @@ dac-prod:
           fs1_mgs: sdb
           fs1_mdt: {nvme0n1: 0}
           fs1_osts: {nvme1n1: 0,nvme2n1: 1}
+        dac-e-23:
+          fs1_osts: {nvme1n1: 3}
       vars:
         fs1_mgsnode: 10.47.18.24@o2ib1

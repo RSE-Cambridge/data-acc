@@ -8,3 +8,11 @@ dac-prod:
           fs1_osts: {nvme1n1: 0,nvme2n1: 1}
       vars:
         fs1_mgsnode: 10.47.18.24@o2ib1
+    fs2:
+      hosts:
+        dac-e-24:
+          fs2_mgs: sdb
+          fs2_mdt: {nvme6n1: 0}
+          fs2_osts: {nvme7n1: 0,nvme8n1: 1}
+      vars:
+        fs2_mgsnode: 10.47.18.24@o2ib1
