@@ -3,7 +3,7 @@ package actions
 import (
 	"errors"
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/lifecycle"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
@@ -16,7 +16,7 @@ type CliContext interface {
 	Int(name string) int
 }
 
-type FakewarpActions interface {
+type DacctlActions interface {
 	CreatePersistentBuffer(c CliContext) error
 	DeleteBuffer(c CliContext) error
 	CreatePerJobBuffer(c CliContext) error
@@ -33,28 +33,28 @@ type FakewarpActions interface {
 	DataOut(c CliContext) error
 }
 
-func NewFakewarpActions(
-	poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, disk fileio.Disk) FakewarpActions {
+func NewDacctlActions(
+	poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, disk fileio.Disk) DacctlActions {
 
-	return &fakewarpActions{poolRegistry, volumeRegistry, disk}
+	return &dacctlActions{poolRegistry, volumeRegistry, disk}
 }
 
-type fakewarpActions struct {
+type dacctlActions struct {
 	poolRegistry   registry.PoolRegistry
 	volumeRegistry registry.VolumeRegistry
 	disk           fileio.Disk
 }
 
-func (fwa *fakewarpActions) CreatePersistentBuffer(c CliContext) error {
+func (fwa *dacctlActions) CreatePersistentBuffer(c CliContext) error {
 	checkRequiredStrings(c, "token", "caller", "capacity", "user", "access", "type")
-	request := fakewarp.BufferRequest{Token: c.String("token"), Caller: c.String("caller"),
+	request := dacctl.BufferRequest{Token: c.String("token"), Caller: c.String("caller"),
 		Capacity: c.String("capacity"), User: c.Int("user"),
-		Group: c.Int("groupid"), Access: fakewarp.AccessModeFromString(c.String("access")),
-		Type: fakewarp.BufferTypeFromString(c.String("type")), Persistent: true}
+		Group: c.Int("groupid"), Access: dacctl.AccessModeFromString(c.String("access")),
+		Type: dacctl.BufferTypeFromString(c.String("type")), Persistent: true}
 	if request.Group == 0 {
 		request.Group = request.User
 	}
-	err := fakewarp.CreateVolumesAndJobs(fwa.volumeRegistry, fwa.poolRegistry, request)
+	err := dacctl.CreateVolumesAndJobs(fwa.volumeRegistry, fwa.poolRegistry, request)
 	if err == nil {
 		// Slurm is looking for the string "created" to know this worked
 		fmt.Printf("created %s\n", request.Token)
@@ -74,21 +74,21 @@ func checkRequiredStrings(c CliContext, flags ...string) {
 	}
 }
 
-func (fwa *fakewarpActions) DeleteBuffer(c CliContext) error {
+func (fwa *dacctlActions) DeleteBuffer(c CliContext) error {
 	checkRequiredStrings(c, "token", "job")
 	token := c.String("token")
-	return fakewarp.DeleteBufferComponents(fwa.volumeRegistry, fwa.poolRegistry, token)
+	return dacctl.DeleteBufferComponents(fwa.volumeRegistry, fwa.poolRegistry, token)
 }
 
-func (fwa *fakewarpActions) CreatePerJobBuffer(c CliContext) error {
+func (fwa *dacctlActions) CreatePerJobBuffer(c CliContext) error {
 	checkRequiredStrings(c, "token", "job", "caller", "capacity")
-	return fakewarp.CreatePerJobBuffer(fwa.volumeRegistry, fwa.poolRegistry, fwa.disk,
+	return dacctl.CreatePerJobBuffer(fwa.volumeRegistry, fwa.poolRegistry, fwa.disk,
 		c.String("token"), c.Int("user"), c.Int("group"), c.String("capacity"),
 		c.String("caller"), c.String("job"))
 }
 
-func (fwa *fakewarpActions) ShowInstances() error {
-	instances, err := fakewarp.GetInstances(fwa.volumeRegistry)
+func (fwa *dacctlActions) ShowInstances() error {
+	instances, err := dacctl.GetInstances(fwa.volumeRegistry)
 	if err != nil {
 		return err
 	}
@@ -96,8 +96,8 @@ func (fwa *fakewarpActions) ShowInstances() error {
 	return nil
 }
 
-func (fwa *fakewarpActions) ShowSessions() error {
-	sessions, err := fakewarp.GetSessions(fwa.volumeRegistry)
+func (fwa *dacctlActions) ShowSessions() error {
+	sessions, err := dacctl.GetSessions(fwa.volumeRegistry)
 	if err != nil {
 		return err
 	}
@@ -105,8 +105,8 @@ func (fwa *fakewarpActions) ShowSessions() error {
 	return nil
 }
 
-func (fwa *fakewarpActions) ListPools() error {
-	pools, err := fakewarp.GetPools(fwa.poolRegistry)
+func (fwa *dacctlActions) ListPools() error {
+	pools, err := dacctl.GetPools(fwa.poolRegistry)
 	if err != nil {
 		return err
 	}
@@ -114,14 +114,14 @@ func (fwa *fakewarpActions) ListPools() error {
 	return nil
 }
 
-func (fwa *fakewarpActions) ShowConfigurations() error {
-	fmt.Print(fakewarp.GetConfigurations())
+func (fwa *dacctlActions) ShowConfigurations() error {
+	fmt.Print(dacctl.GetConfigurations())
 	return nil
 }
 
-func (fwa *fakewarpActions) ValidateJob(c CliContext) error {
+func (fwa *dacctlActions) ValidateJob(c CliContext) error {
 	checkRequiredStrings(c, "job")
-	if summary, err := fakewarp.ParseJobFile(fwa.disk, c.String("job")); err != nil {
+	if summary, err := dacctl.ParseJobFile(fwa.disk, c.String("job")); err != nil {
 		return err
 	} else {
 		// TODO check valid pools, etc, etc.
@@ -130,7 +130,7 @@ func (fwa *fakewarpActions) ValidateJob(c CliContext) error {
 	return nil
 }
 
-func (fwa *fakewarpActions) RealSize(c CliContext) error {
+func (fwa *dacctlActions) RealSize(c CliContext) error {
 	checkRequiredStrings(c, "token")
 	job, err := fwa.volumeRegistry.Job(c.String("token"))
 	if err != nil {
@@ -150,7 +150,7 @@ func (fwa *fakewarpActions) RealSize(c CliContext) error {
 	return nil
 }
 
-func (fwa *fakewarpActions) DataIn(c CliContext) error {
+func (fwa *dacctlActions) DataIn(c CliContext) error {
 	checkRequiredStrings(c, "token", "job")
 	fmt.Printf("--token %s --job %s\n", c.String("token"), c.String("job"))
 
@@ -173,7 +173,7 @@ func (fwa *fakewarpActions) DataIn(c CliContext) error {
 	return vlm.DataIn()
 }
 
-func (fwa *fakewarpActions) Paths(c CliContext) error {
+func (fwa *dacctlActions) Paths(c CliContext) error {
 	checkRequiredStrings(c, "token", "job", "pathfile")
 	fmt.Printf("--token %s --job %s --pathfile %s\n",
 		c.String("token"), c.String("job"), c.String("pathfile"))
@@ -192,14 +192,14 @@ func (fwa *fakewarpActions) Paths(c CliContext) error {
 
 var testVLM lifecycle.VolumeLifecycleManager
 
-func (fwa *fakewarpActions) getVolumeLifecycleManger(volume registry.Volume) lifecycle.VolumeLifecycleManager {
+func (fwa *dacctlActions) getVolumeLifecycleManger(volume registry.Volume) lifecycle.VolumeLifecycleManager {
 	if testVLM != nil {
 		return testVLM
 	}
 	return lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
 }
 
-func (fwa *fakewarpActions) PreRun(c CliContext) error {
+func (fwa *dacctlActions) PreRun(c CliContext) error {
 	checkRequiredStrings(c, "token", "job", "nodehostnamefile") // TODO: why require job if we don't use it?
 	fmt.Printf("--token %s --job %s --nodehostnamefile %s\n",
 		c.String("token"), c.String("job"), c.String("nodehostnamefile"))
@@ -249,7 +249,7 @@ func (fwa *fakewarpActions) PreRun(c CliContext) error {
 	return nil
 }
 
-func (fwa *fakewarpActions) PostRun(c CliContext) error {
+func (fwa *dacctlActions) PostRun(c CliContext) error {
 	checkRequiredStrings(c, "token", "job")
 	fmt.Printf("--token %s --job %s\n",
 		c.String("token"), c.String("job"))
@@ -286,7 +286,7 @@ func (fwa *fakewarpActions) PostRun(c CliContext) error {
 	return nil
 }
 
-func (fwa *fakewarpActions) DataOut(c CliContext) error {
+func (fwa *dacctlActions) DataOut(c CliContext) error {
 	checkRequiredStrings(c, "token", "job")
 	fmt.Printf("--token %s --job %s\n",
 		c.String("token"), c.String("job"))

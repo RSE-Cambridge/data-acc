@@ -1,24 +1,24 @@
 [Unit]
-Description=data-acc-brick-host
-ConditionPathExists=/home/centos/data-acc-brick-host
+Description=dacd
+ConditionPathExists=/usr/local/bin/dacd
 After=network.target
 
 [Service]
 Type=simple
-User=centos
-Group=centos
+User=dacd
+Group=dacd
 Restart=on-failure
 RestartSec=10
 
-WorkingDirectory=/home/centos
+WorkingDirectory=/var/lib/dacd
 Environment=ETCDCTL_ENDPOINTS=slurm-master:2381
-ExecStart=/home/centos/data-acc-brick-host
+ExecStart=/usr/local/bin/dacd
 
 # make sure log directory exists and owned by syslog
 PermissionsStartOnly=true
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=data-acc-brick-host
+SyslogIdentifier=dacd
 
 [Install]
 WantedBy=multi-user.target

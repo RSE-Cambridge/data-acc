@@ -42,8 +42,8 @@ var capacity = cli.StringFlag{
 
 func runCli(args []string) error {
 	app := cli.NewApp()
-	app.Name = "FakeWarp CLI"
-	app.Usage = "This CLI is used to integrate data-acc with Slurm's Burst Buffer plugin."
+	app.Name = "dacclt"
+	app.Usage = "This CLI is used to orchestrate the Data Accelerator with Slurm's Burst Buffer plugin."
 	app.Version = version.VERSION
 
 	app.Commands = []cli.Command{
@@ -80,7 +80,7 @@ func runCli(args []string) error {
 		},
 		{
 			Name:   "setup",
-			Usage:  "Create transient burst buffer, called after waiting for enough free capacity.",
+			Usage:  "Create transient buffer, called after waiting for enough free capacity.",
 			Flags:  []cli.Flag{token, job, caller, user, groupid, capacity},
 			Action: setup,
 		},
@@ -156,9 +156,9 @@ func runCli(args []string) error {
 }
 
 func main() {
-	logFilename := os.Getenv("FAKEWARP_LOG")
+	logFilename := os.Getenv("DACCTL_LOG")
 	if logFilename == "" {
-		logFilename = "/var/log/fakewarp.log"
+		logFilename = "/var/log/dacctl.log"
 	}
 	f, err := os.OpenFile(logFilename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -175,12 +175,12 @@ func main() {
 	}()
 
 	log.SetOutput(f)
-	log.Println("fakewarp start, called with:", strings.Join(os.Args, " "))
+	log.Println("dacctl start, called with:", strings.Join(os.Args, " "))
 
 	if err := runCli(os.Args); err != nil {
-		log.Println("fakewarp error, called with:", strings.Join(os.Args, " "))
+		log.Println("dacctl error, called with:", strings.Join(os.Args, " "))
 		log.Fatal(err)
 	} else {
-		log.Println("fakewarp complete, called with:", strings.Join(os.Args, " "))
+		log.Println("dacctl complete, called with:", strings.Join(os.Args, " "))
 	}
 }

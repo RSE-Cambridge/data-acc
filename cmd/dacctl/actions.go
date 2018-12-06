@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl/actions"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/fakewarp/actions"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/urfave/cli"
@@ -10,7 +10,7 @@ import (
 
 var testKeystore keystoreregistry.Keystore
 var testDisk fileio.Disk
-var testActions actions.FakewarpActions
+var testActions actions.DacctlActions
 
 func getKeystore() keystoreregistry.Keystore {
 	// TODO must be a better way to test this, proper factory?
@@ -20,7 +20,7 @@ func getKeystore() keystoreregistry.Keystore {
 	return etcdregistry.NewKeystore()
 }
 
-func getActions(keystore keystoreregistry.Keystore) actions.FakewarpActions {
+func getActions(keystore keystoreregistry.Keystore) actions.DacctlActions {
 	if testActions != nil {
 		return testActions
 	}
@@ -30,7 +30,7 @@ func getActions(keystore keystoreregistry.Keystore) actions.FakewarpActions {
 	if testDisk == nil {
 		disk = fileio.NewDisk()
 	}
-	return actions.NewFakewarpActions(poolReg, volReg, disk)
+	return actions.NewDacctlActions(poolReg, volReg, disk)
 }
 
 func createPersistent(c *cli.Context) error {
