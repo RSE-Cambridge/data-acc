@@ -30,9 +30,10 @@ func TestPlugin_GetInventory(t *testing.T) {
         cpu2: {}
         dac1:
           abcdefgh_mgs: nvme1n1
-          abcdefgh_mdt: nvme1n1
-          abcdefgh_osts: {nvme2n1: 1, nvme3n1: 2}
+          abcdefgh_mdts: {nvme1n1: 0, nvme2n1: 1, nvme3n1: 2}
+          abcdefgh_osts: {nvme1n1: 0, nvme2n1: 1, nvme3n1: 2}
         dac2:
+          abcdefgh_mdts: {nvme2n1: 3, nvme3n1: 4}
           abcdefgh_osts: {nvme2n1: 3, nvme3n1: 4}
       vars:
         abcdefgh_client_port: "10002"
@@ -55,8 +56,10 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
       hosts:
         dac1:
           abcdefgh_mgs: sdb
-          abcdefgh_mdt: nvme1n1
+          abcdefgh_mdts: {nvme1n1: 0}
+          abcdefgh_osts: {nvme1n1: 0}
         dac2:
+          abcdefgh_mdts: {nvme2n1: 1}
           abcdefgh_osts: {nvme2n1: 1}
       vars:
         abcdefgh_client_port: "10002"
