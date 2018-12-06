@@ -6,15 +6,29 @@ import (
 	"log"
 )
 
-func processDataCopy(volumeName registry.VolumeName, request registry.DataCopyRequest) error {
-	cmd, err := generateDataCopyCmd(volumeName, request)
+func processDataCopy(volume registry.Volume, request registry.DataCopyRequest) error {
+	cmd, err := generateDataCopyCmd(volume, request)
+	if err != nil {
+		return err
+	}
+
 	log.Printf("FAKE %s", cmd)
-	return err
+	return nil
 }
 
-func generateDataCopyCmd(volumeName registry.VolumeName, request registry.DataCopyRequest) (string, error) {
+func generateDataCopyCmd(volume registry.Volume, request registry.DataCopyRequest) (string, error) {
+	rsync, err := generateRsyncCmd(volume, request)
+	if err != nil || rsync == ""{
+		return "", err
+	}
+
+	cmd := fmt.Sprintf("sudo su `getent passwd %d | cut -d: -f1` %s", volume.Owner, rsync)
+	return cmd, nil
+}
+
+func generateRsyncCmd(volume registry.Volume, request registry.DataCopyRequest) (string, error) {
 	if request.Source == "" && request.Destination == "" {
-		log.Println("No files to copy for:", volumeName)
+		log.Println("No files to copy for:", volume.Name)
 		return "", nil
 	}
 
@@ -24,8 +38,7 @@ func generateDataCopyCmd(volumeName registry.VolumeName, request registry.DataCo
 	} else if request.SourceType == registry.File {
 		flags = ""
 	} else {
-		log.Println("Unspported source type", request.SourceType, "for volume:", volumeName)
-		return "", nil
+		return "", fmt.Errorf("unsupported source type %s for volume: %s", request.SourceType, volume.Name)
 	}
 
 	return fmt.Sprintf("rsync %s%s %s", flags, request.Source, request.Destination), nil
