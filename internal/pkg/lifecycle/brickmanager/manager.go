@@ -52,15 +52,14 @@ func (bm *brickManager) Start() error {
 }
 
 const FakeDeviceAddress = "nvme%dn1"
-const FakeDeviceCapacityGB = 1600
+const FakeDeviceCapacityGB = 1400
 const FakePoolName = "default"
 
 func getDevices() []string {
 	// TODO: check for real devices!
-	//devices := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	devices := []int{1, 2, 3, 4}
+	devices := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 	if FSType == ansible.BeegFS {
-		devices = []int{0, 1, 2, 3, 4}
+		devices = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 	}
 	var bricks []string
 	for _, i := range devices {

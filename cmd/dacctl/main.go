@@ -42,7 +42,7 @@ var capacity = cli.StringFlag{
 
 func runCli(args []string) error {
 	app := cli.NewApp()
-	app.Name = "dacclt"
+	app.Name = "dacctl"
 	app.Usage = "This CLI is used to orchestrate the Data Accelerator with Slurm's Burst Buffer plugin."
 	app.Version = version.VERSION
 

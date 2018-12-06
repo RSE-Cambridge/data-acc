@@ -22,7 +22,7 @@ func TestPlugin_GetInventory(t *testing.T) {
 		{Hostname: "dac2", Device: "nvme3n1", AllocatedIndex: 4},
 	}
 	result := getInventory(BeegFS, volume, brickAllocations)
-	expected := `dac-fake:
+	expected := `dac-prod:
   children:
     abcdefgh:
       hosts:
@@ -48,7 +48,7 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
 		{Hostname: "dac2", Device: "nvme2n1", AllocatedIndex: 1},
 	}
 	result := getInventory(Lustre, volume, brickAllocations)
-	expected := `dac-fake:
+	expected := `dac-prod:
   children:
     abcdefgh:
       hosts:

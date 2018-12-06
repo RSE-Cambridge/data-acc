@@ -35,7 +35,7 @@ type Wrapper struct {
 }
 
 // TODO: should come from configuration?
-var hostGroup = "dac-fake"
+var hostGroup = "dac-prod"
 
 func getInventory(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
 	var mdt registry.BrickAllocation
