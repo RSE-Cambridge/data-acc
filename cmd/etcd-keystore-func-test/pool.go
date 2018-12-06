@@ -57,7 +57,7 @@ func testGetBricks(poolRegistry registry.PoolRegistry) {
 func testAllocateBricks(poolRegistry registry.PoolRegistry) {
 	poolRegistry.WatchHostBrickAllocations("foo", func(old *registry.BrickAllocation,
 		new *registry.BrickAllocation) {
-		log.Printf("**Allocation update. Old: %s New: %s", old, new)
+		log.Printf("**Allocation update. Old: %+v New: %+v", old, new)
 		if new.DeallocateRequested {
 			log.Printf("requested clean of: %d:%s", new.AllocatedIndex, new.Device)
 		}

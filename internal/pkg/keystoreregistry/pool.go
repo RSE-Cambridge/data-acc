@@ -86,12 +86,12 @@ func (poolRegistry *poolRegistry) AllocateBricks(allocations []registry.BrickAll
 	for i, allocation := range allocations {
 		brick, err := poolRegistry.GetBrickInfo(allocation.Hostname, allocation.Device)
 		if err != nil {
-			return fmt.Errorf("unable to find brick for: %s", allocation)
+			return fmt.Errorf("unable to find brick for: %+v", allocation)
 		}
 		bricks = append(bricks, brick)
 
 		if allocation.DeallocateRequested {
-			return fmt.Errorf("should not requeste deallocated: %s", allocation)
+			return fmt.Errorf("should not requeste deallocated: %+v", allocation)
 		}
 		if allocation.AllocatedIndex != 0 {
 			return fmt.Errorf("should not specify the allocated index")
@@ -162,7 +162,7 @@ func (poolRegistry *poolRegistry) HardDeleteAllocations(allocations []registry.B
 		keys = append(keys, getBrickAllocationKeyHost(allocation))
 		keys = append(keys, getBrickAllocationKeyVolume(allocation))
 		if !allocation.DeallocateRequested {
-			return fmt.Errorf("must first call deallocate on: %s", allocation)
+			return fmt.Errorf("must first call deallocate on: %+v", allocation)
 		}
 	}
 
@@ -268,7 +268,7 @@ func (poolRegistry *poolRegistry) Pools() ([]registry.Pool, error) {
 		}
 
 		if brick.CapacityGB != pool.GranularityGB {
-			log.Printf("brick doesn't match pool granularity: %s\n", brick)
+			log.Printf("brick doesn't match pool granularity: %+v\n", brick)
 			if brick.CapacityGB < pool.GranularityGB {
 				pool.GranularityGB = brick.CapacityGB
 			}

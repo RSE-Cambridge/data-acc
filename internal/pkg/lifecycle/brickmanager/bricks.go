@@ -36,7 +36,7 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 		if allocation.AllocatedIndex == 0 {
 			volume, err := volumeRegistry.Volume(allocation.AllocatedVolume)
 			if err != nil {
-				log.Panicf("unable to find volume for allocation %s", allocation)
+				log.Panicf("unable to find volume for allocation %+v", allocation)
 			}
 			log.Println("We host a primary brick for:", volume.Name, volume)
 			if volume.State == registry.BricksProvisioned || volume.State == registry.DataInComplete {

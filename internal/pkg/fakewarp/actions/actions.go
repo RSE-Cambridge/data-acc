@@ -47,10 +47,10 @@ type fakewarpActions struct {
 
 func (fwa *fakewarpActions) CreatePersistentBuffer(c CliContext) error {
 	checkRequiredStrings(c, "token", "caller", "capacity", "user", "access", "type")
-	request := fakewarp.BufferRequest{c.String("token"), c.String("caller"),
-		c.String("capacity"), c.Int("user"),
-		c.Int("groupid"), fakewarp.AccessModeFromString(c.String("access")),
-		fakewarp.BufferTypeFromString(c.String("type")), true}
+	request := fakewarp.BufferRequest{Token: c.String("token"), Caller: c.String("caller"),
+		Capacity: c.String("capacity"), User: c.Int("user"),
+		Group: c.Int("groupid"), Access: fakewarp.AccessModeFromString(c.String("access")),
+		Type: fakewarp.BufferTypeFromString(c.String("type")), Persistent: true}
 	if request.Group == 0 {
 		request.Group = request.User
 	}
