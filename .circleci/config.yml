@@ -34,9 +34,8 @@ jobs:
                 /go/bin/dep ensure
             fi
 
-      - run: go install -v -installsuffix "static" ./...
-      - run: go vet -v ./...
-      - run: go test -v ./...
+      - run: make tar
+      - run: make test
 
       - save_cache:
           key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
