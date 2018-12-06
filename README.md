@@ -1,5 +1,7 @@
 # Data Accelerator
 
+[![CircleCI](https://circleci.com/gh/RSE-Cambridge/data-acc.svg?style=svg&circle-token=4042ee71fb486efc320ce64b7b568afd4f9e0b38)](https://circleci.com/gh/RSE-Cambridge/data-acc)
+
 <!-- [![Build Status](https://travis-ci.org/JohnGarbutt/pfsaccel.svg?branch=master)](https://travis-ci.org/JohnGarbutt/pfsaccel)
 [![Go Report Card](https://goreportcard.com/badge/github.com/johngarbutt/pfsaccel)](https://goreportcard.com/report/github.com/johngarbutt/pfsaccel)
 [![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/JohnGarbutt/pfsaccel)
