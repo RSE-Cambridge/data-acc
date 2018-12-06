@@ -42,3 +42,5 @@ jobs:
           paths:
               - /go/src/github.com/RSE-Cambridge/data-acc/vendor
               - /go/pkg/dep
+      - store_artifacts:
+          path: /go/src/github.com/RSE-Cambridge/data-acc/bin
