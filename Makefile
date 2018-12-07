@@ -11,12 +11,15 @@
 # limitations under the License.
 
 
-all: deps buildlocal test
+all: deps buildlocal test format
 
 buildlocal:
 		mkdir -p `pwd`/bin
 		GOBIN=`pwd`/bin go install -v ./...
 		ls -l `pwd`/bin
+
+format:
+		go fmt ./...
 
 test: 
 		go test -cover -race ./...

@@ -8,7 +8,7 @@ import (
 
 func Test_GenerateDataCopy(t *testing.T) {
 	testVolume := registry.Volume{
-		Name: registry.VolumeName("asdf"),
+		Name:  registry.VolumeName("asdf"),
 		Owner: 1001,
 	}
 	request := registry.DataCopyRequest{}
