@@ -124,39 +124,39 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 func createSwap(hostname string, swapMb int, filename string, loopback string) error {
 	file := fmt.Sprintf("dd if=/dev/zero of=%s bs=1024 count=%d && sudo chmod 0600 %s",
 		filename, swapMb*1024, filename)
-	if err := remoteExecuteCmd(hostname, file); err != nil {
+	if err := runner.Execute(hostname, file); err != nil {
 		return err
 	}
 	device := fmt.Sprintf("losetup %s %s", loopback, filename)
-	if err := remoteExecuteCmd(hostname, device); err != nil {
+	if err := runner.Execute(hostname, device); err != nil {
 		return err
 	}
 	swap := fmt.Sprintf("mkswap %s", loopback)
-	return remoteExecuteCmd(hostname, swap)
+	return runner.Execute(hostname, swap)
 }
 
 func swapOn(hostname string, loopback string) error {
-	return remoteExecuteCmd(hostname, fmt.Sprintf("swapon %s", loopback))
+	return runner.Execute(hostname, fmt.Sprintf("swapon %s", loopback))
 }
 
 func swapOff(hostname string, loopback string) error {
-	return remoteExecuteCmd(hostname, fmt.Sprintf("swapoff %s", loopback))
+	return runner.Execute(hostname, fmt.Sprintf("swapoff %s", loopback))
 }
 
 func detachLoopback(hostname string, loopback string) error {
-	return remoteExecuteCmd(hostname, fmt.Sprintf("losetup -d %s", loopback))
+	return runner.Execute(hostname, fmt.Sprintf("losetup -d %s", loopback))
 }
 
 func chown(hostname string, owner uint, directory string) error {
-	return remoteExecuteCmd(hostname, fmt.Sprintf("chown %d %s", owner, directory))
+	return runner.Execute(hostname, fmt.Sprintf("chown %d %s", owner, directory))
 }
 
 func umountLustre(hostname string, directory string) error {
-	return remoteExecuteCmd(hostname, fmt.Sprintf("umount -l %s", directory))
+	return runner.Execute(hostname, fmt.Sprintf("umount -l %s", directory))
 }
 
 func removeSubtree(hostname string, directory string) error {
-	return remoteExecuteCmd(hostname, fmt.Sprintf("rm -rf %s", directory))
+	return runner.Execute(hostname, fmt.Sprintf("rm -rf %s", directory))
 }
 
 func mountRemoteFilesystem(fsType FSType, hostname string, mgtHost string, fsname string, directory string) error {
@@ -169,10 +169,10 @@ func mountRemoteFilesystem(fsType FSType, hostname string, mgtHost string, fsnam
 }
 
 func mountLustre(hostname string, mgtHost string, fsname string, directory string) error {
-	if err := remoteExecuteCmd(hostname, "modprobe -v lustre"); err != nil {
+	if err := runner.Execute(hostname, "modprobe -v lustre"); err != nil {
 		return err
 	}
-	return remoteExecuteCmd(hostname, fmt.Sprintf(
+	return runner.Execute(hostname, fmt.Sprintf(
 		"mount -t lustre %s:/%s %s", mgtHost, fsname, directory))
 }
 
@@ -182,14 +182,21 @@ func mountBeegFS(hostname string, mgtHost string, fsname string, directory strin
 	if err := removeSubtree(hostname, directory); err != nil {
 		return err
 	}
-	return remoteExecuteCmd(hostname, fmt.Sprintf("ln -s /mnt/beegfs/%s %s", fsname, directory))
+	return runner.Execute(hostname, fmt.Sprintf("ln -s /mnt/beegfs/%s %s", fsname, directory))
 }
 
 func mkdir(hostname string, directory string) error {
-	return remoteExecuteCmd(hostname, fmt.Sprintf("mkdir -p %s", directory))
+	return runner.Execute(hostname, fmt.Sprintf("mkdir -p %s", directory))
 }
 
-func remoteExecuteCmd(hostname string, cmdStr string) error {
+type Run interface {
+	Execute(name string, cmd string) error
+}
+
+type run struct {
+}
+
+func (*run) Execute(hostname string, cmdStr string) error {
 	log.Println("SSH to:", hostname, "with command:", cmdStr)
 
 	cmd := exec.Command("ssh", "-o", "StrictHostKeyChecking=no",
@@ -205,3 +212,5 @@ func remoteExecuteCmd(hostname string, cmdStr string) error {
 		return err
 	}
 }
+
+var runner Run = &run{}
