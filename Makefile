@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 all: deps buildlocal test
 
 buildlocal:
@@ -21,9 +22,13 @@ test:
 		go test -cover -race ./...
 		go vet ./...
 
-clean: 
+test-func:
+		./build/func_test.sh
+
+clean:
 		go clean
 		rm -rf `pwd`/bin
+		rm -rf /tmp/etcd-download
 
 deps:
 		dep ensure
@@ -35,3 +40,6 @@ dockercmd=docker run --rm -it -v ~/go:/go -w /go/src/github.com/RSE-Cambridge/da
 
 docker:
 		$(dockercmd) go install -v ./...
+
+installdep:
+	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
