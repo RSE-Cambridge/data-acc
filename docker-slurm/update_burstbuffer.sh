@@ -5,7 +5,7 @@ cd ../
 make
 cd docker-slurm
 mkdir ./bin
-cp ../bin/amd64/* ./bin
+cp ../bin/* ./bin
 docker build -t slurm-docker-cluster:17.02.9 .
 
 #docker exec slurmctld bash -c "cd /usr/local/src/burstbuffer && . .venv/bin/activate && git remote update && git checkout etcd && git pull && pip install -Ue . && dacctl help"
