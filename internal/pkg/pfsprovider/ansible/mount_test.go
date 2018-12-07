@@ -68,3 +68,14 @@ func Test_createSwap(t *testing.T) {
 	assert.Equal(t, "losetup loopback file", fake.cmdStrs[1])
 	assert.Equal(t, "mkswap loopback", fake.cmdStrs[2])
 }
+
+func Test_chown(t *testing.T){
+	defer func() {runner = &run{}}()
+	fake := &fakeRunner{err: errors.New("expected")}
+	runner = fake
+
+	err := chown("host", 10, "dir")
+	assert.Equal(t, "expected", err.Error())
+	assert.Equal(t, "host", fake.hostnames[0])
+	assert.Equal(t, "chown 10 dir", fake.cmdStrs[0])
+}
