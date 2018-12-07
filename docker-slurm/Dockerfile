@@ -49,8 +49,8 @@ RUN set -x \
 
 RUN groupadd -r slurm --gid=995 && useradd -r -g slurm --uid=995 slurm
 
-ARG SLURM_VERSION=17.11.7
-ARG SLURM_DOWNLOAD_MD5=6452300949ba375c3898ba7ce7959f05
+ARG SLURM_VERSION=17.11.12
+ARG SLURM_DOWNLOAD_MD5=94fb13b509d23fcf9733018d6c961ca9
 ARG SLURM_DOWNLOAD_URL=https://download.schedmd.com/slurm/slurm-"$SLURM_VERSION".tar.bz2
 
 RUN set -x \
