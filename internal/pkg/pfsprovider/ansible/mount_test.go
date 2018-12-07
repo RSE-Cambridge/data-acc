@@ -15,12 +15,9 @@ type fakeRunner struct {
 
 func (f *fakeRunner) Execute(hostname string, cmdStr string) error {
 	f.calls += 1
-	if f.err != nil {
-		return f.err
-	}
 	f.hostnames = append(f.hostnames, hostname)
 	f.cmdStrs = append(f.cmdStrs, cmdStr)
-	return nil
+	return f.err
 }
 
 func Test_mkdir(t *testing.T) {
@@ -50,7 +47,24 @@ func Test_mountLustre(t *testing.T) {
 	assert.Equal(t, "modprobe -v lustre", fake.cmdStrs[0])
 	assert.Equal(t, "mount -t lustre mgt:/fs dir", fake.cmdStrs[1])
 
-	runner = &fakeRunner{err: errors.New("expected")}
-	err = mountLustre("", "", "", "")
+	fake = &fakeRunner{err: errors.New("expected")}
+	runner = fake
+	err = mountRemoteFilesystem(Lustre, "host", "", "", "")
 	assert.Equal(t, "expected", err.Error())
+	assert.Equal(t, "modprobe -v lustre", fake.cmdStrs[0])
+}
+
+func Test_createSwap(t *testing.T) {
+	defer func() {runner = &run{}}()
+	fake := &fakeRunner{}
+	runner = fake
+
+	err := createSwap("host", 3, "file", "loopback")
+	assert.Nil(t, err)
+	assert.Equal(t, "host", fake.hostnames[0])
+	assert.Equal(t, "host", fake.hostnames[1])
+	assert.Equal(t, "host", fake.hostnames[2])
+	assert.Equal(t, "dd if=/dev/zero of=file bs=1024 count=3072 && sudo chmod 0600 file", fake.cmdStrs[0])
+	assert.Equal(t, "losetup loopback file", fake.cmdStrs[1])
+	assert.Equal(t, "mkswap loopback", fake.cmdStrs[2])
 }
