@@ -36,7 +36,6 @@ jobs:
 
       - run: make tar
       - run: make test
-      - run: make test-func
 
       - save_cache:
           key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
