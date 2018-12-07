@@ -7,26 +7,30 @@ import (
 )
 
 type fakeRunner struct {
-	t *testing.T
-	hostname string
-	cmdStr string
 	err error
+	calls int
+	hostnames []string
+	cmdStrs []string
 }
 
 func (f *fakeRunner) Execute(hostname string, cmdStr string) error {
+	f.calls += 1
 	if f.err != nil {
 		return f.err
 	}
-	assert.Equal(f.t, f.hostname, hostname)
-	assert.Equal(f.t, f.cmdStr, cmdStr)
+	f.hostnames = append(f.hostnames, hostname)
+	f.cmdStrs = append(f.cmdStrs, cmdStr)
 	return nil
 }
 
 func Test_mkdir(t *testing.T) {
 	defer func() {runner = &run{}}()
-	runner = &fakeRunner{t: t, hostname:"host", cmdStr:"mkdir -p dir"}
+	fake := &fakeRunner{}
+	runner = fake
 	err := mkdir("host", "dir")
 	assert.Nil(t, err)
+	assert.Equal(t, "host", fake.hostnames[0])
+	assert.Equal(t, "mkdir -p dir", fake.cmdStrs[0])
 
 	runner = &fakeRunner{err: errors.New("expected")}
 	err = mkdir("", "")
