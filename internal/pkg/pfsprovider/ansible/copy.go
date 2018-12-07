@@ -18,7 +18,7 @@ func processDataCopy(volume registry.Volume, request registry.DataCopyRequest) e
 
 func generateDataCopyCmd(volume registry.Volume, request registry.DataCopyRequest) (string, error) {
 	rsync, err := generateRsyncCmd(volume, request)
-	if err != nil || rsync == ""{
+	if err != nil || rsync == "" {
 		return "", err
 	}
 

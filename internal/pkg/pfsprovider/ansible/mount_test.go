@@ -7,10 +7,10 @@ import (
 )
 
 type fakeRunner struct {
-	err error
-	calls int
+	err       error
+	calls     int
 	hostnames []string
-	cmdStrs []string
+	cmdStrs   []string
 }
 
 func (f *fakeRunner) Execute(hostname string, cmdStr string) error {
@@ -21,7 +21,7 @@ func (f *fakeRunner) Execute(hostname string, cmdStr string) error {
 }
 
 func Test_mkdir(t *testing.T) {
-	defer func() {runner = &run{}}()
+	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
 
@@ -36,7 +36,7 @@ func Test_mkdir(t *testing.T) {
 }
 
 func Test_mountLustre(t *testing.T) {
-	defer func() {runner = &run{}}()
+	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
 
@@ -55,7 +55,7 @@ func Test_mountLustre(t *testing.T) {
 }
 
 func Test_createSwap(t *testing.T) {
-	defer func() {runner = &run{}}()
+	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
 
@@ -69,13 +69,13 @@ func Test_createSwap(t *testing.T) {
 	assert.Equal(t, "mkswap loopback", fake.cmdStrs[2])
 }
 
-func Test_chown(t *testing.T){
-	defer func() {runner = &run{}}()
+func Test_chown(t *testing.T) {
+	defer func() { runner = &run{} }()
 	fake := &fakeRunner{err: errors.New("expected")}
 	runner = fake
 
-	err := chown("host", 10, "dir")
+	err := chown("host", 10, 11, "dir")
 	assert.Equal(t, "expected", err.Error())
 	assert.Equal(t, "host", fake.hostnames[0])
-	assert.Equal(t, "chown 10 dir", fake.cmdStrs[0])
+	assert.Equal(t, "chown 10:11 dir", fake.cmdStrs[0])
 }
