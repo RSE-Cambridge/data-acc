@@ -1,23 +1,21 @@
 #!/bin/bash
-set +eux
+set -eux
 
 cd ../
 make
+
 cd docker-slurm
+rm -rf ./bin
 mkdir ./bin
 cp ../bin/* ./bin
-docker build -t slurm-docker-cluster:17.02.9 .
 
-#docker exec slurmctld bash -c "cd /usr/local/src/burstbuffer && . .venv/bin/activate && git remote update && git checkout etcd && git pull && pip install -Ue . && dacctl help"
-
+docker-compose build
+#docker-compose push
 docker-compose down -v
 docker-compose up -d
 
 sleep 8
 ./register_cluster.sh
-
-#sleep 5
-#docker exec bufferwatcher bash -c "data-acc-host"
 
 echo "Wait for startup to complete..."
 sleep 10

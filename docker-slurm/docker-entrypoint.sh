@@ -1,15 +1,27 @@
 #!/bin/bash
-set -e
+set -eux
 
-MYSQL_HOST=${MYSQL_HOST:-"192.168.0.109"}
-SLURM_DB=${SLURM_DB:-"192.168.0.109"}
-SLURM_DB_HOST=${SLURM_DB_HOST:-"slurm-master"}
-SLURM_CTL=${SLURM_CTL:-"192.168.0.109"}
-SLURM_CTL_HOST=${SLURM_CTL_HOST:-"slurm-master"}
+#export MYSQL_HOST=${MYSQL_HOST:-"192.168.0.109"}
+#export SLURM_DB=${SLURM_DB:-"192.168.0.109"}
+#export SLURM_DB_HOST=${SLURM_DB_HOST:-"slurm-master"}
+#export SLURM_CTL=${SLURM_CTL:-"192.168.0.109"}
+#export SLURM_CTL_HOST=${SLURM_CTL_HOST:-"slurm-master"}
+
+echo mysql:$MYSQL_HOST
+echo slurmdb:$SLURM_DB
+echo slurmdb_host:$SLURM_DB_HOST
+echo slurmctl:$SLURM_CTL
+echo slurmctl_host:$SLURM_CTL_HOST
+
+export NOW=`date`
+echo $NOW
 
 # update config
 cat /etc/slurm/slurm.conf.template | envsubst > /etc/slurm/slurm.conf
 cat /etc/slurm/slurmdbd.conf.template | envsubst > /etc/slurm/slurmdbd.conf
+
+cat /etc/slurm/slurm.conf
+cat /etc/slurm/slurmdbd.conf
 
 if [ "$1" = "slurmdbd" ]
 then

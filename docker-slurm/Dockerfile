@@ -98,9 +98,8 @@ COPY slurm.conf /etc/slurm/slurm.conf.template
 COPY slurmdbd.conf /etc/slurm/slurmdbd.conf.template
 COPY burst_buffer.conf /etc/slurm/burst_buffer.conf
 
-
 # Download and install etcd client
-ARG ETCD_VERSION=3.3.1
+ARG ETCD_VERSION=3.3.10
 ARG ETCD_DOWNLOAD_URL="https://github.com/coreos/etcd/releases/download/v$ETCD_VERSION/etcd-v$ETCD_VERSION-linux-amd64.tar.gz"
 
 RUN set -x \
@@ -119,11 +118,8 @@ RUN touch /var/log/dacctl.log \
     && chown slurm /var/log/dacctl.log \
     && chgrp slurm /var/log/dacctl.log
 
-ENV MYSQL_HOST 192.168.0.109
-ENV SLURM_DB 192.168.0.109
-ENV SLURM_CTL 192.168.0.109
-
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["slurmdbd"]
