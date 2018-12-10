@@ -126,6 +126,8 @@ RUN set -x \
 
 COPY bin/dacctl /usr/local/bin/dacctl
 RUN install -D -m755 /usr/local/bin/dacctl /opt/cray/dw_wlm/default/bin/dw_wlm_cli
+# TODO: may want a separate dwstat binary
+RUN install -D -m755 /usr/local/bin/dacctl /opt/cray/dws/default/bin/dwstat
 COPY bin/dacd /usr/local/bin/dacd
 
 RUN touch /var/log/dacctl.log \
