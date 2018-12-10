@@ -159,6 +159,7 @@ services:
     build: ./
     image: johngarbutt/data-acc-slurm
     environment:
+      - DAC_SKIP_ANSIBLE=True
       - ETCDCTL_API=3
       - ETCDCTL_ENDPOINTS=etcdproxy1:2379
       - "MYSQL_HOST=mysql"

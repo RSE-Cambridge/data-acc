@@ -242,6 +242,11 @@ func executeAnsiblePlaybook(dir string, args string) error {
 	cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook %s;`, dir, args)
 	log.Println("Requested ansible:", cmdStr)
 
+	skipAnsible := os.Getenv("DAC_SKIP_ANSIBLE")
+	if skipAnsible == "True" {
+		return nil
+	}
+
 	var err error
 	for i := 1; i <= 5; i++ {
 		cmdMount := exec.Command("mount")
