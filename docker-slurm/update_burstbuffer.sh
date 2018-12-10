@@ -9,16 +9,12 @@ rm -rf ./bin
 mkdir ./bin
 cp ../bin/* ./bin
 
+cp -r ../fs-ansible .
+
 docker-compose build
 #docker-compose push
 docker-compose down -v
 docker-compose up -d
-
-sleep 8
-./register_cluster.sh
-
-echo "Wait for startup to complete..."
-sleep 10
 
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 #BB create_persistent name=mytestbuffer capacity=4000GB access=striped type=scratch" > create-persistent.sh'
@@ -33,6 +29,14 @@ docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 set
 echo \$HOSTNAME
 " > use-persistent.sh'
+
+
+sleep 10
+./register_cluster.sh
+
+echo "Wait for startup to complete..."
+sleep 10
+
 
 echo "***Show current system state***"
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"

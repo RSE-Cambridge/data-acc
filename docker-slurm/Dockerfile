@@ -22,6 +22,7 @@ RUN yum makecache fast \
            munge-devel \
            python-devel \
            python-pip \
+           python-virtualenv \
            python34 \
            python34-devel \
            python34-pip \
@@ -97,6 +98,17 @@ RUN yum install -y gettext
 COPY slurm.conf /etc/slurm/slurm.conf.template
 COPY slurmdbd.conf /etc/slurm/slurmdbd.conf.template
 COPY burst_buffer.conf /etc/slurm/burst_buffer.conf
+
+RUN mkdir -p /var/lib/data-acc/fs-ansible
+COPY fs-ansible /var/lib/data-acc/fs-ansible
+
+RUN set -x \
+    && cd /var/lib/data-acc/fs-ansible \
+    && virtualenv .venv \
+    && . .venv/bin/activate \
+    && pip install -U pip \
+    && pip install -U ansible \
+    && deactivate
 
 # Download and install etcd client
 ARG ETCD_VERSION=3.3.10
