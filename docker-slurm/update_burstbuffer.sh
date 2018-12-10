@@ -1,26 +1,20 @@
 #!/bin/bash
-set +eux
+set -eux
 
 cd ../
 make
+
 cd docker-slurm
+rm -rf ./bin
 mkdir ./bin
-cp ../bin/amd64/* ./bin
-docker build -t slurm-docker-cluster:17.02.9 .
+cp ../bin/* ./bin
 
-#docker exec slurmctld bash -c "cd /usr/local/src/burstbuffer && . .venv/bin/activate && git remote update && git checkout etcd && git pull && pip install -Ue . && dacctl help"
+cp -r ../fs-ansible .
 
+docker-compose build
+#docker-compose push
 docker-compose down -v
 docker-compose up -d
-
-sleep 8
-./register_cluster.sh
-
-#sleep 5
-#docker exec bufferwatcher bash -c "data-acc-host"
-
-echo "Wait for startup to complete..."
-sleep 10
 
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 #BB create_persistent name=mytestbuffer capacity=4000GB access=striped type=scratch" > create-persistent.sh'
@@ -35,6 +29,14 @@ docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash
 set
 echo \$HOSTNAME
 " > use-persistent.sh'
+
+
+sleep 10
+./register_cluster.sh
+
+echo "Wait for startup to complete..."
+sleep 10
+
 
 echo "***Show current system state***"
 docker exec slurmctld bash -c "cd /data && scontrol show burstbuffer"

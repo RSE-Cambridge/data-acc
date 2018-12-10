@@ -5,4 +5,5 @@
 /.dockerfile-*
 /.idea/workspace.xml
 /docker-slurm/bin/*
+/docker-slurm/fs-ansible/*
 /vendor

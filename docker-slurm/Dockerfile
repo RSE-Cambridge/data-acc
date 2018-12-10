@@ -22,6 +22,7 @@ RUN yum makecache fast \
            munge-devel \
            python-devel \
            python-pip \
+           python-virtualenv \
            python34 \
            python34-devel \
            python34-pip \
@@ -49,8 +50,8 @@ RUN set -x \
 
 RUN groupadd -r slurm --gid=995 && useradd -r -g slurm --uid=995 slurm
 
-ARG SLURM_VERSION=17.11.7
-ARG SLURM_DOWNLOAD_MD5=6452300949ba375c3898ba7ce7959f05
+ARG SLURM_VERSION=17.11.12
+ARG SLURM_DOWNLOAD_MD5=94fb13b509d23fcf9733018d6c961ca9
 ARG SLURM_DOWNLOAD_URL=https://download.schedmd.com/slurm/slurm-"$SLURM_VERSION".tar.bz2
 
 RUN set -x \
@@ -98,9 +99,19 @@ COPY slurm.conf /etc/slurm/slurm.conf.template
 COPY slurmdbd.conf /etc/slurm/slurmdbd.conf.template
 COPY burst_buffer.conf /etc/slurm/burst_buffer.conf
 
+RUN mkdir -p /var/lib/data-acc/fs-ansible
+COPY fs-ansible /var/lib/data-acc/fs-ansible
+
+RUN set -x \
+    && cd /var/lib/data-acc/fs-ansible \
+    && virtualenv .venv \
+    && . .venv/bin/activate \
+    && pip install -U pip \
+    && pip install -U ansible \
+    && deactivate
 
 # Download and install etcd client
-ARG ETCD_VERSION=3.3.1
+ARG ETCD_VERSION=3.3.10
 ARG ETCD_DOWNLOAD_URL="https://github.com/coreos/etcd/releases/download/v$ETCD_VERSION/etcd-v$ETCD_VERSION-linux-amd64.tar.gz"
 
 RUN set -x \
@@ -119,11 +130,8 @@ RUN touch /var/log/dacctl.log \
     && chown slurm /var/log/dacctl.log \
     && chgrp slurm /var/log/dacctl.log
 
-ENV MYSQL_HOST 192.168.0.109
-ENV SLURM_DB 192.168.0.109
-ENV SLURM_CTL 192.168.0.109
-
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["slurmdbd"]
