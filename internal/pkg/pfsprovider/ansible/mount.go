@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
+	"os"
 	"os/exec"
 	"path"
 )
@@ -202,6 +203,12 @@ type run struct {
 
 func (*run) Execute(hostname string, cmdStr string) error {
 	log.Println("SSH to:", hostname, "with command:", cmdStr)
+
+	skipAnsible := os.Getenv("DAC_SKIP_ANSIBLE")
+	if skipAnsible == "True" {
+		log.Println("Skip as DAC_SKIP_ANSIBLE=True")
+		return nil
+	}
 
 	cmd := exec.Command("ssh", "-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null", hostname, "sudo", cmdStr)

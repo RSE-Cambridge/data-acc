@@ -244,6 +244,7 @@ func executeAnsiblePlaybook(dir string, args string) error {
 
 	skipAnsible := os.Getenv("DAC_SKIP_ANSIBLE")
 	if skipAnsible == "True" {
+		log.Println("Skip as DAC_SKIP_ANSIBLE=True")
 		return nil
 	}
 
