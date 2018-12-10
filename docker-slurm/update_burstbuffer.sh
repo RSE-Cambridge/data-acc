@@ -11,9 +11,9 @@ cp ../bin/* ./bin
 
 cp -r ../fs-ansible .
 
+docker-compose down -v
 docker-compose build
 #docker-compose push
-docker-compose down -v
 docker-compose up -d
 
 docker exec slurmctld bash -c 'cd /data && echo "#!/bin/bash

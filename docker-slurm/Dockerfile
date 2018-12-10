@@ -50,8 +50,10 @@ RUN set -x \
 
 RUN groupadd -r slurm --gid=995 && useradd -r -g slurm --uid=995 slurm
 
-ARG SLURM_VERSION=17.11.12
-ARG SLURM_DOWNLOAD_MD5=94fb13b509d23fcf9733018d6c961ca9
+#ARG SLURM_VERSION=17.11.12
+#ARG SLURM_DOWNLOAD_MD5=94fb13b509d23fcf9733018d6c961ca9
+ARG SLURM_VERSION=18.08.3
+ARG SLURM_DOWNLOAD_MD5=a52d8f857ec5a58b2605b643a99dcc71
 ARG SLURM_DOWNLOAD_URL=https://download.schedmd.com/slurm/slurm-"$SLURM_VERSION".tar.bz2
 
 RUN set -x \
@@ -66,7 +68,7 @@ RUN set -x \
     && make install \
     && install -D -m644 etc/cgroup.conf.example /etc/slurm/cgroup.conf.example \
     && install -D -m644 etc/slurm.conf.example /etc/slurm/slurm.conf.example \
-    && install -D -m644 etc/slurm.epilog.clean /etc/slurm/slurm.epilog.clean \
+#    && install -D -m644 etc/slurm.epilog.clean /etc/slurm/slurm.epilog.clean \
     && install -D -m644 etc/slurmdbd.conf.example /etc/slurm/slurmdbd.conf.example \
     && install -D -m644 contribs/slurm_completion_help/slurm_completion.sh /etc/profile.d/slurm_completion.sh \
 #    && install -D -m755 src/plugins/burst_buffer/cray/dw_wlm_cli /opt/cray/dw_wlm/default/bin/dw_wlm_cli \
@@ -101,14 +103,14 @@ COPY burst_buffer.conf /etc/slurm/burst_buffer.conf
 
 RUN mkdir -p /var/lib/data-acc/fs-ansible
 COPY fs-ansible /var/lib/data-acc/fs-ansible
-
 RUN set -x \
     && cd /var/lib/data-acc/fs-ansible \
-    && virtualenv .venv \
-    && . .venv/bin/activate \
-    && pip install -U pip \
-    && pip install -U ansible \
-    && deactivate
+    && virtualenv .venv
+# TODO: need lots more work to get ansible running in here
+#    && . .venv/bin/activate \
+#    && pip install -U pip \
+#    && pip install -U ansible \
+#    && deactivate
 
 # Download and install etcd client
 ARG ETCD_VERSION=3.3.10
@@ -124,6 +126,8 @@ RUN set -x \
 
 COPY bin/dacctl /usr/local/bin/dacctl
 RUN install -D -m755 /usr/local/bin/dacctl /opt/cray/dw_wlm/default/bin/dw_wlm_cli
+# TODO: may want a separate dwstat binary
+RUN install -D -m755 /usr/local/bin/dacctl /opt/cray/dws/default/bin/dwstat
 COPY bin/dacd /usr/local/bin/dacd
 
 RUN touch /var/log/dacctl.log \

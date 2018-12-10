@@ -115,6 +115,11 @@ func runCli(args []string) error {
 					Name:  "nodehostnamefile",
 					Usage: "Path to file containing list of compute nodes.",
 				},
+				// TODO: required when SetExecHost flag set, but currently we just ignore this param!
+				cli.StringFlag{
+					Name:  "jobexecutionnodefile",
+					Usage: "Path to file containing list of login nodes.",
+				},
 			},
 			Action: preRun,
 		},
