@@ -14,10 +14,10 @@ services:
       - "6818"
       - "60001-63000"
     environment:
-      - "MYSQL_HOST={{ slurm_master[0] }}"
+      - "MYSQL_HOST={{ hostvars[groups['slurm_master'][0]].ansible_host }}"
       - "SLURM_DB_HOST=dac-slurm-master"
-      - "SLURM_DB={{ slurm_master[0] }}"
-      - "SLURM_CTL={{ slurm_master[0] }}"
+      - "SLURM_DB={{ hostvars[groups['slurm_master'][0]].ansible_host }}"
+      - "SLURM_CTL={{ hostvars[groups['slurm_master'][0]].ansible_host }}"
       - "SLURM_CTL_HOST=dac-slurm-master"
       - "COMPUTE_NODE=slurm-cpu"
     network_mode: host
