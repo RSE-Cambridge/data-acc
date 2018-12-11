@@ -44,6 +44,12 @@ def main():
     servers = {}
     servers['dac1'] = create_server(conn, 'dac1', image, flavor, network)
     servers['dac2'] = create_server(conn, 'dac2', image, flavor, network)
+    servers['dac3'] = create_server(conn, 'dac3', image, flavor, network)
+    servers['dac-etcd'] = create_server(
+            conn, 'dac-etcd', image, flavor, network)
+    servers['dac-slurm-master'] = create_server(conn, 'dac-slurm-master', image, flavor, network)
+    servers['slurm-cpu1'] = create_server(conn, 'slurm-cpu1', image, flavor, network)
+    servers['slurm-cpu2'] = create_server(conn, 'slurm-cpu2', image, flavor, network)
 
     print "[dac-workers]"
     print "dac1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos" % (
