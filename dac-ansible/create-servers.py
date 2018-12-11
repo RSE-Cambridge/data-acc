@@ -74,8 +74,8 @@ slurm-cpu2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 
 [slurm:children]
 slurm_master
-slurm_workers
-"""
+slurm_workers"""
+
     print inventory_template % (
             servers['dac1'],
             servers['dac2'],
