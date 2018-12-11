@@ -77,6 +77,8 @@
         - dac-slurm-master.dac.hpc.cam.ac.uk-key.pem
         - slurm-cpu1.dac.hpc.cam.ac.uk.pem
         - slurm-cpu1.dac.hpc.cam.ac.uk-key.pem
+        - slurm-cpu2.dac.hpc.cam.ac.uk.pem
+        - slurm-cpu2.dac.hpc.cam.ac.uk-key.pem
 
 - hosts: etcd
   roles:
