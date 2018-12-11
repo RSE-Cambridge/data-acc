@@ -2,6 +2,7 @@
 
 import argparse
 
+from openstack import exceptions
 import openstack
 
 
@@ -18,9 +19,10 @@ def get_connection():
 
 
 def create_server(conn, name):
-    server = conn.compute.get_server(name)
-    if server:
-        return server
+    try:
+        return conn.compute.get_server(name)
+    except exceptions.ResourceNotFound:
+        pass
 
     server = conn.compute.create_server(
         name=SERVER_NAME, image_id=image.id, flavor_id=flavor.id,
@@ -29,11 +31,11 @@ def create_server(conn, name):
 
 
 def main():
+    conn = get_connection()
+
     image = conn.compute.find_image(IMAGE_NAME)
     flavor = conn.compute.find_flavor(FLAVOR_NAME)
     network = conn.network.find_network(NETWORK_NAME)
-
-    conn = get_connection()
 
     servers = {}
     servers['dac1', create_server(conn, 'dac1')]
