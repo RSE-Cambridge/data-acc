@@ -17,7 +17,7 @@
     with_items:
       - "{{ ansible_play_hosts }}"
 
-- hosts: etcd-master[0]
+- hosts: etcd_master[0]
   roles:
     - role: andrewrothstein.pki
       pki_dir: /home/centos/pki-dir
@@ -52,7 +52,7 @@
           sans:
             - slurm-cpu1.dac.hpc.cam.ac.uk
 
-- hosts: etcd-master[0]
+- hosts: etcd_master[0]
   tasks:
     - fetch:
         src: /home/centos/pki-dir/{{item}}
@@ -78,13 +78,13 @@
   roles:
     - role: andrewrothstein.etcd-cluster
 
-- hosts: dac-workers
+- hosts: dac_workers
   become: true
   roles:
     - geerlingguy.repo-epel
     - geerlingguy.pip
 
-- hosts: dac-workers
+- hosts: dac_workers
   become: True
   tasks:
     - name: ensure kernel dev tools available for beegfs client autobuild
@@ -96,11 +96,11 @@
     - selinux:
         state: disabled
 
-- hosts: dac-workers
+- hosts: dac_workers
   roles:
     - role: data-acc
 
-- hosts: dac-workers[0]
+- hosts: dac_workers[0]
   become: true
   become_user: dac
   tasks:
@@ -117,7 +117,7 @@
         dest: ~/.dac.ssh/
         recursive: yes
 
-- hosts: dac-workers
+- hosts: dac_workers
   become: true
   tasks:
     - name: Push Keys for dac user for fs-ansible
@@ -163,7 +163,7 @@
     - geerlingguy.pip
     - geerlingguy.docker
 
-- hosts: slurm-master[0]
+- hosts: slurm_master[0]
   become: true
   vars:
       recreate: false
@@ -217,7 +217,7 @@
       failed_when: "shell_result.rc != 0 and ('already exists' not in shell_result.stdout)"
       when: output.changed
 
-- hosts: slurm-workers
+- hosts: slurm_workers
   become: true
   vars:
       recreate: false

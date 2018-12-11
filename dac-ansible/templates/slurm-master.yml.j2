@@ -26,10 +26,10 @@ services:
     depends_on:
       - mysql
     environment:
-      - "MYSQL_HOST={{ slurm-master[0] }}"
+      - "MYSQL_HOST={{ slurm_master[0] }}"
       - "SLURM_DB_HOST=dac-slurm-master"
-      - "SLURM_DB={{ slurm-master[0] }}"
-      - "SLURM_CTL={{ slurm-master[0] }}"
+      - "SLURM_DB={{ slurm_master[0] }}"
+      - "SLURM_CTL={{ slurm_master[0] }}"
       - "SLURM_CTL_HOST=dac-slurm-master"
       - "COMPUTE_NODE=slurm-cpu"
     network_mode: host
@@ -50,14 +50,14 @@ services:
     depends_on:
       - "slurmdbd"
     environment:
-      - "MYSQL_HOST={{ slurm-master[0] }}"
+      - "MYSQL_HOST={{ slurm_master[0] }}"
       - "SLURM_DB_HOST=dac-slurm-master"
-      - "SLURM_DB={{ slurm-master[0] }}"
-      - "SLURM_CTL={{ slurm-master[0] }}"
+      - "SLURM_DB={{ slurm_master[0] }}"
+      - "SLURM_CTL={{ slurm_master[0] }}"
       - "SLURM_CTL_HOST=dac-slurm-master"
       - "COMPUTE_NODE=slurm-cpu"
       - "ETCDCTL_API=3"
-      - "ETCD_ENDPOINTS=https://{{ etcd-master[0] }}:2379"
+      - "ETCD_ENDPOINTS=https://{{ etcd_master[0] }}:2379"
       - "ETCDCTL_CERT_FILE=/etc/data-acc/pki/dac-slurm-master.dac.hpc.cam.ac.uk.pem"
       - "ETCDCTL_KEY_FILE=/etc/data-acc/pki/dac-slurm-master.dac.hpc.cam.ac.uk-key.pem"
       - "ETCDCTL_CA_FILE=/etc/data-acc/pki/ca.pem"
@@ -69,7 +69,7 @@ services:
       - /etc/data-acc:/etc/data-acc
     environment:
       - "ETCDCTL_API=3"
-      - "ETCD_ENDPOINTS=https://{{ etcd-master[0] }}:2379"
+      - "ETCD_ENDPOINTS=https://{{ etcd_master[0] }}:2379"
       - "ETCDCTL_CERT_FILE=/etc/data-acc/pki/dac-slurm-master.dac.hpc.cam.ac.uk.pem"
       - "ETCDCTL_KEY_FILE=/etc/data-acc/pki/dac-slurm-master.dac.hpc.cam.ac.uk-key.pem"
       - "ETCDCTL_CA_FILE=/etc/data-acc/pki/ca.pem"
@@ -80,7 +80,7 @@ services:
     image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
-      - ETCD_ENDPOINTS={{ etcd-master[0] }}:2381
+      - ETCD_ENDPOINTS={{ etcd_master[0] }}:2381
     command: sh -c "etcdctl watch --prefix burstbuffer/job -- sh -c 'env | grep ETCD_WATCH_'"
     network_mode: host
 
@@ -88,7 +88,7 @@ services:
     image: johngarbutt/data-acc-slurm
     environment:
       - ETCDCTL_API=3
-      - ETCD_ENDPOINTS={{ etcd-master[0] }}:2381
+      - ETCD_ENDPOINTS={{ etcd_master[0] }}:2381
     command: sh -c "etcdctl watch --prefix burstbuffer/brick -- sh -c 'env | grep ETCD_WATCH_'"
     network_mode: host
 
