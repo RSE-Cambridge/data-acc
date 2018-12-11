@@ -4,6 +4,7 @@ Install data-acc demo with ansible working
 
 To run this set of playbooks, please execute:
 
+    ./create-servers.py > hosts
     ansible-playbook master.yml -i hosts
 
 ## Install notes

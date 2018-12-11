@@ -2,7 +2,7 @@
 - name: check for installation of data-acc
   become: yes
   stat:
-    path: '{{data_acc_install_dir}}/{{data_acc_version}}/data-acc/bin/amd64'
+    path: '{{data_acc_install_dir}}/{{data_acc_name}}/bin'
   changed_when: false
   register: data_acc_binary_dir
 
@@ -11,26 +11,29 @@
     - name: download data_acc
       become: yes
       become_user: root
-      get_url:
-        url: '{{data_acc_tgz_url}}'
+      copy:
+        src: ~/{{data_acc_tgz}}
         dest: /tmp/{{data_acc_tgz}}
-        checksum: '{{data_acc_checksum}}'
-        timeout: '{{data_acc_download_timeout_seconds}}'
-        mode: 0644
+#      get_url:
+#        url: '{{data_acc_tgz_url}}'
+#        dest: /tmp/{{data_acc_tgz}}
+#        checksum: '{{data_acc_checksum}}'
+#        timeout: '{{data_acc_download_timeout_seconds}}'
+#        mode: 0644
     - name: create install dir
       become: yes
       become_user: root
       file:
         state: directory
-        path: '{{data_acc_install_dir}}/{{data_acc_version}}'
+        path: '{{data_acc_install_dir}}/{{data_acc_name}}'
     - name: unachive data_acc
       become: yes
       become_user: root
       unarchive:
         remote_src: yes
         src: /tmp/{{data_acc_tgz}}
-        dest: '{{data_acc_install_dir}}/{{data_acc_version}}'
-        creates: '{{data_acc_install_dir}}/{{data_acc_version}}/{{data_acc_name}}'
+        dest: '{{data_acc_install_dir}}/{{data_acc_name}}'
+        creates: '{{data_acc_install_dir}}/{{data_acc_name}}/bin'
   always:
     - name: delete archive
       become: yes
@@ -43,11 +46,11 @@
   become: yes
   become_user: root
   file:
-    src: '{{data_acc_install_dir}}/{{data_acc_version}}/data-acc/bin/amd64/{{item}}'
+    src: '{{data_acc_install_dir}}/{{data_acc_name}}/bin/{{item}}'
     dest: '{{data_acc_install_dir}}/{{item}}'
     state: link
   with_items:
-    - data-acc-brick-host
+    - dacd
     - dacctl
 
 - name: Install python-virtualenv
@@ -61,13 +64,13 @@
   become: yes
   become_user: root
   shell: |
-      cd {{data_acc_install_dir}}/{{data_acc_version}}/data-acc/fs-ansible
+      cd {{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible
       virtualenv .venv
       source .venv/bin/activate
       pip install -U pip
       pip install -U ansible
   args:
-    creates: "{{data_acc_install_dir}}/{{data_acc_version}}/data-acc/fs-ansible/.venv"
+    creates: "{{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible/.venv"
 
 - include_tasks: systemd.yml
   when: data_acc_install_dacd

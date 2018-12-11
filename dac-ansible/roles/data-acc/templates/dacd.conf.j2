@@ -1,7 +1,7 @@
 ETCDCTL_API=3
-ETCDCTL_ENDPOINTS=https://10.43.101.30:2379
+ETCDCTL_ENDPOINTS=https://{{ hostvars[groups['etcd_master'][0]].ansible_host }}:2379
 #ETCD_CLIENT_DEBUG=1
 ETCDCTL_CERT_FILE=/etc/data-acc/pki/{{ inventory_hostname }}.pem
 ETCDCTL_KEY_FILE=/etc/data-acc/pki/{{ inventory_hostname }}-key.pem
 ETCDCTL_CA_FILE=/etc/data-acc/pki/ca.pem
-DAC_ANSIBLE_DIR={{data_acc_install_dir}}/{{data_acc_version}}/data-acc/fs-ansible/
+DAC_ANSIBLE_DIR={{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible/

@@ -1,22 +1,22 @@
-[dac-workers]
+[dac_workers]
 dac1.dac.hpc.cam.ac.uk ansible_host=10.43.101.29 ansible_user=centos
 dac2.dac.hpc.cam.ac.uk ansible_host=10.43.101.31 ansible_user=centos
 dac3.dac.hpc.cam.ac.uk ansible_host=10.43.101.34 ansible_user=centos
 
-[etcd-master]
+[etcd_master]
 dac-etcd.dac.hpc.cam.ac.uk ansible_host=10.43.101.9 ansible_user=centos
 
 [etcd:children]
-etcd-master
-dac-workers
+etcd_master
+dac_workers
 
-[slurm-master]
+[slurm_master]
 dac-slurm-master.dac.hpc.cam.ac.uk ansible_host=10.43.101.5 ansible_user=centos
 
-[slurm-workers]
+[slurm_workers]
 slurm-cpu1.dac.hpc.cam.ac.uk ansible_host=10.43.101.38 ansible_user=centos
 slurm-cpu2.dac.hpc.cam.ac.uk ansible_host=10.43.101.42 ansible_user=centos
 
 [slurm:children]
-slurm-master
-slurm-workers
+slurm_master
+slurm_workers

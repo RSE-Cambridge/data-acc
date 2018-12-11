@@ -17,7 +17,7 @@
     with_items:
       - "{{ ansible_play_hosts }}"
 
-- hosts: etcd-master[0]
+- hosts: etcd_master[0]
   roles:
     - role: andrewrothstein.pki
       pki_dir: /home/centos/pki-dir
@@ -30,7 +30,7 @@
           sans:
             - dac-etcd.dac.hpc.cam.ac.uk
           altips:
-            - '10.43.101.30'
+            - "{{ hostvars[groups['etcd_master'][0]].ansible_host }}"
         - cname: dac1.dac.hpc.cam.ac.uk
           include_localhost: True
           sans:
@@ -51,8 +51,12 @@
           include_localhost: True
           sans:
             - slurm-cpu1.dac.hpc.cam.ac.uk
+        - cname: slurm-cpu2.dac.hpc.cam.ac.uk
+          include_localhost: True
+          sans:
+            - slurm-cpu2.dac.hpc.cam.ac.uk
 
-- hosts: etcd-master[0]
+- hosts: etcd_master[0]
   tasks:
     - fetch:
         src: /home/centos/pki-dir/{{item}}
@@ -73,18 +77,21 @@
         - dac-slurm-master.dac.hpc.cam.ac.uk-key.pem
         - slurm-cpu1.dac.hpc.cam.ac.uk.pem
         - slurm-cpu1.dac.hpc.cam.ac.uk-key.pem
+        - slurm-cpu2.dac.hpc.cam.ac.uk.pem
+        - slurm-cpu2.dac.hpc.cam.ac.uk-key.pem
 
 - hosts: etcd
   roles:
     - role: andrewrothstein.etcd-cluster
+      etcd_master_group_name: etcd_master
 
-- hosts: dac-workers
+- hosts: dac_workers
   become: true
   roles:
     - geerlingguy.repo-epel
     - geerlingguy.pip
 
-- hosts: dac-workers
+- hosts: dac_workers
   become: True
   tasks:
     - name: ensure kernel dev tools available for beegfs client autobuild
@@ -96,11 +103,11 @@
     - selinux:
         state: disabled
 
-- hosts: dac-workers
+- hosts: dac_workers
   roles:
     - role: data-acc
 
-- hosts: dac-workers[0]
+- hosts: dac_workers[0]
   become: true
   become_user: dac
   tasks:
@@ -117,7 +124,7 @@
         dest: ~/.dac.ssh/
         recursive: yes
 
-- hosts: dac-workers
+- hosts: dac_workers
   become: true
   tasks:
     - name: Push Keys for dac user for fs-ansible
@@ -154,6 +161,7 @@
   vars:
     pip_install_packages:
       - name: docker
+      - name: docker-compose
     docker_users:
       - "centos"
     docker_compose_version: "1.22.0"
@@ -162,23 +170,19 @@
     - geerlingguy.pip
     - geerlingguy.docker
 
-- hosts: slurm-master[0]
+- hosts: slurm_master[0]
   become: true
   vars:
       recreate: false
   tasks:
     - file:
-        path: /var/lib/slurm-docker
+        path: /var/lib/slurm-docker/slurm-master
         state: directory
         mode: 0755
     - name: docker service description to host
-      synchronize:
-        mode: push
-        src: "{{ playbook_dir }}/slurm-master"
-        dest:  /var/lib/slurm-docker/
-        recursive: yes
-        links: no
-        copy_links: yes
+      template:
+        src: slurm-master.yml.j2
+        dest: /var/lib/slurm-docker/slurm-master/docker-compose.yml
     - file:
         path: /etc/data-acc/pki
         state: directory
@@ -198,15 +202,19 @@
         - '~/pki-dir/{{inventory_hostname}}.pem'
         - '~/pki-dir/{{inventory_hostname}}-key.pem'
         - '~/pki-dir/ca.pem'
+    - name: pull docker images
+      # https://github.com/ansible/ansible/issues/47978
+      command: docker-compose pull
+      args:
+        chdir: '/var/lib/slurm-docker/slurm-master'
+      changed_when: False
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-master
-        pull: yes
         state: absent
         remove_volumes: yes
       when: recreate|bool
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-master
-        pull: yes
       register: output
     - name: ensure slurm cluster registered in db
       shell: |
@@ -216,23 +224,19 @@
       failed_when: "shell_result.rc != 0 and ('already exists' not in shell_result.stdout)"
       when: output.changed
 
-- hosts: slurm-workers
+- hosts: slurm_workers
   become: true
   vars:
       recreate: false
   tasks:
     - file:
-        path: /var/lib/slurm-docker/
+        path: /var/lib/slurm-docker/slurm-worker
         state: directory
         mode: 0755
     - name: docker service description to host
-      synchronize:
-        mode: push
-        src: "{{ playbook_dir }}/slurm-worker"
-        dest:  /var/lib/slurm-docker/
-        recursive: yes
-        links: no
-        copy_links: yes
+      template:
+        src: slurm-worker.yml.j2
+        dest: /var/lib/slurm-docker/slurm-worker/docker-compose.yml
     - file:
         path: /etc/data-acc/pki
         state: directory
@@ -252,12 +256,16 @@
         - '~/pki-dir/{{inventory_hostname}}.pem'
         - '~/pki-dir/{{inventory_hostname}}-key.pem'
         - '~/pki-dir/ca.pem'
+    - name: pull docker images
+      # https://github.com/ansible/ansible/issues/47978
+      command: docker-compose pull
+      args:
+        chdir: '/var/lib/slurm-docker/slurm-worker'
+      changed_when: False
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-worker
-        pull: yes
         state: absent
         remove_volumes: yes
       when: recreate|bool
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-worker
-        pull: yes

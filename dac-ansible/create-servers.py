@@ -53,29 +53,29 @@ def main():
     servers['slurm-cpu2'] = create_server(
             conn, 'slurm-cpu2', image, flavor, network)
 
-    inventory_template = """[dac-workers]
+    inventory_template = """[dac_workers]
 dac1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 dac2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 dac3.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 
-[etcd-master]
+[etcd_master]
 dac-etcd.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 
 [etcd:children]
-etcd-master
-dac-workers
+etcd_master
+dac_workers
 
-[slurm-master]
+[slurm_master]
 dac-slurm-master.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 
-[slurm-workers]
+[slurm_workers]
 slurm-cpu1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 slurm-cpu2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 
 [slurm:children]
-slurm-master
-slurm-workers
-"""
+slurm_master
+slurm_workers"""
+
     print inventory_template % (
             servers['dac1'],
             servers['dac2'],

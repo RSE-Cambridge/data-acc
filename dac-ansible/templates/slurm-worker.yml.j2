@@ -14,7 +14,12 @@ services:
       - "6818"
       - "60001-63000"
     environment:
-      - SLURM_CTL=10.43.101.34
+      - "MYSQL_HOST={{ hostvars[groups['slurm_master'][0]].ansible_host }}"
+      - "SLURM_DB_HOST=dac-slurm-master"
+      - "SLURM_DB={{ hostvars[groups['slurm_master'][0]].ansible_host }}"
+      - "SLURM_CTL={{ hostvars[groups['slurm_master'][0]].ansible_host }}"
+      - "SLURM_CTL_HOST=dac-slurm-master"
+      - "COMPUTE_NODE=slurm-cpu"
     network_mode: host
 
 volumes:
