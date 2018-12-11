@@ -47,7 +47,6 @@ The following tests are currently expected to work:
 The following tests are currently a work in progress:
 
 * full end to end test deployment using ansible to install systemd unit files, with SSL certs for etcd, aimed at testing the Ansible inside virtual machines (./dac-ansible)
-* older more broken end to end deployment using docker-compose (./ansible)
 * functional tests for etcd (make test-func runs dac-func-test golang binary)
 
 ### Packages

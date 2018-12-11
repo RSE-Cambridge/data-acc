@@ -1,6 +1,6 @@
-# install data-acc demo (no slurm)
+# install data-acc
 
-Install data-acc demo with ansible
+Install data-acc demo with ansible working
 
 To run this set of playbooks, please execute:
 
