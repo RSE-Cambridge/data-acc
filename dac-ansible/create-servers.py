@@ -42,8 +42,8 @@ def main():
         raise Exception("Can't find %s" % NETWORK_NAME)
 
     servers = {}
-    servers['dac1', create_server(conn, 'dac1', image, flavor, network)]
-    servers['dac2', create_server(conn, 'dac2', image, flavor, network)]
+    servers['dac1'] = create_server(conn, 'dac1', image, flavor, network)
+    servers['dac2'] = create_server(conn, 'dac2', image, flavor, network)
 
     print "[dac-workers]"
     print "dac1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos" % (
