@@ -18,7 +18,7 @@ def get_connection():
 
 def create_server(conn, name, image, flavor, network):
     try:
-        return conn.compute.get_server(name)
+        return conn.compute.find_server(name)
     except exceptions.ResourceNotFound:
         pass
 
