@@ -83,6 +83,7 @@
 - hosts: etcd
   roles:
     - role: andrewrothstein.etcd-cluster
+      etcd_master_group_name: etcd_master
 
 - hosts: dac_workers
   become: true
