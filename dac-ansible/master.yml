@@ -51,6 +51,10 @@
           include_localhost: True
           sans:
             - slurm-cpu1.dac.hpc.cam.ac.uk
+        - cname: slurm-cpu2.dac.hpc.cam.ac.uk
+          include_localhost: True
+          sans:
+            - slurm-cpu2.dac.hpc.cam.ac.uk
 
 - hosts: etcd_master[0]
   tasks:
