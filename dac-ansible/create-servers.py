@@ -52,8 +52,7 @@ def main():
     servers['slurm-cpu2'] = create_server(
             conn, 'slurm-cpu2', image, flavor, network)
 
-    inventory_template = """
-[dac-workers]
+    inventory_template = """[dac-workers]
 dac1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 dac2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 dac3.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
