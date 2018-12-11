@@ -1,4 +1,19 @@
 ---
+- hosts: all
+  become: true
+  tasks:
+  - name: configure default gateway
+    command: route add default gw 10.43.255.1 || true
+  - name: Create entries in /etc/hosts for all nodes
+    lineinfile:
+      path: /etc/hosts
+      line: "{{ hostvars[item]['ansible_host'] }} {{ hostvars[item]['ansible_hostname'] }} {{ item }}"
+      regexp: "^.* {{ item }}$"
+      create: no
+      state: present
+    with_items:
+      - "{{ ansible_play_hosts }}"
+
 - hosts: etcd-master[0]
   roles:
     - role: andrewrothstein.pki
@@ -55,21 +70,6 @@
         - dac-slurm-master.dac.hpc.cam.ac.uk-key.pem
         - slurm-cpu1.dac.hpc.cam.ac.uk.pem
         - slurm-cpu1.dac.hpc.cam.ac.uk-key.pem
-
-- hosts: all
-  become: true
-  tasks:
-  - name: configure default gateway
-    command: route add default gw 10.43.255.1 || true
-  - name: Create entries in /etc/hosts for all nodes
-    lineinfile:
-      path: /etc/hosts
-      line: "{{ hostvars[item]['ansible_host'] }} {{ hostvars[item]['ansible_hostname'] }} {{ item }}"
-      regexp: "^.* {{ item }}$"
-      create: no
-      state: present
-    with_items:
-      - "{{ ansible_play_hosts }}"
 
 - hosts: etcd
   roles:
