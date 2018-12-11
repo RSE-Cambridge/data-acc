@@ -39,6 +39,7 @@ deps:
 
 tar: clean buildlocal
 	tar -cvzf ./bin/data-acc-`git describe --tag`.tgz ./bin/dacd ./bin/dacctl ./fs-ansible ./tools/*.sh
+	sha256sum ./bin/data-acc-`git describe --tag`.tgz > ./bin/data-acc-`git describe --tag`.tgz.sha256
 
 dockercmd=docker run --rm -it -v ~/go:/go -w /go/src/github.com/RSE-Cambridge/data-acc golang:1.11
 
