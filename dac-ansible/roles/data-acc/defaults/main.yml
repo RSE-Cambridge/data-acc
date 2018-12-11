@@ -1,5 +1,5 @@
 ---
-data_acc_version: dac-0.4
+data_acc_version: v0.5
 data_acc_platform: linux-amd64
 data_acc_mirror: https://github.com/RSE-Cambridge/data-acc/releases/download
 data_acc_install_dir: /usr/local/bin
@@ -8,10 +8,8 @@ data_acc_download_timeout_seconds: 600
 data_acc_install_dacd: True
 data_acc_launch: True
 
-#data_acc_name: data_acc-{{data_acc_version}}-{{data_acc_platform}}
-data_acc_name: data-acc-brick-host
-#data_acc_tgz: '{{data_acc_name}}.tar.gz'
-data_acc_tgz: 'data-acc.tgz'
+data_acc_name: 'data-acc-{{data_acc_version}}'
+data_acc_tgz: '{{data_acc_name}}.tar.gz'
 #data_acc_tgz_url: '{{data_acc_mirror}}/{{data_acc_version}}/{{data_acc_tgz}}'
 data_acc_tgz_url: 'https://github.com/RSE-Cambridge/data-acc/releases/download/v0.5/data-acc-v0.5.tgz'
 data_acc_checksum: 'sha256:67bf35aae21efa8bd9111959dd596e2eee0aed56c897e3ecdd25f7bc247de8c7'
