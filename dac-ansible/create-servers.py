@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from openstack import exceptions
 import openstack
 
 
@@ -71,6 +70,7 @@ dac-slurm-master.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 
 [slurm-workers]
 slurm-cpu1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
+slurm-cpu2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 
 [slurm:children]
 slurm-master
