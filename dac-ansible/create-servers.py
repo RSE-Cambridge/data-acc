@@ -47,15 +47,44 @@ def main():
     servers['dac3'] = create_server(conn, 'dac3', image, flavor, network)
     servers['dac-etcd'] = create_server(
             conn, 'dac-etcd', image, flavor, network)
-    servers['dac-slurm-master'] = create_server(conn, 'dac-slurm-master', image, flavor, network)
-    servers['slurm-cpu1'] = create_server(conn, 'slurm-cpu1', image, flavor, network)
-    servers['slurm-cpu2'] = create_server(conn, 'slurm-cpu2', image, flavor, network)
+    servers['dac-slurm-master'] = create_server(
+            conn, 'dac-slurm-master', image, flavor, network)
+    servers['slurm-cpu1'] = create_server(
+            conn, 'slurm-cpu1', image, flavor, network)
+    servers['slurm-cpu2'] = create_server(
+            conn, 'slurm-cpu2', image, flavor, network)
 
-    print "[dac-workers]"
-    print "dac1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos" % (
-            servers['dac1'].access_ipv4)
-    print "dac2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos" % (
-            servers['dac2'].access_ipv4)
+    inventory_template = """
+[dac-workers]
+dac1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
+dac2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
+dac3.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
+
+[etcd-master]
+dac-etcd.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
+
+[etcd:children]
+etcd-master
+dac-workers
+
+[slurm-master]
+dac-slurm-master.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
+
+[slurm-workers]
+slurm-cpu1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
+
+[slurm:children]
+slurm-master
+slurm-workers
+"""
+    print inventory_template % (
+            servers['dac1'].access_ipv4,
+            servers['dac2'].access_ipv4,
+            servers['dac3'].access_ipv4,
+            servers['dac-etcd'].access_ipv4,
+            servers['dac-slurm-master'].access_ipv4,
+            servers['slurm-cpu1'].access_ipv4,
+            servers['slurm-cpu2'].access_ipv4)
 
 
 if __name__ == '__main__':
