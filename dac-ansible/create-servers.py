@@ -32,8 +32,14 @@ def main():
     conn = get_connection()
 
     image = conn.compute.find_image(IMAGE_NAME)
+    if image is None:
+        raise Exception("Can't find %s" % IMAGE_NAME)
     flavor = conn.compute.find_flavor(FLAVOR_NAME)
+    if flavor is None:
+        raise Exception("Can't find %s" % FLAVOR_NAME)
     network = conn.network.find_network(NETWORK_NAME)
+    if network is None:
+        raise Exception("Can't find %s" % NETWORK_NAME)
 
     servers = {}
     servers['dac1', create_server(conn, 'dac1', image, flavor, network)]
