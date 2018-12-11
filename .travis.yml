@@ -3,7 +3,5 @@ language: go
 services:
     - docker
 script:
-    - make build
-    - test -f bin/amd64/fakewarp
-    - make container
-    - make test
+    - make
+    - make tar

@@ -47,7 +47,6 @@ The following tests are currently expected to work:
 The following tests are currently a work in progress:
 
 * full end to end test deployment using ansible to install systemd unit files, with SSL certs for etcd, aimed at testing the Ansible inside virtual machines (./dac-ansible)
-* older more broken end to end deployment using docker-compose (./ansible)
 * functional tests for etcd (make test-func runs dac-func-test golang binary)
 
 ### Packages
@@ -93,6 +92,9 @@ https://golang.org/doc/install#testing
 
 dep 0.5.0 is used to manage dependencies. To install dep please read:
 https://golang.github.io/dep/docs/installation.html#binary-installation
+
+gomock v1.1.1 is used to generate mocks. The version is fixed to stop
+conflicts with etcd 3.3.x.
 
 To build all the golang code and run unit tests locally:
 ```

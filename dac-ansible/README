@@ -1,6 +1,6 @@
-# install data-acc demo (no slurm)
+# install data-acc
 
-Install data-acc demo with ansible
+Install data-acc demo with ansible working
 
 To run this set of playbooks, please execute:
 
@@ -13,5 +13,5 @@ You may find this useful to run the above ansible-playbook command:
     virtualenv .venv
     . .venv/bin/activate
     pip install -U pip
-    pip install -U ansible
+    pip install -U ansible openstacksdk
     ansible-galaxy install -r requirements.yml

@@ -14,35 +14,37 @@
 all: deps buildlocal test format
 
 buildlocal:
-		mkdir -p `pwd`/bin
-		GOBIN=`pwd`/bin go install -v ./...
-		ls -l `pwd`/bin
+	mkdir -p `pwd`/bin
+	GOBIN=`pwd`/bin go install -v ./...
+	ls -l `pwd`/bin
 
 format:
-		go fmt ./...
+	go fmt ./...
 
 test: 
-		go test -cover -race ./...
-		go vet ./...
+	./build/rebuild_mocks.sh
+	go test -cover -race ./...
+	go vet ./...
 
 test-func:
-		./build/func_test.sh
+	./build/func_test.sh
 
 clean:
-		go clean
-		rm -rf `pwd`/bin
-		rm -rf /tmp/etcd-download
+	go clean
+	rm -rf `pwd`/bin
+	rm -rf /tmp/etcd-download
 
 deps:
-		dep ensure
+	dep ensure
 
 tar: clean buildlocal
-		tar -cvzf ./bin/data-acc-`git describe --tag`.tgz ./bin/dacd ./bin/dacctl ./fs-ansible ./tools/*.sh
+	tar -cvzf ./bin/data-acc-`git describe --tag`.tgz ./bin/dacd ./bin/dacctl ./fs-ansible ./tools/*.sh
+	sha256sum ./bin/data-acc-`git describe --tag`.tgz > ./bin/data-acc-`git describe --tag`.tgz.sha256
 
 dockercmd=docker run --rm -it -v ~/go:/go -w /go/src/github.com/RSE-Cambridge/data-acc golang:1.11
 
 docker:
-		$(dockercmd) go install -v ./...
+	$(dockercmd) go install -v ./...
 
 installdep:
 	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
