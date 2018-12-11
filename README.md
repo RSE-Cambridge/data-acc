@@ -93,6 +93,9 @@ https://golang.org/doc/install#testing
 dep 0.5.0 is used to manage dependencies. To install dep please read:
 https://golang.github.io/dep/docs/installation.html#binary-installation
 
+gomock v1.1.1 is used to generate mocks. The version is fixed to stop
+conflicts with etcd 3.3.x.
+
 To build all the golang code and run unit tests locally:
 ```
 cd ~/go/src/github.com/RSE-Cambridge/data-acc

@@ -1,4 +1,15 @@
+#!/bin/bash
+
 set -eux
+
+echo "Install gomock"
+
+go get github.com/golang/mock/gomock || True
+# note we use v1.1.1 tag of gomock to not conflict with etcd
+pushd ../../golang/mock
+git checkout v1.1.1
+popd
+go install github.com/golang/mock/mockgen || True
 
 echo "Regenerate mocks:"
 
