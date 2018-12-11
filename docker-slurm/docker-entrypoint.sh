@@ -6,6 +6,7 @@ echo slurmdb:$SLURM_DB
 echo slurmdb_host:$SLURM_DB_HOST
 echo slurmctl:$SLURM_CTL
 echo slurmctl_host:$SLURM_CTL_HOST
+echo compute_prefix:$COMPUTE_NODE
 
 export NOW=`date`
 echo $NOW

@@ -1,0 +1,29 @@
+version: "2.2"
+
+services:
+  slurmd:
+    image: johngarbutt/data-acc-slurm
+    command: ["slurmd"]
+    container_name: "slurmd"
+    volumes:
+      - etc_munge:/etc/munge
+      - etc_slurm:/etc/slurm
+      - slurm_jobdir:/data
+      - var_log_slurm:/var/log/slurm
+    expose:
+      - "6818"
+      - "60001-63000"
+    environment:
+      - "MYSQL_HOST={{ slurm-master[0] }}"
+      - "SLURM_DB_HOST=dac-slurm-master"
+      - "SLURM_DB={{ slurm-master[0] }}"
+      - "SLURM_CTL={{ slurm-master[0] }}"
+      - "SLURM_CTL_HOST=dac-slurm-master"
+      - "COMPUTE_NODE=slurm-cpu"
+    network_mode: host
+
+volumes:
+  etc_munge:
+  etc_slurm:
+  slurm_jobdir:
+  var_log_slurm:

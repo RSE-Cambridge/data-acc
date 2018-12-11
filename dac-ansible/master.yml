@@ -169,17 +169,13 @@
       recreate: false
   tasks:
     - file:
-        path: /var/lib/slurm-docker
+        path: /var/lib/slurm-docker/slurm-master
         state: directory
         mode: 0755
     - name: docker service description to host
-      synchronize:
-        mode: push
-        src: "{{ playbook_dir }}/slurm-master"
-        dest:  /var/lib/slurm-docker/
-        recursive: yes
-        links: no
-        copy_links: yes
+      template:
+        src: slurm-master.yml.j2
+        dest: /var/lib/slurm-docker/slurm-master/docker-compose.yml
     - file:
         path: /etc/data-acc/pki
         state: directory
@@ -227,17 +223,13 @@
       recreate: false
   tasks:
     - file:
-        path: /var/lib/slurm-docker/
+        path: /var/lib/slurm-docker/slurm-worker
         state: directory
         mode: 0755
     - name: docker service description to host
-      synchronize:
-        mode: push
-        src: "{{ playbook_dir }}/slurm-worker"
-        dest:  /var/lib/slurm-docker/
-        recursive: yes
-        links: no
-        copy_links: yes
+      template:
+        src: slurm-worker.yml.j2
+        dest: /var/lib/slurm-docker/slurm-worker/docker-compose.yml
     - file:
         path: /etc/data-acc/pki
         state: directory
