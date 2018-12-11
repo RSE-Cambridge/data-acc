@@ -107,7 +107,7 @@
 - hosts: dac_workers
   become: True
   vars:
-      lustre_release: "2.11.0"
+      lustre_release: "2.10.5"
   tasks:
     - name: enable lustre server repo
       yum_repository:
