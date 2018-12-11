@@ -30,7 +30,7 @@
           sans:
             - dac-etcd.dac.hpc.cam.ac.uk
           altips:
-            - '10.43.101.30'
+            - "{{ hostvars[groups['etcd_master'][0]].ansible_host }}"
         - cname: dac1.dac.hpc.cam.ac.uk
           include_localhost: True
           sans:
