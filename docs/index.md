@@ -1,12 +1,12 @@
 # Data Accelerator
 
-[![Build Status](https://www.travis-ci.org/RSE-Cambridge/burstbuffer.svg?branch=master)](https://www.travis-ci.org/RSE-Cambridge/burstbuffer)
+[![CircleCI](https://circleci.com/gh/RSE-Cambridge/data-acc.svg?style=svg&circle-token=4042ee71fb486efc320ce64b7b568afd4f9e0b38)](https://circleci.com/gh/RSE-Cambridge/data-acc)
 
 The Data Accelerator project is working to orchestrate the creation of a burst
 buffers built using commodity hardware and existing parallel file systems.
 
 The initial focus is around exposing 0.5PB of NVMe storage via the Cambridge
-University CSD3 cluster's Slurm. Currently evaluating using either Lustre 2.10
+University CSD3 cluster's Slurm. Currently evaluating using either Lustre 2.11
 or BeeGFS 7.
 
 > **NOTE:** This is a work in progress!!
@@ -75,7 +75,7 @@ please see: https://github.com/RSE-Cambridge/data-acc
 
 ### Slurm Integration Testing
 
-Currently we are targeting testing at Slurm 17.11.7
+Currently we are targeting testing at Slurm 18.08.x
 
 The packing is based on:
 https://github.com/giovtorres/slurm-docker-cluster
