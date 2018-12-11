@@ -21,6 +21,7 @@ def create_server(conn, name, image, flavor, network):
         server = conn.compute.create_server(
             name=name, image_id=image.id, flavor_id=flavor.id,
             networks=[{"uuid": network.id}], key_name=KEYPAIR_NAME)
+        server = conn.compute.wait_for_server(server)
 
     details = conn.compute.get_server(server.id)
     return details.addresses[NETWORK_NAME][0]['addr']
