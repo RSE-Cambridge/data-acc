@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import argparse
-
 from openstack import exceptions
 import openstack
 
@@ -13,20 +11,20 @@ KEYPAIR_NAME = "usual"
 
 
 def get_connection():
-    #openstack.enable_logging(debug=True)
+    # openstack.enable_logging(debug=True)
     conn = openstack.connect()
     return conn
 
 
-def create_server(conn, name):
+def create_server(conn, name, image, flavor, network):
     try:
         return conn.compute.get_server(name)
     except exceptions.ResourceNotFound:
         pass
 
     server = conn.compute.create_server(
-        name=SERVER_NAME, image_id=image.id, flavor_id=flavor.id,
-        networks=[{"uuid": network.id}], key_name=keypair.name)
+        name=name, image_id=image.id, flavor_id=flavor.id,
+        networks=[{"uuid": network.id}], key_name=KEYPAIR_NAME)
     return server
 
 
@@ -38,12 +36,14 @@ def main():
     network = conn.network.find_network(NETWORK_NAME)
 
     servers = {}
-    servers['dac1', create_server(conn, 'dac1')]
-    servers['dac2', create_server(conn, 'dac2')]
+    servers['dac1', create_server(conn, 'dac1', image, flavor, network)]
+    servers['dac2', create_server(conn, 'dac2', image, flavor, network)]
 
     print "[dac-workers]"
-    print "dac1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos" % servers['dac1'].access_ipv4
-    print "dac2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos" % servers['dac2'].access_ipv4
+    print "dac1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos" % (
+            servers['dac1'].access_ipv4)
+    print "dac2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos" % (
+            servers['dac2'].access_ipv4)
 
 
 if __name__ == '__main__':
