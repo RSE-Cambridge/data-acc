@@ -1,6 +1,6 @@
 ---
 - set_fact:
-    osts: "{{ vars[fs_name + '_osts'] | default(omit) }}"
+    osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
     mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
     mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
     mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
