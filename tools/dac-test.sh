@@ -1,8 +1,14 @@
 set -eux
 
+# NOTE: must be run as the dac user
+
 set -a
 . /etc/data-acc/dacd.conf
 set +a
+
+# Ensure dacctl can write to its log
+sudo touch /var/log/dacctl.log
+sudo chown dac /var/log/dacctl.log
 
 /usr/local/bin/dacctl show_sessions
 /usr/local/bin/dacctl show_instances
