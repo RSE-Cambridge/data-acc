@@ -174,6 +174,7 @@ func mountRemoteFilesystem(fsType FSType, hostname string, mgtHost string, fsnam
 }
 
 func mountLustre(hostname string, mgtHost string, fsname string, directory string) error {
+	// TODO: do we really need to do modprobe here? seems to need the server install to work
 	if err := runner.Execute(hostname, "modprobe -v lustre"); err != nil {
 		return err
 	}
