@@ -161,9 +161,30 @@
         recursive: yes
         delete: yes
 
-- hosts: dac_workers
+- hosts: dac_workers:slurm_workers
   become: true
   tasks:
+    - name: create data_acc group
+      become: yes
+      become_user: root
+      group:
+        name: dac
+        state: present
+    - name: create data_acc group
+      become: yes
+      become_user: root
+      group:
+        name: etcd
+        state: present
+    - name: create data_acc user
+      become: yes
+      become_user: root
+      user:
+        name: dac
+        group: dac
+        groups: etcd,wheel # Get access to etcd private key, and sudo for ansible
+        home: /var/lib/dac
+        state: present
     - name: Push Keys for dac user for fs-ansible
       synchronize:
         mode: push
