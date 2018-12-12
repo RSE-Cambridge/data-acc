@@ -11,7 +11,7 @@ func TestPlugin_GetInventory(t *testing.T) {
 		Name: "1", UUID: "abcdefgh", ClientPort: 10002,
 		Attachments: []registry.Attachment{
 			{Hostname: "cpu1"},
-			{Hostname: "cpu3"},
+			{Hostname: "cpu2"},
 		},
 	}
 	brickAllocations := []registry.BrickAllocation{

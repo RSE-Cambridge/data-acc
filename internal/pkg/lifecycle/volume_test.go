@@ -13,16 +13,17 @@ func TestVolumeLifecycleManager_Mount(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
 
-	volume := registry.Volume{Name: "vol1", SizeBricks: 3, State: registry.BricksProvisioned}
+	volume := registry.Volume{
+		Name: "vol1", SizeBricks: 3, State: registry.BricksProvisioned, JobName: "job1"}
 	vlm := NewVolumeLifecycleManager(mockVolReg, nil, volume)
 	hosts := []string{"host1", "host2"}
 
-	mockVolReg.EXPECT().UpdateVolumeAttachments(volume.Name, map[string]registry.Attachment{
-		"host1": {Hostname: "host1", State: registry.RequestAttach, Job: "job1"},
-		"host2": {Hostname: "host2", State: registry.RequestAttach, Job: "job1"},
+	mockVolReg.EXPECT().UpdateVolumeAttachments(volume.Name, []registry.Attachment{
+		{Hostname: "host1", State: registry.RequestAttach, Job: "job1"},
+		{Hostname: "host2", State: registry.RequestAttach, Job: "job1"},
 	})
 	mockVolReg.EXPECT().WaitForCondition(volume.Name, gomock.Any())
 
-	err := vlm.Mount(hosts, "job1")
+	err := vlm.Mount(hosts)
 	assert.Nil(t, err)
 }

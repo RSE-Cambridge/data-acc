@@ -230,7 +230,7 @@ func (fwa *dacctlActions) PreRun(c CliContext) error {
 			return err
 		}
 		vlm := fwa.getVolumeLifecycleManger(volume)
-		if err := vlm.Mount(hosts, job.Name); err != nil {
+		if err := vlm.Mount(hosts); err != nil {
 			return err
 		}
 	}
@@ -241,7 +241,7 @@ func (fwa *dacctlActions) PreRun(c CliContext) error {
 			return err
 		}
 		vlm := fwa.getVolumeLifecycleManger(volume)
-		if err := vlm.Mount(hosts, job.Name); err != nil {
+		if err := vlm.Mount(hosts); err != nil {
 			return err
 		}
 	}
@@ -267,7 +267,7 @@ func (fwa *dacctlActions) PostRun(c CliContext) error {
 			return err
 		}
 		vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
-		if err := vlm.Unmount(job.AttachHosts, job.Name); err != nil {
+		if err := vlm.Unmount(job.AttachHosts); err != nil {
 			return err
 		}
 	}
@@ -278,7 +278,7 @@ func (fwa *dacctlActions) PostRun(c CliContext) error {
 			return err
 		}
 		vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
-		if err := vlm.Unmount(job.AttachHosts, job.Name); err != nil {
+		if err := vlm.Unmount(job.AttachHosts); err != nil {
 			return err
 		}
 	}
