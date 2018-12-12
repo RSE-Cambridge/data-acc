@@ -103,6 +103,42 @@
     - selinux:
         state: disabled
 
+# TODO: should this be part of fs-ansible really?
+- hosts: dac_workers
+  become: True
+  vars:
+      lustre_release: "2.10.5"
+  tasks:
+    - name: enable lustre server repo
+      yum_repository:
+        name: lustre-server
+        description: lustre-server
+        file: lustre-repo
+        baseurl: https://downloads.whamcloud.com/public/lustre/lustre-{{ lustre_release }}/el7/patchless-ldiskfs-server
+        gpgcheck: no
+    - name: enable lustre client repo
+      yum_repository:
+        name: lustre-client
+        description: lustre-client
+        file: lustre-repo
+        baseurl: https://downloads.whamcloud.com/public/lustre/lustre-{{ lustre_release }}/el7/client
+        gpgcheck: no
+    - name: enable lustre e2fs repo
+      yum_repository:
+        name: e2fsprogs-wc
+        description: e2fsprogs-wc
+        file: lustre-repo
+        baseurl: https://downloads.whamcloud.com/public/e2fsprogs/latest/el7
+        gpgcheck: no
+    - name: Install Lustre Server
+      yum:
+        name: "lustre-{{ lustre_release }}"
+        state: present
+    - name: Install Lustre Client
+      yum:
+        name: "lustre-client-dkms-{{ lustre_release }}"
+        state: present
+
 - hosts: dac_workers
   roles:
     - role: data-acc
@@ -123,6 +159,7 @@
         src:  /var/lib/dac/.ssh/
         dest: ~/.dac.ssh/
         recursive: yes
+        delete: yes
 
 - hosts: dac_workers
   become: true

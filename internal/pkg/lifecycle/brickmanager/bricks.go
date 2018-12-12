@@ -139,7 +139,7 @@ func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume,
 }
 
 // TODO: should not be hardcoded here
-var FSType = ansible.BeegFS
+var FSType = ansible.Lustre
 var plugin = ansible.GetPlugin(FSType)
 
 func provisionNewVolume(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume) {

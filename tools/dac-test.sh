@@ -1,8 +1,14 @@
 set -eux
 
+# NOTE: must be run as the dac user
+
 set -a
 . /etc/data-acc/dacd.conf
 set +a
+
+# Ensure dacctl can write to its log
+sudo touch /var/log/dacctl.log
+sudo chown dac /var/log/dacctl.log
 
 /usr/local/bin/dacctl show_sessions
 /usr/local/bin/dacctl show_instances
@@ -30,3 +36,6 @@ sleep 15
 sleep 15
 
 /usr/local/bin/etcdctl --key /etc/data-acc/pki/`hostname`.dac.hpc.cam.ac.uk-key.pem --cert /etc/data-acc/pki/`hostname`.dac.hpc.cam.ac.uk.pem --cacert /etc/data-acc/pki/ca.pem get --prefix ''
+
+# show debug info
+less /var/log/dacctl.log

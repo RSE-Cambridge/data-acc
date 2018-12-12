@@ -7,6 +7,12 @@ This is a multi-container Slurm cluster using docker-compose.
 The compose file creates named volumes for persistent storage
 of MySQL data files as well as Slurm state and log directories.
 
+For a quick end to end demo, including rebuilding the container
+image, please run:
+```console
+$ ./demo.sh
+```
+
 ## Containers and Volumes
 
 The compose file will run the following containers:
@@ -30,7 +36,7 @@ The compose file will create the following named volumes:
 Build the image locally:
 
 ```console
-$ docker build -t slurm-docker-cluster:17.02.9 .
+$ docker-compose build
 ```
 
 ## Starting the Cluster

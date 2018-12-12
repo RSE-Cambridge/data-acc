@@ -43,10 +43,10 @@ The following tests are currently expected to work:
 
 * unit tests (make tests)
 * Slurm integration tests using Docker compose (see below on how to run ./docker-slurm)
+* Full end to end test deployment using ansible to install systemd unit files, with SSL certs for etcd, aimed at testing the Ansible inside virtual machines (./dac-ansible)
 
 The following tests are currently a work in progress:
 
-* full end to end test deployment using ansible to install systemd unit files, with SSL certs for etcd, aimed at testing the Ansible inside virtual machines (./dac-ansible)
 * functional tests for etcd (make test-func runs dac-func-test golang binary)
 
 ### Packages
@@ -77,12 +77,12 @@ To see end to end demo with Slurm 18.08
 (but without running fs-ansible and not ssh-ing to compute nodes to mount):
 ```
 cd docker-slurm
-./update_burstbuffer.sh
+./demo.sh
 ```
 
 To clean up after the demo, including removing all docker volumes:
 ```
-docker-compose down --vol
+docker-compose down --vol --rmi all
 ```
 
 ## Golang Build and Test (using make)
