@@ -104,7 +104,7 @@
         state: disabled
 
 # TODO: should this be part of fs-ansible really?
-- hosts: dac_workers
+- hosts: dac_workers:slurm_workers
   become: True
   vars:
       lustre_release: "2.10.5"
@@ -130,10 +130,18 @@
         file: lustre-repo
         baseurl: https://downloads.whamcloud.com/public/e2fsprogs/latest/el7
         gpgcheck: no
+
+- hosts: dac_workers
+  become: True
+  tasks:
     - name: Install Lustre Server
       yum:
         name: "lustre-{{ lustre_release }}"
         state: present
+
+- hosts: dac_workers:slurm_workers
+  become: True
+  tasks:
     - name: Install Lustre Client
       yum:
         name: "lustre-client-dkms-{{ lustre_release }}"
