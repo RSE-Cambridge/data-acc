@@ -159,6 +159,7 @@
         src:  /var/lib/dac/.ssh/
         dest: ~/.dac.ssh/
         recursive: yes
+        delete: yes
 
 - hosts: dac_workers
   become: true
