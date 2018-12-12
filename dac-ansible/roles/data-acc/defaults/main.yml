@@ -1,5 +1,5 @@
 ---
-data_acc_version: v0.5
+data_acc_version: v0.6
 data_acc_platform: linux-amd64
 data_acc_mirror: https://github.com/RSE-Cambridge/data-acc/releases/download
 data_acc_install_dir: /usr/local/bin
