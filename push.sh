@@ -1,7 +1,7 @@
 #make clean
 #make
 #make tar
-scp ./bin/*.tgz jmfg2@login-cpu.hpc.cam.ac.uk:~/
+scp `ls ./bin/*.tgz` jmfg2@login-cpu.hpc.cam.ac.uk:~/data-acc-v0.5.tgz
 
 cd docker-slurm
 #./build.sh
