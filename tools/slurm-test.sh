@@ -53,12 +53,12 @@ scontrol show burstbuffer
 squeue
 sleep $SLEEP_INTERVAL
 
-echo "***Delete persistent buffer***"
-cat delete-persistent.sh
-su slurm -c 'sbatch delete-persistent.sh'
-sleep $SLEEP_INTERVAL
+#echo "***Delete persistent buffer***"
+#cat delete-persistent.sh
+#su slurm -c 'sbatch delete-persistent.sh'
+#sleep $SLEEP_INTERVAL
 
-echo "***Show all buffers are cleaned up***"
+#echo "***Show all buffers are cleaned up***"
 scontrol show burstbuffer
 squeue
 sleep $SLEEP_INTERVAL
