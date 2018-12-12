@@ -158,7 +158,7 @@ func (mr *MockVolumeRegistryMockRecorder) UpdateState(name, state interface{}) *
 }
 
 // UpdateVolumeAttachments mocks base method
-func (m *MockVolumeRegistry) UpdateVolumeAttachments(name registry.VolumeName, attachments map[string]registry.Attachment) error {
+func (m *MockVolumeRegistry) UpdateVolumeAttachments(name registry.VolumeName, attachments []registry.Attachment) error {
 	ret := m.ctrl.Call(m, "UpdateVolumeAttachments", name, attachments)
 	ret0, _ := ret[0].(error)
 	return ret0

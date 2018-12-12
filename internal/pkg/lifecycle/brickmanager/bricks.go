@@ -183,19 +183,20 @@ func processAttach(poolRegistry registry.PoolRegistry, volumeRegistry registry.V
 		handleError(volumeRegistry, volume, err)
 		return
 	}
-
 	err = plugin.Mounter().Mount(volume, bricks) // TODO pass down specific attachments?
 	if err != nil {
 		handleError(volumeRegistry, volume, err)
 		return
 	}
 
-	updates := make(map[string]registry.Attachment)
-	for key, attachment := range attachments {
+	// TODO: this is really odd, mount should probably do this?
+	updates := []registry.Attachment{}
+	for _, attachment := range attachments {
 		if attachment.State == registry.RequestAttach {
 			attachment.State = registry.Attached
-			updates[key] = attachment
+			updates = append(updates, attachment)
 		}
+
 	}
 	volumeRegistry.UpdateVolumeAttachments(volume.Name, updates)
 }

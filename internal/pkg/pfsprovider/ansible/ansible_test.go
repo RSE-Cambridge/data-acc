@@ -9,9 +9,9 @@ import (
 func TestPlugin_GetInventory(t *testing.T) {
 	volume := registry.Volume{
 		Name: "1", UUID: "abcdefgh", ClientPort: 10002,
-		Attachments: map[string]registry.Attachment{
-			"cpu1": {Hostname: "cpu1"},
-			"cpu2": {Hostname: "cpu3"},
+		Attachments: []registry.Attachment{
+			{Hostname: "cpu1"},
+			{Hostname: "cpu3"},
 		},
 	}
 	brickAllocations := []registry.BrickAllocation{

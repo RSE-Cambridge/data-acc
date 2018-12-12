@@ -42,7 +42,7 @@ type VolumeRegistry interface {
 
 	// Update all the specified attachments
 	// if attachment doesn't exist, attachment is added
-	UpdateVolumeAttachments(name VolumeName, attachments map[string]Attachment) error
+	UpdateVolumeAttachments(name VolumeName, attachments []Attachment) error
 
 	// Delete all the specified attachments
 	DeleteVolumeAttachments(name VolumeName, hostnames []string) error
@@ -119,8 +119,8 @@ type Volume struct {
 	// TODO: need to fill these in...
 	// They all related to how the volume is attached
 
-	// All current attachments, by hostname
-	Attachments map[string]Attachment
+	// All current attachments
+	Attachments []Attachment
 	// Attach all attachments to a shared global namespace
 	// Allowed for any volume type
 	AttachGlobalNamespace bool
@@ -245,10 +245,12 @@ const (
 )
 
 type Attachment struct {
-	// Hostname and Volume name uniquely identify an attachment
+	// Hostname, Job and Volume name uniquely identify an attachment
 	Hostname string
 
-	// TODO: delete three fields above
+	// Associated jobName
+	Job string
+
 	State AttachmentState
 
 	// If any error happened, it is reported here

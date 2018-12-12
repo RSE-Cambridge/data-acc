@@ -124,7 +124,7 @@ func (volRegistry *volumeRegistry) JobAttachHosts(jobName string, hosts []string
 }
 
 func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeName,
-	attachments map[string]registry.Attachment) error {
+	attachments []registry.Attachment) error {
 
 	update := func(volume *registry.Volume) error {
 		if volume.Attachments == nil {

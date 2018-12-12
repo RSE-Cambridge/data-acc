@@ -144,7 +144,7 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	})
 	mockVolReg.EXPECT().Volume(registry.VolumeName("mybuffer")).DoAndReturn(
 		func(name registry.VolumeName) (registry.Volume, error) {
-			return registry.Volume{Name: name}, nil
+			return registry.Volume{Name: name, MultiJob: true}, nil
 		})
 	mockVolReg.EXPECT().AddVolume(registry.Volume{
 		Name:                   "token",
@@ -167,9 +167,9 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 		Owner:     1001,
 		CreatedAt: uint(time.Now().Unix()),
 		Paths: map[string]string{
-			"DW_PERSISTENT_STRIPED_mybuffer": "/mnt/dac/job/token/multijob/mybuffer",
-			"DW_JOB_PRIVATE":                 "/mnt/dac/job/token/private",
-			"DW_JOB_STRIPED":                 "/mnt/dac/job/token/global",
+			"DW_PERSISTENT_STRIPED_mybuffer": "/dac/token/persistent/mybuffer",
+			"DW_JOB_PRIVATE":                 "/dac/token/private",
+			"DW_JOB_STRIPED":                 "/dac/token/global",
 		},
 		JobVolume:       registry.VolumeName("token"),
 		MultiJobVolumes: []registry.VolumeName{"mybuffer"},
@@ -196,7 +196,7 @@ func (*mockVLM) DataIn() error {
 	panic("implement me")
 }
 
-func (*mockVLM) Mount(hosts []string) error {
+func (*mockVLM) Mount(hosts []string, jobName string) error {
 	return nil
 }
 
