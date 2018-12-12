@@ -101,17 +101,6 @@ COPY slurm.conf /etc/slurm/slurm.conf.template
 COPY slurmdbd.conf /etc/slurm/slurmdbd.conf.template
 COPY burst_buffer.conf /etc/slurm/burst_buffer.conf
 
-RUN mkdir -p /var/lib/data-acc/fs-ansible
-COPY fs-ansible /var/lib/data-acc/fs-ansible
-RUN set -x \
-    && cd /var/lib/data-acc/fs-ansible \
-    && virtualenv .venv
-# TODO: need lots more work to get ansible running in here
-#    && . .venv/bin/activate \
-#    && pip install -U pip \
-#    && pip install -U ansible \
-#    && deactivate
-
 # Download and install etcd client
 ARG ETCD_VERSION=3.3.10
 ARG ETCD_DOWNLOAD_URL="https://github.com/coreos/etcd/releases/download/v$ETCD_VERSION/etcd-v$ETCD_VERSION-linux-amd64.tar.gz"
@@ -124,11 +113,24 @@ RUN set -x \
     && rm etcd.tar.gz \
     && rm -rf /usr/local/src/etcd
 
-COPY bin/dacctl /usr/local/bin/dacctl
-RUN install -D -m755 /usr/local/bin/dacctl /opt/cray/dw_wlm/default/bin/dw_wlm_cli
 # TODO: may want a separate dwstat binary
-RUN install -D -m755 /usr/local/bin/dacctl /opt/cray/dws/default/bin/dwstat
-COPY bin/dacd /usr/local/bin/dacd
+COPY bin/data-acc.tgz /usr/local/bin/
+RUN set -x \
+    && mkdir /usr/local/bin/data-acc \
+    && tar xf /usr/local/bin/data-acc.tgz -C /usr/local/bin/data-acc \
+    && install -D -m755 /usr/local/bin/data-acc/bin/dacd /usr/local/bin/dacd \
+    && install -D -m755 /usr/local/bin/data-acc/bin/dacctl /usr/local/bin/dacctl \
+    && install -D -m755 /usr/local/bin/dacctl /opt/cray/dw_wlm/default/bin/dw_wlm_cli \
+    && install -D -m755 /usr/local/bin/dacctl /opt/cray/dws/default/bin/dwstat \
+    && mkdir -p /var/lib/data-acc/ \
+    && cp -r /usr/local/bin/data-acc/fs-ansible /var/lib/data-acc/ \
+    && cd /var/lib/data-acc/fs-ansible \
+    && virtualenv .venv
+# TODO: need lots more work to get ansible running in here
+#    && . .venv/bin/activate \
+#    && pip install -U pip \
+#    && pip install -U ansible \
+#    && deactivate
 
 RUN touch /var/log/dacctl.log \
     && chown slurm /var/log/dacctl.log \
