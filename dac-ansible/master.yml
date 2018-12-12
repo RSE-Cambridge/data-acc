@@ -85,7 +85,7 @@
     - role: andrewrothstein.etcd-cluster
       etcd_master_group_name: etcd_master
 
-- hosts: dac_workers
+- hosts: dac_workers:slurm_workers
   become: true
   roles:
     - geerlingguy.repo-epel
