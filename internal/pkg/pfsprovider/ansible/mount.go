@@ -18,6 +18,7 @@ func getMountDir(volume registry.Volume) string {
 }
 
 func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+	log.Println("Mount for:", volume.Name)
 	var primaryBrickHost string
 	for _, allocation := range brickAllocations {
 		if allocation.AllocatedIndex == 0 {
@@ -96,7 +97,7 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 }
 
 func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	log.Println("FAKE Umount for:", volume.Name)
+	log.Println("Umount for:", volume.Name)
 	var mountDir = getMountDir(volume)
 
 	for _, attachment := range volume.Attachments {
