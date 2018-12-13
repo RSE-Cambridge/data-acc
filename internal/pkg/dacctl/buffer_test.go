@@ -35,8 +35,8 @@ func TestGetPerJobVolume(t *testing.T) {
 
 func TestSetPaths(t *testing.T) {
 	volume := registry.Volume{
-		Name: "job1",
-		UUID: "uuid1",
+		Name:                   "job1",
+		UUID:                   "uuid1",
 		AttachPrivateNamespace: true,
 		AttachGlobalNamespace:  true,
 	}
