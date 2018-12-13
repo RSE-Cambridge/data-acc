@@ -52,10 +52,10 @@ func TestSetPaths(t *testing.T) {
 
 	assert.Equal(t, 4, len(paths))
 	assert.Equal(t,
-		"/dac/job1/private",
+		"/dac/job1/job_private",
 		paths["DW_JOB_PRIVATE"])
 	assert.Equal(t,
-		"/dac/job1/global",
+		"/dac/job1/job/global",
 		paths["DW_JOB_STRIPED"])
 	assert.Equal(t,
 		"/dac/job1/persistent/multi1",

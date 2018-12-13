@@ -12,9 +12,9 @@ import (
 func getMountDir(volume registry.Volume) string {
 	// TODO: what about the environment variables that are being set? should share logic with here
 	if volume.MultiJob {
-		return fmt.Sprintf("/mnt/multi_job_buffer/%s", volume.UUID)
+		return fmt.Sprintf("/dac/%s/persistent/%s", volume.JobName, volume.Name)
 	}
-	return fmt.Sprintf("/mnt/job_buffer/%s", volume.UUID)
+	return fmt.Sprintf("/dac/%s/job", volume.UUID)
 }
 
 func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
@@ -72,6 +72,12 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 				return err
 			}
 			if err := chown(attachment.Hostname, volume.Owner, volume.Group, privateDir); err != nil {
+				return err
+			}
+
+			// need a consistent symlink for shared environment variables
+			privateSymLinkDir := fmt.Sprintf("/dac/%s/job_private", volume.JobName)
+			if err := createSymbolicLink(attachment.Hostname, privateDir, privateSymLinkDir); err != nil {
 				return err
 			}
 		}
@@ -162,6 +168,10 @@ func umountLustre(hostname string, directory string) error {
 
 func removeSubtree(hostname string, directory string) error {
 	return runner.Execute(hostname, fmt.Sprintf("rm -rf %s", directory))
+}
+
+func createSymbolicLink(hostname string, src string, dest string) error {
+	return runner.Execute(hostname, fmt.Sprintf("ln -s %s %s", src, dest))
 }
 
 func mountRemoteFilesystem(fsType FSType, hostname string, mgtHost string, fsname string, directory string) error {
