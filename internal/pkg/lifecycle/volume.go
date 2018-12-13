@@ -260,13 +260,13 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 				if attachment.Job == vlm.volume.JobName && attachment.Hostname == host {
 					if attachment.State == registry.Attached {
 						isAttached = true
-					}
-					if attachment.State == registry.AttachmentError {
+					} else if attachment.State == registry.AttachmentError {
 						// found an error bail out early
 						volumeInErrorState = true
 						return true
+					} else {
+						isAttached = false
 					}
-					isAttached = false
 					break
 				}
 			}
