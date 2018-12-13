@@ -337,7 +337,7 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 				if !finished {
 					// at the end we always get called with nil, nil
 					// but sometimes we will have already found the condition
-					waitGroup.Done()
+					// ?waitGroup.Done()
 				}
 			}
 			oldVolume := &registry.Volume{}
@@ -349,11 +349,12 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 				volumeFromKeyValue(*new, newVolume)
 			}
 
-			if condition(oldVolume, newVolume) {
+			if condition(oldVolume, newVolume) && !finished {
+				log.Printf("condition met with new volume: %s", newVolume)
 				err = nil
 				cancelFunc()
-				waitGroup.Done()
 				finished = true
+				waitGroup.Done()
 			}
 		})
 
@@ -365,9 +366,11 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 	}
 	log.Printf("About to wait for condition on volume: %s", volume)
 	if condition(&volume, &volume) {
+		log.Println("Condition already met, bail early.")
 		cancelFunc()
 		return nil
 	}
+	log.Println("Condition not met, starting to wait.")
 
 	// TODO do we get stuck in a forever loop here when we hit the timeout above?
 	waitGroup.Wait()
