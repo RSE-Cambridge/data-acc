@@ -42,10 +42,10 @@ type VolumeRegistry interface {
 
 	// Update all the specified attachments
 	// if attachment doesn't exist, attachment is added
-	UpdateVolumeAttachments(name VolumeName, attachments map[string]Attachment) error
+	UpdateVolumeAttachments(name VolumeName, attachments []Attachment) error
 
 	// Delete all the specified attachments
-	DeleteVolumeAttachments(name VolumeName, hostnames []string) error
+	DeleteVolumeAttachments(name VolumeName, hostnames []string, jobName string) error
 
 	// Wait for a specific state, error returned if not possible
 	WaitForState(name VolumeName, state VolumeState) error
@@ -119,8 +119,8 @@ type Volume struct {
 	// TODO: need to fill these in...
 	// They all related to how the volume is attached
 
-	// All current attachments, by hostname
-	Attachments map[string]Attachment
+	// All current attachments
+	Attachments []Attachment
 	// Attach all attachments to a shared global namespace
 	// Allowed for any volume type
 	AttachGlobalNamespace bool
@@ -245,10 +245,12 @@ const (
 )
 
 type Attachment struct {
-	// Hostname and Volume name uniquely identify an attachment
+	// Hostname, Job and Volume name uniquely identify an attachment
 	Hostname string
 
-	// TODO: delete three fields above
+	// Associated jobName
+	Job string
+
 	State AttachmentState
 
 	// If any error happened, it is reported here
@@ -302,4 +304,18 @@ func (attachmentState *AttachmentState) UnmarshalJSON(b []byte) error {
 	}
 	*attachmentState = stringToAttachmentState[str]
 	return nil
+}
+
+func (volume Volume) FindMatchingAttachment(attachment Attachment) (*Attachment, bool) {
+	return volume.FindAttachment(attachment.Hostname, attachment.Job)
+}
+
+func (volume Volume) FindAttachment(hostname string, jobName string) (*Attachment, bool) {
+	for _, candidate := range volume.Attachments {
+		if candidate.Hostname == hostname && candidate.Job == jobName {
+			// TODO: double check for duplicate match?
+			return &candidate, true
+		}
+	}
+	return nil, false
 }

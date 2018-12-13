@@ -78,9 +78,9 @@ type jobCommand interface{}
 type AccessMode int
 
 const (
-	striped           AccessMode = 1
-	private                      = 2
-	privateAndStriped            = 3
+	striped           AccessMode = 0
+	private                      = 1
+	privateAndStriped            = 2
 )
 
 var stringToAccessMode = map[string]AccessMode{

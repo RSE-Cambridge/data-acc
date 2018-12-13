@@ -229,16 +229,23 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 		log.Println("skipping mount for:", vlm.volume.Name) // TODO: should never happen now?
 		return nil
 	}
+
 	if vlm.volume.State != registry.BricksProvisioned && vlm.volume.State != registry.DataInComplete {
 		return fmt.Errorf("unable to mount volume: %s in state: %s", vlm.volume.Name, vlm.volume.State)
 	}
 
-	attachments := make(map[string]registry.Attachment)
+	var attachments []registry.Attachment
 	for _, host := range hosts {
-		attachments[host] = registry.Attachment{Hostname: host, State: registry.RequestAttach}
+		attachments = append(attachments, registry.Attachment{
+			Hostname: host, State: registry.RequestAttach, Job: vlm.volume.JobName,
+		})
 	}
-	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, attachments)
 
+	if err := vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, attachments); err != nil {
+		return err
+	}
+
+	// TODO: should share code with Unmount!!
 	var volumeInErrorState bool
 	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
 		if new.State == registry.Error {
@@ -247,8 +254,24 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string) error {
 		}
 		allAttached := false
 		for _, host := range hosts {
-			attachment, ok := new.Attachments[host]
-			if ok && attachment.State == registry.Attached {
+
+			var isAttached bool
+			for _, attachment := range new.Attachments {
+				if attachment.Job == vlm.volume.JobName && attachment.Hostname == host {
+					if attachment.State == registry.Attached {
+						isAttached = true
+					} else if attachment.State == registry.AttachmentError {
+						// found an error bail out early
+						volumeInErrorState = true
+						return true
+					} else {
+						isAttached = false
+					}
+					break
+				}
+			}
+
+			if isAttached {
 				allAttached = true
 			} else {
 				allAttached = false
@@ -268,26 +291,53 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string) error {
 		log.Println("skipping postrun for:", vlm.volume.Name) // TODO return error type and handle outside?
 		return nil
 	}
+
 	if vlm.volume.State != registry.BricksProvisioned && vlm.volume.State != registry.DataInComplete {
 		return fmt.Errorf("unable to unmount volume: %s in state: %s", vlm.volume.Name, vlm.volume.State)
 	}
 
-	updates := make(map[string]registry.Attachment)
+	var updates []registry.Attachment
 	for _, host := range hosts {
-		attachment := vlm.volume.Attachments[host]
+		attachment, ok := vlm.volume.FindAttachment(host, vlm.volume.JobName)
+		if !ok {
+			return fmt.Errorf(
+				"can't find attachment for volume: %s host: %s job: %s",
+				vlm.volume, host, vlm.volume.JobName)
+		}
+
 		if attachment.State != registry.Attached {
 			return fmt.Errorf("attachment must be attached to do unmount for volume: %s", vlm.volume.Name)
 		}
 		attachment.State = registry.RequestDetach
-		updates[host] = attachment
+		updates = append(updates, *attachment)
 	}
-	vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, updates)
+	if err := vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, updates); err != nil {
+		return err
+	}
 
+	// TODO: must share way more code and do more tests on this logic!!
+	volumeInErrorState := false
 	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
+		if new.State == registry.Error {
+			volumeInErrorState = true
+			return true
+		}
 		allDettached := false
 		for _, host := range hosts {
-			attachment, ok := new.Attachments[host]
-			if ok && attachment.State == registry.Detached {
+			newAttachment, ok := new.FindAttachment(host, vlm.volume.JobName)
+			if !ok {
+				// TODO: debug log or something?
+				volumeInErrorState = true
+				return true
+			}
+
+			if newAttachment.State == registry.AttachmentError {
+				// found an error bail out early
+				volumeInErrorState = true
+				return true
+			}
+
+			if newAttachment.State == registry.Detached {
 				allDettached = true
 			} else {
 				allDettached = false
@@ -296,12 +346,13 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string) error {
 		}
 		return allDettached
 	})
+	if volumeInErrorState {
+		return fmt.Errorf("unable to mount volume: %s", vlm.volume.Name)
+	}
 	if err != nil {
 		return err
 	}
-
-	// Delete attachments, so we can easily detect new multi-job volume attachments
-	return vlm.volumeRegistry.DeleteVolumeAttachments(vlm.volume.Name, hosts)
+	return vlm.volumeRegistry.DeleteVolumeAttachments(vlm.volume.Name, hosts, vlm.volume.JobName)
 }
 
 func (vlm *volumeLifecycleManager) DataOut() error {

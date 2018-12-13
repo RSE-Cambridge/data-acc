@@ -230,7 +230,7 @@ func (fwa *dacctlActions) PreRun(c CliContext) error {
 			return err
 		}
 		vlm := fwa.getVolumeLifecycleManger(volume)
-		if err := vlm.Mount(hosts); err != nil { // TODO: why pass the hosts down here?
+		if err := vlm.Mount(hosts); err != nil {
 			return err
 		}
 	}
@@ -241,7 +241,7 @@ func (fwa *dacctlActions) PreRun(c CliContext) error {
 			return err
 		}
 		vlm := fwa.getVolumeLifecycleManger(volume)
-		if err := vlm.Mount(hosts); err != nil { // TODO: why pass the hosts down here?
+		if err := vlm.Mount(hosts); err != nil {
 			return err
 		}
 	}

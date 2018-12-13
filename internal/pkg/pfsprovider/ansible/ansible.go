@@ -71,8 +71,9 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 		hosts[host] = hostInfo
 	}
 	if fsType == BeegFS {
-		for host := range volume.Attachments {
-			hosts[host] = HostInfo{}
+		// TODO: this can't work now, as we need to also pass the job name
+		for _, attachment := range volume.Attachments {
+			hosts[attachment.Hostname] = HostInfo{}
 		}
 	}
 	fsinfo := FSInfo{

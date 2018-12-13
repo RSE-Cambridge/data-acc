@@ -93,29 +93,30 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 			}
 
 			if len(new.Attachments) > len(old.Attachments) {
-				attachRequested := make(map[string]registry.Attachment)
-				for key, new := range new.Attachments {
+				var attachRequested []registry.Attachment
+				for _, newAttachment := range new.Attachments {
 					isNew := false
 					if old.Attachments == nil {
 						isNew = true
 					} else {
-						_, ok := old.Attachments[key]
+						_, ok := old.FindMatchingAttachment(newAttachment)
 						isNew = !ok
 					}
-					if isNew && new.State == registry.RequestAttach {
-						attachRequested[key] = new
+					if isNew && newAttachment.State == registry.RequestAttach {
+						attachRequested = append(attachRequested, newAttachment)
 					}
 				}
-				if len(attachRequested) > 0 {
+				if attachRequested != nil && len(attachRequested) > 0 {
 					processAttach(poolRegistry, volumeRegistry, *new, attachRequested)
 				}
 			}
 
 			if len(new.Attachments) == len(old.Attachments) && new.Attachments != nil && old.Attachments != nil {
-				detachRequested := make(map[string]registry.Attachment)
-				for key, new := range new.Attachments {
-					if new.State == registry.RequestDetach && old.Attachments[key].State == registry.Attached {
-						detachRequested[key] = new
+				var detachRequested []registry.Attachment
+				for _, newAttachment := range new.Attachments {
+					oldAttachment, ok := old.FindMatchingAttachment(newAttachment)
+					if ok && newAttachment.State == registry.RequestDetach && oldAttachment.State == registry.Attached {
+						detachRequested = append(detachRequested, newAttachment)
 					}
 				}
 				if len(detachRequested) > 0 {
@@ -176,32 +177,34 @@ func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volum
 }
 
 func processAttach(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume,
-	attachments map[string]registry.Attachment) {
+	attachments []registry.Attachment) {
 
 	bricks, err := poolRegistry.GetAllocationsForVolume(volume.Name)
 	if err != nil {
 		handleError(volumeRegistry, volume, err)
 		return
 	}
-
 	err = plugin.Mounter().Mount(volume, bricks) // TODO pass down specific attachments?
 	if err != nil {
 		handleError(volumeRegistry, volume, err)
 		return
 	}
 
-	updates := make(map[string]registry.Attachment)
-	for key, attachment := range attachments {
+	// TODO: this is really odd, mount should probably do this?
+	updates := []registry.Attachment{}
+	for _, attachment := range attachments {
 		if attachment.State == registry.RequestAttach {
 			attachment.State = registry.Attached
-			updates[key] = attachment
+			updates = append(updates, attachment)
 		}
+
 	}
+	// TODO: what can we do if we hit an error here?
 	volumeRegistry.UpdateVolumeAttachments(volume.Name, updates)
 }
 
 func processDetach(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume,
-	attachments map[string]registry.Attachment) {
+	attachments []registry.Attachment) {
 
 	bricks, err := poolRegistry.GetAllocationsForVolume(volume.Name)
 	if err != nil {
@@ -215,11 +218,11 @@ func processDetach(poolRegistry registry.PoolRegistry, volumeRegistry registry.V
 		handleError(volumeRegistry, volume, err)
 	}
 
-	updates := make(map[string]registry.Attachment)
-	for key, attachment := range attachments {
+	var updates []registry.Attachment
+	for _, attachment := range attachments {
 		if attachment.State == registry.RequestDetach {
 			attachment.State = registry.Detached
-			updates[key] = attachment
+			updates = append(updates, attachment)
 		}
 	}
 	volumeRegistry.UpdateVolumeAttachments(volume.Name, updates)

@@ -123,35 +123,66 @@ func (volRegistry *volumeRegistry) JobAttachHosts(jobName string, hosts []string
 	return volRegistry.keystore.Update([]KeyValueVersion{keyValue})
 }
 
+func findAttachment(attachments []registry.Attachment,
+	hostname string, jobName string) (*registry.Attachment, bool) {
+	for _, candidate := range attachments {
+		if candidate.Hostname == hostname && candidate.Job == jobName {
+			// TODO: double check for duplicate match?
+			return &candidate, true
+		}
+	}
+	return nil, false
+}
+
 func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeName,
-	attachments map[string]registry.Attachment) error {
+	attachments []registry.Attachment) error {
 
 	update := func(volume *registry.Volume) error {
 		if volume.Attachments == nil {
 			volume.Attachments = attachments
 		} else {
-			for key, value := range attachments {
-				volume.Attachments[key] = value
+			newAttachments := []registry.Attachment{}
+			for _, oldAttachment := range volume.Attachments {
+				newAttachment, ok := findAttachment(
+					attachments, oldAttachment.Hostname, oldAttachment.Job)
+				if ok {
+					newAttachments = append(newAttachments, *newAttachment)
+				} else {
+					newAttachments = append(newAttachments, oldAttachment)
+				}
 			}
+			volume.Attachments = newAttachments
 		}
 		return nil
 	}
 	return volRegistry.updateVolume(name, update)
 }
 
-func (volRegistry *volumeRegistry) DeleteVolumeAttachments(name registry.VolumeName, hostnames []string) error {
+func (volRegistry *volumeRegistry) DeleteVolumeAttachments(name registry.VolumeName, hostnames []string, jobName string) error {
 
 	update := func(volume *registry.Volume) error {
 		if volume.Attachments == nil {
 			return errors.New("no attachments to delete")
 		} else {
-			for _, hostname := range hostnames {
-				_, ok := volume.Attachments[hostname]
-				if ok {
-					delete(volume.Attachments, hostname)
-				} else {
-					return fmt.Errorf("unable to find attachment for volume %s and host %s", name, hostname)
+			var newAttachments []registry.Attachment
+			for _, attachment := range volume.Attachments {
+				remove := false
+				if attachment.Job == jobName {
+					for _, host := range hostnames {
+						if attachment.Hostname == host {
+							remove = true
+							break
+						}
+					}
 				}
+				if !remove {
+					newAttachments = append(newAttachments, attachment)
+				}
+			}
+
+			numberRemoved := len(volume.Attachments) - len(newAttachments)
+			if numberRemoved != len(hostnames) {
+				return fmt.Errorf("unable to find all attachments for volume %s", name)
 			}
 		}
 		return nil
@@ -306,7 +337,7 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 				if !finished {
 					// at the end we always get called with nil, nil
 					// but sometimes we will have already found the condition
-					waitGroup.Done()
+					// ?waitGroup.Done()
 				}
 			}
 			oldVolume := &registry.Volume{}
@@ -318,11 +349,12 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 				volumeFromKeyValue(*new, newVolume)
 			}
 
-			if condition(oldVolume, newVolume) {
+			if condition(oldVolume, newVolume) && !finished {
+				log.Printf("condition met with new volume: %s", newVolume)
 				err = nil
 				cancelFunc()
-				waitGroup.Done()
 				finished = true
+				waitGroup.Done()
 			}
 		})
 
@@ -334,9 +366,11 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 	}
 	log.Printf("About to wait for condition on volume: %s", volume)
 	if condition(&volume, &volume) {
+		log.Println("Condition already met, bail early.")
 		cancelFunc()
 		return nil
 	}
+	log.Println("Condition not met, starting to wait.")
 
 	// TODO do we get stuck in a forever loop here when we hit the timeout above?
 	waitGroup.Wait()
