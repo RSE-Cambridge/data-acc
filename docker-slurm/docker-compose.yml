@@ -168,6 +168,7 @@ services:
       - "SLURM_CTL=slurmctld"
       - "SLURM_CTL_HOST=slurmctld"
       - "COMPUTE_NODE=c"
+      - "DEVICE_COUNT=5"
     command: ["dacd"]
     depends_on:
       - etcdproxy1

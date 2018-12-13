@@ -34,8 +34,7 @@ type Wrapper struct {
 	All FileSystems
 }
 
-// TODO: should come from configuration?
-var hostGroup = "dac-fake"
+var DefaultHostGroup = "dac-fake"
 
 func getInventory(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
 	var mdt registry.BrickAllocation
@@ -95,6 +94,11 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 	strOut = strings.Replace(strOut, " osts:", fmt.Sprintf(" %s_osts:", fsname), -1)
 	strOut = strings.Replace(strOut, " mgsnode:", fmt.Sprintf(" %s_mgsnode:", fsname), -1)
 	strOut = strings.Replace(strOut, " client_port:", fmt.Sprintf(" %s_client_port:", fsname), -1)
+
+	hostGroup := os.Getenv("DAC_HOST_GROUP")
+	if hostGroup == "" {
+		hostGroup = DefaultHostGroup
+	}
 	strOut = strings.Replace(strOut, "all:", hostGroup+":", -1)
 	return strOut
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"os"
+	"strconv"
 )
 
 type BrickManager interface {
@@ -18,6 +19,7 @@ func NewBrickManager(poolRegistry registry.PoolRegistry, volumeRegistry registry
 }
 
 func getHostname() string {
+	// TODO: make this configurable?
 	hostname, err := os.Hostname()
 	if err != nil {
 		log.Fatal(err)
@@ -36,8 +38,7 @@ func (bm *brickManager) Hostname() string {
 }
 
 func (bm *brickManager) Start() error {
-	devices := getDevices()
-	updateBricks(bm.poolRegistry, bm.hostname, devices)
+	updateBricks(bm.poolRegistry, bm.hostname)
 
 	// TODO, on startup see what existing allocations there are, and watch those volumes
 	setupBrickEventHandlers(bm.poolRegistry, bm.volumeRegistry, bm.hostname)
@@ -51,35 +52,58 @@ func (bm *brickManager) Start() error {
 	return nil
 }
 
-const FakeDeviceAddress = "nvme%dn1"
-const FakeDeviceCapacityGB = 1600
-const FakePoolName = "default"
+const DefaultDeviceAddress = "nvme%dn1"
+const DefaultDeviceCapacityGB = 1400
+const DefaultPoolName = "default"
 
-func getDevices() []string {
+func getDevices(devicesStr string) []string {
 	// TODO: check for real devices!
-	//devices := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	devices := []int{1, 2, 3, 4}
-	if FSType == ansible.BeegFS {
-		devices = []int{0, 1, 2, 3, 4}
+	count, err := strconv.Atoi(devicesStr)
+	if err != nil {
+		count = 12
 	}
+
 	var bricks []string
-	for _, i := range devices {
-		device := fmt.Sprintf(FakeDeviceAddress, i)
+	for i := 0; i < count; i++ {
+		if i == 0 && FSType == ansible.Lustre {
+			// TODO: we should use another disk for MGS
+			continue
+		}
+		device := fmt.Sprintf(DefaultDeviceAddress, i)
 		bricks = append(bricks, device)
 	}
 	return bricks
 }
 
-func updateBricks(poolRegistry registry.PoolRegistry, hostname string, devices []string) {
+func getBricks(devices []string, hostname string, capacityStr string, poolName string) []registry.BrickInfo {
+	capacity, ok := strconv.Atoi(capacityStr)
+	if ok != nil || capacityStr == "" || capacity <= 0 {
+		capacity = DefaultDeviceCapacityGB
+	}
+	if poolName == "" {
+		poolName = DefaultPoolName
+	}
+
 	var bricks []registry.BrickInfo
 	for _, device := range devices {
 		bricks = append(bricks, registry.BrickInfo{
 			Device:     device,
 			Hostname:   hostname,
-			CapacityGB: FakeDeviceCapacityGB,
-			PoolName:   FakePoolName,
+			CapacityGB: uint(capacity),
+			PoolName:   poolName,
 		})
 	}
+	return bricks
+}
+
+func updateBricks(poolRegistry registry.PoolRegistry, hostname string) {
+	devicesStr := os.Getenv("DEVICE_COUNT")
+	devices := getDevices(devicesStr)
+
+	capacityStr := os.Getenv("DAC_DEVICE_COUNT")
+	poolName := os.Getenv("DAC_POOL_NAME")
+	bricks := getBricks(devices, hostname, capacityStr, poolName)
+
 	err := poolRegistry.UpdateHost(bricks)
 	if err != nil {
 		log.Fatalln(err)

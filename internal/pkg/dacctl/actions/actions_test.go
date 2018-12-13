@@ -196,11 +196,11 @@ func (*mockVLM) DataIn() error {
 	panic("implement me")
 }
 
-func (*mockVLM) Mount(hosts []string) error {
+func (*mockVLM) Mount(hosts []string, jobName string) error {
 	return nil
 }
 
-func (*mockVLM) Unmount(hosts []string) error {
+func (*mockVLM) Unmount(hosts []string, jobName string) error {
 	panic("implement me")
 }
 
