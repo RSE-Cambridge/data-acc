@@ -54,7 +54,7 @@ func (bm *brickManager) Start() error {
 }
 
 const FakeDeviceAddress = "nvme%dn1"
-const FakeDeviceCapacityGB = 1600
+const FakeDeviceCapacityGB = 1400
 const FakePoolName = "default"
 
 func getDevices(devicesStr string) []string {
