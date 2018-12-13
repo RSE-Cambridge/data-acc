@@ -6,6 +6,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"os"
+	"strconv"
 )
 
 type BrickManager interface {
@@ -36,7 +37,8 @@ func (bm *brickManager) Hostname() string {
 }
 
 func (bm *brickManager) Start() error {
-	devices := getDevices()
+	devicesStr := os.Getenv("DEVICE_COUNT")
+	devices := getDevices(devicesStr)
 	updateBricks(bm.poolRegistry, bm.hostname, devices)
 
 	// TODO, on startup see what existing allocations there are, and watch those volumes
@@ -55,15 +57,19 @@ const FakeDeviceAddress = "nvme%dn1"
 const FakeDeviceCapacityGB = 1600
 const FakePoolName = "default"
 
-func getDevices() []string {
+func getDevices(devicesStr string) []string {
 	// TODO: check for real devices!
-	//devices := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	devices := []int{1, 2, 3, 4}
-	if FSType == ansible.BeegFS {
-		devices = []int{0, 1, 2, 3, 4}
+	count, err := strconv.Atoi(devicesStr)
+	if err != nil {
+		count = 12
 	}
+
 	var bricks []string
-	for _, i := range devices {
+	for i := 0; i < count; i++ {
+		if i == 0 && FSType == ansible.Lustre {
+			// TODO: we should use another disk for MGS
+			continue
+		}
 		device := fmt.Sprintf(FakeDeviceAddress, i)
 		bricks = append(bricks, device)
 	}
