@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/pfsprovider"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
-	"log"
 )
 
 func GetPlugin(fsType FSType) pfsprovider.Plugin {
@@ -76,15 +75,12 @@ func (volProvider *volumeProvider) TeardownVolume(volume registry.Volume, brickA
 
 func (*volumeProvider) CopyDataIn(volume registry.Volume) error {
 	// TODO we should support multiple stagein commands! oops!
-	//return processDataCopy(volume.Name, volume.StageIn)
-	log.Println("FAKE CopyIn:", volume.Name, volume.StageIn)
-	return nil
+	return processDataCopy(volume, volume.StageIn)
 }
 
 func (*volumeProvider) CopyDataOut(volume registry.Volume) error {
-	//return processDataCopy(volume.Name, volume.StageOut)
-	log.Println("FAKE CopyOut:", volume.Name, volume.StageOut)
-	return nil
+	// TODO we should support multiple stageout commands too! oops!
+	return processDataCopy(volume, volume.StageOut)
 }
 
 type mounter struct {

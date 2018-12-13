@@ -12,7 +12,7 @@ func processDataCopy(volume registry.Volume, request registry.DataCopyRequest) e
 		return err
 	}
 
-	log.Printf("FAKE %s", cmd)
+	log.Printf("FAKE copy: %s", cmd)
 	return nil
 }
 
