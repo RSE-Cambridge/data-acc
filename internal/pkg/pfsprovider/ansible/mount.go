@@ -14,7 +14,7 @@ func getMountDir(volume registry.Volume) string {
 	if volume.MultiJob {
 		return fmt.Sprintf("/dac/%s/persistent/%s", volume.JobName, volume.Name)
 	}
-	return fmt.Sprintf("/dac/%s/job", volume.UUID)
+	return fmt.Sprintf("/dac/%s/job", volume.JobName)
 }
 
 func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
@@ -82,7 +82,7 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 			}
 		}
 
-		sharedDir := path.Join(mountDir, "/shared")
+		sharedDir := path.Join(mountDir, "/global")
 		if err := mkdir(attachment.Hostname, sharedDir); err != nil {
 			return err
 		}
