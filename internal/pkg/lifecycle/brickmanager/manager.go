@@ -19,6 +19,7 @@ func NewBrickManager(poolRegistry registry.PoolRegistry, volumeRegistry registry
 }
 
 func getHostname() string {
+	// TODO: make this configurable?
 	hostname, err := os.Hostname()
 	if err != nil {
 		log.Fatal(err)
@@ -37,9 +38,7 @@ func (bm *brickManager) Hostname() string {
 }
 
 func (bm *brickManager) Start() error {
-	devicesStr := os.Getenv("DEVICE_COUNT")
-	devices := getDevices(devicesStr)
-	updateBricks(bm.poolRegistry, bm.hostname, devices)
+	updateBricks(bm.poolRegistry, bm.hostname)
 
 	// TODO, on startup see what existing allocations there are, and watch those volumes
 	setupBrickEventHandlers(bm.poolRegistry, bm.volumeRegistry, bm.hostname)
@@ -76,7 +75,7 @@ func getDevices(devicesStr string) []string {
 	return bricks
 }
 
-func updateBricks(poolRegistry registry.PoolRegistry, hostname string, devices []string) {
+func getBricks(devices []string, hostname string) []registry.BrickInfo {
 	var bricks []registry.BrickInfo
 	for _, device := range devices {
 		bricks = append(bricks, registry.BrickInfo{
@@ -86,7 +85,16 @@ func updateBricks(poolRegistry registry.PoolRegistry, hostname string, devices [
 			PoolName:   FakePoolName,
 		})
 	}
-	err := poolRegistry.UpdateHost(bricks)
+	return bricks
+}
+
+func updateBricks(poolRegistry registry.PoolRegistry, hostname string) {
+	devicesStr := os.Getenv("DEVICE_COUNT")
+	devices := getDevices(devicesStr)
+
+	bricks := getBricks(devices, hostname)
+
+	err := poolRegistry.UpdateHost(bricks, )
 	if err != nil {
 		log.Fatalln(err)
 	}
