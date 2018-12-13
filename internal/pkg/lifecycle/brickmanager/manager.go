@@ -52,9 +52,9 @@ func (bm *brickManager) Start() error {
 	return nil
 }
 
-const FakeDeviceAddress = "nvme%dn1"
-const FakeDeviceCapacityGB = 1400
-const FakePoolName = "default"
+const DefaultDeviceAddress = "nvme%dn1"
+const DefaultDeviceCapacityGB = 1400
+const DefaultPoolName = "default"
 
 func getDevices(devicesStr string) []string {
 	// TODO: check for real devices!
@@ -69,20 +69,28 @@ func getDevices(devicesStr string) []string {
 			// TODO: we should use another disk for MGS
 			continue
 		}
-		device := fmt.Sprintf(FakeDeviceAddress, i)
+		device := fmt.Sprintf(DefaultDeviceAddress, i)
 		bricks = append(bricks, device)
 	}
 	return bricks
 }
 
-func getBricks(devices []string, hostname string) []registry.BrickInfo {
+func getBricks(devices []string, hostname string, capacityStr string, poolName string) []registry.BrickInfo {
+	capacity, ok := strconv.Atoi(capacityStr)
+	if ok != nil || capacityStr == "" || capacity <= 0 {
+		capacity = DefaultDeviceCapacityGB
+	}
+	if poolName == "" {
+		poolName = DefaultPoolName
+	}
+
 	var bricks []registry.BrickInfo
 	for _, device := range devices {
 		bricks = append(bricks, registry.BrickInfo{
 			Device:     device,
 			Hostname:   hostname,
-			CapacityGB: FakeDeviceCapacityGB,
-			PoolName:   FakePoolName,
+			CapacityGB: uint(capacity),
+			PoolName:   poolName,
 		})
 	}
 	return bricks
@@ -92,9 +100,11 @@ func updateBricks(poolRegistry registry.PoolRegistry, hostname string) {
 	devicesStr := os.Getenv("DEVICE_COUNT")
 	devices := getDevices(devicesStr)
 
-	bricks := getBricks(devices, hostname)
+	capacityStr := os.Getenv("DAC_DEVICE_COUNT")
+	poolName := os.Getenv("DAC_POOL_NAME")
+	bricks := getBricks(devices, hostname, capacityStr, poolName)
 
-	err := poolRegistry.UpdateHost(bricks, )
+	err := poolRegistry.UpdateHost(bricks)
 	if err != nil {
 		log.Fatalln(err)
 	}

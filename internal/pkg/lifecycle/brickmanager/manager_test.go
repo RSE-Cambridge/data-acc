@@ -20,7 +20,7 @@ func TestGetDevices(t *testing.T) {
 
 func TestGetBricks(t *testing.T) {
 	devices := []string{"a", "b"}
-	bricks := getBricks(devices, "host")
+	bricks := getBricks(devices, "host", "-1", "")
 
 	assert.Equal(t, 2, len(bricks))
 	assert.Equal(t, registry.BrickInfo{
@@ -28,5 +28,10 @@ func TestGetBricks(t *testing.T) {
 	}, bricks[0])
 	assert.Equal(t, registry.BrickInfo{
 		Device: "b", Hostname: "host", PoolName: "default", CapacityGB: 1400,
+	}, bricks[1])
+
+	bricks = getBricks(devices, "host", "20", "foo")
+	assert.Equal(t, registry.BrickInfo{
+		Device: "b", Hostname: "host", PoolName: "foo", CapacityGB: 20,
 	}, bricks[1])
 }
