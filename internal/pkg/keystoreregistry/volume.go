@@ -337,7 +337,7 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 				if !finished {
 					// at the end we always get called with nil, nil
 					// but sometimes we will have already found the condition
-					// ?waitGroup.Done()
+					waitGroup.Done()
 				}
 			}
 			oldVolume := &registry.Volume{}
