@@ -85,7 +85,6 @@
     - role: andrewrothstein.etcd-cluster
       etcd_master_group_name: etcd_master
       etcd_pki_dir: "{{ inventory_dir }}/pki-dir"
-      etcd_cluster_name: dac-cluster
 
 - hosts: dac_workers:slurm_workers
   become: true
