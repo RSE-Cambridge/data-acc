@@ -140,6 +140,31 @@ func (mr *MockKeystoreMockRecorder) WatchKey(ctxt, key, onUpdate interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchKey", reflect.TypeOf((*MockKeystore)(nil).WatchKey), ctxt, key, onUpdate)
 }
 
+// Watch mocks base method
+func (m *MockKeystore) Watch(ctxt context.Context, key string, withPrefix bool) <-chan keystoreregistry.KeyValueUpdate {
+	ret := m.ctrl.Call(m, "Watch", ctxt, key, withPrefix)
+	ret0, _ := ret[0].(<-chan keystoreregistry.KeyValueUpdate)
+	return ret0
+}
+
+// Watch indicates an expected call of Watch
+func (mr *MockKeystoreMockRecorder) Watch(ctxt, key, withPrefix interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Watch", reflect.TypeOf((*MockKeystore)(nil).Watch), ctxt, key, withPrefix)
+}
+
+// WatchForCondition mocks base method
+func (m *MockKeystore) WatchForCondition(ctxt context.Context, key string, fromRevision int64, check func(keystoreregistry.KeyValueUpdate) bool) (bool, error) {
+	ret := m.ctrl.Call(m, "WatchForCondition", ctxt, key, fromRevision, check)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WatchForCondition indicates an expected call of WatchForCondition
+func (mr *MockKeystoreMockRecorder) WatchForCondition(ctxt, key, fromRevision, check interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchForCondition", reflect.TypeOf((*MockKeystore)(nil).WatchForCondition), ctxt, key, fromRevision, check)
+}
+
 // KeepAliveKey mocks base method
 func (m *MockKeystore) KeepAliveKey(key string) error {
 	ret := m.ctrl.Call(m, "KeepAliveKey", key)

@@ -65,11 +65,11 @@ func newEtcdClient() *clientv3.Client {
 
 func NewKeystore() keystoreregistry.Keystore {
 	cli := newEtcdClient()
-	return &etcKeystore{cli}
+	return &etcKeystore{Client: cli}
 }
 
 type etcKeystore struct {
-	*clientv3.Client
+	Client *clientv3.Client
 }
 
 func (client *etcKeystore) NewMutex(lockKey string) (keystoreregistry.Mutex, error) {
@@ -95,6 +95,10 @@ func handleError(err error) {
 		}
 		log.Fatal(err)
 	}
+}
+
+func (client *etcKeystore) Close() error {
+	return client.Client.Close()
 }
 
 func (client *etcKeystore) runTransaction(ifOps []clientv3.Cmp, thenOps []clientv3.Op) error {
@@ -195,7 +199,7 @@ func (client *etcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, er
 
 func (client *etcKeystore) WatchPrefix(prefix string,
 	onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
-	rch := client.Watch(context.Background(), prefix, clientv3.WithPrefix(), clientv3.WithPrevKV())
+	rch := client.Client.Watch(context.Background(), prefix, clientv3.WithPrefix(), clientv3.WithPrevKV())
 	go func() {
 		for wresp := range rch {
 			for _, ev := range wresp.Events {
@@ -213,7 +217,7 @@ func (client *etcKeystore) WatchPrefix(prefix string,
 
 func (client *etcKeystore) WatchKey(ctxt context.Context, key string,
 	onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
-	rch := client.Watch(ctxt, key, clientv3.WithPrevKV())
+	rch := client.Client.Watch(ctxt, key, clientv3.WithPrevKV())
 	go func() {
 		for watchResponse := range rch {
 			for _, ev := range watchResponse.Events {
@@ -232,6 +236,99 @@ func (client *etcKeystore) WatchKey(ctxt context.Context, key string,
 	}()
 }
 
+func (client *etcKeystore) Watch(ctxt context.Context, key string, withPrefix bool) <-chan keystoreregistry.KeyValueUpdate {
+
+	// open channel with etcd
+	options := []clientv3.OpOption{clientv3.WithPrevKV()}
+	if withPrefix {
+		options = append(options, clientv3.WithPrefix())
+	}
+	rch := client.Client.Watch(ctxt, key, options...)
+
+	c := make(chan keystoreregistry.KeyValueUpdate)
+
+	go func() {
+		for watchResponse := range rch {
+			for _, ev := range watchResponse.Events {
+				update := keystoreregistry.KeyValueUpdate{
+					New: getKeyValueVersion(ev.Kv),
+					Old: getKeyValueVersion(ev.PrevKv),
+				}
+				// show deleted by returning nil for new
+				if update.New != nil && update.New.CreateRevision == 0 {
+					update.New = nil
+					// TODO: should we cancel if the key is deleted?
+					// or just let the user deal with it?
+				}
+				c <- update
+			}
+		}
+		// Assuming we get here when the context is cancelled or hits its timeout
+		// i.e. there are no more events, so we close the channel
+		close(c)
+	}()
+
+	return c
+}
+
+func (client *etcKeystore) WatchForCondition(ctxt context.Context, key string, fromRevision int64,
+	check func(update keystoreregistry.KeyValueUpdate) bool) (bool, error) {
+
+	// check key is present and find revision of the last update
+	initialValue, err := client.Get(key)
+	if err != nil {
+		return false, err
+	}
+	if fromRevision < initialValue.CreateRevision {
+		return false, errors.New("incorrect fromRevision")
+	}
+
+	// no deadline set, so add default timeout of 10 mins
+	var cancelFunc context.CancelFunc
+	_, ok := ctxt.Deadline()
+	if !ok {
+		ctxt, cancelFunc = context.WithTimeout(ctxt, time.Minute*10)
+	}
+
+	// open channel with etcd, starting with the last revision of the key from above
+	rch := client.Client.Watch(ctxt, key, clientv3.WithPrefix(), clientv3.WithRev(fromRevision))
+	if rch == nil {
+		cancelFunc()
+		return false, errors.New("no watcher returned from etcd")
+	}
+
+	conditionMet := false
+	go func() {
+		for watchResponse := range rch {
+			for _, ev := range watchResponse.Events {
+				update := keystoreregistry.KeyValueUpdate{
+					New: getKeyValueVersion(ev.Kv),
+					Old: getKeyValueVersion(ev.PrevKv),
+				}
+
+				// show deleted by returning nil for new
+				isKeyDeleted := false
+				if ev.Type == clientv3.EventTypeDelete {
+					update.New = nil
+					isKeyDeleted = true
+				}
+
+				conditionMet := check(update)
+
+				// stop watching if the condition passed or key was deleted
+				if conditionMet || isKeyDeleted {
+					cancelFunc()
+					return
+				}
+			}
+		}
+		// Assuming we get here when the context is cancelled or hits its timeout
+		// i.e. there are no more events, so we close the channel
+	}()
+
+	return conditionMet, nil
+}
+
 func (client *etcKeystore) KeepAliveKey(key string) error {
 	kvc := clientv3.NewKV(client.Client)
 
@@ -243,7 +340,7 @@ func (client *etcKeystore) KeepAliveKey(key string) error {
 
 	// TODO what about configure timeout and ttl?
 	var ttl int64 = 10
-	grantResponse, err := client.Grant(context.Background(), ttl)
+	grantResponse, err := client.Client.Grant(context.Background(), ttl)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -258,7 +355,7 @@ func (client *etcKeystore) KeepAliveKey(key string) error {
 		return fmt.Errorf("unable to create keep-alive key: %s", key)
 	}
 
-	ch, err := client.KeepAlive(context.Background(), leaseID)
+	ch, err := client.Client.KeepAlive(context.Background(), leaseID)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -57,6 +57,10 @@ type Keystore interface {
 	// When callback returns true, stop watch the key
 	WatchKey(ctxt context.Context, key string, onUpdate func(old *KeyValueVersion, new *KeyValueVersion))
 
+	// TODO: WIP to replce above watch functions
+	Watch(ctxt context.Context, key string, withPrefix bool) <-chan KeyValueUpdate
+	WatchForCondition(ctxt context.Context, key string, fromRevision int64, check func(update KeyValueUpdate) bool) (bool, error)
+
 	// Add a key, and remove it when calling process dies
 	// Error is returned if the key already exists
 	KeepAliveKey(key string) error
@@ -75,6 +79,11 @@ type KeyValueVersion struct {
 	Value          string
 	CreateRevision int64
 	ModRevision    int64
+}
+
+type KeyValueUpdate struct {
+	Old *KeyValueVersion
+	New *KeyValueVersion
 }
 
 func (kvv KeyValueVersion) String() string {
