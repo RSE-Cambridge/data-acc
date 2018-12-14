@@ -60,7 +60,7 @@
   tasks:
     - fetch:
         src: /home/centos/pki-dir/{{item}}
-        dest: ~/pki-dir/
+        dest: "{{ inventory_dir }}/pki-dir/"
         flat: yes
       with_items:
         - ca.pem
@@ -169,7 +169,7 @@
       synchronize:
         mode: pull
         src:  /var/lib/dac/.ssh/
-        dest: ~/.dac.ssh/
+        dest: "{{ inventory_dir }}/.dac.ssh/"
         recursive: yes
         delete: yes
 
@@ -200,7 +200,7 @@
     - name: Push Keys for dac user for fs-ansible
       synchronize:
         mode: push
-        src: ~/.dac.ssh/
+        src: "{{ inventory_dir }}/.dac.ssh/"
         dest:  /var/lib/dac/.ssh/
         recursive: yes
     - name: trust host keys
@@ -269,9 +269,9 @@
         group: '995'
         mode: 0700
       with_items:
-        - '~/pki-dir/{{inventory_hostname}}.pem'
-        - '~/pki-dir/{{inventory_hostname}}-key.pem'
-        - '~/pki-dir/ca.pem'
+        - '{{ inventory_dir }}/pki-dir/{{inventory_hostname}}.pem'
+        - '{{ inventory_dir }}/pki-dir/{{inventory_hostname}}-key.pem'
+        - '{{ inventory_dir }}/pki-dir/ca.pem'
     - name: pull docker images
       # https://github.com/ansible/ansible/issues/47978
       command: docker-compose pull
@@ -323,9 +323,9 @@
         group: 'root'
         mode: 0700
       with_items:
-        - '~/pki-dir/{{inventory_hostname}}.pem'
-        - '~/pki-dir/{{inventory_hostname}}-key.pem'
-        - '~/pki-dir/ca.pem'
+        - '{{ inventory_dir }}/pki-dir/{{inventory_hostname}}.pem'
+        - '{{ inventory_dir }}/pki-dir/{{inventory_hostname}}-key.pem'
+        - '{{ inventory_dir }}/pki-dir/ca.pem'
     - name: pull docker images
       # https://github.com/ansible/ansible/issues/47978
       command: docker-compose pull
