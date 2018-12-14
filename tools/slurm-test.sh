@@ -47,6 +47,10 @@ sleep $SLEEP_INTERVAL
 echo "***Use persistent buffer***"
 cat use-persistent.sh
 su slurm -c 'sbatch use-persistent.sh'
+su slurm -c 'sbatch use-persistent.sh'
+su slurm -c 'sbatch use-persistent.sh'
+su slurm -c 'sbatch use-persistent.sh'
+squeue
 
 sleep $SLEEP_INTERVAL
 scontrol show burstbuffer

@@ -22,8 +22,34 @@ func TestVolumeLifecycleManager_Mount(t *testing.T) {
 		{Hostname: "host1", State: registry.RequestAttach, Job: "job1"},
 		{Hostname: "host2", State: registry.RequestAttach, Job: "job1"},
 	})
-	mockVolReg.EXPECT().WaitForCondition(volume.Name, gomock.Any())
+	fakeWait := func(volumeName registry.VolumeName, condition func(old *registry.Volume, new *registry.Volume) bool) error {
+		old := &registry.Volume{}
+		new := &registry.Volume{}
+		assert.False(t, condition(old, new))
+		new.Attachments = []registry.Attachment{
+			{Hostname: "host1", Job: "job2", State: registry.Detached},
+			{Hostname: "host1", Job: "job1", State: registry.Attached},
+			{Hostname: "host2", Job: "job1", State: registry.Attached},
+		}
+		assert.True(t, condition(old, new))
+
+		new.Attachments = []registry.Attachment{
+			{Hostname: "host1", Job: "job2", State: registry.AttachmentError},
+			{Hostname: "host1", Job: "job1", State: registry.Detached},
+			{Hostname: "host2", Job: "job1", State: registry.Attached},
+		}
+		assert.False(t, condition(old, new))
+
+		new.Attachments = []registry.Attachment{
+			{Hostname: "host1", Job: "job2", State: registry.Attached},
+			{Hostname: "host1", Job: "job1", State: registry.AttachmentError},
+			{Hostname: "host2", Job: "job1", State: registry.Attached},
+		}
+		assert.True(t, condition(old, new))
+		return nil
+	}
+	mockVolReg.EXPECT().WaitForCondition(volume.Name, gomock.Any()).DoAndReturn(fakeWait)
 
 	err := vlm.Mount(hosts, "job1")
-	assert.Nil(t, err)
+	assert.Equal(t, "unable to mount volume: vol1", err.Error())
 }

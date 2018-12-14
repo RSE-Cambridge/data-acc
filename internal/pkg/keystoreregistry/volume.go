@@ -164,23 +164,7 @@ func (volRegistry *volumeRegistry) DeleteVolumeAttachments(name registry.VolumeN
 		if volume.Attachments == nil {
 			return errors.New("no attachments to delete")
 		} else {
-			var newAttachments []registry.Attachment
-			for _, attachment := range volume.Attachments {
-				remove := false
-				if attachment.Job == jobName {
-					for _, host := range hostnames {
-						if attachment.Hostname == host {
-							remove = true
-							break
-						}
-					}
-				}
-				if !remove {
-					newAttachments = append(newAttachments, attachment)
-				}
-			}
-
-			numberRemoved := len(volume.Attachments) - len(newAttachments)
+			numberRemoved := removeAttachments(volume, jobName, hostnames)
 			if numberRemoved != len(hostnames) {
 				return fmt.Errorf("unable to find all attachments for volume %s", name)
 			}
@@ -188,6 +172,27 @@ func (volRegistry *volumeRegistry) DeleteVolumeAttachments(name registry.VolumeN
 		return nil
 	}
 	return volRegistry.updateVolume(name, update)
+}
+
+func removeAttachments(volume *registry.Volume, jobName string, hostnames []string) int {
+	var newAttachments []registry.Attachment
+	for _, attachment := range volume.Attachments {
+		remove := false
+		if attachment.Job == jobName {
+			for _, host := range hostnames {
+				if attachment.Hostname == host {
+					remove = true
+					break
+				}
+			}
+		}
+		if !remove {
+			newAttachments = append(newAttachments, attachment)
+		}
+	}
+	numberRemoved := len(volume.Attachments) - len(newAttachments)
+	volume.Attachments = newAttachments
+	return numberRemoved
 }
 
 func (volRegistry *volumeRegistry) updateVolume(name registry.VolumeName,

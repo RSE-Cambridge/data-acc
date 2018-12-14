@@ -263,7 +263,7 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string, jobName string) error {
 					} else if attachment.State == registry.AttachmentError {
 						// found an error bail out early
 						volumeInErrorState = true
-						return true
+						return true // Return true to stop the waiting
 					} else {
 						isAttached = false
 					}
