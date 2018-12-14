@@ -165,8 +165,10 @@ func getBricksForBuffer(poolRegistry registry.PoolRegistry,
 	}
 	err := poolRegistry.AllocateBricks(allocations)
 	if err != nil {
+		// TODO: should we retry in case we just raced someone else?
 		return err
 	}
+
 	_, err = poolRegistry.GetAllocationsForVolume(volume.Name) // TODO return result, wait for updates
 	return err
 }
@@ -175,7 +177,7 @@ func (vlm *volumeLifecycleManager) Delete() error {
 	// TODO convert errors into volume related errors, somewhere?
 	log.Println("Deleting volume:", vlm.volume.Name, vlm.volume)
 
-	if vlm.volume.SizeBricks == 0 {
+	if vlm.volume.SizeBricks == 0 || vlm.volume.HadBricksAssigned == false {
 		log.Println("No bricks to delete, skipping request delete bricks for:", vlm.volume.Name)
 
 	} else {
@@ -206,6 +208,8 @@ func (vlm *volumeLifecycleManager) Delete() error {
 		}
 		log.Println("Allocations all deleted, count:", len(allocations))
 	}
+
+	// TODO: what about any pending mounts that might get left behind for job?
 
 	log.Println("Deleting volume record in registry for:", vlm.volume.Name)
 	return vlm.volumeRegistry.DeleteVolume(vlm.volume.Name)
@@ -347,7 +351,7 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 		return allDettached
 	})
 	if volumeInErrorState {
-		return fmt.Errorf("unable to mount volume: %s", vlm.volume.Name)
+		return fmt.Errorf("unable to unmount volume: %s", vlm.volume.Name)
 	}
 	if err != nil {
 		return err

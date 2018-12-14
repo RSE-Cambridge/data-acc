@@ -224,6 +224,10 @@ func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state r
 				volume.Name, volume.State)
 		}
 		volume.State = state
+		if state == registry.BricksAllocated {
+			// From this point onwards, we know bricks might need to be cleaned up
+			volume.HadBricksAssigned = true
+		}
 		return nil
 	}
 	return volRegistry.updateVolume(name, updateState)
