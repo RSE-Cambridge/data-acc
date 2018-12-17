@@ -21,7 +21,7 @@ func TestVolumeRegistry_DeleteVolumeAttachments(t *testing.T) {
 
 func TestVolumeRegistry_FindAttachment(t *testing.T) {
 	attachments := []registry.Attachment{
-		{Job:"job1", Hostname:"foo1"}, {Job:"job2", Hostname:"foo1"}, {Job:"job2", Hostname:"foo2"},
+		{Job: "job1", Hostname: "foo1"}, {Job: "job2", Hostname: "foo1"}, {Job: "job2", Hostname: "foo2"},
 	}
 
 	attachment, ok := findAttachment(nil, "", "")
@@ -34,16 +34,16 @@ func TestVolumeRegistry_FindAttachment(t *testing.T) {
 
 	attachment, ok = findAttachment(attachments, "foo1", "job1")
 	assert.True(t, ok)
-	assert.Equal(t, registry.Attachment{Job: "job1", Hostname:"foo1"}, *attachment)
+	assert.Equal(t, registry.Attachment{Job: "job1", Hostname: "foo1"}, *attachment)
 
 	attachment, ok = findAttachment(attachments, "foo1", "job2")
 	assert.True(t, ok)
-	assert.Equal(t, registry.Attachment{Job: "job2", Hostname:"foo1"}, *attachment)
+	assert.Equal(t, registry.Attachment{Job: "job2", Hostname: "foo1"}, *attachment)
 }
 
 func TestVolumeRegistry_MergeAttachments(t *testing.T) {
 	oldAttachments := []registry.Attachment{
-		{Job:"job1", Hostname:"foo1"}, {Job:"job2", Hostname:"foo1"}, {Job:"job2", Hostname:"foo2"},
+		{Job: "job1", Hostname: "foo1"}, {Job: "job2", Hostname: "foo1"}, {Job: "job2", Hostname: "foo2"},
 	}
 
 	assert.Nil(t, mergeAttachments(nil, nil))
@@ -51,17 +51,17 @@ func TestVolumeRegistry_MergeAttachments(t *testing.T) {
 	assert.Equal(t, oldAttachments, mergeAttachments(nil, oldAttachments))
 
 	// add new
-	result := mergeAttachments(oldAttachments, []registry.Attachment{{Job:"foo", Hostname:"foo"}})
+	result := mergeAttachments(oldAttachments, []registry.Attachment{{Job: "foo", Hostname: "foo"}})
 	assert.Equal(t, 4, len(result))
-	assert.Equal(t, registry.Attachment{Job:"foo", Hostname:"foo"}, result[0])
+	assert.Equal(t, registry.Attachment{Job: "foo", Hostname: "foo"}, result[0])
 	assert.Equal(t, oldAttachments[0], result[1])
 	assert.Equal(t, oldAttachments[1], result[2])
 	assert.Equal(t, oldAttachments[2], result[3])
 
 	// in place update
 	updates := []registry.Attachment{
-		{Job:"job2", Hostname:"foo1", State:registry.Attached},
-		{Job:"job2", Hostname:"foo2", State:registry.Attached},
+		{Job: "job2", Hostname: "foo1", State: registry.Attached},
+		{Job: "job2", Hostname: "foo2", State: registry.Attached},
 	}
 	result = mergeAttachments(oldAttachments, updates)
 	assert.Equal(t, 3, len(result))

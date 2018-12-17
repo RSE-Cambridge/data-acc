@@ -187,10 +187,10 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 	}
 
 	// TODO: must share way more code and do more tests on this logic!!
-	volumeInErrorState := false
+	var volumeInErrorState error
 	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(olqqd *registry.Volume, new *registry.Volume) bool {
 		if new.State == registry.Error {
-			volumeInErrorState = true
+			volumeInErrorState = fmt.Errorf("volume %s now in error state", new.Name)
 			return true
 		}
 		allDettached := false
@@ -198,13 +198,13 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 			newAttachment, ok := new.FindAttachment(host, jobName)
 			if !ok {
 				// TODO: debug log or something?
-				volumeInErrorState = true
+				volumeInErrorState = fmt.Errorf("unable to find attachment for host: %s", host)
 				return true
 			}
 
 			if newAttachment.State == registry.AttachmentError {
 				// found an error bail out early
-				volumeInErrorState = true
+				volumeInErrorState = fmt.Errorf("attachment for host %s in error state", host)
 				return true
 			}
 
@@ -217,8 +217,8 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 		}
 		return allDettached
 	})
-	if volumeInErrorState {
-		return fmt.Errorf("unable to unmount volume: %s", vlm.volume.Name)
+	if volumeInErrorState != nil {
+		return fmt.Errorf("unable to unmount volume: %s because: %s", vlm.volume.Name, volumeInErrorState)
 	}
 	if err != nil {
 		return err

@@ -54,7 +54,6 @@ func TestVolumeLifecycleManager_Mount(t *testing.T) {
 	assert.Equal(t, "unable to mount volume: vol1", err.Error())
 }
 
-
 func TestVolumeLifecycleManager_Unmount(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -62,10 +61,10 @@ func TestVolumeLifecycleManager_Unmount(t *testing.T) {
 
 	volume := registry.Volume{
 		Name: "vol1", SizeBricks: 3, State: registry.BricksProvisioned, JobName: "job1",
-		Attachments:[]registry.Attachment{
-			{Hostname:"host1", Job:"job1", State:registry.Attached},
-			{Hostname:"host2", Job:"job1", State:registry.Attached},
-			{Hostname:"host1", Job:"job2"},
+		Attachments: []registry.Attachment{
+			{Hostname: "host1", Job: "job1", State: registry.Attached},
+			{Hostname: "host2", Job: "job1", State: registry.Attached},
+			{Hostname: "host1", Job: "job2"},
 		}}
 	vlm := NewVolumeLifecycleManager(mockVolReg, nil, volume)
 	hosts := []string{"host1", "host2"}
@@ -108,5 +107,5 @@ func TestVolumeLifecycleManager_Unmount(t *testing.T) {
 	assert.Equal(t, "can't find attachment for volume: vol1 host: host1 job: job3", err.Error())
 
 	err = vlm.Unmount(hosts, "job1")
-	assert.Equal(t, "unable to unmount volume: vol1", err.Error())
+	assert.Equal(t, "unable to unmount volume: vol1 because: attachment for host host1 in error state", err.Error())
 }

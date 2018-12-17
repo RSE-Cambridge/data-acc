@@ -152,7 +152,7 @@ func mergeAttachments(oldAttachments []registry.Attachment, updates []registry.A
 }
 
 func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeName,
-		updates []registry.Attachment) error {
+	updates []registry.Attachment) error {
 	update := func(volume *registry.Volume) error {
 		volume.Attachments = mergeAttachments(volume.Attachments, updates)
 		return nil
