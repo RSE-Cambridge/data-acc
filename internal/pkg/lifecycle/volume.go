@@ -172,7 +172,7 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 		if !ok {
 			return fmt.Errorf(
 				"can't find attachment for volume: %s host: %s job: %s",
-				vlm.volume, host, jobName)
+				vlm.volume.Name, host, jobName)
 		}
 
 		if attachment.State != registry.Attached {
@@ -188,7 +188,7 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 
 	// TODO: must share way more code and do more tests on this logic!!
 	volumeInErrorState := false
-	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
+	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(olqqd *registry.Volume, new *registry.Volume) bool {
 		if new.State == registry.Error {
 			volumeInErrorState = true
 			return true
