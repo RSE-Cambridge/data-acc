@@ -155,7 +155,7 @@ func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeN
 		}
 		return nil
 	}
-	return volRegistry.updateVolume(name, true, update)
+	return volRegistry.updateVolume(name, update)
 }
 
 func (volRegistry *volumeRegistry) DeleteVolumeAttachments(name registry.VolumeName, hostnames []string, jobName string) error {
@@ -171,7 +171,7 @@ func (volRegistry *volumeRegistry) DeleteVolumeAttachments(name registry.VolumeN
 		}
 		return nil
 	}
-	return volRegistry.updateVolume(name, true, update)
+	return volRegistry.updateVolume(name, update)
 }
 
 func removeAttachments(volume *registry.Volume, jobName string, hostnames []string) int {
@@ -195,20 +195,18 @@ func removeAttachments(volume *registry.Volume, jobName string, hostnames []stri
 	return numberRemoved
 }
 
-func (volRegistry *volumeRegistry) updateVolume(name registry.VolumeName, withMutex bool,
+func (volRegistry *volumeRegistry) updateVolume(name registry.VolumeName,
 	update func(volume *registry.Volume) error) error {
 
 	// TODO: if we restructure attachments into separate keys, we can probably ditch this mutex
-	if withMutex {
-		mutex, err := volRegistry.keystore.NewMutex(getVolumeKey(string(name)))
-		if err != nil {
-			return err
-		}
-		if err := mutex.Lock(context.TODO()); err != nil {
-			return err
-		}
-		defer mutex.Unlock(context.TODO())
+	mutex, err := volRegistry.keystore.NewMutex(getVolumeKey(string(name)))
+	if err != nil {
+		return err
 	}
+	if err := mutex.Lock(context.TODO()); err != nil {
+		return err
+	}
+	defer mutex.Unlock(context.TODO())
 
 	keyValue, err := volRegistry.keystore.Get(getVolumeKey(string(name)))
 	if err != nil {
@@ -242,7 +240,7 @@ func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state r
 		}
 		return nil
 	}
-	return volRegistry.updateVolume(name, false, updateState)
+	return volRegistry.updateVolume(name, updateState)
 }
 
 const volumeKeyPrefix = "/volume/"
