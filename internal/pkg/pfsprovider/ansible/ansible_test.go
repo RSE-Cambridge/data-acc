@@ -53,7 +53,7 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
     abcdefgh:
       hosts:
         dac1:
-          abcdefgh_mgs: nvme0n1
+          abcdefgh_mgs: sdb
           abcdefgh_mdt: nvme1n1
         dac2:
           abcdefgh_osts: {nvme2n1: 1}

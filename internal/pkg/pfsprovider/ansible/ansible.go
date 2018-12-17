@@ -37,6 +37,12 @@ type Wrapper struct {
 var DefaultHostGroup = "dac-fake"
 
 func getInventory(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
+	// NOTE: only used by lustre
+	mgsDevice := os.Getenv("DAC_MGS_DEV")
+	if mgsDevice == "" {
+		mgsDevice = "sdb"
+	}
+
 	var mdt registry.BrickAllocation
 	osts := make(map[string][]registry.BrickAllocation)
 	for _, allocation := range brickAllocations {
@@ -62,7 +68,7 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 		if mdt.Hostname == host {
 			hostInfo.MDTS = mdt.Device
 			if fsType == Lustre {
-				hostInfo.MGS = "nvme0n1" // TODO: horrible hack!!
+				hostInfo.MGS = mgsDevice // TODO: horrible hack!!
 			} else {
 				hostInfo.MGS = mdt.Device
 			}
