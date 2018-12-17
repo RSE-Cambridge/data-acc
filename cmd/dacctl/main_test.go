@@ -172,6 +172,9 @@ func (*stubKeystore) WatchKey(ctxt context.Context, key string, onUpdate func(ol
 func (*stubKeystore) KeepAliveKey(key string) error {
 	panic("implement me")
 }
+func (*stubKeystore) NewMutex(lockKey string) (keystoreregistry.Mutex, error) {
+	panic("implement me")
+}
 
 type stubDacctlActions struct{}
 
