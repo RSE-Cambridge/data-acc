@@ -39,10 +39,8 @@ squeue
 echo "***Create per job buffer***"
 su slurm -c 'srun --bb="capacity=100GB" bash -c "sleep 5 && echo \$HOSTNAME"'
 
-sleep $SLEEP_INTERVAL
 scontrol show burstbuffer
 squeue
-sleep $SLEEP_INTERVAL
 
 echo "***Use persistent buffer***"
 cat use-persistent.sh
