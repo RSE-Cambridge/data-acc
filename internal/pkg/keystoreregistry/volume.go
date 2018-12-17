@@ -360,6 +360,7 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 					// but sometimes we will have already found the condition
 					waitGroup.Done()
 				}
+				return
 			}
 			oldVolume := &registry.Volume{}
 			newVolume := &registry.Volume{}
@@ -370,13 +371,12 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 				volumeFromKeyValue(*new, newVolume)
 			}
 
-			if condition(oldVolume, newVolume) && !finished {
+			if !finished && condition(oldVolume, newVolume) {
 				finished = true
 				log.Printf("condition met with new volume: %s", newVolume)
 				err = nil
 				cancelFunc()
 				waitGroup.Done()
-
 			}
 		})
 
