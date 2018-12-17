@@ -34,7 +34,7 @@ type Wrapper struct {
 	All FileSystems
 }
 
-var DefaultHostGroup = "dac-fake"
+var DefaultHostGroup = "dac-prod"
 
 func getInventory(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
 	// NOTE: only used by lustre
