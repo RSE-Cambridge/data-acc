@@ -77,7 +77,8 @@ func (client *etcKeystore) NewMutex(lockKey string) (keystoreregistry.Mutex, err
 	if err != nil {
 		return nil, err
 	}
-	return concurrency.NewMutex(session, lockKey), nil
+	key := fmt.Sprintf("/locks/%s", lockKey)
+	return concurrency.NewMutex(session, key), nil
 }
 
 func handleError(err error) {
