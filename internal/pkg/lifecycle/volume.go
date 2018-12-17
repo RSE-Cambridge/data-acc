@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
-	"math/rand"
-	"time"
 )
 
 type VolumeLifecycleManager interface {
-	ProvisionBricks(pool registry.Pool) error
+	ProvisionBricks() error
 	DataIn() error
 	Mount(hosts []string, jobName string) error
 	Unmount(hosts []string, jobName string) error
@@ -28,8 +26,8 @@ type volumeLifecycleManager struct {
 	volume         registry.Volume
 }
 
-func (vlm *volumeLifecycleManager) ProvisionBricks(pool registry.Pool) error {
-	err := getBricksForBuffer(vlm.poolRegistry, pool, vlm.volume)
+func (vlm *volumeLifecycleManager) ProvisionBricks() error {
+	_, err := vlm.poolRegistry.AllocateBricksForVolume(vlm.volume)
 	if err != nil {
 		return err
 	}
@@ -38,65 +36,6 @@ func (vlm *volumeLifecycleManager) ProvisionBricks(pool registry.Pool) error {
 	if vlm.volume.SizeBricks != 0 {
 		err = vlm.volumeRegistry.WaitForState(vlm.volume.Name, registry.BricksProvisioned)
 	}
-	return err
-}
-
-func getBricksForBuffer(poolRegistry registry.PoolRegistry,
-	pool registry.Pool, volume registry.Volume) error {
-
-	if volume.SizeBricks == 0 {
-		// No bricks requested, so return right away
-		return nil
-	}
-
-	availableBricks := pool.AvailableBricks
-	var chosenBricks []registry.BrickInfo
-
-	// pick some of the available bricks
-	s := rand.NewSource(time.Now().Unix())
-	r := rand.New(s) // initialize local pseudorandom generator
-
-	randomWalk := r.Perm(len(availableBricks))
-	for _, i := range randomWalk {
-		candidateBrick := availableBricks[i]
-
-		// TODO: should not the random walk mean this isn't needed!
-		goodCandidate := true
-		for _, brick := range chosenBricks {
-			if brick == candidateBrick {
-				goodCandidate = false
-				break
-			}
-		}
-		if goodCandidate {
-			chosenBricks = append(chosenBricks, candidateBrick)
-		}
-		if uint(len(chosenBricks)) >= volume.SizeBricks {
-			break
-		}
-	}
-
-	if uint(len(chosenBricks)) != volume.SizeBricks {
-		return fmt.Errorf("unable to get number of requested bricks (%d) for given pool (%s)",
-			volume.SizeBricks, pool.Name)
-	}
-
-	var allocations []registry.BrickAllocation
-	for _, brick := range chosenBricks {
-		allocations = append(allocations, registry.BrickAllocation{
-			Device:              brick.Device,
-			Hostname:            brick.Hostname,
-			AllocatedVolume:     volume.Name,
-			DeallocateRequested: false,
-		})
-	}
-	err := poolRegistry.AllocateBricks(allocations)
-	if err != nil {
-		// TODO: should we retry in case we just raced someone else?
-		return err
-	}
-
-	_, err = poolRegistry.GetAllocationsForVolume(volume.Name) // TODO return result, wait for updates
 	return err
 }
 
