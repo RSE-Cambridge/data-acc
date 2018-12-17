@@ -155,6 +155,13 @@ func provisionNewVolume(poolRegistry registry.PoolRegistry, volumeRegistry regis
 		return
 	}
 
+	// Before we provision the bricks, notify that we have seen the volume
+	err = volumeRegistry.UpdateState(volume.Name, registry.BricksAllocated)
+	if err != nil {
+		handleError(volumeRegistry, volume, err)
+		return
+	}
+
 	err = plugin.VolumeProvider().SetupVolume(volume, bricks)
 	if err != nil {
 		handleError(volumeRegistry, volume, err)

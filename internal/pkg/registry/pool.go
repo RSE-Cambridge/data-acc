@@ -38,7 +38,7 @@ type PoolRegistry interface {
 	//
 	// Note: you may assign multiple volumes in a single call, but all bricks
 	// for a particular volume must be set in a single call
-	AllocateBricks(allocations []BrickAllocation) error
+	AllocateBricksForVolume(volume Volume) ([]BrickAllocation, error)
 
 	// Deallocate all bricks associated with the given volume
 	//

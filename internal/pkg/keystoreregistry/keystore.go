@@ -60,6 +60,9 @@ type Keystore interface {
 	// Add a key, and remove it when calling process dies
 	// Error is returned if the key already exists
 	KeepAliveKey(key string) error
+
+	// Get a new mutex associated with the specified key
+	NewMutex(lockKey string) (Mutex, error)
 }
 
 type KeyValue struct {
@@ -84,4 +87,9 @@ func toJson(message interface{}) string {
 		log.Fatal(error)
 	}
 	return string(b)
+}
+
+type Mutex interface {
+	Lock(ctx context.Context) error
+	Unlock(ctx context.Context) error
 }

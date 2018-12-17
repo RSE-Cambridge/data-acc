@@ -134,25 +134,27 @@ func findAttachment(attachments []registry.Attachment,
 	return nil, false
 }
 
-func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeName,
-	attachments []registry.Attachment) error {
+func mergeAttachments(oldAttachments []registry.Attachment, updates []registry.Attachment) []registry.Attachment {
+	var newAttachments []registry.Attachment
+	for _, update := range updates {
+		newAttachments = append(newAttachments, update)
+	}
 
-	update := func(volume *registry.Volume) error {
-		if volume.Attachments == nil {
-			volume.Attachments = attachments
-		} else {
-			newAttachments := []registry.Attachment{}
-			for _, oldAttachment := range volume.Attachments {
-				newAttachment, ok := findAttachment(
-					attachments, oldAttachment.Hostname, oldAttachment.Job)
-				if ok {
-					newAttachments = append(newAttachments, *newAttachment)
-				} else {
-					newAttachments = append(newAttachments, oldAttachment)
-				}
-			}
-			volume.Attachments = newAttachments
+	// add any existing attachments that don't match an update
+	for _, oldAttachment := range oldAttachments {
+		_, ok := findAttachment(
+			updates, oldAttachment.Hostname, oldAttachment.Job)
+		if !ok {
+			newAttachments = append(newAttachments, oldAttachment)
 		}
+	}
+	return newAttachments
+}
+
+func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeName,
+	updates []registry.Attachment) error {
+	update := func(volume *registry.Volume) error {
+		volume.Attachments = mergeAttachments(volume.Attachments, updates)
 		return nil
 	}
 	return volRegistry.updateVolume(name, update)
@@ -164,23 +166,7 @@ func (volRegistry *volumeRegistry) DeleteVolumeAttachments(name registry.VolumeN
 		if volume.Attachments == nil {
 			return errors.New("no attachments to delete")
 		} else {
-			var newAttachments []registry.Attachment
-			for _, attachment := range volume.Attachments {
-				remove := false
-				if attachment.Job == jobName {
-					for _, host := range hostnames {
-						if attachment.Hostname == host {
-							remove = true
-							break
-						}
-					}
-				}
-				if !remove {
-					newAttachments = append(newAttachments, attachment)
-				}
-			}
-
-			numberRemoved := len(volume.Attachments) - len(newAttachments)
+			numberRemoved := removeAttachments(volume, jobName, hostnames)
 			if numberRemoved != len(hostnames) {
 				return fmt.Errorf("unable to find all attachments for volume %s", name)
 			}
@@ -190,8 +176,39 @@ func (volRegistry *volumeRegistry) DeleteVolumeAttachments(name registry.VolumeN
 	return volRegistry.updateVolume(name, update)
 }
 
+func removeAttachments(volume *registry.Volume, jobName string, hostnames []string) int {
+	var newAttachments []registry.Attachment
+	for _, attachment := range volume.Attachments {
+		remove := false
+		if attachment.Job == jobName {
+			for _, host := range hostnames {
+				if attachment.Hostname == host {
+					remove = true
+					break
+				}
+			}
+		}
+		if !remove {
+			newAttachments = append(newAttachments, attachment)
+		}
+	}
+	numberRemoved := len(volume.Attachments) - len(newAttachments)
+	volume.Attachments = newAttachments
+	return numberRemoved
+}
+
 func (volRegistry *volumeRegistry) updateVolume(name registry.VolumeName,
 	update func(volume *registry.Volume) error) error {
+
+	// TODO: if we restructure attachments into separate keys, we can probably ditch this mutex
+	mutex, err := volRegistry.keystore.NewMutex(getVolumeKey(string(name)))
+	if err != nil {
+		return err
+	}
+	if err := mutex.Lock(context.TODO()); err != nil {
+		return err
+	}
+	defer mutex.Unlock(context.TODO())
 
 	keyValue, err := volRegistry.keystore.Get(getVolumeKey(string(name)))
 	if err != nil {
@@ -219,6 +236,10 @@ func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state r
 				volume.Name, volume.State)
 		}
 		volume.State = state
+		if state == registry.BricksAllocated {
+			// From this point onwards, we know bricks might need to be cleaned up
+			volume.HadBricksAssigned = true
+		}
 		return nil
 	}
 	return volRegistry.updateVolume(name, updateState)
@@ -339,6 +360,7 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 					// but sometimes we will have already found the condition
 					waitGroup.Done()
 				}
+				return
 			}
 			oldVolume := &registry.Volume{}
 			newVolume := &registry.Volume{}
@@ -349,11 +371,11 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 				volumeFromKeyValue(*new, newVolume)
 			}
 
-			if condition(oldVolume, newVolume) && !finished {
+			if !finished && condition(oldVolume, newVolume) {
+				finished = true
 				log.Printf("condition met with new volume: %s", newVolume)
 				err = nil
 				cancelFunc()
-				finished = true
 				waitGroup.Done()
 			}
 		})

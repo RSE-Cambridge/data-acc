@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
-	"math/rand"
-	"time"
 )
 
 type VolumeLifecycleManager interface {
-	ProvisionBricks(pool registry.Pool) error
+	ProvisionBricks() error
 	DataIn() error
 	Mount(hosts []string, jobName string) error
 	Unmount(hosts []string, jobName string) error
@@ -28,8 +26,8 @@ type volumeLifecycleManager struct {
 	volume         registry.Volume
 }
 
-func (vlm *volumeLifecycleManager) ProvisionBricks(pool registry.Pool) error {
-	err := getBricksForBuffer(vlm.poolRegistry, pool, vlm.volume)
+func (vlm *volumeLifecycleManager) ProvisionBricks() error {
+	_, err := vlm.poolRegistry.AllocateBricksForVolume(vlm.volume)
 	if err != nil {
 		return err
 	}
@@ -41,141 +39,11 @@ func (vlm *volumeLifecycleManager) ProvisionBricks(pool registry.Pool) error {
 	return err
 }
 
-// TODO: delete me?
-func getBricksForBufferOld(poolRegistry registry.PoolRegistry,
-	pool registry.Pool, volume registry.Volume) error {
-
-	if volume.SizeBricks == 0 {
-		// No bricks requested, so return right away
-		return nil
-	}
-
-	availableBricks := pool.AvailableBricks
-	availableBricksByHost := make(map[string][]registry.BrickInfo)
-	for _, brick := range availableBricks {
-		hostBricks := availableBricksByHost[brick.Hostname]
-		availableBricksByHost[brick.Hostname] = append(hostBricks, brick)
-	}
-
-	var chosenBricks []registry.BrickInfo
-
-	// pick some of the available bricks
-	s := rand.NewSource(time.Now().Unix())
-	r := rand.New(s) // initialize local pseudorandom generator
-
-	var hosts []string
-	for key := range availableBricksByHost {
-		hosts = append(hosts, key)
-	}
-
-	randomWalk := rand.Perm(len(availableBricksByHost))
-	for _, i := range randomWalk {
-		hostBricks := availableBricksByHost[hosts[i]]
-		candidateBrick := hostBricks[r.Intn(len(hostBricks))]
-
-		goodCandidate := true
-		for _, brick := range chosenBricks {
-			if brick == candidateBrick {
-				goodCandidate = false
-				break
-			}
-			if brick.Hostname == candidateBrick.Hostname {
-				goodCandidate = false
-				break
-			}
-		}
-		if goodCandidate {
-			chosenBricks = append(chosenBricks, candidateBrick)
-		}
-		if uint(len(chosenBricks)) >= volume.SizeBricks {
-			break
-		}
-	}
-
-	if uint(len(chosenBricks)) != volume.SizeBricks {
-		return fmt.Errorf("unable to get number of requested bricks (%d) for given pool (%s)",
-			volume.SizeBricks, pool.Name)
-	}
-
-	var allocations []registry.BrickAllocation
-	for _, brick := range chosenBricks {
-		allocations = append(allocations, registry.BrickAllocation{
-			Device:              brick.Device,
-			Hostname:            brick.Hostname,
-			AllocatedVolume:     volume.Name,
-			DeallocateRequested: false,
-		})
-	}
-	err := poolRegistry.AllocateBricks(allocations)
-	if err != nil {
-		return err
-	}
-	_, err = poolRegistry.GetAllocationsForVolume(volume.Name) // TODO return result, wait for updates
-	return err
-}
-
-func getBricksForBuffer(poolRegistry registry.PoolRegistry,
-	pool registry.Pool, volume registry.Volume) error {
-
-	if volume.SizeBricks == 0 {
-		// No bricks requested, so return right away
-		return nil
-	}
-
-	availableBricks := pool.AvailableBricks
-	var chosenBricks []registry.BrickInfo
-
-	// pick some of the available bricks
-	s := rand.NewSource(time.Now().Unix())
-	r := rand.New(s) // initialize local pseudorandom generator
-
-	randomWalk := r.Perm(len(availableBricks))
-	for _, i := range randomWalk {
-		candidateBrick := availableBricks[i]
-
-		// TODO: should not the random walk mean this isn't needed!
-		goodCandidate := true
-		for _, brick := range chosenBricks {
-			if brick == candidateBrick {
-				goodCandidate = false
-				break
-			}
-		}
-		if goodCandidate {
-			chosenBricks = append(chosenBricks, candidateBrick)
-		}
-		if uint(len(chosenBricks)) >= volume.SizeBricks {
-			break
-		}
-	}
-
-	if uint(len(chosenBricks)) != volume.SizeBricks {
-		return fmt.Errorf("unable to get number of requested bricks (%d) for given pool (%s)",
-			volume.SizeBricks, pool.Name)
-	}
-
-	var allocations []registry.BrickAllocation
-	for _, brick := range chosenBricks {
-		allocations = append(allocations, registry.BrickAllocation{
-			Device:              brick.Device,
-			Hostname:            brick.Hostname,
-			AllocatedVolume:     volume.Name,
-			DeallocateRequested: false,
-		})
-	}
-	err := poolRegistry.AllocateBricks(allocations)
-	if err != nil {
-		return err
-	}
-	_, err = poolRegistry.GetAllocationsForVolume(volume.Name) // TODO return result, wait for updates
-	return err
-}
-
 func (vlm *volumeLifecycleManager) Delete() error {
 	// TODO convert errors into volume related errors, somewhere?
 	log.Println("Deleting volume:", vlm.volume.Name, vlm.volume)
 
-	if vlm.volume.SizeBricks == 0 {
+	if vlm.volume.SizeBricks == 0 || vlm.volume.HadBricksAssigned == false {
 		log.Println("No bricks to delete, skipping request delete bricks for:", vlm.volume.Name)
 
 	} else {
@@ -206,6 +74,8 @@ func (vlm *volumeLifecycleManager) Delete() error {
 		}
 		log.Println("Allocations all deleted, count:", len(allocations))
 	}
+
+	// TODO: what about any pending mounts that might get left behind for job?
 
 	log.Println("Deleting volume record in registry for:", vlm.volume.Name)
 	return vlm.volumeRegistry.DeleteVolume(vlm.volume.Name)
@@ -263,7 +133,7 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string, jobName string) error {
 					} else if attachment.State == registry.AttachmentError {
 						// found an error bail out early
 						volumeInErrorState = true
-						return true
+						return true // Return true to stop the waiting
 					} else {
 						isAttached = false
 					}
@@ -302,7 +172,7 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 		if !ok {
 			return fmt.Errorf(
 				"can't find attachment for volume: %s host: %s job: %s",
-				vlm.volume, host, jobName)
+				vlm.volume.Name, host, jobName)
 		}
 
 		if attachment.State != registry.Attached {
@@ -311,15 +181,16 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 		attachment.State = registry.RequestDetach
 		updates = append(updates, *attachment)
 	}
+	// TODO: I think we need to split attachments out of the volume object to avoid the races
 	if err := vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, updates); err != nil {
 		return err
 	}
 
 	// TODO: must share way more code and do more tests on this logic!!
-	volumeInErrorState := false
-	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
+	var volumeInErrorState error
+	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(olqqd *registry.Volume, new *registry.Volume) bool {
 		if new.State == registry.Error {
-			volumeInErrorState = true
+			volumeInErrorState = fmt.Errorf("volume %s now in error state", new.Name)
 			return true
 		}
 		allDettached := false
@@ -327,13 +198,13 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 			newAttachment, ok := new.FindAttachment(host, jobName)
 			if !ok {
 				// TODO: debug log or something?
-				volumeInErrorState = true
+				volumeInErrorState = fmt.Errorf("unable to find attachment for host: %s", host)
 				return true
 			}
 
 			if newAttachment.State == registry.AttachmentError {
 				// found an error bail out early
-				volumeInErrorState = true
+				volumeInErrorState = fmt.Errorf("attachment for host %s in error state", host)
 				return true
 			}
 
@@ -346,8 +217,8 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 		}
 		return allDettached
 	})
-	if volumeInErrorState {
-		return fmt.Errorf("unable to mount volume: %s", vlm.volume.Name)
+	if volumeInErrorState != nil {
+		return fmt.Errorf("unable to unmount volume: %s because: %s", vlm.volume.Name, volumeInErrorState)
 	}
 	if err != nil {
 		return err

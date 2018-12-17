@@ -62,13 +62,14 @@ func testAllocateBricks(poolRegistry registry.PoolRegistry) {
 			log.Printf("requested clean of: %d:%s", new.AllocatedIndex, new.Device)
 		}
 	})
-	allocations := []registry.BrickAllocation{
-		{Hostname: "foo", Device: "vbdb1", AllocatedVolume: "vol1"},
-		{Hostname: "foo", Device: "nvme3n1", AllocatedVolume: "vol1"},
-	}
-	if err := poolRegistry.AllocateBricks(allocations); err != nil {
-		log.Fatal(err)
-	}
+	//allocations := []registry.BrickAllocation{
+	//	{Hostname: "foo", Device: "vbdb1", AllocatedVolume: "vol1"},
+	//	{Hostname: "foo", Device: "nvme3n1", AllocatedVolume: "vol1"},
+	//}
+	// TODO: create a volume to get the bricks allocated from?
+	//if err := poolRegistry.AllocateBricks(allocations); err != nil {
+	// log.Fatal(err)
+	//}
 	if err := poolRegistry.DeallocateBricks("vol1"); err != nil {
 		log.Fatal(err)
 	}

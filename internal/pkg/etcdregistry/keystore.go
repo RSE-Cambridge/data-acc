@@ -8,6 +8,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/clientv3util"
+	"github.com/coreos/etcd/clientv3/concurrency"
 	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
 	"github.com/coreos/etcd/mvcc/mvccpb"
 	"github.com/coreos/etcd/pkg/transport"
@@ -69,6 +70,15 @@ func NewKeystore() keystoreregistry.Keystore {
 
 type etcKeystore struct {
 	*clientv3.Client
+}
+
+func (client *etcKeystore) NewMutex(lockKey string) (keystoreregistry.Mutex, error) {
+	session, err := concurrency.NewSession(client.Client)
+	if err != nil {
+		return nil, err
+	}
+	key := fmt.Sprintf("/locks/%s", lockKey)
+	return concurrency.NewMutex(session, key), nil
 }
 
 func handleError(err error) {

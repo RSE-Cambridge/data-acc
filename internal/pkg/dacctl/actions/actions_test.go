@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
@@ -61,14 +60,14 @@ func TestCreatePersistentBufferReturnsError(t *testing.T) {
 	mockPool.EXPECT().Pools().DoAndReturn(func() ([]registry.Pool, error) {
 		return []registry.Pool{{Name: "pool1", GranularityGB: 1}}, nil
 	})
+
+	mockPool.EXPECT().AllocateBricksForVolume(gomock.Any())
 	mockCtxt := &mockCliContext{}
 
 	actions := NewDacctlActions(mockPool, mockObj, nil)
 
-	if err := actions.CreatePersistentBuffer(mockCtxt); err != nil {
-		assert.EqualValues(t, "unable to create buffer", fmt.Sprint(err))
-		t.Fatal("expected success")
-	}
+	err := actions.CreatePersistentBuffer(mockCtxt)
+	assert.Nil(t, err)
 }
 
 func TestDacctlActions_PreRun(t *testing.T) {
@@ -146,7 +145,7 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 		func(name registry.VolumeName) (registry.Volume, error) {
 			return registry.Volume{Name: name, MultiJob: true}, nil
 		})
-	mockVolReg.EXPECT().AddVolume(registry.Volume{
+	expectedVolume := registry.Volume{
 		Name:                   "token",
 		MultiJob:               false,
 		State:                  registry.Registered,
@@ -161,7 +160,8 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 		AttachGlobalNamespace:  true,
 		AttachPrivateNamespace: true,
 		AttachAsSwapBytes:      0,
-	})
+	}
+	mockVolReg.EXPECT().AddVolume(expectedVolume)
 	mockVolReg.EXPECT().AddJob(registry.Job{
 		Name:      "token",
 		Owner:     1001,
@@ -181,6 +181,8 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 				SizeBricks: 0, // TODO: skips ProvisionBricks logic
 			}, nil
 		})
+	// TODO: sort out the volume passed here!
+	mockPoolReg.EXPECT().AllocateBricksForVolume(gomock.Any())
 
 	err := actions.CreatePerJobBuffer(mockCtxt)
 	assert.Nil(t, err)
@@ -188,8 +190,8 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 
 type mockVLM struct{}
 
-func (*mockVLM) ProvisionBricks(pool registry.Pool) error {
-	return errors.New(pool.Name)
+func (*mockVLM) ProvisionBricks() error {
+	panic("implement me")
 }
 
 func (*mockVLM) DataIn() error {

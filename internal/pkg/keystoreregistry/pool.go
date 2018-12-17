@@ -2,11 +2,14 @@ package keystoreregistry
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 func NewPoolRegistry(keystore Keystore) registry.PoolRegistry {
@@ -79,7 +82,101 @@ func (poolRegistry *poolRegistry) HostAlive(hostname string) (bool, error) {
 	return keyValue.Key != "", err
 }
 
-func (poolRegistry *poolRegistry) AllocateBricks(allocations []registry.BrickAllocation) error {
+func (poolRegistry *poolRegistry) AllocateBricksForVolume(volume registry.Volume) ([]registry.BrickAllocation, error) {
+	// No bricks requested, so return right away
+	if volume.SizeBricks == 0 {
+		return nil, nil
+	}
+
+	// TODO: would retries on clashes be better? this seems simpler for now
+	// lock the pool to stop races
+	mutex, err := poolRegistry.keystore.NewMutex(fmt.Sprintf("allocation/%s", volume.Pool))
+	if err != nil {
+		return nil, err
+	}
+	if err := mutex.Lock(context.TODO()); err != nil {
+		return nil, err
+	}
+	defer mutex.Unlock(context.TODO())
+
+	pools, err := poolRegistry.Pools()
+	if err != nil {
+		return nil, err
+	}
+
+	var pool *registry.Pool
+	for _, candidate := range pools {
+		if candidate.Name == volume.Pool {
+			pool = &candidate
+		}
+	}
+
+	if pool == nil {
+		return nil, fmt.Errorf("unable to find pool %s", volume.Pool)
+	}
+
+	allocations, err := getBricksForBuffer(pool, &volume)
+	if err != nil {
+		return nil, err
+	}
+
+	// Note that this call triggers dacd of the first allocation to provision the bricks
+	// TODO: probably better to make the provision a spearate state change?
+	if err := poolRegistry.allocateBricks(allocations); err != nil {
+		return nil, err
+	}
+
+	return allocations, nil
+}
+
+func getBricksForBuffer(pool *registry.Pool, volume *registry.Volume) ([]registry.BrickAllocation, error) {
+
+	availableBricks := pool.AvailableBricks
+	var chosenBricks []registry.BrickInfo
+
+	// pick some of the available bricks
+	s := rand.NewSource(time.Now().Unix())
+	r := rand.New(s) // initialize local pseudorandom generator
+
+	randomWalk := r.Perm(len(availableBricks))
+	for _, i := range randomWalk {
+		candidateBrick := availableBricks[i]
+
+		// TODO: should not the random walk mean this isn't needed!
+		goodCandidate := true
+		for _, brick := range chosenBricks {
+			if brick == candidateBrick {
+				goodCandidate = false
+				break
+			}
+		}
+		if goodCandidate {
+			chosenBricks = append(chosenBricks, candidateBrick)
+		}
+		if uint(len(chosenBricks)) >= volume.SizeBricks {
+			break
+		}
+	}
+
+	if uint(len(chosenBricks)) != volume.SizeBricks {
+		return nil, fmt.Errorf(
+			"unable to get number of requested bricks (%d) for given pool (%s)",
+			volume.SizeBricks, pool.Name)
+	}
+
+	var allocations []registry.BrickAllocation
+	for _, brick := range chosenBricks {
+		allocations = append(allocations, registry.BrickAllocation{
+			Device:              brick.Device,
+			Hostname:            brick.Hostname,
+			AllocatedVolume:     volume.Name,
+			DeallocateRequested: false,
+		})
+	}
+	return allocations, nil
+}
+
+func (poolRegistry *poolRegistry) allocateBricks(allocations []registry.BrickAllocation) error {
 	var bricks []registry.BrickInfo
 	var volume registry.VolumeName
 	var raw []KeyValue

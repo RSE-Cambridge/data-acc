@@ -70,16 +70,17 @@ func (mr *MockPoolRegistryMockRecorder) KeepAliveHost(hostname interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KeepAliveHost", reflect.TypeOf((*MockPoolRegistry)(nil).KeepAliveHost), hostname)
 }
 
-// AllocateBricks mocks base method
-func (m *MockPoolRegistry) AllocateBricks(allocations []registry.BrickAllocation) error {
-	ret := m.ctrl.Call(m, "AllocateBricks", allocations)
-	ret0, _ := ret[0].(error)
-	return ret0
+// AllocateBricksForVolume mocks base method
+func (m *MockPoolRegistry) AllocateBricksForVolume(volume registry.Volume) ([]registry.BrickAllocation, error) {
+	ret := m.ctrl.Call(m, "AllocateBricksForVolume", volume)
+	ret0, _ := ret[0].([]registry.BrickAllocation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// AllocateBricks indicates an expected call of AllocateBricks
-func (mr *MockPoolRegistryMockRecorder) AllocateBricks(allocations interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocateBricks", reflect.TypeOf((*MockPoolRegistry)(nil).AllocateBricks), allocations)
+// AllocateBricksForVolume indicates an expected call of AllocateBricksForVolume
+func (mr *MockPoolRegistryMockRecorder) AllocateBricksForVolume(volume interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocateBricksForVolume", reflect.TypeOf((*MockPoolRegistry)(nil).AllocateBricksForVolume), volume)
 }
 
 // DeallocateBricks mocks base method

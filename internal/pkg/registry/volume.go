@@ -145,6 +145,10 @@ type Volume struct {
 	// BeeGFS wants each fs to be assigned a unique port number
 	ClientPort int
 
+	// Track if we have had bricks assigned
+	// if we request delete, no bricks ever assigned, don't ait for dacd!
+	HadBricksAssigned bool
+
 	// TODO: data model currently does not do these things well:
 	// 1. correctly track multiple jobs at the same time attach to the same persistent buffer
 	// 2. data in/out requests for persistent buffer
@@ -161,6 +165,7 @@ type VolumeState int
 const (
 	Unknown VolumeState = iota
 	Registered
+	BricksAllocated
 	BricksProvisioned // setup waits for this, updated by host manager, paths should be setup, or gone to ERROR
 	DataInRequested
 	DataInComplete // data_in waits for host manager to data in, or gone to ERROR
@@ -174,6 +179,7 @@ const (
 var volumeStateStrings = map[VolumeState]string{
 	Unknown:           "",
 	Registered:        "Registered",
+	BricksAllocated:   "BricksAllocated",
 	BricksProvisioned: "BricksProvisioned",
 	DataInRequested:   "DataInRequested",
 	DataInComplete:    "DataInComplete",
@@ -186,6 +192,7 @@ var volumeStateStrings = map[VolumeState]string{
 var stringToVolumeState = map[string]VolumeState{
 	"":                  Unknown,
 	"Registered":        Registered,
+	"BricksAllocated":   BricksAllocated,
 	"BricksProvisioned": BricksProvisioned,
 	"DataInRequested":   DataInRequested,
 	"DataInComplete":    DataInComplete,
