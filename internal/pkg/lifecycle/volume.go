@@ -315,6 +315,7 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 		attachment.State = registry.RequestDetach
 		updates = append(updates, *attachment)
 	}
+	// TODO: I think we need to split attachments out of the volume object to avoid the races
 	if err := vlm.volumeRegistry.UpdateVolumeAttachments(vlm.volume.Name, updates); err != nil {
 		return err
 	}
