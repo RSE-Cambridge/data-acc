@@ -95,7 +95,7 @@ func updateBricks(poolRegistry registry.PoolRegistry, hostname string) {
 	devicesStr := os.Getenv("DEVICE_COUNT")
 	devices := getDevices(devicesStr)
 
-	capacityStr := os.Getenv("DAC_DEVICE_COUNT")
+	capacityStr := os.Getenv("DAC_DEVICE_CAPACITY_GB")
 	poolName := os.Getenv("DAC_POOL_NAME")
 	bricks := getBricks(devices, hostname, capacityStr, poolName)
 
