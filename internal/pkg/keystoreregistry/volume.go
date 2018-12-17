@@ -371,11 +371,12 @@ func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeNa
 			}
 
 			if condition(oldVolume, newVolume) && !finished {
+				finished = true
 				log.Printf("condition met with new volume: %s", newVolume)
 				err = nil
 				cancelFunc()
-				finished = true
 				waitGroup.Done()
+
 			}
 		})
 
