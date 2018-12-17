@@ -134,25 +134,27 @@ func findAttachment(attachments []registry.Attachment,
 	return nil, false
 }
 
-func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeName,
-	attachments []registry.Attachment) error {
+func mergeAttachments(oldAttachments []registry.Attachment, updates []registry.Attachment) []registry.Attachment {
+	var newAttachments []registry.Attachment
+	for _, update := range updates {
+		newAttachments = append(newAttachments, update)
+	}
 
-	update := func(volume *registry.Volume) error {
-		if volume.Attachments == nil {
-			volume.Attachments = attachments
-		} else {
-			newAttachments := []registry.Attachment{}
-			for _, oldAttachment := range volume.Attachments {
-				newAttachment, ok := findAttachment(
-					attachments, oldAttachment.Hostname, oldAttachment.Job)
-				if ok {
-					newAttachments = append(newAttachments, *newAttachment)
-				} else {
-					newAttachments = append(newAttachments, oldAttachment)
-				}
-			}
-			volume.Attachments = newAttachments
+	// add any existing attachments that don't match an update
+	for _, oldAttachment := range oldAttachments {
+		_, ok := findAttachment(
+			updates, oldAttachment.Hostname, oldAttachment.Job)
+		if !ok {
+			newAttachments = append(newAttachments, oldAttachment)
 		}
+	}
+	return newAttachments
+}
+
+func (volRegistry *volumeRegistry) UpdateVolumeAttachments(name registry.VolumeName,
+		updates []registry.Attachment) error {
+	update := func(volume *registry.Volume) error {
+		volume.Attachments = mergeAttachments(volume.Attachments, updates)
 		return nil
 	}
 	return volRegistry.updateVolume(name, update)
