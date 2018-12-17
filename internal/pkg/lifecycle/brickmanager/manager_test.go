@@ -8,14 +8,14 @@ import (
 
 func TestGetDevices(t *testing.T) {
 	devices := getDevices("5")
-	assert.Equal(t, 4, len(devices))
-	assert.Equal(t, "nvme1n1", devices[0])
-	assert.Equal(t, "nvme4n1", devices[3])
+	assert.Equal(t, 5, len(devices))
+	assert.Equal(t, "nvme0n1", devices[0])
+	assert.Equal(t, "nvme4n1", devices[4])
 
 	devices = getDevices("asdf")
-	assert.Equal(t, 11, len(devices))
-	assert.Equal(t, "nvme1n1", devices[0])
-	assert.Equal(t, "nvme11n1", devices[10])
+	assert.Equal(t, 12, len(devices))
+	assert.Equal(t, "nvme0n1", devices[0])
+	assert.Equal(t, "nvme11n1", devices[11])
 }
 
 func TestGetBricks(t *testing.T) {

@@ -2,7 +2,6 @@ package brickmanager
 
 import (
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/pfsprovider/ansible"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"os"
@@ -65,10 +64,6 @@ func getDevices(devicesStr string) []string {
 
 	var bricks []string
 	for i := 0; i < count; i++ {
-		if i == 0 && FSType == ansible.Lustre {
-			// TODO: we should use another disk for MGS
-			continue
-		}
 		device := fmt.Sprintf(DefaultDeviceAddress, i)
 		bricks = append(bricks, device)
 	}
