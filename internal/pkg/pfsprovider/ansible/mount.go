@@ -108,6 +108,12 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 	log.Println("Umount for:", volume.Name)
 
 	for _, attachment := range volume.Attachments {
+		if attachment.State != registry.RequestDetach {
+			log.Printf("Skipping volume %s detach for: %+v", volume.Name, attachment)
+			continue
+		}
+		log.Printf("Volume %s dettaching: %+v", volume.Name, attachment)
+
 		var mountDir = getMountDir(volume, attachment.Job)
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
 			swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?

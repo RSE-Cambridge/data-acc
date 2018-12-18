@@ -176,5 +176,5 @@ func Test_Umount(t *testing.T) {
 	}
 	err := umount(Lustre, volume, bricks)
 	assert.Nil(t, err)
-	assert.Equal(t, 30, fake.calls)
+	assert.Equal(t, 15, fake.calls)
 }
