@@ -96,8 +96,11 @@ func Test_Mount(t *testing.T) {
 		AttachAsSwapBytes:      10000,
 		Attachments: []registry.Attachment{
 			{Hostname: "client1", Job: "job1", State: registry.RequestAttach},
-			{Hostname: "client2", Job: "job1", State: registry.Attached},
-			{Hostname: "client2", Job: "job2", State: registry.RequestDetach},
+			{Hostname: "client2", Job: "job1", State: registry.RequestAttach},
+			{Hostname: "client3", Job: "job3", State: registry.Attached},
+			{Hostname: "client3", Job: "job3", State: registry.RequestDetach},
+			{Hostname: "client3", Job: "job3", State: registry.Detached},
+			{Hostname: "client2", Job: "job2", State: registry.RequestAttach},
 		},
 		ClientPort: 42,
 		Owner:      1001,

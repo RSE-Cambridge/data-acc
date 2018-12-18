@@ -38,6 +38,12 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 	}
 
 	for _, attachment := range volume.Attachments {
+		if attachment.State != registry.RequestAttach {
+			log.Printf("Skipping volume %s attach: %+v", volume.Name, attachment)
+			continue
+		}
+		log.Printf("Volume %s attaching with: %+v", volume.Name, attachment)
+
 		var mountDir = getMountDir(volume, attachment.Job)
 		if err := mkdir(attachment.Hostname, mountDir); err != nil {
 			return err
