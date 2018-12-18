@@ -73,8 +73,8 @@ func getPoolAndBrickCount(poolRegistry registry.PoolRegistry, capacity string) (
 	}
 
 	bricksRequired = uint(math.Ceil(float64(capacityGB) / float64(pool.GranularityGB)))
-	// Add one more for the metadata... TODO: lustre specific?
-	if bricksRequired != 0 {
+	// Add one more for the metadata, but only if request only one brick... TODO: lustre specific?
+	if bricksRequired == 1 {
 		bricksRequired += 1
 	}
 	return
