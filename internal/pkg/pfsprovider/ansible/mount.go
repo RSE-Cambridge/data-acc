@@ -218,7 +218,8 @@ func mountLustre(hostname string, lnetSuffix string, mgtHost string, fsname stri
 		return err
 	}
 	return runner.Execute(hostname, fmt.Sprintf(
-		"mount -t lustre %s%s:/%s %s", mgtHost, lnetSuffix, fsname, directory))
+		"(grep %s /etc/mtab) || (mount -t lustre %s%s:/%s %s)",
+		directory, mgtHost, lnetSuffix, fsname, directory))
 }
 
 func mountBeegFS(hostname string, mgtHost string, fsname string, directory string) error {
