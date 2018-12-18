@@ -108,15 +108,15 @@ func setPaths(perJobVolume *registry.Volume, job registry.Job) map[string]string
 	paths := make(map[string]string)
 	if perJobVolume != nil {
 		if perJobVolume.AttachPrivateNamespace {
-			paths["DW_JOB_PRIVATE"] = fmt.Sprintf("/dac/%s/job_private", job.Name)
+			paths["DW_JOB_PRIVATE"] = fmt.Sprintf("/dac/%s_job_private", job.Name)
 		}
 		if perJobVolume.AttachGlobalNamespace {
-			paths["DW_JOB_STRIPED"] = fmt.Sprintf("/dac/%s/job/global", job.Name)
+			paths["DW_JOB_STRIPED"] = fmt.Sprintf("/dac/%s_job/global", job.Name)
 		}
 	}
 	for _, multiJobVolume := range job.MultiJobVolumes {
 		paths[fmt.Sprintf("DW_PERSISTENT_STRIPED_%s", multiJobVolume)] = fmt.Sprintf(
-			"/dac/%s/persistent/%s", job.Name, multiJobVolume)
+			"/dac/%s_persistent_%s", job.Name, multiJobVolume)
 	}
 	return paths
 }

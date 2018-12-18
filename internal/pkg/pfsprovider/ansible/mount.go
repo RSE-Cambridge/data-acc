@@ -12,9 +12,9 @@ import (
 func getMountDir(volume registry.Volume, jobName string) string {
 	// TODO: what about the environment variables that are being set? should share logic with here
 	if volume.MultiJob {
-		return fmt.Sprintf("/dac/%s/persistent/%s", jobName, volume.Name)
+		return fmt.Sprintf("/dac/%s_persistent_%s", jobName, volume.Name)
 	}
-	return fmt.Sprintf("/dac/%s/job", jobName)
+	return fmt.Sprintf("/dac/%s_job", jobName)
 }
 
 func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
@@ -86,8 +86,8 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 				return err
 			}
 
-			// need a consistent symlink for shared environment variables
-			privateSymLinkDir := fmt.Sprintf("/dac/%s/job_private", volume.JobName)
+			// need a consistent symlink for shared environment variables across all hosts
+			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", attachment.Job)
 			if err := createSymbolicLink(attachment.Hostname, privateDir, privateSymLinkDir); err != nil {
 				return err
 			}
@@ -130,14 +130,22 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 				return err
 			}
 		}
+
+		if !volume.MultiJob && volume.AttachPrivateNamespace {
+			privateSymLinkDir := fmt.Sprintf("/dac/%s/job_private", attachment.Job)
+			if err := removeSubtree(attachment.Hostname, privateSymLinkDir); err != nil {
+				return err
+			}
+		}
+
 		if fsType == Lustre {
 			if err := umountLustre(attachment.Hostname, mountDir); err != nil {
 				return err
 			}
-			basePath := fmt.Sprintf("/dac/%s/", attachment.Job)
-			if err := removeSubtree(attachment.Hostname, basePath); err != nil {
+			if err := removeSubtree(attachment.Hostname, mountDir); err != nil {
 				return err
 			}
+
 		}
 	}
 

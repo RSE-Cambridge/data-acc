@@ -167,9 +167,9 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 		Owner:     1001,
 		CreatedAt: uint(time.Now().Unix()),
 		Paths: map[string]string{
-			"DW_PERSISTENT_STRIPED_mybuffer": "/dac/token/persistent/mybuffer",
-			"DW_JOB_PRIVATE":                 "/dac/token/job_private",
-			"DW_JOB_STRIPED":                 "/dac/token/job/global",
+			"DW_PERSISTENT_STRIPED_mybuffer": "/dac/token_persistent_mybuffer",
+			"DW_JOB_PRIVATE":                 "/dac/token_job_private",
+			"DW_JOB_STRIPED":                 "/dac/token_job/global",
 		},
 		JobVolume:       registry.VolumeName("token"),
 		MultiJobVolumes: []registry.VolumeName{"mybuffer"},
