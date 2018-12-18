@@ -17,6 +17,10 @@ func getMountDir(volume registry.Volume, jobName string) string {
 	return fmt.Sprintf("/dac/%s_job", jobName)
 }
 
+func getLnetSuffix() string {
+	return os.Getenv("DAC_LNET_SUFFIX")
+}
+
 func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("Mount for:", volume.Name)
 	var primaryBrickHost string
@@ -31,7 +35,7 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 		log.Panicf("failed to find primary brick for volume: %s", volume.Name)
 	}
 
-	lnetSuffix := os.Getenv("DAC_LNET_SUFFIX")
+	lnetSuffix := getLnetSuffix()
 
 	if fsType == BeegFS {
 		// Write out the config needed, and do the mount using ansible

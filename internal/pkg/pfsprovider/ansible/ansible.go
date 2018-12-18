@@ -84,7 +84,9 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 	fsinfo := FSInfo{
 		Vars: map[string]string{
 			"mgsnode":     mdt.Hostname,
-			"client_port": fmt.Sprintf("%d", volume.ClientPort)},
+			"client_port": fmt.Sprintf("%d", volume.ClientPort),
+			"lnet_suffix": getLnetSuffix(),
+		},
 		Hosts: hosts,
 	}
 	fsname := fmt.Sprintf("%s", volume.UUID)

@@ -36,6 +36,7 @@ func TestPlugin_GetInventory(t *testing.T) {
           abcdefgh_osts: {nvme2n1: 3, nvme3n1: 4}
       vars:
         abcdefgh_client_port: "10002"
+        lnet_suffix: ""
         abcdefgh_mgsnode: dac1
 `
 	assert.Equal(t, expected, result)
@@ -59,6 +60,7 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
           abcdefgh_osts: {nvme2n1: 1}
       vars:
         abcdefgh_client_port: "10002"
+        lnet_suffix: ""
         abcdefgh_mgsnode: dac1
 `
 	assert.Equal(t, expected, result)
