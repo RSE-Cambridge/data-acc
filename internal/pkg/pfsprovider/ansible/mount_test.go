@@ -186,7 +186,7 @@ func Test_Umount(t *testing.T) {
 	assert.Equal(t, "swapoff /dev/loop42", fake.cmdStrs[0])
 	assert.Equal(t, "losetup -d /dev/loop42", fake.cmdStrs[1])
 	assert.Equal(t, "rm -rf /dac/job1_job/swap/client1", fake.cmdStrs[2])
-	assert.Equal(t, "rm -rf /dac/job1/job_private", fake.cmdStrs[3])
+	assert.Equal(t, "rm -rf /dac/job1_job_private", fake.cmdStrs[3])
 	assert.Equal(t, "umount -l /dac/job1_job", fake.cmdStrs[4])
 	assert.Equal(t, "rm -rf /dac/job1_job", fake.cmdStrs[5])
 

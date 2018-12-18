@@ -132,7 +132,7 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 		}
 
 		if !volume.MultiJob && volume.AttachPrivateNamespace {
-			privateSymLinkDir := fmt.Sprintf("/dac/%s/job_private", attachment.Job)
+			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", attachment.Job)
 			if err := removeSubtree(attachment.Hostname, privateSymLinkDir); err != nil {
 				return err
 			}
