@@ -10,6 +10,8 @@ set +a
 ssh dac1 sudo umount -at lustre
 ssh dac2 sudo umount -at lustre
 ssh dac3 sudo umount -at lustre
+ssh slurm-cpu1 sudo umount -at lustre
+ssh slurm-cpu2 sudo umount -at lustre
 
 ssh dac1 sudo systemctl restart dacd
 ssh dac2 sudo systemctl restart dacd
