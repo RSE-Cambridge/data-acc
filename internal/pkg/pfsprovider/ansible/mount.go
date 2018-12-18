@@ -9,12 +9,12 @@ import (
 	"path"
 )
 
-func getMountDir(volume registry.Volume) string {
+func getMountDir(volume registry.Volume, jobName string) string {
 	// TODO: what about the environment variables that are being set? should share logic with here
 	if volume.MultiJob {
-		return fmt.Sprintf("/dac/%s/persistent/%s", volume.JobName, volume.Name)
+		return fmt.Sprintf("/dac/%s/persistent/%s", jobName, volume.Name)
 	}
-	return fmt.Sprintf("/dac/%s/job", volume.JobName)
+	return fmt.Sprintf("/dac/%s/job", jobName)
 }
 
 func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
@@ -37,9 +37,8 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 		executeAnsibleMount(fsType, volume, brickAllocations)
 	}
 
-	var mountDir = getMountDir(volume)
 	for _, attachment := range volume.Attachments {
-
+		var mountDir = getMountDir(volume, attachment.Job)
 		if err := mkdir(attachment.Hostname, mountDir); err != nil {
 			return err
 		}
@@ -98,9 +97,9 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 
 func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("Umount for:", volume.Name)
-	var mountDir = getMountDir(volume)
 
 	for _, attachment := range volume.Attachments {
+		var mountDir = getMountDir(volume, attachment.Job)
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
 			swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?
 			loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)                     // TODO share?
