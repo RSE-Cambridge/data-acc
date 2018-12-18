@@ -132,9 +132,10 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 			if err := umountLustre(attachment.Hostname, mountDir); err != nil {
 				return err
 			}
-		}
-		if err := removeSubtree(attachment.Hostname, mountDir); err != nil {
-			return err
+			basePath := fmt.Sprintf("/dac/%s/", attachment.Job)
+			if err := removeSubtree(attachment.Hostname, basePath); err != nil {
+				return err
+			}
 		}
 	}
 
