@@ -52,6 +52,9 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 			if err := mkdir(attachment.Hostname, swapDir); err != nil {
 				return err
 			}
+			if err := fixUpOwnership(attachment.Hostname, 0, 0, swapDir); err != nil {
+				return err
+			}
 
 			// TODO: swapmb := int(volume.AttachAsSwapBytes/1024)
 			swapmb := 2
