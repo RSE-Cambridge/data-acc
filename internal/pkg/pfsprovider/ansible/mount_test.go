@@ -47,7 +47,8 @@ func Test_mountLustre(t *testing.T) {
 	assert.Equal(t, "host", fake.hostnames[0])
 	assert.Equal(t, "host", fake.hostnames[1])
 	assert.Equal(t, "modprobe -v lustre", fake.cmdStrs[0])
-	assert.Equal(t, "(grep dir /etc/mtab) || (mount -t lustre mgt-opa@o2ib1:/fs dir)", fake.cmdStrs[1])
+	assert.Equal(t, "bash -c '(grep dir /etc/mtab) || (mount -t lustre mgt-opa@o2ib1:/fs dir)'",
+		fake.cmdStrs[1])
 
 	fake = &fakeRunner{err: errors.New("expected")}
 	runner = fake
@@ -124,7 +125,8 @@ func Test_Mount(t *testing.T) {
 	assert.Equal(t, "client1", fake.hostnames[0])
 	assert.Equal(t, "mkdir -p /dac/job1_job", fake.cmdStrs[0])
 	assert.Equal(t, "modprobe -v lustre", fake.cmdStrs[1])
-	assert.Equal(t, "(grep /dac/job1_job /etc/mtab) || (mount -t lustre host1:/ /dac/job1_job)", fake.cmdStrs[2])
+	assert.Equal(t, "bash -c '(grep /dac/job1_job /etc/mtab) || (mount -t lustre host1:/ /dac/job1_job)'",
+		fake.cmdStrs[2])
 
 	assert.Equal(t, "mkdir -p /dac/job1_job/swap", fake.cmdStrs[3])
 	assert.Equal(t, "chown 0:0 /dac/job1_job/swap", fake.cmdStrs[4])
@@ -255,7 +257,7 @@ func Test_Mount_multi(t *testing.T) {
 	assert.Equal(t, "mkdir -p /dac/job1_persistent_asdf", fake.cmdStrs[0])
 	assert.Equal(t, "modprobe -v lustre", fake.cmdStrs[1])
 	assert.Equal(t,
-		"(grep /dac/job1_persistent_asdf /etc/mtab) || (mount -t lustre host1:/medkDfdg /dac/job1_persistent_asdf)",
+		"bash -c '(grep /dac/job1_persistent_asdf /etc/mtab) || (mount -t lustre host1:/medkDfdg /dac/job1_persistent_asdf)'",
 		fake.cmdStrs[2])
 	assert.Equal(t, "mkdir -p /dac/job1_persistent_asdf/global", fake.cmdStrs[3])
 	assert.Equal(t, "chown 1001:1001 /dac/job1_persistent_asdf/global", fake.cmdStrs[4])

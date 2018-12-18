@@ -218,7 +218,7 @@ func mountLustre(hostname string, lnetSuffix string, mgtHost string, fsname stri
 		return err
 	}
 	return runner.Execute(hostname, fmt.Sprintf(
-		"(grep %s /etc/mtab) || (mount -t lustre %s%s:/%s %s)",
+		"bash -c '(grep %s /etc/mtab) || (mount -t lustre %s%s:/%s %s)'",
 		directory, mgtHost, lnetSuffix, fsname, directory))
 }
 
