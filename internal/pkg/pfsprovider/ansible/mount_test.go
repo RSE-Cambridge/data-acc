@@ -148,3 +148,33 @@ func Test_Mount(t *testing.T) {
 	assert.Equal(t, "client2", fake.hostnames[50])
 	assert.Equal(t, "chmod 770 /dac/job2/job/global", fake.cmdStrs[50])
 }
+
+func Test_Umount(t *testing.T) {
+	defer func() { runner = &run{} }()
+	fake := &fakeRunner{}
+	runner = fake
+	volume := registry.Volume{
+		Name: "asdf", JobName: "asdf",
+		AttachGlobalNamespace:  true,
+		AttachPrivateNamespace: true,
+		AttachAsSwapBytes:      10000,
+		Attachments: []registry.Attachment{
+			{Hostname: "client1", Job: "job1", State: registry.RequestDetach},
+			{Hostname: "client2", Job: "job1", State: registry.RequestDetach},
+			{Hostname: "client3", Job: "job3", State: registry.Attached},
+			{Hostname: "client3", Job: "job3", State: registry.RequestAttach},
+			{Hostname: "client3", Job: "job3", State: registry.Detached},
+			{Hostname: "client2", Job: "job2", State: registry.RequestDetach},
+		},
+		ClientPort: 42,
+		Owner:      1001,
+		Group:      1001,
+	}
+	bricks := []registry.BrickAllocation{
+		{Hostname: "host1"},
+		{Hostname: "host2"},
+	}
+	err := umount(Lustre, volume, bricks)
+	assert.Nil(t, err)
+	assert.Equal(t, 30, fake.calls)
+}
