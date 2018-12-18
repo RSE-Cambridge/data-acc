@@ -177,4 +177,17 @@ func Test_Umount(t *testing.T) {
 	err := umount(Lustre, volume, bricks)
 	assert.Nil(t, err)
 	assert.Equal(t, 15, fake.calls)
+
+	assert.Equal(t, "client1", fake.hostnames[0])
+	assert.Equal(t, "swapoff /dev/loop42", fake.cmdStrs[0])
+	assert.Equal(t, "losetup -d /dev/loop42", fake.cmdStrs[1])
+	assert.Equal(t, "rm -rf /dac/job1/job/swap/client1", fake.cmdStrs[2])
+	assert.Equal(t, "umount -l /dac/job1/job", fake.cmdStrs[3])
+	assert.Equal(t, "rm -rf /dac/job1/job", fake.cmdStrs[4])
+
+	assert.Equal(t, "client2", fake.hostnames[6])
+	assert.Equal(t, "swapoff /dev/loop42", fake.cmdStrs[5])
+
+	assert.Equal(t, "client2", fake.hostnames[14])
+	assert.Equal(t, "rm -rf /dac/job2/job", fake.cmdStrs[14])
 }
