@@ -34,9 +34,15 @@ type Wrapper struct {
 	All FileSystems
 }
 
-var DefaultHostGroup = "dac-fake"
+var DefaultHostGroup = "dac-prod"
 
 func getInventory(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
+	// NOTE: only used by lustre
+	mgsDevice := os.Getenv("DAC_MGS_DEV")
+	if mgsDevice == "" {
+		mgsDevice = "sdb"
+	}
+
 	var mdt registry.BrickAllocation
 	osts := make(map[string][]registry.BrickAllocation)
 	for _, allocation := range brickAllocations {
@@ -62,7 +68,7 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 		if mdt.Hostname == host {
 			hostInfo.MDTS = mdt.Device
 			if fsType == Lustre {
-				hostInfo.MGS = "nvme0n1" // TODO: horrible hack!!
+				hostInfo.MGS = mgsDevice // TODO: horrible hack!!
 			} else {
 				hostInfo.MGS = mdt.Device
 			}
@@ -78,7 +84,9 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 	fsinfo := FSInfo{
 		Vars: map[string]string{
 			"mgsnode":     mdt.Hostname,
-			"client_port": fmt.Sprintf("%d", volume.ClientPort)},
+			"client_port": fmt.Sprintf("%d", volume.ClientPort),
+			"lnet_suffix": getLnetSuffix(),
+		},
 		Hosts: hosts,
 	}
 	fsname := fmt.Sprintf("%s", volume.UUID)

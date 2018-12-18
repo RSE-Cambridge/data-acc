@@ -9,12 +9,16 @@ import (
 	"path"
 )
 
-func getMountDir(volume registry.Volume) string {
+func getMountDir(volume registry.Volume, jobName string) string {
 	// TODO: what about the environment variables that are being set? should share logic with here
 	if volume.MultiJob {
-		return fmt.Sprintf("/dac/%s/persistent/%s", volume.JobName, volume.Name)
+		return fmt.Sprintf("/dac/%s_persistent_%s", jobName, volume.Name)
 	}
-	return fmt.Sprintf("/dac/%s/job", volume.JobName)
+	return fmt.Sprintf("/dac/%s_job", jobName)
+}
+
+func getLnetSuffix() string {
+	return os.Getenv("DAC_LNET_SUFFIX")
 }
 
 func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
@@ -31,19 +35,26 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 		log.Panicf("failed to find primary brick for volume: %s", volume.Name)
 	}
 
+	lnetSuffix := getLnetSuffix()
+
 	if fsType == BeegFS {
 		// Write out the config needed, and do the mount using ansible
 		// TODO: Move Lustre mount here that is done below
 		executeAnsibleMount(fsType, volume, brickAllocations)
 	}
 
-	var mountDir = getMountDir(volume)
 	for _, attachment := range volume.Attachments {
+		if attachment.State != registry.RequestAttach {
+			log.Printf("Skipping volume %s attach: %+v", volume.Name, attachment)
+			continue
+		}
+		log.Printf("Volume %s attaching with: %+v", volume.Name, attachment)
 
+		var mountDir = getMountDir(volume, attachment.Job)
 		if err := mkdir(attachment.Hostname, mountDir); err != nil {
 			return err
 		}
-		if err := mountRemoteFilesystem(fsType, attachment.Hostname,
+		if err := mountRemoteFilesystem(fsType, attachment.Hostname, lnetSuffix,
 			primaryBrickHost, volume.UUID, mountDir); err != nil {
 			return err
 		}
@@ -51,6 +62,9 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
 			swapDir := path.Join(mountDir, "/swap")
 			if err := mkdir(attachment.Hostname, swapDir); err != nil {
+				return err
+			}
+			if err := fixUpOwnership(attachment.Hostname, 0, 0, swapDir); err != nil {
 				return err
 			}
 
@@ -72,12 +86,12 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 			if err := mkdir(attachment.Hostname, privateDir); err != nil {
 				return err
 			}
-			if err := chown(attachment.Hostname, volume.Owner, volume.Group, privateDir); err != nil {
+			if err := fixUpOwnership(attachment.Hostname, volume.Owner, volume.Group, privateDir); err != nil {
 				return err
 			}
 
-			// need a consistent symlink for shared environment variables
-			privateSymLinkDir := fmt.Sprintf("/dac/%s/job_private", volume.JobName)
+			// need a consistent symlink for shared environment variables across all hosts
+			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", attachment.Job)
 			if err := createSymbolicLink(attachment.Hostname, privateDir, privateSymLinkDir); err != nil {
 				return err
 			}
@@ -87,7 +101,7 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 		if err := mkdir(attachment.Hostname, sharedDir); err != nil {
 			return err
 		}
-		if err := chown(attachment.Hostname, volume.Owner, volume.Group, sharedDir); err != nil {
+		if err := fixUpOwnership(attachment.Hostname, volume.Owner, volume.Group, sharedDir); err != nil {
 			return err
 		}
 	}
@@ -98,9 +112,15 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 
 func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("Umount for:", volume.Name)
-	var mountDir = getMountDir(volume)
 
 	for _, attachment := range volume.Attachments {
+		if attachment.State != registry.RequestDetach {
+			log.Printf("Skipping volume %s detach for: %+v", volume.Name, attachment)
+			continue
+		}
+		log.Printf("Volume %s dettaching: %+v", volume.Name, attachment)
+
+		var mountDir = getMountDir(volume, attachment.Job)
 		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
 			swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?
 			loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)                     // TODO share?
@@ -114,13 +134,22 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 				return err
 			}
 		}
+
+		if !volume.MultiJob && volume.AttachPrivateNamespace {
+			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", attachment.Job)
+			if err := removeSubtree(attachment.Hostname, privateSymLinkDir); err != nil {
+				return err
+			}
+		}
+
 		if fsType == Lustre {
 			if err := umountLustre(attachment.Hostname, mountDir); err != nil {
 				return err
 			}
-		}
-		if err := removeSubtree(attachment.Hostname, mountDir); err != nil {
-			return err
+			if err := removeSubtree(attachment.Hostname, mountDir); err != nil {
+				return err
+			}
+
 		}
 	}
 
@@ -159,8 +188,11 @@ func detachLoopback(hostname string, loopback string) error {
 	return runner.Execute(hostname, fmt.Sprintf("losetup -d %s", loopback))
 }
 
-func chown(hostname string, owner uint, group uint, directory string) error {
-	return runner.Execute(hostname, fmt.Sprintf("chown %d:%d %s", owner, group, directory))
+func fixUpOwnership(hostname string, owner uint, group uint, directory string) error {
+	if err := runner.Execute(hostname, fmt.Sprintf("chown %d:%d %s", owner, group, directory)); err != nil {
+		return err
+	}
+	return runner.Execute(hostname, fmt.Sprintf("chmod 770 %s", directory))
 }
 
 func umountLustre(hostname string, directory string) error {
@@ -175,22 +207,23 @@ func createSymbolicLink(hostname string, src string, dest string) error {
 	return runner.Execute(hostname, fmt.Sprintf("ln -s %s %s", src, dest))
 }
 
-func mountRemoteFilesystem(fsType FSType, hostname string, mgtHost string, fsname string, directory string) error {
+func mountRemoteFilesystem(fsType FSType, hostname string, lnetSuffix string, mgtHost string, fsname string, directory string) error {
 	if fsType == Lustre {
-		return mountLustre(hostname, mgtHost, fsname, directory)
+		return mountLustre(hostname, lnetSuffix, mgtHost, fsname, directory)
 	} else if fsType == BeegFS {
 		return mountBeegFS(hostname, mgtHost, fsname, directory)
 	}
 	return fmt.Errorf("mount unsuported by filesystem type %s", fsType)
 }
 
-func mountLustre(hostname string, mgtHost string, fsname string, directory string) error {
+func mountLustre(hostname string, lnetSuffix string, mgtHost string, fsname string, directory string) error {
 	// TODO: do we really need to do modprobe here? seems to need the server install to work
 	if err := runner.Execute(hostname, "modprobe -v lustre"); err != nil {
 		return err
 	}
 	return runner.Execute(hostname, fmt.Sprintf(
-		"mount -t lustre %s:/%s %s", mgtHost, fsname, directory))
+		"bash -c '(grep %s /etc/mtab) || (mount -t lustre %s%s:/%s %s)'",
+		directory, mgtHost, lnetSuffix, fsname, directory))
 }
 
 func mountBeegFS(hostname string, mgtHost string, fsname string, directory string) error {

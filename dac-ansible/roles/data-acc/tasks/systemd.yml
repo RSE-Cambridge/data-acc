@@ -92,6 +92,7 @@
     - "{{data_acc_data_dir}}/fake_nvme2"
     - "{{data_acc_data_dir}}/fake_nvme3"
     - "{{data_acc_data_dir}}/fake_nvme4"
+    - "{{data_acc_data_dir}}/fake_sdb"
 
 - name: create loopback
   become: yes
@@ -110,6 +111,8 @@
       file: "{{data_acc_data_dir}}/fake_nvme3"
     - loop: 4
       file: "{{data_acc_data_dir}}/fake_nvme4"
+    - loop: 5
+      file: "{{data_acc_data_dir}}/fake_sdb"
 
 - name: create nvme symlinks
   become: yes
@@ -129,6 +132,14 @@
       file: "{{data_acc_data_dir}}/fake_nvme3"
     - loop: 4
       file: "{{data_acc_data_dir}}/fake_nvme4"
+
+- name: create nvme symlinks
+  become: yes
+  become_user: root
+  file:
+    src: "/dev/loop5"
+    dest: "/dev/sdb"
+    state: link
 
 - name: launching data_acc...
   when: data_acc_launch
