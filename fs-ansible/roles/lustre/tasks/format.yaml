@@ -23,13 +23,13 @@
   tags: [ 'never', 'reformat_mgs']
 
 - name: Reformat MDT
-  command: /usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index=0 --mgsnode={{ mgsnode }} /dev/{{ mdt }}
+  command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index=0 --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ mdt }}"
   when:
     - mdt is defined
   tags: [ 'never', 'reformat_mdts', 'format']
 
 - name: Reformat OSTs
-  command: /usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }} /dev/{{ item.key }}
+  command: "/usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}"
   loop: "{{ osts|dict2items }}"
   when:
     - osts is defined
