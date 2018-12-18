@@ -71,7 +71,7 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 			if err := mkdir(attachment.Hostname, privateDir); err != nil {
 				return err
 			}
-			if err := chown(attachment.Hostname, volume.Owner, volume.Group, privateDir); err != nil {
+			if err := fixUpOwnership(attachment.Hostname, volume.Owner, volume.Group, privateDir); err != nil {
 				return err
 			}
 
@@ -86,7 +86,7 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 		if err := mkdir(attachment.Hostname, sharedDir); err != nil {
 			return err
 		}
-		if err := chown(attachment.Hostname, volume.Owner, volume.Group, sharedDir); err != nil {
+		if err := fixUpOwnership(attachment.Hostname, volume.Owner, volume.Group, sharedDir); err != nil {
 			return err
 		}
 	}
@@ -158,8 +158,11 @@ func detachLoopback(hostname string, loopback string) error {
 	return runner.Execute(hostname, fmt.Sprintf("losetup -d %s", loopback))
 }
 
-func chown(hostname string, owner uint, group uint, directory string) error {
-	return runner.Execute(hostname, fmt.Sprintf("chown %d:%d %s", owner, group, directory))
+func fixUpOwnership(hostname string, owner uint, group uint, directory string) error {
+	if err := runner.Execute(hostname, fmt.Sprintf("chown %d:%d %s", owner, group, directory)); err != nil {
+		return err
+	}
+	return runner.Execute(hostname, fmt.Sprintf("chmod 770 %s", directory))
 }
 
 func umountLustre(hostname string, directory string) error {

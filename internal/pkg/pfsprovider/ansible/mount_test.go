@@ -70,15 +70,19 @@ func Test_createSwap(t *testing.T) {
 	assert.Equal(t, "mkswap loopback", fake.cmdStrs[2])
 }
 
-func Test_chown(t *testing.T) {
+func Test_fixUpOwnership(t *testing.T) {
 	defer func() { runner = &run{} }()
-	fake := &fakeRunner{err: errors.New("expected")}
+	fake := &fakeRunner{}
 	runner = fake
 
-	err := chown("host", 10, 11, "dir")
-	assert.Equal(t, "expected", err.Error())
+	err := fixUpOwnership("host", 10, 11, "dir")
+	assert.Nil(t, err)
+
+	assert.Equal(t, 2, fake.calls)
 	assert.Equal(t, "host", fake.hostnames[0])
 	assert.Equal(t, "chown 10:11 dir", fake.cmdStrs[0])
+	assert.Equal(t, "host", fake.hostnames[1])
+	assert.Equal(t, "chmod 770 dir", fake.cmdStrs[1])
 }
 
 func Test_Mount(t *testing.T) {
@@ -110,7 +114,7 @@ func Test_Mount(t *testing.T) {
 	}
 	err := mount(Lustre, volume, bricks)
 	assert.Nil(t, err)
-	assert.Equal(t, 39, fake.calls)
+	assert.Equal(t, 45, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
 	assert.Equal(t, "mkdir -p /dac/job1/job", fake.cmdStrs[0])
@@ -124,15 +128,18 @@ func Test_Mount(t *testing.T) {
 	assert.Equal(t, "swapon /dev/loop42", fake.cmdStrs[7])
 	assert.Equal(t, "mkdir -p /dac/job1/job/private/client1", fake.cmdStrs[8])
 	assert.Equal(t, "chown 1001:1001 /dac/job1/job/private/client1", fake.cmdStrs[9])
-	assert.Equal(t, "ln -s /dac/job1/job/private/client1 /dac/asdf/job_private", fake.cmdStrs[10])
+	assert.Equal(t, "chmod 770 /dac/job1/job/private/client1", fake.cmdStrs[10])
+	assert.Equal(t, "ln -s /dac/job1/job/private/client1 /dac/asdf/job_private", fake.cmdStrs[11])
 
-	assert.Equal(t, "mkdir -p /dac/job1/job/global", fake.cmdStrs[11])
-	assert.Equal(t, "chown 1001:1001 /dac/job1/job/global", fake.cmdStrs[12])
+	assert.Equal(t, "mkdir -p /dac/job1/job/global", fake.cmdStrs[12])
+	assert.Equal(t, "chown 1001:1001 /dac/job1/job/global", fake.cmdStrs[13])
+	assert.Equal(t, "chmod 770 /dac/job1/job/global", fake.cmdStrs[14])
 
-	assert.Equal(t, "client2", fake.hostnames[13])
-	assert.Equal(t, "mkdir -p /dac/job1/job", fake.cmdStrs[13])
+	assert.Equal(t, "client2", fake.hostnames[15])
+	assert.Equal(t, "mkdir -p /dac/job1/job", fake.cmdStrs[15])
 
-	assert.Equal(t, "client2", fake.hostnames[26])
-	assert.Equal(t, "mkdir -p /dac/job2/job", fake.cmdStrs[26])
-
+	assert.Equal(t, "client2", fake.hostnames[30])
+	assert.Equal(t, "mkdir -p /dac/job2/job", fake.cmdStrs[30])
+	assert.Equal(t, "client2", fake.hostnames[44])
+	assert.Equal(t, "chmod 770 /dac/job2/job/global", fake.cmdStrs[44])
 }
