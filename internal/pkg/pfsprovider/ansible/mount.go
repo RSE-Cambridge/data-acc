@@ -31,6 +31,8 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 		log.Panicf("failed to find primary brick for volume: %s", volume.Name)
 	}
 
+	lnetSuffix := os.Getenv("DAC_LNET_SUFFIX")
+
 	if fsType == BeegFS {
 		// Write out the config needed, and do the mount using ansible
 		// TODO: Move Lustre mount here that is done below
@@ -48,7 +50,7 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 		if err := mkdir(attachment.Hostname, mountDir); err != nil {
 			return err
 		}
-		if err := mountRemoteFilesystem(fsType, attachment.Hostname,
+		if err := mountRemoteFilesystem(fsType, attachment.Hostname, lnetSuffix,
 			primaryBrickHost, volume.UUID, mountDir); err != nil {
 			return err
 		}
@@ -193,22 +195,22 @@ func createSymbolicLink(hostname string, src string, dest string) error {
 	return runner.Execute(hostname, fmt.Sprintf("ln -s %s %s", src, dest))
 }
 
-func mountRemoteFilesystem(fsType FSType, hostname string, mgtHost string, fsname string, directory string) error {
+func mountRemoteFilesystem(fsType FSType, hostname string, lnetSuffix string, mgtHost string, fsname string, directory string) error {
 	if fsType == Lustre {
-		return mountLustre(hostname, mgtHost, fsname, directory)
+		return mountLustre(hostname, lnetSuffix, mgtHost, fsname, directory)
 	} else if fsType == BeegFS {
 		return mountBeegFS(hostname, mgtHost, fsname, directory)
 	}
 	return fmt.Errorf("mount unsuported by filesystem type %s", fsType)
 }
 
-func mountLustre(hostname string, mgtHost string, fsname string, directory string) error {
+func mountLustre(hostname string, lnetSuffix string, mgtHost string, fsname string, directory string) error {
 	// TODO: do we really need to do modprobe here? seems to need the server install to work
 	if err := runner.Execute(hostname, "modprobe -v lustre"); err != nil {
 		return err
 	}
 	return runner.Execute(hostname, fmt.Sprintf(
-		"mount -t lustre %s:/%s %s", mgtHost, fsname, directory))
+		"mount -t lustre %s%s:/%s %s", mgtHost, lnetSuffix, fsname, directory))
 }
 
 func mountBeegFS(hostname string, mgtHost string, fsname string, directory string) error {

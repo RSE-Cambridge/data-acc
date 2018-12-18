@@ -41,17 +41,19 @@ func Test_mountLustre(t *testing.T) {
 	fake := &fakeRunner{}
 	runner = fake
 
-	err := mountLustre("host", "mgt", "fs", "dir")
+	err := mountLustre("host", "-opa@o2ib1", "mgt", "fs", "dir")
 	assert.Nil(t, err)
+	assert.Equal(t, 2, fake.calls)
 	assert.Equal(t, "host", fake.hostnames[0])
 	assert.Equal(t, "host", fake.hostnames[1])
 	assert.Equal(t, "modprobe -v lustre", fake.cmdStrs[0])
-	assert.Equal(t, "mount -t lustre mgt:/fs dir", fake.cmdStrs[1])
+	assert.Equal(t, "mount -t lustre mgt-opa@o2ib1:/fs dir", fake.cmdStrs[1])
 
 	fake = &fakeRunner{err: errors.New("expected")}
 	runner = fake
-	err = mountRemoteFilesystem(Lustre, "host", "", "", "")
+	err = mountRemoteFilesystem(Lustre, "host", "", "", "", "")
 	assert.Equal(t, "expected", err.Error())
+	assert.Equal(t, 1, fake.calls)
 	assert.Equal(t, "modprobe -v lustre", fake.cmdStrs[0])
 }
 
