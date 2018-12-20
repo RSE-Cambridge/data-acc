@@ -68,11 +68,10 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 				return err
 			}
 
-			// TODO: swapmb := int(volume.AttachAsSwapBytes/1024)
-			swapmb := 2
+			swapSizeMB := int(volume.AttachAsSwapBytes / 1024)
 			swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
 			loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)
-			if err := createSwap(attachment.Hostname, swapmb, swapFile, loopback); err != nil {
+			if err := createSwap(attachment.Hostname, swapSizeMB, swapFile, loopback); err != nil {
 				return err
 			}
 
@@ -162,10 +161,12 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 	return nil
 }
 
-func createSwap(hostname string, swapMb int, filename string, loopback string) error {
-	file := fmt.Sprintf("dd if=/dev/zero of=%s bs=1024 count=%d && sudo chmod 0600 %s",
-		filename, swapMb*1024, filename)
+func createSwap(hostname string, swapMB int, filename string, loopback string) error {
+	file := fmt.Sprintf("dd if=/dev/zero of=%s bs=1024 count=%d", filename, swapMB*1024)
 	if err := runner.Execute(hostname, file); err != nil {
+		return err
+	}
+	if err := runner.Execute(hostname, fmt.Sprintf("sudo chmod 0600 %s", filename)); err != nil {
 		return err
 	}
 	device := fmt.Sprintf("losetup %s %s", loopback, filename)
@@ -217,13 +218,16 @@ func mountRemoteFilesystem(fsType FSType, hostname string, lnetSuffix string, mg
 }
 
 func mountLustre(hostname string, lnetSuffix string, mgtHost string, fsname string, directory string) error {
-	// TODO: do we really need to do modprobe here? seems to need the server install to work
-	if err := runner.Execute(hostname, "modprobe -v lustre"); err != nil {
-		return err
+	// We assume modprobe -v lustre is already done
+	// First check if we are mounted already
+	if err := runner.Execute(hostname, fmt.Sprintf("grep %s /etc/mtab", directory)); err != nil {
+		if err := runner.Execute(hostname, fmt.Sprintf(
+			"mount -t lustre %s%s:/%s %s",
+			mgtHost, lnetSuffix, fsname, directory)); err != nil {
+			return err
+		}
 	}
-	return runner.Execute(hostname, fmt.Sprintf(
-		"bash -c '(grep %s /etc/mtab) || (mount -t lustre %s%s:/%s %s)'",
-		directory, mgtHost, lnetSuffix, fsname, directory))
+	return nil
 }
 
 func mountBeegFS(hostname string, mgtHost string, fsname string, directory string) error {
