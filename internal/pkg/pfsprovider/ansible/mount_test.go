@@ -101,7 +101,7 @@ func Test_Mount(t *testing.T) {
 		Name: "asdf", JobName: "asdf",
 		AttachGlobalNamespace:  true,
 		AttachPrivateNamespace: true,
-		AttachAsSwapBytes:      10240,
+		AttachAsSwapBytes:      1024 * 1024, // 1 MiB
 		Attachments: []registry.Attachment{
 			{Hostname: "client1", Job: "job1", State: registry.RequestAttach},
 			{Hostname: "client2", Job: "job1", State: registry.RequestAttach},
@@ -135,7 +135,7 @@ func Test_Mount(t *testing.T) {
 	assert.Equal(t, "mkdir -p /dac/job1_job/swap", fake.cmdStrs[3])
 	assert.Equal(t, "chown 0:0 /dac/job1_job/swap", fake.cmdStrs[4])
 	assert.Equal(t, "chmod 770 /dac/job1_job/swap", fake.cmdStrs[5])
-	assert.Equal(t, "dd if=/dev/zero of=/dac/job1_job/swap/client1 bs=1024 count=10240", fake.cmdStrs[6])
+	assert.Equal(t, "dd if=/dev/zero of=/dac/job1_job/swap/client1 bs=1024 count=1024", fake.cmdStrs[6])
 	assert.Equal(t, "sudo chmod 0600 /dac/job1_job/swap/client1", fake.cmdStrs[7])
 	assert.Equal(t, "losetup /dev/loop42 /dac/job1_job/swap/client1", fake.cmdStrs[8])
 	assert.Equal(t, "mkswap /dev/loop42", fake.cmdStrs[9])

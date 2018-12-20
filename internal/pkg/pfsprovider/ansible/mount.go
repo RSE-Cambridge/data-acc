@@ -68,7 +68,7 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 				return err
 			}
 
-			swapSizeMB := int(volume.AttachAsSwapBytes / 1024)
+			swapSizeMB := int(volume.AttachAsSwapBytes / (1024*1024))
 			swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
 			loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)
 			if err := createSwap(attachment.Hostname, swapSizeMB, swapFile, loopback); err != nil {
