@@ -14,7 +14,9 @@ echo "#!/bin/bash
 #DW swap 5MB
 #DW stage_in source=/global/cscratch1/filename1 destination=\$DW_JOB_STRIPED/filename1 type=file
 #DW stage_out source=\$DW_JOB_STRIPED/outdir destination=/global/scratch1/outdir type=directory
-set
+env
+df -h
+swapon
 echo \$HOSTNAME
 " > use-persistent.sh
 
