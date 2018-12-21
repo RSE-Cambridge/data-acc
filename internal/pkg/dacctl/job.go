@@ -170,11 +170,11 @@ type cmdStageOutData struct {
 
 var sizeSuffixMulitiplyer = map[string]int{
 	"TiB": 1099511627776,
-	"TB":  1099511627776,
+	"TB":  1000000000000,
 	"GiB": 1073741824,
-	"GB":  1073741824,
+	"GB":  1000000000,
 	"MiB": 1048576,
-	"MB":  1048576,
+	"MB":  1000000,
 }
 
 func parseSize(raw string) (int, error) {
