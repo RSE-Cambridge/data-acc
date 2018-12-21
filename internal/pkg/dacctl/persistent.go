@@ -117,8 +117,6 @@ func CreateVolumesAndJobs(volReg registry.VolumeRegistry, poolRegistry registry.
 		JobVolume: volume.Name, // Even though its a persistent buffer, we add it here to ensure we delete buffer
 		Paths:     make(map[string]string),
 	}
-	job.Paths[fmt.Sprintf("DW_PERSISTENT_STRIPED_%s", volume.Name)] = fmt.Sprintf(
-		"/mnt/dac/job/%s/multijob/%s", job.Name, volume.Name)
 
 	err = volReg.AddJob(job)
 	if err != nil {
