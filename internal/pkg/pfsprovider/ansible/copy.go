@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
+	"path"
 )
 
 func processDataCopy(volume registry.Volume, request registry.DataCopyRequest) error {
@@ -16,7 +17,22 @@ func processDataCopy(volume registry.Volume, request registry.DataCopyRequest) e
 		return nil
 	}
 
-	log.Printf("FAKE copy: %s", cmd)
+	log.Printf("Doing copy: %s", cmd)
+
+	// Make sure global dir is setup correctly
+	// TODO: share code with mount better
+	// TODO: Probably should all get setup in fs-ansible really!!
+	mountDir := fmt.Sprintf("/mnt/lustre/%s", volume.UUID)
+	sharedDir := path.Join(mountDir, "/global")
+	if err := mkdir("localhost", sharedDir); err != nil {
+		return err
+	}
+	if err := fixUpOwnership("localhost", volume.Owner, volume.Group, sharedDir); err != nil {
+		return err
+	}
+
+	// Do the copy
+	runner.Execute("localhost", cmd)
 	return nil
 }
 
