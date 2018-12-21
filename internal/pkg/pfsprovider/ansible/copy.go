@@ -27,7 +27,8 @@ func generateDataCopyCmd(volume registry.Volume, request registry.DataCopyReques
 	}
 
 	cmd := fmt.Sprintf("sudo -g '#%d' -u '#%d' %s", volume.Group, volume.Owner, rsync)
-	cmd = fmt.Sprintf("bash -c \"export JOB='%s' && %s\"", volume.JobName, cmd)
+	dacHostBufferPath := fmt.Sprintf("/mnt/lustre/%s/global", volume.UUID)
+	cmd = fmt.Sprintf("bash -c \"export DW_JOB_STRIPED='%s' && %s\"", dacHostBufferPath, cmd)
 	return cmd, nil
 }
 

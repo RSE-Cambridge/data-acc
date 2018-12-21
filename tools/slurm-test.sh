@@ -12,11 +12,16 @@ echo "#!/bin/bash
 #DW jobdw capacity=2TB access_mode=striped,private type=scratch
 #DW persistentdw name=mytestbuffer
 #DW swap 5MB
-#DW stage_in source=/global/cscratch1/filename1 destination=\$DW_JOB_STRIPED/filename1 type=file
-#DW stage_out source=\$DW_JOB_STRIPED/outdir destination=/global/scratch1/outdir type=directory
+#DW stage_in source=/usr/local/bin/dacd /global/cscratch1/filename1 destination=\$DW_JOB_STRIPED/filename1 type=file
+#DW stage_out source=\$DW_JOB_STRIPED/outdir destination=/tmp type=directory
+
 env
 df -h
 swapon
+
+mkdir \$DW_JOB_STRIPED/outdir
+df -h > \$DW_JOB_STRIPED/outdir/dfoutput
+
 echo \$HOSTNAME
 " > use-persistent.sh
 
