@@ -51,11 +51,12 @@ scontrol show burstbuffer
 squeue
 
 echo "***Use persistent buffer***"
+adduser centos
 cat use-persistent.sh
-su slurm -c 'sbatch use-persistent.sh'
-su slurm -c 'sbatch use-persistent.sh'
-su slurm -c 'sbatch use-persistent.sh'
-su slurm -c 'sbatch use-persistent.sh'
+su centos -c 'sbatch use-persistent.sh'
+su centos -c 'sbatch use-persistent.sh'
+su centos -c 'sbatch use-persistent.sh'
+su centos -c 'sbatch use-persistent.sh'
 squeue
 
 sleep $SLEEP_INTERVAL
