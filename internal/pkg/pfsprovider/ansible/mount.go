@@ -166,7 +166,7 @@ func createSwap(hostname string, swapMB int, filename string, loopback string) e
 	if err := runner.Execute(hostname, file); err != nil {
 		return err
 	}
-	if err := runner.Execute(hostname, fmt.Sprintf("sudo chmod 0600 %s", filename)); err != nil {
+	if err := runner.Execute(hostname, fmt.Sprintf("chmod 0600 %s", filename)); err != nil {
 		return err
 	}
 	device := fmt.Sprintf("losetup %s %s", loopback, filename)

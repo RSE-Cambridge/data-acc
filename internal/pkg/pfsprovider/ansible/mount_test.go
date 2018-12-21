@@ -73,7 +73,7 @@ func Test_createSwap(t *testing.T) {
 	assert.Equal(t, "host", fake.hostnames[2])
 	assert.Equal(t, 4, len(fake.cmdStrs))
 	assert.Equal(t, "dd if=/dev/zero of=file bs=1024 count=3072", fake.cmdStrs[0])
-	assert.Equal(t, "sudo chmod 0600 file", fake.cmdStrs[1])
+	assert.Equal(t, "chmod 0600 file", fake.cmdStrs[1])
 	assert.Equal(t, "losetup loopback file", fake.cmdStrs[2])
 	assert.Equal(t, "mkswap loopback", fake.cmdStrs[3])
 }
@@ -136,7 +136,7 @@ func Test_Mount(t *testing.T) {
 	assert.Equal(t, "chown 0:0 /dac/job1_job/swap", fake.cmdStrs[4])
 	assert.Equal(t, "chmod 770 /dac/job1_job/swap", fake.cmdStrs[5])
 	assert.Equal(t, "dd if=/dev/zero of=/dac/job1_job/swap/client1 bs=1024 count=1024", fake.cmdStrs[6])
-	assert.Equal(t, "sudo chmod 0600 /dac/job1_job/swap/client1", fake.cmdStrs[7])
+	assert.Equal(t, "chmod 0600 /dac/job1_job/swap/client1", fake.cmdStrs[7])
 	assert.Equal(t, "losetup /dev/loop42 /dac/job1_job/swap/client1", fake.cmdStrs[8])
 	assert.Equal(t, "mkswap /dev/loop42", fake.cmdStrs[9])
 	assert.Equal(t, "swapon /dev/loop42", fake.cmdStrs[10])
