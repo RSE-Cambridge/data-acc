@@ -7,8 +7,8 @@ set +a
 /usr/local/bin/etcdctl --key /etc/data-acc/pki/`hostname`.dac.hpc.cam.ac.uk-key.pem --cert /etc/data-acc/pki/`hostname`.dac.hpc.cam.ac.uk.pem --cacert /etc/data-acc/pki/ca.pem del --prefix ''
 
 # Kill all lustre filesystems
-ssh slurm-cpu1 sudo umount -atl lustre
-ssh slurm-cpu2 sudo umount -atl lustre
+#ssh slurm-cpu1 sudo umount -atl lustre
+#ssh slurm-cpu2 sudo umount -atl lustre
 ssh dac1 sudo umount -at lustre
 ssh dac2 sudo umount -at lustre
 ssh dac3 sudo umount -at lustre
