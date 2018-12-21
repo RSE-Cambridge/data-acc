@@ -1,13 +1,5 @@
 ---
-- name: check for installation of data-acc
-  become: yes
-  stat:
-    path: '{{data_acc_install_dir}}/{{data_acc_name}}/bin'
-  changed_when: false
-  register: data_acc_binary_dir
-
-- when: not data_acc_binary_dir.stat.exists
-  block:
+- block:
     - name: download data_acc
       become: yes
       become_user: root
@@ -33,7 +25,6 @@
         remote_src: yes
         src: /tmp/{{data_acc_tgz}}
         dest: '{{data_acc_install_dir}}/{{data_acc_name}}'
-        creates: '{{data_acc_install_dir}}/{{data_acc_name}}/bin'
   always:
     - name: delete archive
       become: yes
