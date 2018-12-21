@@ -32,8 +32,7 @@ func processDataCopy(volume registry.Volume, request registry.DataCopyRequest) e
 	}
 
 	// Do the copy
-	runner.Execute("localhost", cmd)
-	return nil
+	return runner.Execute("localhost", cmd)
 }
 
 func generateDataCopyCmd(volume registry.Volume, request registry.DataCopyRequest) (string, error) {
