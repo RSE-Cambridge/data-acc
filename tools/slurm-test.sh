@@ -21,6 +21,7 @@ swapon
 
 mkdir \$DW_JOB_STRIPED/outdir
 df -h > \$DW_JOB_STRIPED/outdir/dfoutput
+ls -al \$DW_JOB_STRIPED > \$DW_JOB_STRIPED/outdir/lsoutput
 
 echo \$HOSTNAME
 " > use-persistent.sh
