@@ -10,7 +10,7 @@
 - name: Ensure MGS has been formatted
   command: /usr/sbin/mkfs.lustre --mgs /dev/{{ mgs }}
   register: command_result
-  failed_when: "command_result.rc != 0 and ('was previously formatted for lustre' not in command_result.stderr)"
+  failed_when: "command_result.rc != 0 and ('was previously formatted for lustre' not in command_result.stderr) and command_result.rc != 17"
   changed_when: "command_result.rc == 0"
   when:
     - mgs is defined
