@@ -5,6 +5,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"path"
+	"strings"
 )
 
 func processDataCopy(volume registry.Volume, request registry.DataCopyRequest) error {
@@ -61,5 +62,11 @@ func generateRsyncCmd(volume registry.Volume, request registry.DataCopyRequest) 
 		return "", fmt.Errorf("unsupported source type %s for volume: %s", request.SourceType, volume.Name)
 	}
 
-	return fmt.Sprintf("rsync %s %s %s", flags, request.Source, request.Destination), nil
+	return fmt.Sprintf("rsync %s %s %s", flags,
+		escapePath(request.Source),
+		escapePath(request.Destination)), nil
+}
+
+func escapePath(path string) string {
+	return strings.Replace(path, "$DW_JOB_STRIPED", "\\$DW_JOB_STRIPED", 1)
 }

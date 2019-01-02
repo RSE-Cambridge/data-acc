@@ -20,11 +20,11 @@ func Test_GenerateDataCopy(t *testing.T) {
 	assert.Empty(t, cmd)
 
 	request.SourceType = registry.File
-	request.Source = "source"
+	request.Source = "$DW_JOB_STRIPED/source"
 	request.Destination = "dest"
 	cmd, err = generateDataCopyCmd(testVolume, request)
 	assert.Nil(t, err)
-	assert.Equal(t, "bash -c \"export DW_JOB_STRIPED='/mnt/lustre/fsuuid/global' && sudo -g '#1002' -u '#1001' rsync -ospgu --stats source dest\"", cmd)
+	assert.Equal(t, "bash -c \"export DW_JOB_STRIPED='/mnt/lustre/fsuuid/global' && sudo -g '#1002' -u '#1001' rsync -ospgu --stats \\$DW_JOB_STRIPED/source dest\"", cmd)
 
 	request.SourceType = registry.List
 	request.Source = "list_filename"
