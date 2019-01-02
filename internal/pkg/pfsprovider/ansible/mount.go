@@ -197,7 +197,16 @@ func fixUpOwnership(hostname string, owner uint, group uint, directory string) e
 }
 
 func umountLustre(hostname string, directory string) error {
-	return runner.Execute(hostname, fmt.Sprintf("umount -l %s", directory))
+	// only unmount if already mounted
+	if err := runner.Execute(hostname, fmt.Sprintf("grep %s /etc/mtab", directory)); err == nil {
+		if err := runner.Execute(hostname, fmt.Sprintf("umount -l %s", directory)); err != nil {
+			return err
+		}
+	} else {
+		// TODO: we should really just avoid this being possible?
+		log.Println("skip umount, as not currently mounted.")
+	}
+	return nil
 }
 
 func removeSubtree(hostname string, directory string) error {

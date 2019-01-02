@@ -168,12 +168,12 @@ func Test_Umount(t *testing.T) {
 		AttachPrivateNamespace: true,
 		AttachAsSwapBytes:      10000,
 		Attachments: []registry.Attachment{
-			{Hostname: "client1", Job: "job1", State: registry.RequestDetach},
-			{Hostname: "client2", Job: "job1", State: registry.RequestDetach},
+			{Hostname: "client1", Job: "job4", State: registry.RequestDetach},
+			{Hostname: "client2", Job: "job4", State: registry.RequestDetach},
 			{Hostname: "client3", Job: "job3", State: registry.Attached},
 			{Hostname: "client3", Job: "job3", State: registry.RequestAttach},
 			{Hostname: "client3", Job: "job3", State: registry.Detached},
-			{Hostname: "client2", Job: "job2", State: registry.RequestDetach},
+			{Hostname: "client2", Job: "job1", State: registry.RequestDetach},
 		},
 		ClientPort: 42,
 		Owner:      1001,
@@ -185,21 +185,22 @@ func Test_Umount(t *testing.T) {
 	}
 	err := umount(Lustre, volume, bricks)
 	assert.Nil(t, err)
-	assert.Equal(t, 18, fake.calls)
+	assert.Equal(t, 20, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
 	assert.Equal(t, "swapoff /dev/loop42", fake.cmdStrs[0])
 	assert.Equal(t, "losetup -d /dev/loop42", fake.cmdStrs[1])
-	assert.Equal(t, "rm -rf /dac/job1_job/swap/client1", fake.cmdStrs[2])
-	assert.Equal(t, "rm -rf /dac/job1_job_private", fake.cmdStrs[3])
-	assert.Equal(t, "umount -l /dac/job1_job", fake.cmdStrs[4])
-	assert.Equal(t, "rm -rf /dac/job1_job", fake.cmdStrs[5])
+	assert.Equal(t, "rm -rf /dac/job4_job/swap/client1", fake.cmdStrs[2])
+	assert.Equal(t, "rm -rf /dac/job4_job_private", fake.cmdStrs[3])
+	assert.Equal(t, "grep /dac/job4_job /etc/mtab", fake.cmdStrs[4])
+	assert.Equal(t, "umount -l /dac/job4_job", fake.cmdStrs[5])
+	assert.Equal(t, "rm -rf /dac/job4_job", fake.cmdStrs[6])
 
-	assert.Equal(t, "client2", fake.hostnames[6])
-	assert.Equal(t, "swapoff /dev/loop42", fake.cmdStrs[6])
+	assert.Equal(t, "client2", fake.hostnames[7])
+	assert.Equal(t, "swapoff /dev/loop42", fake.cmdStrs[7])
 
-	assert.Equal(t, "client2", fake.hostnames[17])
-	assert.Equal(t, "rm -rf /dac/job2_job", fake.cmdStrs[17])
+	assert.Equal(t, "client2", fake.hostnames[19])
+	assert.Equal(t, "rm -rf /dac/job1_job", fake.cmdStrs[19])
 }
 
 func Test_Umount_multi(t *testing.T) {
@@ -225,11 +226,12 @@ func Test_Umount_multi(t *testing.T) {
 	}
 	err := umount(Lustre, volume, bricks)
 	assert.Nil(t, err)
-	assert.Equal(t, 2, fake.calls)
+	assert.Equal(t, 3, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
-	assert.Equal(t, "umount -l /dac/job1_persistent_asdf", fake.cmdStrs[0])
-	assert.Equal(t, "rm -rf /dac/job1_persistent_asdf", fake.cmdStrs[1])
+	assert.Equal(t, "grep /dac/job1_persistent_asdf /etc/mtab", fake.cmdStrs[0])
+	assert.Equal(t, "umount -l /dac/job1_persistent_asdf", fake.cmdStrs[1])
+	assert.Equal(t, "rm -rf /dac/job1_persistent_asdf", fake.cmdStrs[2])
 }
 
 func Test_Mount_multi(t *testing.T) {
