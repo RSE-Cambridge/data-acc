@@ -63,9 +63,6 @@ type Keystore interface {
 	// is deleted, or you stop watching after some timeout.
 	Watch(ctxt context.Context, key string, withPrefix bool) KeyValueUpdateChan
 
-	// TODO: WIP to replce above watch functions
-	// WatchForCondition(ctxt context.Context, key string, fromRevision int64, check func(update KeyValueUpdate) bool) (bool, error)
-
 	// Add a key, and remove it when calling process dies
 	// Error is returned if the key already exists
 	KeepAliveKey(key string) error
