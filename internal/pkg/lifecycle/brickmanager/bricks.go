@@ -32,11 +32,11 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 	}
 
 	for _, allocation := range allocations {
+		volume, err := volumeRegistry.Volume(allocation.AllocatedVolume)
+		if err != nil {
+			log.Panicf("unable to find volume for allocation %+v", allocation)
+		}
 		if allocation.AllocatedIndex == 0 {
-			volume, err := volumeRegistry.Volume(allocation.AllocatedVolume)
-			if err != nil {
-				log.Panicf("unable to find volume for allocation %+v", allocation)
-			}
 			log.Printf("Start watching again, as we host a primary brick for: %+v", volume)
 			// TODO: do we finish watching correctly?
 			watchForVolumeChanges(poolRegistry, volumeRegistry, volume)
