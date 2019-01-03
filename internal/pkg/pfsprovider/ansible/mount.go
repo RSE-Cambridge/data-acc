@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"time"
 )
 
 func getMountDir(volume registry.Volume, jobName string) string {
@@ -265,6 +266,7 @@ func (*run) Execute(hostname string, cmdStr string) error {
 	skipAnsible := os.Getenv("DAC_SKIP_ANSIBLE")
 	if skipAnsible == "True" {
 		log.Println("Skip as DAC_SKIP_ANSIBLE=True")
+		time.Sleep(time.Millisecond * 200)
 		return nil
 	}
 
