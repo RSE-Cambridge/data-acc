@@ -15,7 +15,10 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 	go func() {
 		for brick := range newBricks {
 			if brick.AllocatedIndex == 0 {
+				log.Printf("found new primary brick %+v", brick)
 				go processNewPrimaryBlock(poolRegistry, volumeRegistry, &brick)
+			} else {
+				log.Printf("ignore block create, as it is not a primary brick %+v", brick)
 			}
 		}
 		log.Panic("we appear to have stopped watching for new bricks")
