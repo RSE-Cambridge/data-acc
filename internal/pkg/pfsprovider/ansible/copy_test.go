@@ -10,6 +10,8 @@ func Test_GenerateDataCopy(t *testing.T) {
 	testVolume := registry.Volume{
 		Name:  registry.VolumeName("asdf"),
 		Owner: 1001,
+		Group: 1002,
+		UUID:  "fsuuid",
 	}
 	request := registry.DataCopyRequest{}
 
@@ -18,11 +20,11 @@ func Test_GenerateDataCopy(t *testing.T) {
 	assert.Empty(t, cmd)
 
 	request.SourceType = registry.File
-	request.Source = "source"
+	request.Source = "$DW_JOB_STRIPED/source"
 	request.Destination = "dest"
 	cmd, err = generateDataCopyCmd(testVolume, request)
 	assert.Nil(t, err)
-	assert.Equal(t, "sudo su `getent passwd 1001 | cut -d: -f1` rsync source dest", cmd)
+	assert.Equal(t, "bash -c \"export DW_JOB_STRIPED='/mnt/lustre/fsuuid/global' && sudo -g '#1002' -u '#1001' rsync -ospgu --stats \\$DW_JOB_STRIPED/source dest\"", cmd)
 
 	request.SourceType = registry.List
 	request.Source = "list_filename"
@@ -47,14 +49,14 @@ func Test_GenerateRsyncCmd(t *testing.T) {
 	request.Destination = "dest"
 	cmd, err = generateRsyncCmd(testVolume, request)
 	assert.Nil(t, err)
-	assert.Equal(t, "rsync source dest", cmd)
+	assert.Equal(t, "rsync -ospgu --stats source dest", cmd)
 
 	request.SourceType = registry.Directory
 	request.Source = "source"
 	request.Destination = "dest"
 	cmd, err = generateRsyncCmd(testVolume, request)
 	assert.Nil(t, err)
-	assert.Equal(t, "rsync -r source dest", cmd)
+	assert.Equal(t, "rsync -r -ospgu --stats source dest", cmd)
 
 	request.SourceType = registry.List
 	request.Source = "list_filename"
