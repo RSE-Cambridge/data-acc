@@ -96,6 +96,7 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 			}
 
 			if new.State != old.State {
+				log.Printf("volume:%s state move: %s -> %s", new.Name, old.State, new.State)
 				switch new.State {
 				case registry.DataInRequested:
 					processDataIn(volumeRegistry, *new)
@@ -107,7 +108,7 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 					log.Println("Volume", new.Name, "has had bricks deleted.")
 				default:
 					// Ignore the state changes we triggered
-					log.Printf("ignore volume:%s state move: %s -> %s", new.Name, old.State, new.State)
+					log.Printf("ignore volume state move %+v", change)
 				}
 			}
 
