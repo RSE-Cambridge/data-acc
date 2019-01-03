@@ -300,25 +300,50 @@ func (volRegistry *volumeRegistry) DeleteVolume(name registry.VolumeName) error 
 	return volRegistry.keystore.DeleteAll([]KeyValueVersion{keyValue})
 }
 
-func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
-	callback func(old *registry.Volume, new *registry.Volume) bool) error {
-	key := getVolumeKey(volumeName)
-	ctxt, cancelFunc := context.WithCancel(context.Background())
-	volRegistry.keystore.WatchKey(ctxt, key, func(old *KeyValueVersion, new *KeyValueVersion) {
-		oldVolume := &registry.Volume{}
-		newVolume := &registry.Volume{}
-		if old != nil {
-			volumeFromKeyValue(*old, oldVolume)
+func (volRegistry *volumeRegistry) GetVolumeChanges(ctx context.Context, volume registry.Volume) registry.VolumeChangeChan {
+	// TODO: we should watch from the version of the passed in volume
+	key := getVolumeKey(string(volume.Name))
+	rawEvents := volRegistry.keystore.Watch(ctx, key, false)
+
+	events := make(chan registry.VolumeChange)
+
+	go func() {
+		defer close(events)
+		if rawEvents == nil {
+			return
 		}
-		if new != nil {
-			volumeFromKeyValue(*new, newVolume)
+		for rawEvent := range rawEvents {
+			if rawEvent.Err != nil {
+				events <- registry.VolumeChange{Err: rawEvent.Err}
+				continue
+			}
+
+			event := registry.VolumeChange{
+				IsDelete: rawEvent.IsDelete,
+				Old:      nil,
+				New:      nil,
+			}
+			if rawEvent.Old != nil {
+				oldVolume := &registry.Volume{}
+				if err := volumeFromKeyValue(*rawEvent.Old, oldVolume); err != nil {
+					event.Err = err
+				} else {
+					event.Old = oldVolume
+				}
+			}
+			if rawEvent.New != nil {
+				newVolume := &registry.Volume{}
+				if err := volumeFromKeyValue(*rawEvent.New, newVolume); err != nil {
+					event.Err = err
+				} else {
+					event.New = newVolume
+				}
+			}
+			events <- event
 		}
-		if callback(oldVolume, newVolume) {
-			log.Println("stopping watching volume", volumeName)
-			cancelFunc()
-		}
-	})
-	return nil // TODO check key is present
+	}()
+
+	return events
 }
 
 func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, state registry.VolumeState) error {

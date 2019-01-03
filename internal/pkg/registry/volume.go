@@ -2,6 +2,7 @@ package registry
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 )
 
@@ -54,10 +55,19 @@ type VolumeRegistry interface {
 	// TODO: remove wait for state?
 	WaitForCondition(volumeName VolumeName, condition func(old *Volume, new *Volume) bool) error
 
-	// Get all callback on all volume changes
-	// If the volume is new, old = nil
-	// used by the primary brick to get volume updates
-	WatchVolumeChanges(volumeName string, callback func(old *Volume, new *Volume) bool) error
+	// Gets all changes that happen to the given volume
+	//
+	// To stop watching cancel or timeout the context, this will close the channel.
+	GetVolumeChanges(ctx context.Context, volume Volume) VolumeChangeChan
+}
+
+type VolumeChangeChan <-chan VolumeChange
+
+type VolumeChange struct {
+	New      *Volume
+	Old      *Volume
+	IsDelete bool
+	Err      error
 }
 
 // TODO: Attachment request, or session is probably a better name here...

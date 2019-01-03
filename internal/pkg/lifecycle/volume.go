@@ -43,9 +43,16 @@ func (vlm *volumeLifecycleManager) Delete() error {
 	// TODO convert errors into volume related errors, somewhere?
 	log.Println("Deleting volume:", vlm.volume.Name, vlm.volume)
 
-	if vlm.volume.SizeBricks == 0 || vlm.volume.HadBricksAssigned == false {
+	if vlm.volume.SizeBricks == 0 {
 		log.Println("No bricks to delete, skipping request delete bricks for:", vlm.volume.Name)
-
+	} else if vlm.volume.HadBricksAssigned == false {
+		allocations, _ := vlm.poolRegistry.GetAllocationsForVolume(vlm.volume.Name)
+		if len(allocations) == 0 {
+			// TODO should we be holding a lock here?
+			log.Println("No bricks yet assigned, skip delete bricks.")
+		} else {
+			return fmt.Errorf("bricks assigned but dacd hasn't noticed them yet for: %+v", vlm.volume)
+		}
 	} else {
 		log.Printf("Requested delete of %d bricks for %s", vlm.volume.SizeBricks, vlm.volume.Name)
 		err := vlm.volumeRegistry.UpdateState(vlm.volume.Name, registry.DeleteRequested)

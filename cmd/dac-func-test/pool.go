@@ -54,28 +54,6 @@ func testGetBricks(poolRegistry registry.PoolRegistry) {
 	}
 }
 
-func testAllocateBricks(poolRegistry registry.PoolRegistry) {
-	poolRegistry.WatchHostBrickAllocations("foo", func(old *registry.BrickAllocation,
-		new *registry.BrickAllocation) {
-		log.Printf("**Allocation update. Old: %+v New: %+v", old, new)
-		if new.DeallocateRequested {
-			log.Printf("requested clean of: %d:%s", new.AllocatedIndex, new.Device)
-		}
-	})
-	//allocations := []registry.BrickAllocation{
-	//	{Hostname: "foo", Device: "vbdb1", AllocatedVolume: "vol1"},
-	//	{Hostname: "foo", Device: "nvme3n1", AllocatedVolume: "vol1"},
-	//}
-	// TODO: create a volume to get the bricks allocated from?
-	//if err := poolRegistry.AllocateBricks(allocations); err != nil {
-	// log.Fatal(err)
-	//}
-	if err := poolRegistry.DeallocateBricks("vol1"); err != nil {
-		log.Fatal(err)
-	}
-	log.Println("asdf")
-}
-
 func testGetAllocations(poolRegistry registry.PoolRegistry) {
 	allocations, err := poolRegistry.GetAllocationsForHost("foo")
 	if err != nil {
@@ -132,7 +110,6 @@ func TestKeystorePoolRegistry(keystore keystoreregistry.Keystore) {
 	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
 	testUpdateHost(poolRegistry)
 	testGetBricks(poolRegistry)
-	testAllocateBricks(poolRegistry)
 	testGetAllocations(poolRegistry)
 	testDeleteAllocations(poolRegistry)
 	testKeepHostAlive(poolRegistry)

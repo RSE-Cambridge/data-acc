@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	registry "github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
@@ -205,14 +206,14 @@ func (mr *MockVolumeRegistryMockRecorder) WaitForCondition(volumeName, condition
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitForCondition", reflect.TypeOf((*MockVolumeRegistry)(nil).WaitForCondition), volumeName, condition)
 }
 
-// WatchVolumeChanges mocks base method
-func (m *MockVolumeRegistry) WatchVolumeChanges(volumeName string, callback func(*registry.Volume, *registry.Volume) bool) error {
-	ret := m.ctrl.Call(m, "WatchVolumeChanges", volumeName, callback)
-	ret0, _ := ret[0].(error)
+// GetVolumeChanges mocks base method
+func (m *MockVolumeRegistry) GetVolumeChanges(ctx context.Context, volume registry.Volume) registry.VolumeChangeChan {
+	ret := m.ctrl.Call(m, "GetVolumeChanges", ctx, volume)
+	ret0, _ := ret[0].(registry.VolumeChangeChan)
 	return ret0
 }
 
-// WatchVolumeChanges indicates an expected call of WatchVolumeChanges
-func (mr *MockVolumeRegistryMockRecorder) WatchVolumeChanges(volumeName, callback interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchVolumeChanges", reflect.TypeOf((*MockVolumeRegistry)(nil).WatchVolumeChanges), volumeName, callback)
+// GetVolumeChanges indicates an expected call of GetVolumeChanges
+func (mr *MockVolumeRegistryMockRecorder) GetVolumeChanges(ctx, volume interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVolumeChanges", reflect.TypeOf((*MockVolumeRegistry)(nil).GetVolumeChanges), ctx, volume)
 }

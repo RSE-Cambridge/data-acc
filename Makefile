@@ -11,7 +11,7 @@
 # limitations under the License.
 
 
-all: deps buildlocal test format
+all: deps buildlocal format test
 
 buildlocal:
 	mkdir -p `pwd`/bin
@@ -24,8 +24,8 @@ format:
 test: 
 	mkdir -p `pwd`/bin
 	./build/rebuild_mocks.sh
-	go test -cover -race -coverprofile=./bin/coverage.txt ./...
 	go vet ./...
+	go test -cover -race -coverprofile=./bin/coverage.txt ./...
 
 test-func:
 	./build/func_test.sh

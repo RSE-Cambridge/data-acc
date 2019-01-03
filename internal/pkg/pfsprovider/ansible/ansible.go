@@ -260,6 +260,7 @@ func executeAnsiblePlaybook(dir string, args string) error {
 	skipAnsible := os.Getenv("DAC_SKIP_ANSIBLE")
 	if skipAnsible == "True" {
 		log.Println("Skip as DAC_SKIP_ANSIBLE=True")
+		time.Sleep(time.Millisecond * 200)
 		return nil
 	}
 

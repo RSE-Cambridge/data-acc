@@ -305,24 +305,38 @@ func (poolRegistry *poolRegistry) GetBrickInfo(hostname string, device string) (
 	return value, error
 }
 
-func (poolRegistry *poolRegistry) WatchHostBrickAllocations(hostname string,
-	callback func(old *registry.BrickAllocation, new *registry.BrickAllocation)) {
+func (poolRegistry *poolRegistry) GetNewHostBrickAllocations(
+	ctxt context.Context, hostname string) <-chan registry.BrickAllocation {
+
+	events := make(chan registry.BrickAllocation)
+
 	key := getPrefixAllocationHost(hostname)
-	poolRegistry.keystore.WatchPrefix(key, func(old *KeyValueVersion, new *KeyValueVersion) {
-		oldBrick := &registry.BrickAllocation{}
-		newBrick := &registry.BrickAllocation{}
-		if old != nil {
-			if old.Value != "" {
-				json.Unmarshal(bytes.NewBufferString(old.Value).Bytes(), &oldBrick)
+	rawEvents := poolRegistry.keystore.Watch(ctxt, key, true)
+
+	go func() {
+		defer close(events)
+		if rawEvents == nil {
+			return
+		}
+		for raw := range rawEvents {
+			if raw.Err != nil {
+				// consider sending error back to the listener? For now force process restart
+				log.Panicf("Error when watching %s for new brick hosts: %+v", hostname, raw)
+			}
+			if raw.IsCreate {
+				newBrick := registry.BrickAllocation{}
+				err := json.Unmarshal(bytes.NewBufferString(raw.New.Value).Bytes(), &newBrick)
+				if err != nil {
+					log.Panicf("error parsing create brick host %s event %+v %s", hostname, raw, err)
+				} else {
+					events <- newBrick
+				}
 			}
 		}
-		if new != nil {
-			if new.Value != "" {
-				json.Unmarshal(bytes.NewBufferString(new.Value).Bytes(), &newBrick)
-			}
-		}
-		callback(oldBrick, newBrick)
-	})
+		// we get here if the context is canceled, etc
+	}()
+
+	return events
 }
 
 func (poolRegistry *poolRegistry) getBricks(prefix string) ([]registry.BrickInfo, error) {

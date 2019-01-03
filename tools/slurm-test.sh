@@ -53,11 +53,11 @@ squeue
 echo "***Use persistent buffer***"
 adduser centos
 cat use-persistent.sh
+su centos -c 'sbatch --array=1-10 use-persistent.sh'
 su centos -c 'sbatch use-persistent.sh'
 su centos -c 'sbatch use-persistent.sh'
 su centos -c 'sbatch use-persistent.sh'
 su centos -c 'sbatch use-persistent.sh'
-su centos -c 'sbatch --array=1-10 test-persistent.sh'
 
 squeue
 

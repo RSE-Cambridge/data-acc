@@ -57,6 +57,12 @@ type Keystore interface {
 	// When callback returns true, stop watch the key
 	WatchKey(ctxt context.Context, key string, onUpdate func(old *KeyValueVersion, new *KeyValueVersion))
 
+	// Get a channel containing all KeyValueUpdate events
+	//
+	// Use the context to control if you watch forever, or if you choose to cancel when a key
+	// is deleted, or you stop watching after some timeout.
+	Watch(ctxt context.Context, key string, withPrefix bool) KeyValueUpdateChan
+
 	// Add a key, and remove it when calling process dies
 	// Error is returned if the key already exists
 	KeepAliveKey(key string) error
@@ -64,6 +70,8 @@ type Keystore interface {
 	// Get a new mutex associated with the specified key
 	NewMutex(lockKey string) (Mutex, error)
 }
+
+type KeyValueUpdateChan <-chan KeyValueUpdate
 
 type KeyValue struct {
 	Key   string
@@ -75,6 +83,15 @@ type KeyValueVersion struct {
 	Value          string
 	CreateRevision int64
 	ModRevision    int64
+}
+
+type KeyValueUpdate struct {
+	Old      *KeyValueVersion
+	New      *KeyValueVersion
+	IsCreate bool
+	IsModify bool
+	IsDelete bool
+	Err      error
 }
 
 func (kvv KeyValueVersion) String() string {

@@ -1,6 +1,7 @@
 package brickmanager
 
 import (
+	"context"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/pfsprovider/ansible"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
@@ -10,20 +11,18 @@ import (
 func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry,
 	hostname string) {
 
-	poolRegistry.WatchHostBrickAllocations(hostname,
-		func(old *registry.BrickAllocation, new *registry.BrickAllocation) {
-			// log.Println("Noticed brick allocation update. Old:", old, "New:", new)
-			if new.AllocatedVolume != "" && old.AllocatedVolume == "" && new.AllocatedIndex == 0 {
-				//log.Println("Dectected we host primary brick for:",
-				//	new.AllocatedVolume, "Must check for action.")
-				processNewPrimaryBlock(poolRegistry, volumeRegistry, new)
+	newBricks := poolRegistry.GetNewHostBrickAllocations(context.Background(), hostname)
+	go func() {
+		for brick := range newBricks {
+			if brick.AllocatedIndex == 0 {
+				log.Printf("found new primary brick %+v", brick)
+				go processNewPrimaryBlock(poolRegistry, volumeRegistry, &brick)
+			} else {
+				log.Printf("ignore brick create, as it is not a primary brick %+v", brick)
 			}
-			if old.AllocatedVolume != "" {
-				if new.DeallocateRequested && !old.DeallocateRequested {
-					log.Printf("Requested clean of brick: %d:%s", new.AllocatedIndex, new.Device)
-				}
-			}
-		})
+		}
+		log.Panic("we appear to have stopped watching for new bricks")
+	}()
 
 	allocations, err := poolRegistry.GetAllocationsForHost(hostname)
 	if err != nil {
@@ -33,16 +32,16 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 	}
 
 	for _, allocation := range allocations {
+		volume, err := volumeRegistry.Volume(allocation.AllocatedVolume)
+		if err != nil {
+			log.Panicf("unable to find volume for allocation %+v", allocation)
+		}
 		if allocation.AllocatedIndex == 0 {
-			volume, err := volumeRegistry.Volume(allocation.AllocatedVolume)
-			if err != nil {
-				log.Panicf("unable to find volume for allocation %+v", allocation)
-			}
-			log.Println("We host a primary brick for:", volume.Name, volume)
-			if volume.State == registry.BricksProvisioned || volume.State == registry.DataInComplete {
-				log.Println("Start watch for changes to volume again:", volume.Name)
-				watchForVolumeChanges(poolRegistry, volumeRegistry, volume)
-			}
+			log.Printf("Start watching again, as we host a primary brick for: %+v", volume)
+			// TODO: do we finish watching correctly?
+			watchForVolumeChanges(poolRegistry, volumeRegistry, volume)
+
+			// TODO: trigger events if we missed the "edge" already
 			if volume.State == registry.DeleteRequested {
 				log.Println("Complete pending delete request for volume:", volume.Name)
 				processDelete(poolRegistry, volumeRegistry, volume)
@@ -72,10 +71,32 @@ func processNewPrimaryBlock(poolRegistry registry.PoolRegistry, volumeRegistry r
 func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry,
 	volume registry.Volume) {
 
-	// TODO: watch from version associated with above volume to avoid any missed events
-	volumeRegistry.WatchVolumeChanges(string(volume.Name), func(old *registry.Volume, new *registry.Volume) bool {
-		if old != nil && new != nil {
+	ctxt, cancelFunc := context.WithCancel(context.Background())
+	changes := volumeRegistry.GetVolumeChanges(ctxt, volume)
+
+	go func() {
+		defer cancelFunc()
+
+		for change := range changes {
+			old := change.Old
+			new := change.New
+
+			if change.IsDelete {
+				log.Printf("Stop watching volume: %s", volume.Name)
+				return
+			}
+
+			if old == nil || new == nil {
+				log.Printf("nil volume seen, unable to process volume event: %+v", change)
+			}
+
+			if change.Err != nil {
+				log.Printf("Error while waiting for volume %s saw error: %s with: %+v",
+					volume.Name, change.Err.Error(), change)
+			}
+
 			if new.State != old.State {
+				log.Printf("volume:%s state move: %s -> %s", new.Name, old.State, new.State)
 				switch new.State {
 				case registry.DataInRequested:
 					processDataIn(volumeRegistry, *new)
@@ -84,11 +105,10 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 				case registry.DeleteRequested:
 					processDelete(poolRegistry, volumeRegistry, *new)
 				case registry.BricksDeleted:
-					log.Println("Volume", new.Name, "deleted, stop listening for events now.")
-					return true
+					log.Println("Volume", new.Name, "has had bricks deleted.")
 				default:
 					// Ignore the state changes we triggered
-					log.Println(". ingore volume:", volume.Name, "state move:", old.State, "->", new.State)
+					log.Printf("ignore volume state move %+v", change)
 				}
 			}
 
@@ -124,9 +144,7 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 				}
 			}
 		}
-		// keep watching
-		return false
-	})
+	}()
 }
 
 func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume, err error) {

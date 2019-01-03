@@ -19,10 +19,7 @@ func TestKeystoreVolumeRegistry(keystore keystoreregistry.Keystore) {
 }
 
 func testVolumeCRUD(volRegistry registry.VolumeRegistry) {
-	volRegistry.WatchVolumeChanges("asdf", func(old *registry.Volume, new *registry.Volume) bool {
-		log.Printf("Volume update detected. old: %s new: %s", old.State, new.State)
-		return false
-	})
+	// TODO: test get volume changes?
 
 	volume := registry.Volume{Name: "asdf", State: registry.Registered, JobName: "foo", SizeBricks: 2, SizeGB: 200}
 	volume2 := registry.Volume{Name: "asdf2", JobName: "foo", SizeBricks: 3, SizeGB: 300}
