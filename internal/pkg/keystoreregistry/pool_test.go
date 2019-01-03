@@ -8,7 +8,10 @@ import (
 )
 
 type fakeKeystore struct {
-	watchChan KeyValueUpdateChan
+	watchChan  KeyValueUpdateChan
+	t          *testing.T
+	key        string
+	withPrefix bool
 }
 
 func (fakeKeystore) Close() error {
@@ -39,6 +42,8 @@ func (fakeKeystore) WatchKey(ctxt context.Context, key string, onUpdate func(old
 	panic("implement me")
 }
 func (fk fakeKeystore) Watch(ctxt context.Context, key string, withPrefix bool) KeyValueUpdateChan {
+	assert.Equal(fk.t, fk.key, key)
+	assert.Equal(fk.t, fk.withPrefix, withPrefix)
 	return fk.watchChan
 }
 func (fakeKeystore) KeepAliveKey(key string) error {
@@ -50,7 +55,9 @@ func (fakeKeystore) NewMutex(lockKey string) (Mutex, error) {
 
 func TestPoolRegistry_GetNewHostBrickAllocations(t *testing.T) {
 	rawEvents := make(chan KeyValueUpdate)
-	reg := poolRegistry{keystore: &fakeKeystore{watchChan: rawEvents}}
+	reg := poolRegistry{keystore: &fakeKeystore{
+		watchChan: rawEvents, t: t, key: "/bricks/allocated/host/host1/", withPrefix: true,
+	}}
 
 	events := reg.GetNewHostBrickAllocations(context.TODO(), "host1")
 
@@ -77,9 +84,11 @@ func TestPoolRegistry_GetNewHostBrickAllocations(t *testing.T) {
 }
 
 func TestPoolRegistry_GetNewHostBrickAllocations_nil(t *testing.T) {
-	reg := poolRegistry{keystore: &fakeKeystore{}}
+	reg := poolRegistry{keystore: &fakeKeystore{
+		watchChan: nil, t: t, key: "/bricks/allocated/host/host2/", withPrefix: true,
+	}}
 
-	events := reg.GetNewHostBrickAllocations(context.TODO(), "host1")
+	events := reg.GetNewHostBrickAllocations(context.TODO(), "host2")
 
 	_, ok := <-events
 	assert.False(t, ok)

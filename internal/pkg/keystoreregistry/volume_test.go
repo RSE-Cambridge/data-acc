@@ -72,7 +72,7 @@ func TestVolumeRegistry_MergeAttachments(t *testing.T) {
 }
 
 func TestVolumeRegistry_GetVolumeChanges_nil(t *testing.T) {
-	volReg := volumeRegistry{keystore: fakeKeystore{watchChan: nil}}
+	volReg := volumeRegistry{keystore: fakeKeystore{watchChan: nil, t: t, key: "/volume/vol1/"}}
 
 	changes := volReg.GetVolumeChanges(context.TODO(), registry.Volume{Name: "vol1"})
 
@@ -82,11 +82,48 @@ func TestVolumeRegistry_GetVolumeChanges_nil(t *testing.T) {
 
 func TestVolumeRegistry_GetVolumeChanges(t *testing.T) {
 	raw := make(chan KeyValueUpdate)
-	volReg := volumeRegistry{keystore: fakeKeystore{watchChan: raw}}
+	volReg := volumeRegistry{keystore: fakeKeystore{
+		watchChan: raw, t: t, key: "/volume/vol1/", withPrefix: false,
+	}}
 
 	changes := volReg.GetVolumeChanges(context.TODO(), registry.Volume{Name: "vol1"})
 
-	close(raw)
+	vol := &registry.Volume{Name: "test1"}
+
+	go func() {
+		raw <- KeyValueUpdate{
+			New: &KeyValueVersion{Key: "asdf", Value: toJson(vol)},
+			Old: &KeyValueVersion{Key: "asdf", Value: toJson(vol)},
+		}
+		raw <- KeyValueUpdate{
+			IsDelete: true,
+			New:      nil,
+			Old:      &KeyValueVersion{Key: "asdf", Value: toJson(vol)},
+		}
+		raw <- KeyValueUpdate{
+			New: &KeyValueVersion{Key: "asdf", Value: "asdf"},
+			Old: nil,
+		}
+		close(raw)
+	}()
+
+	ch1 := <-changes
+	assert.Nil(t, ch1.Err)
+	assert.False(t, ch1.IsDelete)
+	assert.Equal(t, vol, ch1.Old)
+	assert.Equal(t, vol, ch1.New)
+
+	ch2 := <-changes
+	assert.Nil(t, ch2.Err)
+	assert.True(t, ch2.IsDelete)
+	assert.Nil(t, ch2.New)
+	assert.Equal(t, vol, ch1.Old)
+
+	ch3 := <-changes
+	assert.Equal(t, "invalid character 'a' looking for beginning of value", ch3.Err.Error())
+	assert.False(t, ch3.IsDelete)
+	assert.Nil(t, ch3.Old)
+	assert.Nil(t, ch3.New)
 
 	_, ok := <-changes
 	assert.False(t, ok)

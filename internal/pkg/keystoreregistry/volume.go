@@ -341,15 +341,23 @@ func (volRegistry *volumeRegistry) GetVolumeChanges(ctx context.Context, volume 
 
 			event := registry.VolumeChange{
 				IsDelete: rawEvent.IsDelete,
+				Old:      nil,
+				New:      nil,
 			}
 			if rawEvent.Old != nil {
-				if err := volumeFromKeyValue(*rawEvent.Old, event.Old); err != nil {
-					rawEvent.Err = err
+				oldVolume := &registry.Volume{}
+				if err := volumeFromKeyValue(*rawEvent.Old, oldVolume); err != nil {
+					event.Err = err
+				} else {
+					event.Old = oldVolume
 				}
 			}
 			if rawEvent.New != nil {
-				if err := volumeFromKeyValue(*rawEvent.New, event.New); err != nil {
-					rawEvent.Err = err
+				newVolume := &registry.Volume{}
+				if err := volumeFromKeyValue(*rawEvent.New, newVolume); err != nil {
+					event.Err = err
+				} else {
+					event.New = newVolume
 				}
 			}
 			events <- event
