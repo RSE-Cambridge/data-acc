@@ -14,7 +14,9 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 	newBricks := poolRegistry.GetNewHostBrickAllocations(context.Background(), hostname)
 	go func() {
 		for brick := range newBricks {
-			go processNewPrimaryBlock(poolRegistry, volumeRegistry, &brick)
+			if brick.AllocatedIndex == 0 {
+				go processNewPrimaryBlock(poolRegistry, volumeRegistry, &brick)
+			}
 		}
 		log.Panic("we appear to have stopped watching for new bricks")
 	}()
