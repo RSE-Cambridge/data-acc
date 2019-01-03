@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	registry "github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
@@ -146,12 +147,14 @@ func (mr *MockPoolRegistryMockRecorder) GetBrickInfo(hostname, device interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBrickInfo", reflect.TypeOf((*MockPoolRegistry)(nil).GetBrickInfo), hostname, device)
 }
 
-// WatchHostBrickAllocations mocks base method
-func (m *MockPoolRegistry) WatchHostBrickAllocations(hostname string, callback func(*registry.BrickAllocation, *registry.BrickAllocation)) {
-	m.ctrl.Call(m, "WatchHostBrickAllocations", hostname, callback)
+// GetNewHostBrickAllocations mocks base method
+func (m *MockPoolRegistry) GetNewHostBrickAllocations(ctxt context.Context, hostname string) <-chan registry.BrickAllocation {
+	ret := m.ctrl.Call(m, "GetNewHostBrickAllocations", ctxt, hostname)
+	ret0, _ := ret[0].(<-chan registry.BrickAllocation)
+	return ret0
 }
 
-// WatchHostBrickAllocations indicates an expected call of WatchHostBrickAllocations
-func (mr *MockPoolRegistryMockRecorder) WatchHostBrickAllocations(hostname, callback interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WatchHostBrickAllocations", reflect.TypeOf((*MockPoolRegistry)(nil).WatchHostBrickAllocations), hostname, callback)
+// GetNewHostBrickAllocations indicates an expected call of GetNewHostBrickAllocations
+func (mr *MockPoolRegistryMockRecorder) GetNewHostBrickAllocations(ctxt, hostname interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNewHostBrickAllocations", reflect.TypeOf((*MockPoolRegistry)(nil).GetNewHostBrickAllocations), ctxt, hostname)
 }

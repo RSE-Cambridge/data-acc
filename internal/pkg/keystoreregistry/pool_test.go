@@ -50,19 +50,19 @@ func (fakeKeystore) NewMutex(lockKey string) (Mutex, error) {
 
 func TestPoolRegistry_GetNewHostBrickAllocations(t *testing.T) {
 	rawEvents := make(chan KeyValueUpdate)
-	reg := poolRegistry{keystore: &fakeKeystore{watchChan:rawEvents}}
+	reg := poolRegistry{keystore: &fakeKeystore{watchChan: rawEvents}}
 
 	events := reg.GetNewHostBrickAllocations(context.TODO(), "host1")
 
 	go func() {
-		rawEvents <- KeyValueUpdate{IsCreate:false}
+		rawEvents <- KeyValueUpdate{IsCreate: false}
 		rawEvents <- KeyValueUpdate{
-			IsCreate:true,
+			IsCreate: true,
 			New: &KeyValueVersion{Value: toJson(registry.BrickAllocation{
-				Hostname:"host1", Device:"sdb",
+				Hostname: "host1", Device: "sdb",
 			})},
 		}
-		rawEvents <- KeyValueUpdate{IsCreate:false}
+		rawEvents <- KeyValueUpdate{IsCreate: false}
 		close(rawEvents)
 	}()
 

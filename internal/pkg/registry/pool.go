@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 )
@@ -60,8 +61,11 @@ type PoolRegistry interface {
 	// Get information on a specific brick
 	GetBrickInfo(hostname string, device string) (BrickInfo, error)
 
-	// Register for callbacks when allocate or deallocate of a brick on the given host occurs
-	WatchHostBrickAllocations(hostname string, callback func(old *BrickAllocation, new *BrickAllocation))
+	// Returns a channel that reports all new brick allocations for given hostname
+	//
+	// The channel is closed when the context is cancelled or timeout.
+	// Any errors in the watching log the issue and panic
+	GetNewHostBrickAllocations(ctxt context.Context, hostname string) <-chan BrickAllocation
 }
 
 type Pool struct {

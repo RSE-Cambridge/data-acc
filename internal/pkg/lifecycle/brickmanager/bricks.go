@@ -1,6 +1,7 @@
 package brickmanager
 
 import (
+	"context"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/pfsprovider/ansible"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
@@ -10,20 +11,13 @@ import (
 func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry,
 	hostname string) {
 
-	poolRegistry.WatchHostBrickAllocations(hostname,
-		func(old *registry.BrickAllocation, new *registry.BrickAllocation) {
-			// log.Println("Noticed brick allocation update. Old:", old, "New:", new)
-			if new.AllocatedVolume != "" && old.AllocatedVolume == "" && new.AllocatedIndex == 0 {
-				//log.Println("Dectected we host primary brick for:",
-				//	new.AllocatedVolume, "Must check for action.")
-				processNewPrimaryBlock(poolRegistry, volumeRegistry, new)
-			}
-			if old.AllocatedVolume != "" {
-				if new.DeallocateRequested && !old.DeallocateRequested {
-					log.Printf("Requested clean of brick: %d:%s", new.AllocatedIndex, new.Device)
-				}
-			}
-		})
+	newBricks := poolRegistry.GetNewHostBrickAllocations(context.Background(), hostname)
+	go func() {
+		for brick := range newBricks {
+			go processNewPrimaryBlock(poolRegistry, volumeRegistry, &brick)
+		}
+		log.Panic("we appear to have stopped watching for new bricks")
+	}()
 
 	allocations, err := poolRegistry.GetAllocationsForHost(hostname)
 	if err != nil {
