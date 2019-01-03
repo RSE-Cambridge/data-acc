@@ -54,12 +54,16 @@ func TestEtcKeystore_Watch(t *testing.T) {
 		}}
 		ch <- clientv3.WatchResponse{
 			Events: []*clientv3.Event{
-				{Type: clientv3.EventTypePut, Kv: &mvccpb.KeyValue{CreateRevision:1}},
+				{
+					Type: clientv3.EventTypePut,
+					Kv: &mvccpb.KeyValue{ModRevision:1, Key:[]byte("key2")},
+					PrevKv: &mvccpb.KeyValue{ModRevision:1, Key:[]byte("key2")},
+				},
 			}}
 		ch <- clientv3.WatchResponse{
 			Events: []*clientv3.Event{
-				{Type: clientv3.EventTypeDelete, Kv: &mvccpb.KeyValue{}},
-				{Type: clientv3.EventTypeDelete, Kv: &mvccpb.KeyValue{}},
+				{Type: clientv3.EventTypeDelete, PrevKv: &mvccpb.KeyValue{Key:[]byte("key2")}},
+				{Type: clientv3.EventTypeDelete, PrevKv: &mvccpb.KeyValue{Key:[]byte("key1")}},
 			}}
 		close(ch)
 	}()
@@ -70,26 +74,36 @@ func TestEtcKeystore_Watch(t *testing.T) {
 	assert.True(t, ev1.IsCreate)
 	assert.False(t, ev1.IsModify)
 	assert.False(t, ev1.IsDelete)
+	assert.Nil(t, ev1.Old)
+	assert.EqualValues(t, "key1", ev1.New.Key)
 
 	ev2 := <- response
 	assert.True(t, ev2.IsCreate)
 	assert.False(t, ev2.IsModify)
 	assert.False(t, ev2.IsDelete)
+	assert.Nil(t, ev2.Old)
+	assert.EqualValues(t, "key2", ev2.New.Key)
 
 	ev3 := <- response
 	assert.False(t, ev3.IsCreate)
 	assert.True(t, ev3.IsModify)
 	assert.False(t, ev3.IsDelete)
+	assert.EqualValues(t, "key2", ev3.New.Key)
+	assert.EqualValues(t, "key2", ev3.Old.Key)
 
 	ev4 := <- response
 	assert.False(t, ev4.IsCreate)
 	assert.False(t, ev4.IsModify)
 	assert.True(t, ev4.IsDelete)
+	assert.Nil(t, ev4.New)
+	assert.EqualValues(t, "key2", ev4.Old.Key)
 
 	ev5 := <- response
 	assert.False(t, ev5.IsCreate)
 	assert.False(t, ev5.IsModify)
 	assert.True(t, ev5.IsDelete)
+	assert.Nil(t, ev5.New)
+	assert.EqualValues(t, "key1", ev5.Old.Key)
 
 	// Check chan is closed
 	_, ok := <- response
