@@ -237,8 +237,6 @@ func (client *etcKeystore) WatchKey(ctxt context.Context, key string,
 }
 
 func (client *etcKeystore) Watch(ctxt context.Context, key string, withPrefix bool) <-chan keystoreregistry.KeyValueUpdate {
-
-	// open channel with etcd
 	options := []clientv3.OpOption{clientv3.WithPrevKV()}
 	if withPrefix {
 		options = append(options, clientv3.WithPrefix())
@@ -249,20 +247,30 @@ func (client *etcKeystore) Watch(ctxt context.Context, key string, withPrefix bo
 
 	go func() {
 		for watchResponse := range rch {
+			// if error, send empty update with an error
+			err := watchResponse.Err()
+			if err != nil {
+				c <- keystoreregistry.KeyValueUpdate{Err: err}
+			}
+
+			// send all events in this watch response
 			for _, ev := range watchResponse.Events {
 				update := keystoreregistry.KeyValueUpdate{
-					New: getKeyValueVersion(ev.Kv),
-					Old: getKeyValueVersion(ev.PrevKv),
+					IsCreate: ev.IsCreate(),
+					IsModify: ev.IsModify(),
+					IsDelete: ev.Type == clientv3.EventTypeDelete,
 				}
-				// show deleted by returning nil for new
-				if update.New != nil && update.New.CreateRevision == 0 {
-					update.New = nil
-					// TODO: should we cancel if the key is deleted?
-					// or just let the user deal with it?
+				if update.IsCreate || update.IsModify {
+					update.New = getKeyValueVersion(ev.Kv)
 				}
+				if update.IsDelete || update.IsModify {
+					update.Old = getKeyValueVersion(ev.PrevKv)
+				}
+
 				c <- update
 			}
 		}
+
 		// Assuming we get here when the context is cancelled or hits its timeout
 		// i.e. there are no more events, so we close the channel
 		close(c)

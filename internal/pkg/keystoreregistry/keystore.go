@@ -82,8 +82,12 @@ type KeyValueVersion struct {
 }
 
 type KeyValueUpdate struct {
-	Old *KeyValueVersion
-	New *KeyValueVersion
+	Old      *KeyValueVersion
+	New      *KeyValueVersion
+	IsCreate bool
+	IsModify bool
+	IsDelete bool
+	Err      error
 }
 
 func (kvv KeyValueVersion) String() string {
