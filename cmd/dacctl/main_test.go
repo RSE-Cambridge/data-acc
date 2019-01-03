@@ -83,7 +83,7 @@ func TestCreatePerJobBuffer(t *testing.T) {
 	}()
 
 	setupArgs := strings.Split(
-		"--function setup --token a --job b --caller c --user 1 --groupid 1 --capacity dw:1GiB", " ")
+		"--function setup --token a --job b --caller c --user 1 --groupid 1 --capacity dw:1GiB --nodehostnamefile asdf", " ")
 	err := runCli(setupArgs)
 	assert.Equal(t, "CreatePerJobBuffer", err.Error())
 
