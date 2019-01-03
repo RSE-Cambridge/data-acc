@@ -57,6 +57,8 @@ su centos -c 'sbatch use-persistent.sh'
 su centos -c 'sbatch use-persistent.sh'
 su centos -c 'sbatch use-persistent.sh'
 su centos -c 'sbatch use-persistent.sh'
+su centos -c 'sbatch --array=1-10 test-persistent.sh'
+
 squeue
 
 sleep $SLEEP_INTERVAL
