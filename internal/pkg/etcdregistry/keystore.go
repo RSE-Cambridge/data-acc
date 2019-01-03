@@ -340,8 +340,7 @@ func (client *etcKeystore) KeepAliveKey(key string) error {
 		for {
 			ka := <-ch
 			if ka == nil {
-				log.Println("Refresh stoped for key: ", key)
-				// TODO: optionally make this log a fatal error?
+				log.Panicf("Unable to refresh key: %s", key)
 				break
 			} else {
 				if counter >= 9 {
