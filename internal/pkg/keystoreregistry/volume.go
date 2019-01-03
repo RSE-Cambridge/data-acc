@@ -300,27 +300,6 @@ func (volRegistry *volumeRegistry) DeleteVolume(name registry.VolumeName) error 
 	return volRegistry.keystore.DeleteAll([]KeyValueVersion{keyValue})
 }
 
-func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
-	callback func(old *registry.Volume, new *registry.Volume) bool) error {
-	key := getVolumeKey(volumeName)
-	ctxt, cancelFunc := context.WithCancel(context.Background())
-	volRegistry.keystore.WatchKey(ctxt, key, func(old *KeyValueVersion, new *KeyValueVersion) {
-		oldVolume := &registry.Volume{}
-		newVolume := &registry.Volume{}
-		if old != nil {
-			volumeFromKeyValue(*old, oldVolume)
-		}
-		if new != nil {
-			volumeFromKeyValue(*new, newVolume)
-		}
-		if callback(oldVolume, newVolume) {
-			log.Println("stopping watching volume", volumeName)
-			cancelFunc()
-		}
-	})
-	return nil // TODO check key is present
-}
-
 func (volRegistry *volumeRegistry) GetVolumeChanges(ctx context.Context, volume registry.Volume) registry.VolumeChangeChan {
 	// TODO: we should watch from the version of the passed in volume
 	key := getVolumeKey(string(volume.Name))

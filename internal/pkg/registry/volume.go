@@ -55,12 +55,6 @@ type VolumeRegistry interface {
 	// TODO: remove wait for state?
 	WaitForCondition(volumeName VolumeName, condition func(old *Volume, new *Volume) bool) error
 
-	// Get all callback on all volume changes
-	// If the volume is new, old = nil
-	// used by the primary brick to get volume updates
-	WatchVolumeChanges(volumeName string, callback func(old *Volume, new *Volume) bool) error
-
-	// TODO: replacing WatchVolumeChanges
 	// Gets all changes that happen to the given volume
 	//
 	// To stop watching cancel or timeout the context, this will close the channel.

@@ -18,7 +18,7 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 				log.Printf("found new primary brick %+v", brick)
 				go processNewPrimaryBlock(poolRegistry, volumeRegistry, &brick)
 			} else {
-				log.Printf("ignore block create, as it is not a primary brick %+v", brick)
+				log.Printf("ignore brick create, as it is not a primary brick %+v", brick)
 			}
 		}
 		log.Panic("we appear to have stopped watching for new bricks")
@@ -71,9 +71,30 @@ func processNewPrimaryBlock(poolRegistry registry.PoolRegistry, volumeRegistry r
 func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry,
 	volume registry.Volume) {
 
-	// TODO: watch from version associated with above volume to avoid any missed events
-	volumeRegistry.WatchVolumeChanges(string(volume.Name), func(old *registry.Volume, new *registry.Volume) bool {
-		if old != nil && new != nil {
+	ctxt, cancelFunc := context.WithCancel(context.Background())
+	changes := volumeRegistry.GetVolumeChanges(ctxt, volume)
+
+	go func() {
+		defer cancelFunc()
+
+		for change := range changes {
+			old := change.Old
+			new := change.New
+
+			if change.IsDelete {
+				log.Printf("Stop watching volume: %s", volume.Name)
+				return
+			}
+
+			if old == nil || new == nil {
+				log.Printf("nil volume seen, unable to process volume event: %+v", change)
+			}
+
+			if change.Err != nil {
+				log.Printf("Error while waiting for volume %s saw error: %s with: %+v",
+					volume.Name, change.Err.Error(), change)
+			}
+
 			if new.State != old.State {
 				switch new.State {
 				case registry.DataInRequested:
@@ -83,11 +104,10 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 				case registry.DeleteRequested:
 					processDelete(poolRegistry, volumeRegistry, *new)
 				case registry.BricksDeleted:
-					log.Println("Volume", new.Name, "deleted, stop listening for events now.")
-					return true
+					log.Println("Volume", new.Name, "has had bricks deleted.")
 				default:
 					// Ignore the state changes we triggered
-					log.Println(". ingore volume:", volume.Name, "state move:", old.State, "->", new.State)
+					log.Printf("ignore volume:%s state move: %s -> %s", new.Name, old.State, new.State)
 				}
 			}
 
@@ -123,9 +143,7 @@ func watchForVolumeChanges(poolRegistry registry.PoolRegistry, volumeRegistry re
 				}
 			}
 		}
-		// keep watching
-		return false
-	})
+	}()
 }
 
 func handleError(volumeRegistry registry.VolumeRegistry, volume registry.Volume, err error) {
