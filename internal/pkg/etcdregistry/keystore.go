@@ -67,17 +67,17 @@ func NewKeystore() keystoreregistry.Keystore {
 	cli := newEtcdClient()
 	return &etcKeystore{
 		Watcher: cli.Watcher,
-		KV: cli.KV,
-		Lease: cli.Lease,
-		Client: cli,
+		KV:      cli.KV,
+		Lease:   cli.Lease,
+		Client:  cli,
 	}
 }
 
 type etcKeystore struct {
 	Watcher clientv3.Watcher
-	KV clientv3.KV
-	Lease clientv3.Lease
-	Client *clientv3.Client
+	KV      clientv3.KV
+	Lease   clientv3.Lease
+	Client  *clientv3.Client
 }
 
 func (client *etcKeystore) NewMutex(lockKey string) (keystoreregistry.Mutex, error) {
