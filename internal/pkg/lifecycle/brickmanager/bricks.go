@@ -37,11 +37,11 @@ func setupBrickEventHandlers(poolRegistry registry.PoolRegistry, volumeRegistry 
 			if err != nil {
 				log.Panicf("unable to find volume for allocation %+v", allocation)
 			}
-			log.Println("We host a primary brick for:", volume.Name, volume)
-			if volume.State == registry.BricksProvisioned || volume.State == registry.DataInComplete {
-				log.Println("Start watch for changes to volume again:", volume.Name)
-				watchForVolumeChanges(poolRegistry, volumeRegistry, volume)
-			}
+			log.Printf("Start watching again, as we host a primary brick for: %+v", volume)
+			// TODO: do we finish watching correctly?
+			watchForVolumeChanges(poolRegistry, volumeRegistry, volume)
+
+			// TODO: trigger events if we missed the "edge" already
 			if volume.State == registry.DeleteRequested {
 				log.Println("Complete pending delete request for volume:", volume.Name)
 				processDelete(poolRegistry, volumeRegistry, volume)
