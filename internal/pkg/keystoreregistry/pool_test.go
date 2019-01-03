@@ -75,3 +75,12 @@ func TestPoolRegistry_GetNewHostBrickAllocations(t *testing.T) {
 	_, ok = <-rawEvents
 	assert.False(t, ok)
 }
+
+func TestPoolRegistry_GetNewHostBrickAllocations_nil(t *testing.T) {
+	reg := poolRegistry{keystore: &fakeKeystore{}}
+
+	events := reg.GetNewHostBrickAllocations(context.TODO(), "host1")
+
+	_, ok := <-events
+	assert.False(t, ok)
+}

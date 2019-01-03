@@ -1,6 +1,7 @@
 package keystoreregistry
 
 import (
+	"context"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -68,4 +69,27 @@ func TestVolumeRegistry_MergeAttachments(t *testing.T) {
 	assert.Equal(t, updates[0], result[0])
 	assert.Equal(t, updates[1], result[1])
 	assert.Equal(t, oldAttachments[0], result[2])
+}
+
+func TestVolumeRegistry_GetVolumeChanges_nil(t *testing.T) {
+	volReg := volumeRegistry{keystore: fakeKeystore{watchChan: nil}}
+
+	changes := volReg.GetVolumeChanges(context.TODO(), registry.Volume{Name: "vol1"})
+
+	_, ok := <-changes
+	assert.False(t, ok)
+}
+
+func TestVolumeRegistry_GetVolumeChanges(t *testing.T) {
+	raw := make(chan KeyValueUpdate)
+	volReg := volumeRegistry{keystore: fakeKeystore{watchChan: raw}}
+
+	changes := volReg.GetVolumeChanges(context.TODO(), registry.Volume{Name: "vol1"})
+
+	close(raw)
+
+	_, ok := <-changes
+	assert.False(t, ok)
+	_, ok = <-raw
+	assert.False(t, ok)
 }

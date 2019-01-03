@@ -314,6 +314,10 @@ func (poolRegistry *poolRegistry) GetNewHostBrickAllocations(
 	rawEvents := poolRegistry.keystore.Watch(ctxt, key, true)
 
 	go func() {
+		defer close(events)
+		if rawEvents == nil {
+			return
+		}
 		for raw := range rawEvents {
 			if raw.Err != nil {
 				// consider sending error back to the listener? For now force process restart
@@ -330,7 +334,6 @@ func (poolRegistry *poolRegistry) GetNewHostBrickAllocations(
 			}
 		}
 		// we get here if the context is canceled, etc
-		close(events)
 	}()
 
 	return events

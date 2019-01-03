@@ -321,6 +321,44 @@ func (volRegistry *volumeRegistry) WatchVolumeChanges(volumeName string,
 	return nil // TODO check key is present
 }
 
+func (volRegistry *volumeRegistry) GetVolumeChanges(ctx context.Context, volume registry.Volume) registry.VolumeChangeChan {
+	// TODO: we should watch from the version of the passed in volume
+	key := getVolumeKey(string(volume.Name))
+	rawEvents := volRegistry.keystore.Watch(ctx, key, false)
+
+	events := make(chan registry.VolumeChange)
+
+	go func() {
+		defer close(events)
+		if rawEvents == nil {
+			return
+		}
+		for rawEvent := range rawEvents {
+			if rawEvent.Err != nil {
+				events <- registry.VolumeChange{Err: rawEvent.Err}
+				continue
+			}
+
+			event := registry.VolumeChange{
+				IsDelete: rawEvent.IsDelete,
+			}
+			if rawEvent.Old != nil {
+				if err := volumeFromKeyValue(*rawEvent.Old, event.Old); err != nil {
+					rawEvent.Err = err
+				}
+			}
+			if rawEvent.New != nil {
+				if err := volumeFromKeyValue(*rawEvent.New, event.New); err != nil {
+					rawEvent.Err = err
+				}
+			}
+			events <- event
+		}
+	}()
+
+	return events
+}
+
 func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, state registry.VolumeState) error {
 	log.Println("Start waiting for volume", volumeName, "to reach state", state)
 	err := volRegistry.WaitForCondition(volumeName, func(old *registry.Volume, new *registry.Volume) bool {
