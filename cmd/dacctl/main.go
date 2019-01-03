@@ -79,9 +79,14 @@ func runCli(args []string) error {
 			Action: jobProcess,
 		},
 		{
-			Name:   "setup",
-			Usage:  "Create transient buffer, called after waiting for enough free capacity.",
-			Flags:  []cli.Flag{token, job, caller, user, groupid, capacity},
+			Name:  "setup",
+			Usage: "Create transient buffer, called after waiting for enough free capacity.",
+			Flags: []cli.Flag{token, job, caller, user, groupid, capacity,
+				cli.StringFlag{
+					Name:  "nodehostnamefile",
+					Usage: "Path to file containing list of scheduled compute nodes.",
+				},
+			},
 			Action: setup,
 		},
 		{
@@ -113,7 +118,7 @@ func runCli(args []string) error {
 			Flags: []cli.Flag{token, job,
 				cli.StringFlag{
 					Name:  "nodehostnamefile",
-					Usage: "Path to file containing list of compute nodes.",
+					Usage: "Path to file containing list of compute nodes for job.",
 				},
 				// TODO: required when SetExecHost flag set, but currently we just ignore this param!
 				cli.StringFlag{

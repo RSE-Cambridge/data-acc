@@ -16,7 +16,7 @@ func TestCreatePerJobBuffer(t *testing.T) {
 	mockDisk.EXPECT().Lines("jobfile")
 
 	err := CreatePerJobBuffer(mockVolReg, mockPoolReg, mockDisk, "token",
-		2, 2, "", "test", "jobfile")
+		2, 2, "", "test", "jobfile", "nodefile")
 	assert.Equal(t, "must format capacity correctly and include pool", err.Error())
 }
 

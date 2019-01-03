@@ -38,10 +38,15 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry
 }
 
 func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry registry.PoolRegistry, disk fileio.Disk,
-	token string, user int, group int, capacity string, caller string, jobFile string) error {
+	token string, user int, group int, capacity string, caller string, jobFile string, nodeFile string) error {
 	summary, err := ParseJobFile(disk, jobFile)
 	if err != nil {
 		return err
+	}
+
+	if nodeFile != "" {
+		// TODO we could add this into the volume as a scheduling hint, when its available?
+		log.Printf("Ignoring nodeFile in setup: %s", nodeFile)
 	}
 
 	pool, bricksRequired, err := getPoolAndBrickCount(poolRegistry, capacity)

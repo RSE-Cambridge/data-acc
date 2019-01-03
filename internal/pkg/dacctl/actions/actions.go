@@ -84,7 +84,7 @@ func (fwa *dacctlActions) CreatePerJobBuffer(c CliContext) error {
 	checkRequiredStrings(c, "token", "job", "caller", "capacity")
 	return dacctl.CreatePerJobBuffer(fwa.volumeRegistry, fwa.poolRegistry, fwa.disk,
 		c.String("token"), c.Int("user"), c.Int("group"), c.String("capacity"),
-		c.String("caller"), c.String("job"))
+		c.String("caller"), c.String("job"), c.String("nodehostnamefile"))
 }
 
 func (fwa *dacctlActions) ShowInstances() error {
