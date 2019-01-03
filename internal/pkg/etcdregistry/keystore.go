@@ -65,10 +65,18 @@ func newEtcdClient() *clientv3.Client {
 
 func NewKeystore() keystoreregistry.Keystore {
 	cli := newEtcdClient()
-	return &etcKeystore{Client: cli}
+	return &etcKeystore{
+		Watcher: cli.Watcher,
+		KV: cli.KV,
+		Lease: cli.Lease,
+		Client: cli,
+	}
 }
 
 type etcKeystore struct {
+	Watcher clientv3.Watcher
+	KV clientv3.KV
+	Lease clientv3.Lease
 	Client *clientv3.Client
 }
 

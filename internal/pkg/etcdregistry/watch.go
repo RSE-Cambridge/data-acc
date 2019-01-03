@@ -11,7 +11,7 @@ func (client *etcKeystore) Watch(ctxt context.Context, key string, withPrefix bo
 	if withPrefix {
 		options = append(options, clientv3.WithPrefix())
 	}
-	rch := client.Client.Watch(ctxt, key, options...)
+	rch := client.Watcher.Watch(ctxt, key, options...)
 
 	c := make(chan keystoreregistry.KeyValueUpdate)
 
