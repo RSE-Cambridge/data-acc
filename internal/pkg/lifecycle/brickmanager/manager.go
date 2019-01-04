@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type BrickManager interface {
@@ -62,9 +63,14 @@ func getDevices(devicesStr string) []string {
 		count = 12
 	}
 
+	devType := os.Getenv("DEVICE_TYPE")
+	if devType == "" || !strings.Contains("%d", devType) {
+		devType = DefaultDeviceAddress
+	}
+
 	var bricks []string
 	for i := 0; i < count; i++ {
-		device := fmt.Sprintf(DefaultDeviceAddress, i)
+		device := fmt.Sprintf(devType, i)
 		bricks = append(bricks, device)
 	}
 	return bricks
