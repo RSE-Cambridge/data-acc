@@ -1,9 +1,9 @@
 ---
 - set_fact:
-    osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
     mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
-    mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
     mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
+    mdts: "{{ vars[fs_name + '_mdts'] | default({}) }}"
+    osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
     client_port: "{{ vars[fs_name + '_client_port'] }}"
   tags: [ 'never', 'format_mgs', 'reformat_mgs', 'format']
 
@@ -22,10 +22,11 @@
     - mgs is defined
   tags: [ 'never', 'reformat_mgs']
 
-- name: Reformat MDT
-  command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index=0 --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ mdt }}"
+- name: Reformat MDTs
+  command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}"
+  loop: "{{ mdts|dict2items }}"
   when:
-    - mdt is defined
+    - mdts is defined
   tags: [ 'never', 'reformat_mdts', 'format']
 
 - name: Reformat OSTs
