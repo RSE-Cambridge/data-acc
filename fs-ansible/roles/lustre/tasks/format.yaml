@@ -5,7 +5,7 @@
     mdts: "{{ vars[fs_name + '_mdts'] | default({}) }}"
     osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
     client_port: "{{ vars[fs_name + '_client_port'] }}"
-    mdt_size: "{{ vars[fs_name + '_mdt_size'] | default('20GiB') }}"
+    mdt_size: "{{ vars[fs_name + '_mdt_size'] | default('10%') }}"
   tags: [ 'never', 'format_mgs', 'reformat_mgs', 'format']
 
 - name: Ensure MGS has been formatted
@@ -37,7 +37,7 @@
   tags: [ 'never', 'reformat_mdts', 'format']
 
 - name: Reformat MDTs
-  command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}1"
+  command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p1"
   loop: "{{ mdts|dict2items }}"
   when:
     - mdts is defined
@@ -57,7 +57,7 @@
   tags: [ 'never', 'reformat_mdts', 'format']
 
 - name: Reformat OSTs
-  command: "/usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}2"
+  command: "/usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p2"
   loop: "{{ osts|dict2items }}"
   when:
     - osts is defined

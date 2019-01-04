@@ -44,7 +44,7 @@
       with_items: "{{ mdts.keys() }}"
 
     - name: mount MDTs
-      command: mount -t lustre /dev/{{ item }}1 /lustre/{{ fs_name }}/MDT/{{ item }}
+      command: mount -t lustre /dev/{{ item }}p1 /lustre/{{ fs_name }}/MDT/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
@@ -65,7 +65,7 @@
       with_items: "{{ osts.keys() }}"
 
     - name: mount OSTs
-      command: mount -t lustre /dev/{{ item }}2 /lustre/{{ fs_name }}/OST/{{ item }}
+      command: mount -t lustre /dev/{{ item }}p2 /lustre/{{ fs_name }}/OST/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
