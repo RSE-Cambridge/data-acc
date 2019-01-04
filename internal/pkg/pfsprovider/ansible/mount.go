@@ -22,6 +22,14 @@ func getLnetSuffix() string {
 	return os.Getenv("DAC_LNET_SUFFIX")
 }
 
+func getMdtSize() string {
+	mdtSize := os.Getenv("DAC_MDT_SIZE")
+	if mdtSize == "" {
+		mdtSize = "20GB"
+	}
+	return mdtSize
+}
+
 func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
 	log.Println("Mount for:", volume.Name)
 	var primaryBrickHost string
