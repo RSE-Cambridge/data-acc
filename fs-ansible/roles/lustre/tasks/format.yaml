@@ -5,7 +5,7 @@
     mdts: "{{ vars[fs_name + '_mdts'] | default({}) }}"
     osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
     client_port: "{{ vars[fs_name + '_client_port'] }}"
-    mdt_size: "{{ vars[fs_name + '_mdt_size'] | default('10%') }}"
+    mdt_size: "{{ vars[fs_name + '_mdt_size'] | default('20%') }}"
   tags: [ 'never', 'format_mgs', 'reformat_mgs', 'format']
 
 - name: Ensure MGS has been formatted
@@ -22,6 +22,16 @@
   when:
     - mgs is defined
   tags: [ 'never', 'reformat_mgs']
+
+- name: Remove old MDT Partition
+  parted:
+     device: "/dev/{{ item }}"
+     number: 1
+     state: absent
+  loop: "{{ mdts.keys() }}"
+  when:
+    - mdts is defined
+  tags: [ 'never', 'reformat_mdts', 'format']
 
 - name: Add MDT Partition
   parted:
@@ -43,6 +53,16 @@
     - mdts is defined
   tags: [ 'never', 'reformat_mdts', 'format']
 
+- name: Remove old OST Partition
+  parted:
+     device: "/dev/{{ item }}"
+     number: 2
+     state: absent
+  loop: "{{ osts.keys() }}"
+  when:
+    - osts is defined
+  tags: [ 'never', 'reformat_mdts', 'format']
+
 - name: Add OST Partition
   parted:
      device: "/dev/{{ item }}"
@@ -53,7 +73,7 @@
      state: present
   loop: "{{ osts.keys() }}"
   when:
-    - mdts is defined
+    - osts is defined
   tags: [ 'never', 'reformat_mdts', 'format']
 
 - name: Reformat OSTs
