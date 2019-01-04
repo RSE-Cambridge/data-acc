@@ -261,7 +261,7 @@ func executeAnsiblePlaybook(dir string, args string) error {
 	}
 
 	var err error
-	for i := 1; i <= 5; i++ {
+	for i := 1; i <= 3; i++ {
 		cmdMount := exec.Command("mount")
 		output, _ := cmdMount.CombinedOutput()
 		log.Println("Current mounts:", string(output))
