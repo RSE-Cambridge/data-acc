@@ -75,7 +75,7 @@ func checkRequiredStrings(c CliContext, flags ...string) {
 }
 
 func (fwa *dacctlActions) DeleteBuffer(c CliContext) error {
-	checkRequiredStrings(c, "token", "job")
+	checkRequiredStrings(c, "token")
 	token := c.String("token")
 	return dacctl.DeleteBufferComponents(fwa.volumeRegistry, fwa.poolRegistry, token)
 }
@@ -151,7 +151,7 @@ func (fwa *dacctlActions) RealSize(c CliContext) error {
 }
 
 func (fwa *dacctlActions) DataIn(c CliContext) error {
-	checkRequiredStrings(c, "token", "job")
+	checkRequiredStrings(c, "token")
 	fmt.Printf("--token %s --job %s\n", c.String("token"), c.String("job"))
 
 	job, err := fwa.volumeRegistry.Job(c.String("token"))
@@ -174,7 +174,7 @@ func (fwa *dacctlActions) DataIn(c CliContext) error {
 }
 
 func (fwa *dacctlActions) Paths(c CliContext) error {
-	checkRequiredStrings(c, "token", "job", "pathfile")
+	checkRequiredStrings(c, "token", "pathfile")
 	fmt.Printf("--token %s --job %s --pathfile %s\n",
 		c.String("token"), c.String("job"), c.String("pathfile"))
 
@@ -200,7 +200,7 @@ func (fwa *dacctlActions) getVolumeLifecycleManger(volume registry.Volume) lifec
 }
 
 func (fwa *dacctlActions) PreRun(c CliContext) error {
-	checkRequiredStrings(c, "token", "job", "nodehostnamefile") // TODO: why require job if we don't use it?
+	checkRequiredStrings(c, "token", "nodehostnamefile")
 	fmt.Printf("--token %s --job %s --nodehostnamefile %s\n",
 		c.String("token"), c.String("job"), c.String("nodehostnamefile"))
 
@@ -250,7 +250,7 @@ func (fwa *dacctlActions) PreRun(c CliContext) error {
 }
 
 func (fwa *dacctlActions) PostRun(c CliContext) error {
-	checkRequiredStrings(c, "token", "job")
+	checkRequiredStrings(c, "token")
 	fmt.Printf("--token %s --job %s\n",
 		c.String("token"), c.String("job"))
 
@@ -287,7 +287,7 @@ func (fwa *dacctlActions) PostRun(c CliContext) error {
 }
 
 func (fwa *dacctlActions) DataOut(c CliContext) error {
-	checkRequiredStrings(c, "token", "job")
+	checkRequiredStrings(c, "token")
 	fmt.Printf("--token %s --job %s\n",
 		c.String("token"), c.String("job"))
 
