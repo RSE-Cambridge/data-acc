@@ -56,15 +56,14 @@ const DefaultDeviceAddress = "nvme%dn1"
 const DefaultDeviceCapacityGB = 1400
 const DefaultPoolName = "default"
 
-func getDevices(devicesStr string) []string {
+func getDevices(devicesStr string, devType string) []string {
 	// TODO: check for real devices!
 	count, err := strconv.Atoi(devicesStr)
 	if err != nil {
 		count = 12
 	}
 
-	devType := os.Getenv("DEVICE_TYPE")
-	if devType == "" || !strings.Contains("%d", devType) {
+	if devType == "" || !strings.Contains(devType, "%d") {
 		devType = DefaultDeviceAddress
 	}
 
@@ -99,7 +98,8 @@ func getBricks(devices []string, hostname string, capacityStr string, poolName s
 
 func updateBricks(poolRegistry registry.PoolRegistry, hostname string) {
 	devicesStr := os.Getenv("DEVICE_COUNT")
-	devices := getDevices(devicesStr)
+	devType := os.Getenv("DEVICE_TYPE")
+	devices := getDevices(devicesStr, devType)
 
 	capacityStr := os.Getenv("DAC_DEVICE_CAPACITY_GB")
 	poolName := os.Getenv("DAC_POOL_NAME")
