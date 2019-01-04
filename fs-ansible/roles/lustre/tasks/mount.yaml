@@ -1,15 +1,20 @@
 ---
 - set_fact:
-    osts: "{{ vars[fs_name + '_osts'] | default(omit) }}"
     mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
-    mdt: "{{ vars[fs_name + '_mdt'] | default(omit) }}"
     mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
+    mdts: "{{ vars[fs_name + '_mdts'] | default({}) }}"
+    osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
     client_port: "{{ vars[fs_name + '_client_port'] }}"
   tags: [ 'never', 'start_mgs', 'start_mdts', 'start_osts', 'create_mgs', 'create_mdt', 'create_osts', 'stop_all', 'client_mount','client_unmount', 'stop_mgs']
 
 - name: load lustre module
   command: modprobe -v lustre
   tags: [ 'never', 'start_lustre', 'mount']
+
+
+# Using ordering specified in here:
+# http://wiki.lustre.org/Starting_and_Stopping_Lustre_Services
+
 
 - name: Start MGS
   block:
@@ -33,22 +38,24 @@
   block:
     - name: Create MDT mount dir
       file:
-        path: /lustre/{{ fs_name }}/MDT/{{ mdt }}
+        path: /lustre/{{ fs_name }}/MDT/{{ item }}
         state: directory
         recurse: yes
+      with_items: "{{ mdts.keys() }}"
 
     - name: mount MDTs
-      command: mount -t lustre /dev/{{ mdt }} /lustre/{{ fs_name }}/MDT/{{ mdt }}
+      command: mount -t lustre /dev/{{ item }}p1 /lustre/{{ fs_name }}/MDT/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
+      with_items: "{{ mdts.keys() }}"
 
   when:
-    - mdt is defined
+    - mdts is defined
   tags: [ 'never', 'start_mdts', 'create_mdt']
 
 
-- name: Start OST
+- name: Start OSTs
   block:
     - name: Create OST mount dir
       file:
@@ -58,7 +65,7 @@
       with_items: "{{ osts.keys() }}"
 
     - name: mount OSTs
-      command: mount -t lustre /dev/{{ item }} /lustre/{{ fs_name }}/OST/{{ item }}
+      command: mount -t lustre /dev/{{ item }}p2 /lustre/{{ fs_name }}/OST/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
@@ -69,7 +76,7 @@
   tags: [ 'never', 'start_osts', 'create_osts']
 
 
-- name: Mount FS
+- name: mount lustre FS
   block:
     - name: ensure mount dir exists
       file:
@@ -84,7 +91,7 @@
   tags: [ 'never', 'mount_fs', 'client_mount']
 
 
-- name: umount FS
+- name: umount lustre FS
   block:
     - name: umount lustre fs
       command: "umount -l /mnt/lustre/{{ fs_name }}"
@@ -97,6 +104,24 @@
         path: "/mnt/lustre/{{ fs_name }}"
         state: absent
   tags: [ 'never', 'umount_fs', 'client_unmount']
+
+
+- name: Stop MDTs
+  block:
+    - name: umount mdts
+      command: umount /lustre/{{ fs_name }}/MDT/{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+      with_items: "{{ mdts.keys() }}"
+
+    - name: remove mdt mount dir
+      file:
+        path: /lustre/{{ fs_name }}/MDT
+        state: absent
+  when:
+    - mdts is defined
+  tags: [ 'never', 'stop_mdts', 'stop_all']
 
 
 - name: Stop OST
@@ -117,23 +142,6 @@
   tags: [ 'never', 'stop_osts', 'stop_all']
 
 
-- name: Stop MDTs
-  block:
-    - name: umount MDTs
-      command: umount /lustre/{{ fs_name }}/MDT/{{ mdt }}
-      register: command_result
-      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
-      changed_when: "command_result.rc == 0"
-
-    - name: Remove MDT mount dir
-      file:
-        path: /lustre/{{ fs_name }}/MDT
-        state: absent
-  when:
-    - mdt is defined
-  tags: [ 'never', 'stop_mdts', 'stop_all']
-
-
 - name: Stop MGS
   block:
     - name: umount MGS
@@ -152,7 +160,7 @@
 
 
 - name: umount all lustre
-  command: umount -a -t lustre
+  command: umount -a -l -t lustre
   when:
     - osts is defined
   tags: [ 'never', 'stop_alllustre']

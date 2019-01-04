@@ -7,15 +7,15 @@ import (
 )
 
 func TestGetDevices(t *testing.T) {
-	devices := getDevices("5")
+	devices := getDevices("5", "")
 	assert.Equal(t, 5, len(devices))
 	assert.Equal(t, "nvme0n1", devices[0])
 	assert.Equal(t, "nvme4n1", devices[4])
 
-	devices = getDevices("asdf")
+	devices = getDevices("asdf", "loop%d")
 	assert.Equal(t, 12, len(devices))
-	assert.Equal(t, "nvme0n1", devices[0])
-	assert.Equal(t, "nvme11n1", devices[11])
+	assert.Equal(t, "loop0", devices[0])
+	assert.Equal(t, "loop11", devices[11])
 }
 
 func TestGetBricks(t *testing.T) {

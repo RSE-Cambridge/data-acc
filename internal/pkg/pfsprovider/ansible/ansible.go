@@ -17,7 +17,7 @@ import (
 
 type HostInfo struct {
 	MGS  string         `yaml:"mgs,omitempty"`
-	MDTS string         `yaml:"mdt,omitempty"`
+	MDTS map[string]int `yaml:"mdts,omitempty,flow"`
 	OSTS map[string]int `yaml:"osts,omitempty,flow"`
 }
 
@@ -43,35 +43,28 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 		mgsDevice = "sdb"
 	}
 
-	var mdt registry.BrickAllocation
-	osts := make(map[string][]registry.BrickAllocation)
+	allocationsByHost := make(map[string][]registry.BrickAllocation)
 	for _, allocation := range brickAllocations {
-		if allocation.AllocatedIndex == 0 {
-			mdt = allocation
-			current, success := osts[allocation.Hostname]
-			if !success {
-				// ensure hostname will be iterated through below to output mdt if required
-				osts[allocation.Hostname] = current
-			}
-		} else {
-			osts[allocation.Hostname] = append(osts[allocation.Hostname], allocation)
-		}
+		allocationsByHost[allocation.Hostname] = append(allocationsByHost[allocation.Hostname], allocation)
 	}
 
 	hosts := make(map[string]HostInfo)
-	for host, allocations := range osts {
+	mgsnode := ""
+	for host, allocations := range allocationsByHost {
+		mdts := make(map[string]int)
 		osts := make(map[string]int)
 		for _, allocation := range allocations {
+			mdts[allocation.Device] = int(allocation.AllocatedIndex)
 			osts[allocation.Device] = int(allocation.AllocatedIndex)
 		}
-		hostInfo := HostInfo{OSTS: osts}
-		if mdt.Hostname == host {
-			hostInfo.MDTS = mdt.Device
+		hostInfo := HostInfo{MDTS: mdts, OSTS: osts}
+		if allocations[0].AllocatedIndex == 0 {
 			if fsType == Lustre {
-				hostInfo.MGS = mgsDevice // TODO: horrible hack!!
+				hostInfo.MGS = mgsDevice
 			} else {
-				hostInfo.MGS = mdt.Device
+				hostInfo.MGS = allocations[0].Device
 			}
+			mgsnode = host
 		}
 		hosts[host] = hostInfo
 	}
@@ -81,11 +74,13 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 			hosts[attachment.Hostname] = HostInfo{}
 		}
 	}
+
 	fsinfo := FSInfo{
 		Vars: map[string]string{
-			"mgsnode":     mdt.Hostname,
+			"mgsnode":     mgsnode,
 			"client_port": fmt.Sprintf("%d", volume.ClientPort),
 			"lnet_suffix": getLnetSuffix(),
+			"mdt_size":    getMdtSize(),
 		},
 		Hosts: hosts,
 	}
@@ -98,10 +93,11 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 	}
 	strOut := string(output)
 	strOut = strings.Replace(strOut, " mgs:", fmt.Sprintf(" %s_mgs:", fsname), -1)
-	strOut = strings.Replace(strOut, " mdt:", fmt.Sprintf(" %s_mdt:", fsname), -1)
+	strOut = strings.Replace(strOut, " mdts:", fmt.Sprintf(" %s_mdts:", fsname), -1)
 	strOut = strings.Replace(strOut, " osts:", fmt.Sprintf(" %s_osts:", fsname), -1)
 	strOut = strings.Replace(strOut, " mgsnode:", fmt.Sprintf(" %s_mgsnode:", fsname), -1)
 	strOut = strings.Replace(strOut, " client_port:", fmt.Sprintf(" %s_client_port:", fsname), -1)
+	strOut = strings.Replace(strOut, " mdt_size:", fmt.Sprintf(" %s_mdt_size:", fsname), -1)
 
 	hostGroup := os.Getenv("DAC_HOST_GROUP")
 	if hostGroup == "" {

@@ -128,7 +128,7 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	mockPoolReg := mocks.NewMockPoolRegistry(mockCtrl)
 	mockVolReg := mocks.NewMockVolumeRegistry(mockCtrl)
 	mockDisk := mocks.NewMockDisk(mockCtrl)
-	mockCtxt := &mockCliContext{capacity: 2}
+	mockCtxt := &mockCliContext{capacity: 300}
 	actions := NewDacctlActions(mockPoolReg, mockVolReg, mockDisk)
 
 	mockDisk.EXPECT().Lines("jobfile").DoAndReturn(func(string) ([]string, error) {

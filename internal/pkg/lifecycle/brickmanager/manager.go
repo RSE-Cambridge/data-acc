@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type BrickManager interface {
@@ -55,16 +56,20 @@ const DefaultDeviceAddress = "nvme%dn1"
 const DefaultDeviceCapacityGB = 1400
 const DefaultPoolName = "default"
 
-func getDevices(devicesStr string) []string {
+func getDevices(devicesStr string, devType string) []string {
 	// TODO: check for real devices!
 	count, err := strconv.Atoi(devicesStr)
 	if err != nil {
 		count = 12
 	}
 
+	if devType == "" || !strings.Contains(devType, "%d") {
+		devType = DefaultDeviceAddress
+	}
+
 	var bricks []string
 	for i := 0; i < count; i++ {
-		device := fmt.Sprintf(DefaultDeviceAddress, i)
+		device := fmt.Sprintf(devType, i)
 		bricks = append(bricks, device)
 	}
 	return bricks
@@ -93,7 +98,8 @@ func getBricks(devices []string, hostname string, capacityStr string, poolName s
 
 func updateBricks(poolRegistry registry.PoolRegistry, hostname string) {
 	devicesStr := os.Getenv("DEVICE_COUNT")
-	devices := getDevices(devicesStr)
+	devType := os.Getenv("DEVICE_TYPE")
+	devices := getDevices(devicesStr, devType)
 
 	capacityStr := os.Getenv("DAC_DEVICE_CAPACITY_GB")
 	poolName := os.Getenv("DAC_POOL_NAME")
