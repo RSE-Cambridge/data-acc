@@ -162,6 +162,13 @@ var FSType = ansible.Lustre
 var plugin = ansible.GetPlugin(FSType)
 
 func provisionNewVolume(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
+	// TODO: error handling!!
+	mutex, err := volumeRegistry.VolumeOperationMutex(volume.Name)
+	mutex.Lock(context.TODO())
+	defer mutex.Unlock(context.TODO())
+	// Note: this blocks all delete requests till we are finished, which stops nasty races in ansible
+
+	// TODO: fetch fresh copy of volume now we have aquired the lock? Ensure no delete has been processed already
 	if volume.State != registry.Registered {
 		log.Println("Volume in bad initial state:", volume.Name)
 		return
@@ -191,7 +198,14 @@ func provisionNewVolume(poolRegistry registry.PoolRegistry, volumeRegistry regis
 }
 
 func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	err := plugin.VolumeProvider().CopyDataIn(volume)
+	// TODO: error handling!!
+	mutex, err := volumeRegistry.VolumeOperationMutex(volume.Name)
+	mutex.Lock(context.TODO())
+	defer mutex.Unlock(context.TODO())
+
+	// TODO: check volume is not deleted already, etc.
+
+	err = plugin.VolumeProvider().CopyDataIn(volume)
 	if err != nil {
 		handleError(volumeRegistry, volume, err)
 		return
@@ -203,6 +217,10 @@ func processDataIn(volumeRegistry registry.VolumeRegistry, volume registry.Volum
 
 func processAttach(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume,
 	attachments []registry.Attachment) {
+	// TODO: error handling!!
+	mutex, err := volumeRegistry.VolumeOperationMutex(volume.Name)
+	mutex.Lock(context.TODO())
+	defer mutex.Unlock(context.TODO())
 
 	bricks, err := poolRegistry.GetAllocationsForVolume(volume.Name)
 	if err != nil {
@@ -231,6 +249,11 @@ func processAttach(poolRegistry registry.PoolRegistry, volumeRegistry registry.V
 func processDetach(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume,
 	attachments []registry.Attachment) {
 
+	// TODO: error handling!!
+	mutex, err := volumeRegistry.VolumeOperationMutex(volume.Name)
+	mutex.Lock(context.TODO())
+	defer mutex.Unlock(context.TODO())
+
 	bricks, err := poolRegistry.GetAllocationsForVolume(volume.Name)
 	if err != nil {
 		handleError(volumeRegistry, volume, err)
@@ -254,7 +277,12 @@ func processDetach(poolRegistry registry.PoolRegistry, volumeRegistry registry.V
 }
 
 func processDataOut(volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
-	err := plugin.VolumeProvider().CopyDataOut(volume)
+	// TODO: error handling!!
+	mutex, err := volumeRegistry.VolumeOperationMutex(volume.Name)
+	mutex.Lock(context.TODO())
+	defer mutex.Unlock(context.TODO())
+
+	err = plugin.VolumeProvider().CopyDataOut(volume)
 	if err != nil {
 		handleError(volumeRegistry, volume, err)
 	}
@@ -264,6 +292,11 @@ func processDataOut(volumeRegistry registry.VolumeRegistry, volume registry.Volu
 }
 
 func processDelete(poolRegistry registry.PoolRegistry, volumeRegistry registry.VolumeRegistry, volume registry.Volume) {
+	// TODO: error handling!!
+	mutex, err := volumeRegistry.VolumeOperationMutex(volume.Name)
+	mutex.Lock(context.TODO())
+	defer mutex.Unlock(context.TODO())
+
 	bricks, err := poolRegistry.GetAllocationsForVolume(volume.Name)
 	if err != nil {
 		handleError(volumeRegistry, volume, err)

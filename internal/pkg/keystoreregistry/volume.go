@@ -228,6 +228,10 @@ func (volRegistry *volumeRegistry) updateVolume(name registry.VolumeName,
 	return volRegistry.keystore.Update([]KeyValueVersion{keyValue})
 }
 
+func (volRegistry *volumeRegistry) VolumeOperationMutex(name registry.VolumeName) (registry.Mutex, error) {
+	return volRegistry.keystore.NewMutex(fmt.Sprintf("operation_%s", name))
+}
+
 func (volRegistry *volumeRegistry) UpdateState(name registry.VolumeName, state registry.VolumeState) error {
 	updateState := func(volume *registry.Volume) error {
 		stateDifference := state - volume.State
