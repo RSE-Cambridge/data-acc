@@ -87,10 +87,10 @@ type mounter struct {
 	FSType FSType
 }
 
-func (mounter *mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	return mount(mounter.FSType, volume, brickAllocations)
+func (mounter *mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
+	return mount(mounter.FSType, volume, brickAllocations, attachments)
 }
 
-func (mounter *mounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	return umount(mounter.FSType, volume, brickAllocations)
+func (mounter *mounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
+	return umount(mounter.FSType, volume, brickAllocations, attachments)
 }

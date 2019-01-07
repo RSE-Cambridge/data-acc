@@ -44,12 +44,12 @@ func (*volumeProvider) CopyDataOut(volume registry.Volume) error {
 
 type mounter struct{}
 
-func (*mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+func (*mounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
 	log.Println("Mount for:", volume.Name)
 	return nil
 }
 
-func (*mounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+func (*mounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
 	log.Println("Umount for:", volume.Name)
 	return nil
 }

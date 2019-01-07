@@ -30,7 +30,7 @@ func getMdtSize() string {
 	return mdtSize
 }
 
-func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
 	log.Println("Mount for:", volume.Name)
 	var primaryBrickHost string
 	for _, allocation := range brickAllocations {
@@ -52,7 +52,7 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 		executeAnsibleMount(fsType, volume, brickAllocations)
 	}
 
-	for _, attachment := range volume.Attachments {
+	for _, attachment := range attachments {
 		if attachment.State != registry.RequestAttach {
 			log.Printf("Skipping volume %s attach: %+v", volume.Name, attachment)
 			continue
@@ -118,10 +118,10 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 	return nil
 }
 
-func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
+func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
 	log.Println("Umount for:", volume.Name)
 
-	for _, attachment := range volume.Attachments {
+	for _, attachment := range attachments {
 		if attachment.State != registry.RequestDetach {
 			log.Printf("Skipping volume %s detach for: %+v", volume.Name, attachment)
 			continue
