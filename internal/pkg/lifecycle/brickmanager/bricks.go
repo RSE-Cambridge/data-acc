@@ -227,7 +227,7 @@ func processAttach(poolRegistry registry.PoolRegistry, volumeRegistry registry.V
 		handleError(volumeRegistry, volume, err)
 		return
 	}
-	err = plugin.Mounter().Mount(volume, bricks) // TODO pass down specific attachments?
+	err = plugin.Mounter().Mount(volume, bricks, attachments) // TODO pass down specific attachments?
 	if err != nil {
 		handleError(volumeRegistry, volume, err)
 		return
@@ -260,7 +260,7 @@ func processDetach(poolRegistry registry.PoolRegistry, volumeRegistry registry.V
 		return
 	}
 
-	err = plugin.Mounter().Unmount(volume, bricks) // TODO pass down specific attachments?
+	err = plugin.Mounter().Unmount(volume, bricks, attachments) // TODO pass down specific attachments?
 	if err != nil {
 		// TODO: update specific attachment into an error state?
 		handleError(volumeRegistry, volume, err)

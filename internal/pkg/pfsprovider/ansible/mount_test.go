@@ -97,33 +97,34 @@ func Test_Mount(t *testing.T) {
 	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
+	attachments := []registry.Attachment{
+		{Hostname: "client1", Job: "job1", State: registry.RequestAttach},
+		{Hostname: "client2", Job: "job1", State: registry.RequestAttach},
+		{Hostname: "client3", Job: "job3", State: registry.Attached},
+		{Hostname: "client3", Job: "job3", State: registry.RequestDetach},
+		{Hostname: "client3", Job: "job3", State: registry.Detached},
+		{Hostname: "client2", Job: "job2", State: registry.RequestAttach},
+	}
 	volume := registry.Volume{
 		Name: "asdf", JobName: "asdf",
 		AttachGlobalNamespace:  true,
 		AttachPrivateNamespace: true,
 		AttachAsSwapBytes:      1024 * 1024, // 1 MiB
-		Attachments: []registry.Attachment{
-			{Hostname: "client1", Job: "job1", State: registry.RequestAttach},
-			{Hostname: "client2", Job: "job1", State: registry.RequestAttach},
-			{Hostname: "client3", Job: "job3", State: registry.Attached},
-			{Hostname: "client3", Job: "job3", State: registry.RequestDetach},
-			{Hostname: "client3", Job: "job3", State: registry.Detached},
-			{Hostname: "client2", Job: "job2", State: registry.RequestAttach},
-		},
-		ClientPort: 42,
-		Owner:      1001,
-		Group:      1001,
+		Attachments:            attachments,
+		ClientPort:             42,
+		Owner:                  1001,
+		Group:                  1001,
 	}
 
 	assert.PanicsWithValue(t,
 		"failed to find primary brick for volume: asdf",
-		func() { mount(Lustre, volume, nil) })
+		func() { mount(Lustre, volume, nil, nil) })
 
 	bricks := []registry.BrickAllocation{
 		{Hostname: "host1"},
 		{Hostname: "host2"},
 	}
-	err := mount(Lustre, volume, bricks)
+	err := mount(Lustre, volume, bricks, attachments)
 	assert.Nil(t, err)
 	assert.Equal(t, 53, fake.calls)
 
@@ -162,28 +163,29 @@ func Test_Umount(t *testing.T) {
 	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
+	attachments := []registry.Attachment{
+		{Hostname: "client1", Job: "job4", State: registry.RequestDetach},
+		{Hostname: "client2", Job: "job4", State: registry.RequestDetach},
+		{Hostname: "client3", Job: "job3", State: registry.Attached},
+		{Hostname: "client3", Job: "job3", State: registry.RequestAttach},
+		{Hostname: "client3", Job: "job3", State: registry.Detached},
+		{Hostname: "client2", Job: "job1", State: registry.RequestDetach},
+	}
 	volume := registry.Volume{
 		Name: "asdf", JobName: "asdf",
 		AttachGlobalNamespace:  true,
 		AttachPrivateNamespace: true,
 		AttachAsSwapBytes:      10000,
-		Attachments: []registry.Attachment{
-			{Hostname: "client1", Job: "job4", State: registry.RequestDetach},
-			{Hostname: "client2", Job: "job4", State: registry.RequestDetach},
-			{Hostname: "client3", Job: "job3", State: registry.Attached},
-			{Hostname: "client3", Job: "job3", State: registry.RequestAttach},
-			{Hostname: "client3", Job: "job3", State: registry.Detached},
-			{Hostname: "client2", Job: "job1", State: registry.RequestDetach},
-		},
-		ClientPort: 42,
-		Owner:      1001,
-		Group:      1001,
+		Attachments:            attachments,
+		ClientPort:             42,
+		Owner:                  1001,
+		Group:                  1001,
 	}
 	bricks := []registry.BrickAllocation{
 		{Hostname: "host1"},
 		{Hostname: "host2"},
 	}
-	err := umount(Lustre, volume, bricks)
+	err := umount(Lustre, volume, bricks, attachments)
 	assert.Nil(t, err)
 	assert.Equal(t, 20, fake.calls)
 
@@ -207,24 +209,25 @@ func Test_Umount_multi(t *testing.T) {
 	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
+	attachments := []registry.Attachment{
+		{Hostname: "client1", Job: "job1", State: registry.RequestDetach},
+	}
 	volume := registry.Volume{
 		MultiJob: true,
 		Name:     "asdf", JobName: "asdf",
 		AttachGlobalNamespace:  true,
 		AttachPrivateNamespace: true,
 		AttachAsSwapBytes:      10000,
-		Attachments: []registry.Attachment{
-			{Hostname: "client1", Job: "job1", State: registry.RequestDetach},
-		},
-		ClientPort: 42,
-		Owner:      1001,
-		Group:      1001,
+		Attachments:            attachments,
+		ClientPort:             42,
+		Owner:                  1001,
+		Group:                  1001,
 	}
 	bricks := []registry.BrickAllocation{
 		{Hostname: "host1"},
 		{Hostname: "host2"},
 	}
-	err := umount(Lustre, volume, bricks)
+	err := umount(Lustre, volume, bricks, attachments)
 	assert.Nil(t, err)
 	assert.Equal(t, 3, fake.calls)
 
@@ -238,25 +241,26 @@ func Test_Mount_multi(t *testing.T) {
 	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
+	attachments := []registry.Attachment{
+		{Hostname: "client1", Job: "job1", State: registry.RequestAttach},
+	}
 	volume := registry.Volume{
 		MultiJob: true,
 		Name:     "asdf", JobName: "asdf",
 		AttachGlobalNamespace:  true,
 		AttachPrivateNamespace: true,
 		AttachAsSwapBytes:      10000,
-		Attachments: []registry.Attachment{
-			{Hostname: "client1", Job: "job1", State: registry.RequestAttach},
-		},
-		ClientPort: 42,
-		Owner:      1001,
-		Group:      1001,
-		UUID:       "medkDfdg",
+		Attachments:            attachments,
+		ClientPort:             42,
+		Owner:                  1001,
+		Group:                  1001,
+		UUID:                   "medkDfdg",
 	}
 	bricks := []registry.BrickAllocation{
 		{Hostname: "host1"},
 		{Hostname: "host2"},
 	}
-	err := mount(Lustre, volume, bricks)
+	err := mount(Lustre, volume, bricks, attachments)
 	assert.Nil(t, err)
 	assert.Equal(t, 5, fake.calls)
 

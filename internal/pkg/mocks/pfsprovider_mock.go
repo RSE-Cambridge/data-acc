@@ -153,25 +153,25 @@ func (m *MockMounter) EXPECT() *MockMounterMockRecorder {
 }
 
 // Mount mocks base method
-func (m *MockMounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	ret := m.ctrl.Call(m, "Mount", volume, brickAllocations)
+func (m *MockMounter) Mount(volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
+	ret := m.ctrl.Call(m, "Mount", volume, brickAllocations, attachments)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Mount indicates an expected call of Mount
-func (mr *MockMounterMockRecorder) Mount(volume, brickAllocations interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mount", reflect.TypeOf((*MockMounter)(nil).Mount), volume, brickAllocations)
+func (mr *MockMounterMockRecorder) Mount(volume, brickAllocations, attachments interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mount", reflect.TypeOf((*MockMounter)(nil).Mount), volume, brickAllocations, attachments)
 }
 
 // Unmount mocks base method
-func (m *MockMounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	ret := m.ctrl.Call(m, "Unmount", volume, brickAllocations)
+func (m *MockMounter) Unmount(volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
+	ret := m.ctrl.Call(m, "Unmount", volume, brickAllocations, attachments)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Unmount indicates an expected call of Unmount
-func (mr *MockMounterMockRecorder) Unmount(volume, brickAllocations interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unmount", reflect.TypeOf((*MockMounter)(nil).Unmount), volume, brickAllocations)
+func (mr *MockMounterMockRecorder) Unmount(volume, brickAllocations, attachments interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unmount", reflect.TypeOf((*MockMounter)(nil).Unmount), volume, brickAllocations, attachments)
 }
