@@ -133,10 +133,10 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 			swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?
 			loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)                     // TODO share?
 			if err := swapOff(attachment.Hostname, loopback); err != nil {
-				return err
+				log.Printf("Warn: failed to swap off %+v", attachment)
 			}
 			if err := detachLoopback(attachment.Hostname, loopback); err != nil {
-				return err
+				log.Printf("Warn: failed to detach loopback %+v", attachment)
 			}
 			if err := removeSubtree(attachment.Hostname, swapFile); err != nil {
 				return err
