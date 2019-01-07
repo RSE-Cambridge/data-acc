@@ -217,3 +217,63 @@ func (m *MockVolumeRegistry) GetVolumeChanges(ctx context.Context, volume regist
 func (mr *MockVolumeRegistryMockRecorder) GetVolumeChanges(ctx, volume interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVolumeChanges", reflect.TypeOf((*MockVolumeRegistry)(nil).GetVolumeChanges), ctx, volume)
 }
+
+// VolumeOperationMutex mocks base method
+func (m *MockVolumeRegistry) VolumeOperationMutex(volumeName registry.VolumeName) (registry.Mutex, error) {
+	ret := m.ctrl.Call(m, "VolumeOperationMutex", volumeName)
+	ret0, _ := ret[0].(registry.Mutex)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// VolumeOperationMutex indicates an expected call of VolumeOperationMutex
+func (mr *MockVolumeRegistryMockRecorder) VolumeOperationMutex(volumeName interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VolumeOperationMutex", reflect.TypeOf((*MockVolumeRegistry)(nil).VolumeOperationMutex), volumeName)
+}
+
+// MockMutex is a mock of Mutex interface
+type MockMutex struct {
+	ctrl     *gomock.Controller
+	recorder *MockMutexMockRecorder
+}
+
+// MockMutexMockRecorder is the mock recorder for MockMutex
+type MockMutexMockRecorder struct {
+	mock *MockMutex
+}
+
+// NewMockMutex creates a new mock instance
+func NewMockMutex(ctrl *gomock.Controller) *MockMutex {
+	mock := &MockMutex{ctrl: ctrl}
+	mock.recorder = &MockMutexMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockMutex) EXPECT() *MockMutexMockRecorder {
+	return m.recorder
+}
+
+// Lock mocks base method
+func (m *MockMutex) Lock(ctx context.Context) error {
+	ret := m.ctrl.Call(m, "Lock", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Lock indicates an expected call of Lock
+func (mr *MockMutexMockRecorder) Lock(ctx interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lock", reflect.TypeOf((*MockMutex)(nil).Lock), ctx)
+}
+
+// Unlock mocks base method
+func (m *MockMutex) Unlock(ctx context.Context) error {
+	ret := m.ctrl.Call(m, "Unlock", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Unlock indicates an expected call of Unlock
+func (mr *MockMutexMockRecorder) Unlock(ctx interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unlock", reflect.TypeOf((*MockMutex)(nil).Unlock), ctx)
+}

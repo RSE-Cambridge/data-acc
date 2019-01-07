@@ -59,6 +59,14 @@ type VolumeRegistry interface {
 	//
 	// To stop watching cancel or timeout the context, this will close the channel.
 	GetVolumeChanges(ctx context.Context, volume Volume) VolumeChangeChan
+
+	// Get a new mutex associated with the specified key
+	VolumeOperationMutex(volumeName VolumeName) (Mutex, error)
+}
+
+type Mutex interface {
+	Lock(ctx context.Context) error
+	Unlock(ctx context.Context) error
 }
 
 type VolumeChangeChan <-chan VolumeChange
