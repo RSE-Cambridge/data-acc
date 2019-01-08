@@ -44,11 +44,6 @@ type Keystore interface {
 	// Get all keys for a given prefix.
 	Get(key string) (KeyValueVersion, error)
 
-	// Watch given key
-	//
-	// When callback returns true, stop watch the key
-	WatchKey(ctxt context.Context, key string, onUpdate func(old *KeyValueVersion, new *KeyValueVersion))
-
 	// Get a channel containing all KeyValueUpdate events
 	//
 	// Use the context to control if you watch forever, or if you choose to cancel when a key
