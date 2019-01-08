@@ -111,13 +111,6 @@ func testKeepAlive(keystore keystoreregistry.Keystore) {
 func TestEtcdKeystore(keystore keystoreregistry.Keystore) {
 	log.Println("Testing etcdkeystore...")
 
-	keystore.WatchPrefix("ke",
-		func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion) {
-			log.Println("Watch spotted an update:")
-			log.Println(" new:", new)
-			log.Println(" old:", old)
-		})
-
 	testAddValues(keystore)
 	testGet(keystore)
 	testUpdate(keystore)

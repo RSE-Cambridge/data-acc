@@ -44,14 +44,6 @@ type Keystore interface {
 	// Get all keys for a given prefix.
 	Get(key string) (KeyValueVersion, error)
 
-	// Get callback on all changes related to the given prefix.
-	//
-	// When a key is created for the first time, old is an empty value,
-	// and new.CreateRevision == new.ModRevision
-	// This starts watching from the current version, rather than replaying old events
-	// Returns the revision that the watch is starting on
-	WatchPrefix(prefix string, onUpdate func(old *KeyValueVersion, new *KeyValueVersion))
-
 	// Watch given key
 	//
 	// When callback returns true, stop watch the key

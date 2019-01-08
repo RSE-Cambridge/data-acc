@@ -205,24 +205,6 @@ func (client *etcKeystore) Get(key string) (keystoreregistry.KeyValueVersion, er
 	return *getKeyValueVersion(response.Kvs[0]), nil
 }
 
-func (client *etcKeystore) WatchPrefix(prefix string,
-	onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
-	rch := client.Client.Watch(context.Background(), prefix, clientv3.WithPrefix(), clientv3.WithPrevKV())
-	go func() {
-		for wresp := range rch {
-			for _, ev := range wresp.Events {
-				new := getKeyValueVersion(ev.Kv)
-				if new != nil && new.CreateRevision == 0 {
-					// show deleted by returning nil
-					new = nil
-				}
-				old := getKeyValueVersion(ev.PrevKv)
-				onUpdate(old, new)
-			}
-		}
-	}()
-}
-
 func (client *etcKeystore) WatchKey(ctxt context.Context, key string,
 	onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
 	rch := client.Client.Watch(ctxt, key, clientv3.WithPrevKV())
