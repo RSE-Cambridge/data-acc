@@ -238,20 +238,15 @@ func (client *etcKeystore) KeepAliveKey(key string) error {
 
 	counter := 9
 	go func() {
-		for {
-			ka := <-ch
-			if ka == nil {
-				log.Panicf("Unable to refresh key: %s", key)
-				break
+		for range ch {
+			if counter >= 9 {
+				counter = 0
+				log.Println("Still refreshing key:", key)
 			} else {
-				if counter >= 9 {
-					counter = 0
-					log.Println("Still refreshing key:", key)
-				} else {
-					counter++
-				}
+				counter++
 			}
 		}
+		log.Panicf("Unable to refresh key: %s", key)
 	}()
 	return nil
 }
