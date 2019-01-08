@@ -195,7 +195,7 @@ func (mr *MockVolumeRegistryMockRecorder) WaitForState(name, state interface{}) 
 }
 
 // WaitForCondition mocks base method
-func (m *MockVolumeRegistry) WaitForCondition(volumeName registry.VolumeName, condition func(*registry.Volume, *registry.Volume) bool) error {
+func (m *MockVolumeRegistry) WaitForCondition(volumeName registry.VolumeName, condition func(*registry.VolumeChange) bool) error {
 	ret := m.ctrl.Call(m, "WaitForCondition", volumeName, condition)
 	ret0, _ := ret[0].(error)
 	return ret0

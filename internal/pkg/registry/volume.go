@@ -52,8 +52,9 @@ type VolumeRegistry interface {
 	WaitForState(name VolumeName, state VolumeState) error
 
 	// Wait for a given condition
-	// TODO: remove wait for state?
-	WaitForCondition(volumeName VolumeName, condition func(old *Volume, new *Volume) bool) error
+	//
+	// Blocks until condition returns true, or returns error if things timeout
+	WaitForCondition(volumeName VolumeName, condition func(event *VolumeChange) bool) error
 
 	// Gets all changes that happen to the given volume
 	//
