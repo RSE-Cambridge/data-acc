@@ -280,7 +280,14 @@ func (*run) Execute(hostname string, cmdStr string) error {
 
 	cmd := exec.Command("ssh", "-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null", hostname, "sudo", cmdStr)
+
+	timer := time.AfterFunc(time.Minute*5, func() {
+		log.Println("Time up, waited more than 5 mins to complete.")
+		cmd.Process.Kill()
+	})
+
 	output, err := cmd.CombinedOutput()
+	timer.Stop()
 
 	if err == nil {
 		log.Println("Completed remote ssh run:", cmdStr)
