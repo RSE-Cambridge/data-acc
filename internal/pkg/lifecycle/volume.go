@@ -124,8 +124,8 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string, jobName string) error {
 
 	// TODO: should share code with Unmount!!
 	var volumeInErrorState bool
-	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(old *registry.Volume, new *registry.Volume) bool {
-		if new.State == registry.Error {
+	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(event *registry.VolumeChange) bool {
+		if event.New.State == registry.Error {
 			volumeInErrorState = true
 			return true
 		}
@@ -133,7 +133,7 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string, jobName string) error {
 		for _, host := range hosts {
 
 			var isAttached bool
-			for _, attachment := range new.Attachments {
+			for _, attachment := range event.New.Attachments {
 				if attachment.Job == jobName && attachment.Hostname == host {
 					if attachment.State == registry.Attached {
 						isAttached = true
@@ -195,14 +195,14 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 
 	// TODO: must share way more code and do more tests on this logic!!
 	var volumeInErrorState error
-	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(olqqd *registry.Volume, new *registry.Volume) bool {
-		if new.State == registry.Error {
-			volumeInErrorState = fmt.Errorf("volume %s now in error state", new.Name)
+	err := vlm.volumeRegistry.WaitForCondition(vlm.volume.Name, func(event *registry.VolumeChange) bool {
+		if event.New.State == registry.Error {
+			volumeInErrorState = fmt.Errorf("volume %s now in error state", event.New.Name)
 			return true
 		}
 		allDettached := false
 		for _, host := range hosts {
-			newAttachment, ok := new.FindAttachment(host, jobName)
+			newAttachment, ok := event.New.FindAttachment(host, jobName)
 			if !ok {
 				// TODO: debug log or something?
 				volumeInErrorState = fmt.Errorf("unable to find attachment for host: %s", host)

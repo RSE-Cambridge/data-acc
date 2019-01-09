@@ -22,30 +22,29 @@ func TestVolumeLifecycleManager_Mount(t *testing.T) {
 		{Hostname: "host1", State: registry.RequestAttach, Job: "job1"},
 		{Hostname: "host2", State: registry.RequestAttach, Job: "job1"},
 	})
-	fakeWait := func(volumeName registry.VolumeName, condition func(old *registry.Volume, new *registry.Volume) bool) error {
-		old := &registry.Volume{}
-		new := &registry.Volume{}
-		assert.False(t, condition(old, new))
-		new.Attachments = []registry.Attachment{
+	fakeWait := func(volumeName registry.VolumeName, condition func(event *registry.VolumeChange) bool) error {
+		event := &registry.VolumeChange{New: &registry.Volume{}}
+		assert.False(t, condition(event))
+		event.New.Attachments = []registry.Attachment{
 			{Hostname: "host1", Job: "job2", State: registry.Detached},
 			{Hostname: "host1", Job: "job1", State: registry.Attached},
 			{Hostname: "host2", Job: "job1", State: registry.Attached},
 		}
-		assert.True(t, condition(old, new))
+		assert.True(t, condition(event))
 
-		new.Attachments = []registry.Attachment{
+		event.New.Attachments = []registry.Attachment{
 			{Hostname: "host1", Job: "job2", State: registry.AttachmentError},
 			{Hostname: "host1", Job: "job1", State: registry.Detached},
 			{Hostname: "host2", Job: "job1", State: registry.Attached},
 		}
-		assert.False(t, condition(old, new))
+		assert.False(t, condition(event))
 
-		new.Attachments = []registry.Attachment{
+		event.New.Attachments = []registry.Attachment{
 			{Hostname: "host1", Job: "job2", State: registry.Attached},
 			{Hostname: "host1", Job: "job1", State: registry.AttachmentError},
 			{Hostname: "host2", Job: "job1", State: registry.Attached},
 		}
-		assert.True(t, condition(old, new))
+		assert.True(t, condition(event))
 		return nil
 	}
 	mockVolReg.EXPECT().WaitForCondition(volume.Name, gomock.Any()).DoAndReturn(fakeWait)
@@ -73,29 +72,28 @@ func TestVolumeLifecycleManager_Unmount(t *testing.T) {
 		{Hostname: "host1", State: registry.RequestDetach, Job: "job1"},
 		{Hostname: "host2", State: registry.RequestDetach, Job: "job1"},
 	})
-	fakeWait := func(volumeName registry.VolumeName, condition func(old *registry.Volume, new *registry.Volume) bool) error {
-		old := &registry.Volume{}
-		new := &registry.Volume{}
-		new.Attachments = []registry.Attachment{
+	fakeWait := func(volumeName registry.VolumeName, condition func(event *registry.VolumeChange) bool) error {
+		event := &registry.VolumeChange{New: &registry.Volume{}}
+		event.New.Attachments = []registry.Attachment{
 			{Hostname: "host1", Job: "job2"},
 			{Hostname: "host1", Job: "job1", State: registry.Detached},
 			{Hostname: "host2", Job: "job1", State: registry.Detached},
 		}
-		assert.True(t, condition(old, new))
+		assert.True(t, condition(event))
 
-		new.Attachments = []registry.Attachment{
+		event.New.Attachments = []registry.Attachment{
 			{Hostname: "host1", Job: "job2", State: registry.AttachmentError},
 			{Hostname: "host1", Job: "job1", State: registry.Detached},
 			{Hostname: "host2", Job: "job1", State: registry.Attached},
 		}
-		assert.False(t, condition(old, new))
+		assert.False(t, condition(event))
 
-		new.Attachments = []registry.Attachment{
+		event.New.Attachments = []registry.Attachment{
 			{Hostname: "host1", Job: "job2"},
 			{Hostname: "host1", Job: "job1", State: registry.AttachmentError},
 			{Hostname: "host2", Job: "job1", State: registry.Detached},
 		}
-		assert.True(t, condition(old, new))
+		assert.True(t, condition(event))
 		return nil
 	}
 	mockVolReg.EXPECT().WaitForCondition(volume.Name, gomock.Any()).DoAndReturn(fakeWait)

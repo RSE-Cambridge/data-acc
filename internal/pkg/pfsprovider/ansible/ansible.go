@@ -262,13 +262,15 @@ func executeAnsiblePlaybook(dir string, args string) error {
 
 	var err error
 	for i := 1; i <= 3; i++ {
-		cmdMount := exec.Command("mount")
-		output, _ := cmdMount.CombinedOutput()
-		log.Println("Current mounts:", string(output))
-
 		log.Println("Attempt", i, "of ansible:", cmdStr)
 		cmd := exec.Command("bash", "-c", cmdStr)
+
+		timer := time.AfterFunc(time.Minute*5, func() {
+			log.Println("Time up, waited more than 5 mins to complete.")
+			cmd.Process.Kill()
+		})
 		output, currentErr := cmd.CombinedOutput()
+		timer.Stop()
 
 		if currentErr == nil {
 			log.Println("Completed ansible run:", cmdStr)

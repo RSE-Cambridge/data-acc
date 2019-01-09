@@ -9,7 +9,6 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"log"
 	"math/rand"
-	"sync"
 	"time"
 )
 
@@ -352,8 +351,11 @@ func (volRegistry *volumeRegistry) GetVolumeChanges(ctx context.Context, volume 
 
 func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, state registry.VolumeState) error {
 	log.Println("Start waiting for volume", volumeName, "to reach state", state)
-	err := volRegistry.WaitForCondition(volumeName, func(old *registry.Volume, new *registry.Volume) bool {
-		return new.State == state || new.State == registry.Error
+	err := volRegistry.WaitForCondition(volumeName, func(event *registry.VolumeChange) bool {
+		if event.New == nil {
+			log.Panicf("unable to process event %+v", event)
+		}
+		return event.New.State == state || event.New.State == registry.Error
 	})
 	log.Println("Stopped waiting for volume", volumeName, "to reach state", state, err)
 	if err != nil {
@@ -368,62 +370,36 @@ func (volRegistry *volumeRegistry) WaitForState(volumeName registry.VolumeName, 
 	return err
 }
 
+// TODO: maybe have environment variable to tune this wait time?
+var defaultTimeout = time.Minute * 10
+
 func (volRegistry *volumeRegistry) WaitForCondition(volumeName registry.VolumeName,
-	condition func(old *registry.Volume, new *registry.Volume) bool) error {
+	condition func(event *registry.VolumeChange) bool) error {
 
-	var waitGroup sync.WaitGroup
-	waitGroup.Add(1)
-	ctxt, cancelFunc := context.WithTimeout(context.Background(), time.Minute*10)
-	// TODO should we always need to call cancel? or is timeout enough?
-
-	err := fmt.Errorf("error waiting for volume %s to meet supplied condition", volumeName)
-
-	var finished bool
-	volRegistry.keystore.WatchKey(ctxt, getVolumeKey(string(volumeName)),
-		func(old *KeyValueVersion, new *KeyValueVersion) {
-			if old == nil && new == nil {
-				// TODO: attempt to signal error on timeout, should move to channel!!
-				cancelFunc()
-				if !finished {
-					// at the end we always get called with nil, nil
-					// but sometimes we will have already found the condition
-					waitGroup.Done()
-				}
-				return
-			}
-			oldVolume := &registry.Volume{}
-			newVolume := &registry.Volume{}
-			if old != nil {
-				volumeFromKeyValue(*old, oldVolume)
-			}
-			if new != nil {
-				volumeFromKeyValue(*new, newVolume)
-			}
-
-			if !finished && condition(oldVolume, newVolume) {
-				finished = true
-				log.Printf("condition met with new volume: %s", newVolume)
-				err = nil
-				cancelFunc()
-				waitGroup.Done()
-			}
-		})
-
-	// check we have not already hit the condition
 	volume, err := volRegistry.Volume(volumeName)
 	if err != nil {
-		// NOTE this forces the volume to existing before you wait, seems OK
 		return err
 	}
-	log.Printf("About to wait for condition on volume: %s", volume)
-	if condition(&volume, &volume) {
-		log.Println("Condition already met, bail early.")
-		cancelFunc()
-		return nil
-	}
-	log.Println("Condition not met, starting to wait.")
 
-	// TODO do we get stuck in a forever loop here when we hit the timeout above?
-	waitGroup.Wait()
-	return err
+	ctxt, cancelFunc := context.WithTimeout(context.Background(), defaultTimeout)
+	events := volRegistry.GetVolumeChanges(ctxt, volume)
+	defer cancelFunc()
+
+	log.Printf("About to wait for condition on volume: %+v", volume)
+
+	for event := range events {
+		if event.Err != nil {
+			return event.Err
+		}
+		if event.IsDelete {
+			return fmt.Errorf("stopped waiting as volume %s is deleted", volume.Name)
+		}
+
+		conditionMet := condition(&event)
+		if conditionMet {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("stopped waiting for volume %s to meet supplied condition", volume.Name)
 }
