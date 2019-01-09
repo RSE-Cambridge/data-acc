@@ -208,7 +208,8 @@ func fixUpOwnership(hostname string, owner uint, group uint, directory string) e
 func umountLustre(hostname string, directory string) error {
 	// only unmount if already mounted
 	if err := runner.Execute(hostname, fmt.Sprintf("grep %s /etc/mtab", directory)); err == nil {
-		if err := runner.Execute(hostname, fmt.Sprintf("umount -l %s", directory)); err != nil {
+		// Don't add -l so we can spot when this fails
+		if err := runner.Execute(hostname, fmt.Sprintf("umount %s", directory)); err != nil {
 			return err
 		}
 	} else {
@@ -281,7 +282,7 @@ func (*run) Execute(hostname string, cmdStr string) error {
 	cmd := exec.Command("ssh", "-o", "StrictHostKeyChecking=no",
 		"-o", "UserKnownHostsFile=/dev/null", hostname, "sudo", cmdStr)
 
-	timer := time.AfterFunc(time.Minute*5, func() {
+	timer := time.AfterFunc(time.Minute, func() {
 		log.Println("Time up, waited more than 5 mins to complete.")
 		cmd.Process.Kill()
 	})
