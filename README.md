@@ -155,4 +155,5 @@ https://circleci.com/docs/2.0/local-cli/
 This work is licanced under the Apache 2. Please see Licance file for more infomrmation.
 
 Copyright © 2018-2019 Alasdair James King University of Cambridge
+
 Copyright © 2018-2019 John Garbutt StackHPC Ltd
