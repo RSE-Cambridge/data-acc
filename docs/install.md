@@ -60,6 +60,14 @@ ETCDCTL_ENDPOINTS=https://10.43.21.71:2379 ETCD_CLIENT_DEBUG=1
 ETCDCTL_CERT_FILE=/dac/dacd/cert/dac-e-24.data.cluster.pem
 ETCDCTL_KEY_FILE=/dac/dacd/cert/dac-e-24.data.cluster-key.pem
 ETCDCTL_CA_FILE=/dac/dacd/cert/ca.pem
+DAC_LNET_SUFFIX="-opa@o2ib1"
+DEVICE_COUNT=12
+DAC_DEVICE_CAPACITY_GB=1400
+DAC_POOL_NAME=default
+DAC_MGS_DEV=sdb
+DAC_HOST_GROUP=dac-prod
+DAC_SKIP_ANSIBLE=false
+DAC_MDT_SIZE="20g"
 ```
 
 **slurmctld**
