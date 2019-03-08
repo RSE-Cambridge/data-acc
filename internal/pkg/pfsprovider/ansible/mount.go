@@ -25,7 +25,7 @@ func getLnetSuffix() string {
 func getMdtSize() string {
 	mdtSize := os.Getenv("DAC_MDT_SIZE")
 	if mdtSize == "" {
-		mdtSize = "20GB"
+		mdtSize = "20G"
 	}
 	return mdtSize
 }
