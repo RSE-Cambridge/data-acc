@@ -199,10 +199,8 @@ func TestPlugin_GetInventory_MaxMDT(t *testing.T) {
           abcdefgh_mdts: {nvme1n1: 23}
           abcdefgh_osts: {nvme1n1: 23}
         dac25:
-          abcdefgh_mdts: {nvme1n1: 24}
           abcdefgh_osts: {nvme1n1: 24}
         dac26:
-          abcdefgh_mdts: {nvme1n1: 25}
           abcdefgh_osts: {nvme1n1: 25}
       vars:
         abcdefgh_client_port: "10002"
