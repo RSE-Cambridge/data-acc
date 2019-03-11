@@ -50,7 +50,7 @@ func Test_mountLustre(t *testing.T) {
 	assert.Equal(t, "host", fake.hostnames[0])
 	assert.Equal(t, "host", fake.hostnames[1])
 	assert.Equal(t, "grep /dac/job1_job /etc/mtab", fake.cmdStrs[0])
-	assert.Equal(t, "mount -t lustre mgt-opa@o2ib1:/fs /dac/job1_job", fake.cmdStrs[1])
+	assert.Equal(t, "mount -t lustre -o flock,nodev,nosuid mgt-opa@o2ib1:/fs /dac/job1_job", fake.cmdStrs[1])
 
 	fake = &fakeRunner{err: errors.New("expected")}
 	runner = fake
@@ -58,7 +58,7 @@ func Test_mountLustre(t *testing.T) {
 	assert.Equal(t, "expected", err.Error())
 	assert.Equal(t, 2, fake.calls)
 	assert.Equal(t, "grep asdf /etc/mtab", fake.cmdStrs[0])
-	assert.Equal(t, "mount -t lustre mgt:/fs asdf", fake.cmdStrs[1])
+	assert.Equal(t, "mount -t lustre -o flock,nodev,nosuid mgt:/fs asdf", fake.cmdStrs[1])
 }
 
 func Test_createSwap(t *testing.T) {
