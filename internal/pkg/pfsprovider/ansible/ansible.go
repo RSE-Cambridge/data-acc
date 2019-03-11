@@ -35,6 +35,7 @@ type Wrapper struct {
 }
 
 var DefaultHostGroup = "dac-prod"
+var MaxMDTs uint = 24
 
 func getInventory(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
 	// NOTE: only used by lustre
@@ -54,10 +55,13 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 		mdts := make(map[string]int)
 		osts := make(map[string]int)
 		for _, allocation := range allocations {
-			mdts[allocation.Device] = int(allocation.AllocatedIndex)
+			if allocation.AllocatedIndex < MaxMDTs {
+				mdts[allocation.Device] = int(allocation.AllocatedIndex)
+			}
 			osts[allocation.Device] = int(allocation.AllocatedIndex)
 		}
 		hostInfo := HostInfo{MDTS: mdts, OSTS: osts}
+
 		if allocations[0].AllocatedIndex == 0 {
 			if fsType == Lustre {
 				hostInfo.MGS = mgsDevice
