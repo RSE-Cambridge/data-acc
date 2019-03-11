@@ -241,7 +241,7 @@ func mountLustre(hostname string, lnetSuffix string, mgtHost string, fsname stri
 	// First check if we are mounted already
 	if err := runner.Execute(hostname, fmt.Sprintf("grep %s /etc/mtab", directory)); err != nil {
 		if err := runner.Execute(hostname, fmt.Sprintf(
-			"mount -t lustre %s%s:/%s %s",
+			"mount -t lustre -o flock,nodev,nosuid %s%s:/%s %s",
 			mgtHost, lnetSuffix, fsname, directory)); err != nil {
 			return err
 		}
