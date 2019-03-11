@@ -84,7 +84,7 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 			"mgsnode":     mgsnode,
 			"client_port": fmt.Sprintf("%d", volume.ClientPort),
 			"lnet_suffix": getLnetSuffix(),
-			"mdt_size":    getMdtSize(),
+			"mdt_size":    fmt.Sprintf("%dGB", getMdtSize()),
 		},
 		Hosts: hosts,
 	}

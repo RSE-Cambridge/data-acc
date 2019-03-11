@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"time"
 )
 
@@ -22,12 +23,12 @@ func getLnetSuffix() string {
 	return os.Getenv("DAC_LNET_SUFFIX")
 }
 
-func getMdtSize() string {
-	mdtSize := os.Getenv("DAC_MDT_SIZE")
-	if mdtSize == "" {
-		mdtSize = "20GB"
+func getMdtSize() uint {
+	mdtSize, err := strconv.ParseUint(os.Getenv("DAC_MDT_SIZE_GB"), 10, 32)
+	if err != nil ||  mdtSize == 0 {
+		mdtSize = 20
 	}
-	return mdtSize
+	return uint(mdtSize)
 }
 
 func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
