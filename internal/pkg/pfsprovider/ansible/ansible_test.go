@@ -39,7 +39,7 @@ func TestPlugin_GetInventory(t *testing.T) {
       vars:
         abcdefgh_client_port: "10002"
         lnet_suffix: ""
-        abcdefgh_mdt_size: 20GB
+        abcdefgh_mdt_size: 20g
         abcdefgh_mgsnode: dac1
 `
 	assert.Equal(t, expected, result)
@@ -66,7 +66,7 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
       vars:
         abcdefgh_client_port: "10002"
         lnet_suffix: ""
-        abcdefgh_mdt_size: 20GB
+        abcdefgh_mdt_size: 20g
         abcdefgh_mgsnode: dac1
 `
 	assert.Equal(t, expected, result)
@@ -205,7 +205,7 @@ func TestPlugin_GetInventory_MaxMDT(t *testing.T) {
       vars:
         abcdefgh_client_port: "10002"
         lnet_suffix: ""
-        abcdefgh_mdt_size: 20GB
+        abcdefgh_mdt_size: 20g
         abcdefgh_mgsnode: dac1
 `
 	assert.Equal(t, expected, result)
