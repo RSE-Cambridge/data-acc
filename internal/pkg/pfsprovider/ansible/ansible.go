@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -35,13 +36,18 @@ type Wrapper struct {
 }
 
 var DefaultHostGroup = "dac-prod"
-var MaxMDTs uint = 24
+var DefaultMaxMDTs uint = 24
 
 func getInventory(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
 	// NOTE: only used by lustre
 	mgsDevice := os.Getenv("DAC_MGS_DEV")
 	if mgsDevice == "" {
 		mgsDevice = "sdb"
+	}
+	maxMDTs := DefaultMaxMDTs
+	maxMDTsConf, err := strconv.ParseUint(os.Getenv("DAC_MAX_MDT_COUNT"), 10, 32)
+	if err == nil && maxMDTsConf > 0 {
+		maxMDTs = uint(maxMDTsConf)
 	}
 
 	allocationsByHost := make(map[string][]registry.BrickAllocation)
@@ -55,7 +61,7 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 		mdts := make(map[string]int)
 		osts := make(map[string]int)
 		for _, allocation := range allocations {
-			if allocation.AllocatedIndex < MaxMDTs {
+			if allocation.AllocatedIndex < maxMDTs {
 				mdts[allocation.Device] = int(allocation.AllocatedIndex)
 			}
 			osts[allocation.Device] = int(allocation.AllocatedIndex)
@@ -84,7 +90,7 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 			"mgsnode":     mgsnode,
 			"client_port": fmt.Sprintf("%d", volume.ClientPort),
 			"lnet_suffix": getLnetSuffix(),
-			"mdt_size":    fmt.Sprintf("%dg", getMdtSize()),
+			"mdt_size":    fmt.Sprintf("%dm", getMdtSizeMB()),
 		},
 		Hosts: hosts,
 	}
