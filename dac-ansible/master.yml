@@ -145,6 +145,10 @@
       yum:
         name: "lustre-{{ lustre_release }}"
         state: present
+    - name: Install LVM
+      yum:
+        name: "lvm2"
+        state: present
 
 - hosts: dac_workers:slurm_workers
   become: True
