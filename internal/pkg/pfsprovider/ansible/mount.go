@@ -23,12 +23,16 @@ func getLnetSuffix() string {
 	return os.Getenv("DAC_LNET_SUFFIX")
 }
 
-func getMdtSize() uint {
-	mdtSize, err := strconv.ParseUint(os.Getenv("DAC_MDT_SIZE_GB"), 10, 32)
-	if err != nil ||  mdtSize == 0 {
-		mdtSize = 20
+func getMdtSizeMB() uint {
+	mdtSizeGB, err := strconv.ParseUint(os.Getenv("DAC_MDT_SIZE_GB"), 10, 32)
+	if err == nil && mdtSizeGB > 0 {
+		return uint(mdtSizeGB * 1024)
 	}
-	return uint(mdtSize)
+	mdtSizeMB, err := strconv.ParseUint(os.Getenv("DAC_MDT_SIZE_MB"), 10, 32)
+	if err == nil && mdtSizeMB > 0 {
+		return uint(mdtSizeMB)
+	}
+	return uint(20 * 1024)
 }
 
 func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
