@@ -16,6 +16,10 @@
       state: present
     with_items:
       - "{{ ansible_play_hosts }}"
+  - name: Update all packages
+    yum:
+      name: "*"
+      state: latest
 
 - hosts: etcd_master[0]
   roles:
@@ -108,7 +112,7 @@
 - hosts: dac_workers:slurm_workers
   become: True
   vars:
-      lustre_release: "2.10.5"
+      lustre_release: "2.12.0"
   tasks:
     - name: enable lustre server repo
       yum_repository:
