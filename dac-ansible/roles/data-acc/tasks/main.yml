@@ -3,15 +3,15 @@
     - name: download data_acc
       become: yes
       become_user: root
-      copy:
-        src: ~/{{data_acc_tgz}}
-        dest: /tmp/{{data_acc_tgz}}
-#      get_url:
-#        url: '{{data_acc_tgz_url}}'
+#      copy:
+#        src: ~/{{data_acc_tgz}}
 #        dest: /tmp/{{data_acc_tgz}}
-#        checksum: '{{data_acc_checksum}}'
-#        timeout: '{{data_acc_download_timeout_seconds}}'
-#        mode: 0644
+      get_url:
+        url: '{{data_acc_tgz_url}}'
+        dest: /tmp/{{data_acc_tgz}}
+        checksum: '{{data_acc_checksum}}'
+        timeout: '{{data_acc_download_timeout_seconds}}'
+        mode: 0644
     - name: create install dir
       become: yes
       become_user: root
