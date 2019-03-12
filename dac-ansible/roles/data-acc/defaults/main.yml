@@ -11,8 +11,8 @@ data_acc_launch: True
 data_acc_name: 'data-acc-{{data_acc_version}}'
 data_acc_tgz: '{{data_acc_name}}.tgz'
 #data_acc_tgz_url: '{{data_acc_mirror}}/{{data_acc_version}}/{{data_acc_tgz}}'
-data_acc_tgz_url: 'https://github.com/RSE-Cambridge/data-acc/releases/download/v0.17/data-acc-v0.17.tgz'
-data_acc_checksum: 'sha256:26671f456294a7d22839a58f3bf979617b084d604d3e931aec998d87abd136f6'
+data_acc_tgz_url: 'https://github.com/RSE-Cambridge/data-acc/releases/download/v0.18/data-acc-v0.18.tgz'
+data_acc_checksum: 'sha256:beed4ab5ee72f68b244c4e5fd3d32584c7c5d0efcf165c7077ba7d468c2b8efb'
 
 data_acc_user: dac
 data_acc_group: dac
