@@ -33,7 +33,6 @@
     - mgs is defined
   tags: [ 'never', 'start_mgs', 'create_mgs']
 
-
 - name: Start MDTs
   block:
     - name: Create MDT mount dir
@@ -49,7 +48,12 @@
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
       with_items: "{{ mdts.keys() }}"
+  when:
+    - mdts is defined
+  tags: [ 'never', 'start_mdts', 'create_mdt']
 
+- name: DNE2
+  block:
     - name: Enable DNE2 remote dir
       command: "lctl set_param mdt.*.enable_remote_dir=1"
       register: command_result
@@ -58,9 +62,8 @@
     - name: Enable DNE2 all users
       command: "lctl set_param mdt.*.enable_remote_dir_gid=-1"
   when:
-    - mdts is defined
-  tags: [ 'never', 'start_mdts', 'create_mdt']
-
+    - mgs is defined
+  tags: [ 'never', 'start_mgs', 'create_mgs']
 
 - name: Start OSTs
   block:
