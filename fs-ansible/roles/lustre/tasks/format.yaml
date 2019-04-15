@@ -31,7 +31,7 @@
         vg: "dac-{{ item }}"
         state: absent
         force: yes
-      loop: "{{ mdts.keys() }}"
+      loop: "{{ mdts.keys() | list }}"
 
     - name: Remove VG
       lvg:
@@ -39,14 +39,13 @@
         pvs: "/dev/{{ item }}"
         force: yes
         state: absent
-      loop: "{{ mdts.keys() }}"
+      loop: "{{ mdts.keys() | list }}"
 
     - name: dmsetup remove lvm
       command: "dmsetup remove dac--{{ item }}-mdt"
       register: command_result
       failed_when: "command_result.rc != 0 and ('device' not in command_result.stderr)"
-      loop: "{{ mdts.keys() }}"
-
+      loop: "{{ mdts.keys() | list }}"
 
   when:
     - mdts is defined
@@ -57,7 +56,7 @@
     vg: "dac-{{ item }}"
     pvs: "/dev/{{ item }}"
     state: present
-  loop: "{{ mdts.keys() }}"
+  loop: "{{ mdts.keys() | list }}"
   when:
     - mdts is defined
   tags: [ 'never', 'reformat_mdts', 'format']
@@ -68,7 +67,7 @@
     vg: "dac-{{ item }}"
     size: "{{ mdt_size }}"
     state: present
-  loop: "{{ mdts.keys() }}"
+  loop: "{{ mdts.keys() | list }}"
   when:
     - mdts is defined
   tags: [ 'never', 'reformat_mdts', 'format']
@@ -89,7 +88,7 @@
         vg: "dac-{{ item }}"
         state: absent
         force: yes
-      loop: "{{ osts.keys() }}"
+      loop: "{{ osts.keys() | list }}"
       when:
         - mdts is defined
 
@@ -98,7 +97,7 @@
         vg: "dac-{{ item }}"
         pvs: "/dev/{{ item }}"
         state: absent
-      loop: "{{ osts.keys() }}"
+      loop: "{{ osts.keys() | list }}"
       when:
         - osts is defined
         - mdts is not defined
@@ -107,7 +106,7 @@
       command: "dmsetup remove dac--{{ item }}-ost"
       register: command_result
       failed_when: "command_result.rc != 0 and ('device' not in command_result.stderr)"
-      loop: "{{ mdts.keys() }}"
+      loop: "{{ mdts.keys() | list }}"
   tags: [ 'never', 'reformat_osts', 'format']
 
 - name: Add VG
@@ -115,7 +114,7 @@
     vg: "dac-{{ item }}"
     pvs: "/dev/{{ item }}"
     state: present
-  loop: "{{ osts.keys() }}"
+  loop: "{{ osts.keys() | list }}"
   when:
     - osts is defined
   tags: [ 'never', 'reformat_osts', 'format']
@@ -126,7 +125,7 @@
     vg: "dac-{{ item }}"
     size: +100%FREE
     state: present
-  loop: "{{ osts.keys() }}"
+  loop: "{{ osts.keys() | list }}"
   when:
     - osts is defined
   tags: [ 'never', 'reformat_osts', 'format']
