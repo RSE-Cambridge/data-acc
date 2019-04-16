@@ -55,17 +55,30 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 		allocationsByHost[allocation.Hostname] = append(allocationsByHost[allocation.Hostname], allocation)
 	}
 
+	// If we have more brick allocations than maxMDTs
+	// assign at most one mdt per host.
+	// While this may give us less MDTs than max MDTs,
+	// but it helps spread MDTs across network connections
+	oneMdtPerHost := len(brickAllocations) > int(maxMDTs)
+
 	hosts := make(map[string]HostInfo)
 	mgsnode := ""
 	for host, allocations := range allocationsByHost {
-		mdts := make(map[string]int)
 		osts := make(map[string]int)
 		for _, allocation := range allocations {
-			if allocation.AllocatedIndex < maxMDTs {
-				mdts[allocation.Device] = int(allocation.AllocatedIndex)
-			}
 			osts[allocation.Device] = int(allocation.AllocatedIndex)
 		}
+
+		mdts := make(map[string]int)
+		if oneMdtPerHost {
+			allocation := allocations[0]
+			mdts[allocation.Device] = int(allocation.AllocatedIndex)
+		} else {
+			for _, allocation := range allocations {
+				mdts[allocation.Device] = int(allocation.AllocatedIndex)
+			}
+		}
+
 		hostInfo := HostInfo{MDTS: mdts, OSTS: osts}
 
 		if allocations[0].AllocatedIndex == 0 {
@@ -78,12 +91,15 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 		}
 		hosts[host] = hostInfo
 	}
+
+	// for beegfs, mount clients via ansible
 	if fsType == BeegFS {
 		// TODO: this can't work now, as we need to also pass the job name
 		for _, attachment := range volume.Attachments {
-			hosts[attachment.Hostname] = HostInfo{}
+		  hosts[attachment.Hostname] = HostInfo{}
 		}
 	}
+
 
 	fsinfo := FSInfo{
 		Vars: map[string]string{

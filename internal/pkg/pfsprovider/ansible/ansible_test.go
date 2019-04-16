@@ -50,6 +50,7 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
 	brickAllocations := []registry.BrickAllocation{
 		{Hostname: "dac1", Device: "nvme1n1", AllocatedIndex: 0},
 		{Hostname: "dac2", Device: "nvme2n1", AllocatedIndex: 1},
+		{Hostname: "dac2", Device: "nvme3n1", AllocatedIndex: 2},
 	}
 	result := getInventory(Lustre, volume, brickAllocations)
 	expected := `dac-prod:
@@ -61,8 +62,8 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
           abcdefgh_mdts: {nvme1n1: 0}
           abcdefgh_osts: {nvme1n1: 0}
         dac2:
-          abcdefgh_mdts: {nvme2n1: 1}
-          abcdefgh_osts: {nvme2n1: 1}
+          abcdefgh_mdts: {nvme2n1: 1, nvme3n1: 2}
+          abcdefgh_osts: {nvme2n1: 1, nvme3n1: 2}
       vars:
         abcdefgh_client_port: "10002"
         lnet_suffix: ""
@@ -132,42 +133,43 @@ func TestPlugin_GetInventory_MaxMDT(t *testing.T) {
         cpu2: {}
         dac1:
           abcdefgh_mgs: nvme1n1
-          abcdefgh_mdts: {nvme1n1: 0, nvme2n1: 1}
+          abcdefgh_mdts: {nvme1n1: 0}
           abcdefgh_osts: {nvme1n1: 0, nvme2n1: 1}
         dac3:
-          abcdefgh_mdts: {nvme1n1: 2, nvme2n1: 3}
+          abcdefgh_mdts: {nvme1n1: 2}
           abcdefgh_osts: {nvme1n1: 2, nvme2n1: 3}
         dac5:
-          abcdefgh_mdts: {nvme1n1: 4, nvme2n1: 5}
+          abcdefgh_mdts: {nvme1n1: 4}
           abcdefgh_osts: {nvme1n1: 4, nvme2n1: 5}
         dac7:
-          abcdefgh_mdts: {nvme1n1: 6, nvme2n1: 7}
+          abcdefgh_mdts: {nvme1n1: 6}
           abcdefgh_osts: {nvme1n1: 6, nvme2n1: 7}
         dac9:
-          abcdefgh_mdts: {nvme1n1: 8, nvme2n1: 9}
+          abcdefgh_mdts: {nvme1n1: 8}
           abcdefgh_osts: {nvme1n1: 8, nvme2n1: 9}
         dac11:
-          abcdefgh_mdts: {nvme1n1: 10, nvme2n1: 11}
+          abcdefgh_mdts: {nvme1n1: 10}
           abcdefgh_osts: {nvme1n1: 10, nvme2n1: 11}
         dac13:
-          abcdefgh_mdts: {nvme1n1: 12, nvme2n1: 13}
+          abcdefgh_mdts: {nvme1n1: 12}
           abcdefgh_osts: {nvme1n1: 12, nvme2n1: 13}
         dac15:
-          abcdefgh_mdts: {nvme1n1: 14, nvme2n1: 15}
+          abcdefgh_mdts: {nvme1n1: 14}
           abcdefgh_osts: {nvme1n1: 14, nvme2n1: 15}
         dac17:
-          abcdefgh_mdts: {nvme1n1: 16, nvme2n1: 17}
+          abcdefgh_mdts: {nvme1n1: 16}
           abcdefgh_osts: {nvme1n1: 16, nvme2n1: 17}
         dac19:
-          abcdefgh_mdts: {nvme1n1: 18, nvme2n1: 19}
+          abcdefgh_mdts: {nvme1n1: 18}
           abcdefgh_osts: {nvme1n1: 18, nvme2n1: 19}
         dac21:
-          abcdefgh_mdts: {nvme1n1: 20, nvme2n1: 21}
+          abcdefgh_mdts: {nvme1n1: 20}
           abcdefgh_osts: {nvme1n1: 20, nvme2n1: 21}
         dac23:
-          abcdefgh_mdts: {nvme1n1: 22, nvme2n1: 23}
+          abcdefgh_mdts: {nvme1n1: 22}
           abcdefgh_osts: {nvme1n1: 22, nvme2n1: 23}
         dac25:
+          abcdefgh_mdts: {nvme1n1: 24}
           abcdefgh_osts: {nvme1n1: 24, nvme2n1: 25}
       vars:
         abcdefgh_client_port: "10002"
