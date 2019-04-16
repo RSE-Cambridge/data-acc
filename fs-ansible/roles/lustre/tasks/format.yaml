@@ -6,7 +6,7 @@
     osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
     client_port: "{{ vars[fs_name + '_client_port'] }}"
     mdt_size: "{{ vars[fs_name + '_mdt_size'] | default('10%') }}"
-  tags: [ 'never', 'format_mgs', 'reformat_mgs', 'format']
+  tags: [ 'never', 'format_mgs', 'reformat_mgs', 'format', 'clean']
 
 - name: Ensure MGS has been formatted
   command: /usr/sbin/mkfs.lustre --mgs /dev/{{ mgs }}
@@ -67,7 +67,7 @@
       when:
         - osts is defined
 
-  tags: [ 'never', 'reformat_mdts', 'reformat_osts', 'format']
+  tags: [ 'never', 'reformat_mdts', 'reformat_osts', 'format', 'clean']
 
 
 - name: Ensure MDTs setup
