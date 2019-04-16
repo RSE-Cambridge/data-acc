@@ -40,14 +40,14 @@
         path: /lustre/{{ fs_name }}/MDT/{{ item }}
         state: directory
         recurse: yes
-      with_items: "{{ mdts.keys() }}"
+      with_items: "{{ mdts.keys() | list }}"
 
     - name: mount MDTs
       command: mount -t lustre /dev/mapper/dac--{{ item }}-mdt /lustre/{{ fs_name }}/MDT/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
-      with_items: "{{ mdts.keys() }}"
+      with_items: "{{ mdts.keys() | list }}"
   when:
     - mdts is defined
   tags: [ 'never', 'start_mdts', 'create_mdt']
@@ -72,14 +72,14 @@
         path: /lustre/{{ fs_name }}/OST/{{ item }}
         state: directory
         recurse: yes
-      with_items: "{{ osts.keys() }}"
+      with_items: "{{ osts.keys() | list }}"
 
     - name: mount OSTs
       command: mount -t lustre /dev/mapper/dac--{{ item }}-ost /lustre/{{ fs_name }}/OST/{{ item }}
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
-      with_items: "{{ osts.keys() }}"
+      with_items: "{{ osts.keys() | list }}"
 
   when:
     - osts is defined
@@ -123,7 +123,7 @@
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
-      with_items: "{{ mdts.keys() }}"
+      with_items: "{{ mdts.keys() | list }}"
 
     - name: remove mdt mount dir
       file:
@@ -141,7 +141,7 @@
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
-      with_items: "{{ osts.keys() }}"
+      with_items: "{{ osts.keys() | list }}"
 
     - name: Remove OST mount dir
       file:
