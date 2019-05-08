@@ -5,7 +5,23 @@
   become: no
 
   tasks:
-    - name: Set client max_rpcs_in_flight
-      command: "sudo lctl set_param mdc.{{ fs_name }}*.max_rpcs_in_flight={{ max_rpcs_in_flight }}"
+    - name: Set client MDT max_rpcs_in_flight
+      command: "sudo lctl set_param mdc.{{ lustre_fs_name }}*.max_rpcs_in_flight={{ lustre_max_rpcs_in_flight }}"
       tags:
         - 'client'
+
+    - name: Set client MDT max_mod_rpcs_in_flight
+      command: "sudo lctl set_param mdc.{{ lustre_fs_name }}*.max_mod_rpcs_in_flight={{ lustre_max_mod_rpcs_in_flight }}"
+      tags:
+        - 'client'
+
+- name: 'Server tunings'
+  hosts: fs1
+  gather_facts: no
+  become: yes
+
+  tasks:
+    - name: Set server MDT max_mod_rpcs_per_client
+      command: "echo {{ lustre_mdt_max_mod_rpcs_per_client }} > /sys/module/mdt/parameters/max_mod_rpcs_per_client"
+      tags:
+        - 'server'
