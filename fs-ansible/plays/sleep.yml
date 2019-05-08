@@ -1,0 +1,18 @@
+---
+- name: 'Sleep'
+  hosts: fs1
+  gather_facts: no
+  become: no
+
+  tasks:
+    - name: 'Test block'
+      block:
+        - name: 'sleep1'
+          command: /bin/sleep 10
+
+        - name: 'sleep2'
+          command: /bin/sleep 10
+
+      with_items: "{{ osts.keys() | list }}"
+      async: 45
+      poll: 5

@@ -1,0 +1,11 @@
+---
+- name: 'Client tunings'
+  hosts: fs1-clients
+  gather_facts: no
+  become: no
+
+  tasks:
+    - name: Set client max_rpcs_in_flight
+      command: "sudo lctl set_param mdc.{{ fs_name }}*.max_rpcs_in_flight={{ max_rpcs_in_flight }}"
+      tags:
+        - 'client'

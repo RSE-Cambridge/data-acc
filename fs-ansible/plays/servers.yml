@@ -1,0 +1,9 @@
+---
+- name: 'Install Lustre Filesystem on DAC servers'
+  hosts: fs1
+  any_errors_fatal: true
+  gather_facts: no
+  become: yes
+
+  roles:
+    - role: lustre
