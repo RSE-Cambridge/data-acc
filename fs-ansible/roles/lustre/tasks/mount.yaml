@@ -79,6 +79,8 @@
       register: command_result
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
+      async: 60
+      poll: 10
       with_items: "{{ osts.keys() | list }}"
 
   when:
@@ -141,6 +143,8 @@
       register: command_result
       failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
+      async: 120
+      poll: 5
       with_items: "{{ osts.keys() | list }}"
 
     - name: Remove OST mount dir
