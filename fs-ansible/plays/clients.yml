@@ -13,6 +13,7 @@
     - name: Check for current mount
       command: "grep {{ lustre_fs_name }} /proc/mounts"
       register: currently_mounted_result
+      failed_when: currently_mounted_result.rc >= 2
       ignore_errors: yes
       tags:
         - 'mount'
