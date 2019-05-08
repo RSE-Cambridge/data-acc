@@ -18,7 +18,7 @@
         - 'mount'
 
     - name: Mount DAC Filesystem
-      command: "sudo mount -t lustre -o nosuid,nodev,flock,lazystatfs {{ lustre_mgs_host }}@{{ lustre_lnet_suffix }}:/{{ lustre_fs_name }} /dac/{{ lustre_fs_name }}"
+      command: "sudo mount -t lustre -o nosuid,nodev,flock,lazystatfs {{ lustre_mgs_host }}@{{ lustre_lnet_network }}:/{{ lustre_fs_name }} /dac/{{ lustre_fs_name }}"
       when: currently_mounted_result.rc != 0
       async: 15
       poll: 5
