@@ -6,19 +6,19 @@
 
   tasks:
     - name: Create mount point
-      command: "sudo mkdir -p /dac/{{ fs_name }}"
+      command: "sudo mkdir -p /dac/{{ lustre_fs_name }}"
       tags:
         - 'mount'
 
     - name: Check for current mount
-      command: "grep {{ fs_name }} /proc/mounts"
+      command: "grep {{ lustre_fs_name }} /proc/mounts"
       register: currently_mounted_result
       ignore_errors: yes
       tags:
         - 'mount'
 
     - name: Mount DAC Filesystem
-      command: "sudo mount -t lustre -o nosuid,nodev,flock,lazystatfs {{ vars[fs_name + '_mgsnode'] }}{{ lnet_suffix }}:/{{ fs_name }} /dac/{{ fs_name }}"
+      command: "sudo mount -t lustre -o nosuid,nodev,flock,lazystatfs {{ lustre_mgs_host'] }}@{{ lustre_lnet_suffix }}:/{{ lustre_fs_name }} /dac/{{ lustre_fs_name }}"
       when: currently_mounted_result.rc != 0
       async: 15
       poll: 5
@@ -32,12 +32,12 @@
 
   tasks:
     - name: Create benchmark directory
-      command: "sudo mkdir -p /dac/{{ fs_name }}/mjr208"
+      command: "sudo mkdir -p /dac/{{ lustre_fs_name }}/mjr208"
       run_once: true
       tags:
         - 'mount'
     - name: Chown directory
-      command: "sudo chown mjr208:sysadmin /dac/{{ fs_name }}/mjr208"
+      command: "sudo chown mjr208:sysadmin /dac/{{ lustre_fs_name }}/mjr208"
       run_once: true
       tags:
         - 'mount'
@@ -49,14 +49,14 @@
 
   tasks:
     - name: Check for current mount
-      command: "grep {{ fs_name }} /proc/mounts"
+      command: "grep {{ lustre_fs_name }} /proc/mounts"
       register: currently_mounted_result
       failed_when: currently_mounted_result.rc >= 2
       tags:
         - 'unmount'
 
     - name: Un-Mount DAC Filesystem
-      command: "sudo umount -l /dac/{{ fs_name }}"
+      command: "sudo umount -l /dac/{{ lustre_fs_name }}"
       register: unmount_cmd
       failed_when: unmount_cmd.rc not in [0, 32]
       when: currently_mounted_result.rc == 0
@@ -69,7 +69,7 @@
         var: unmount_cmd
 
     - name: Delete mount point
-      command: "sudo rmdir /dac/{{ fs_name }}"
+      command: "sudo rmdir /dac/{{ lustre_fs_name }}"
       register: rmdir_cmd
       failed_when: rmdir_cmd.rc not in [0, 1]
       tags:
