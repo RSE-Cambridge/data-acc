@@ -22,6 +22,6 @@
 
   tasks:
     - name: Set server MDT max_mod_rpcs_per_client
-      command: "echo {{ lustre_mdt_max_mod_rpcs_per_client }} > /sys/module/mdt/parameters/max_mod_rpcs_per_client"
+      shell: "echo {{ lustre_mdt_max_mod_rpcs_per_client }} > /sys/module/mdt/parameters/max_mod_rpcs_per_client"
       tags:
         - 'server'
