@@ -21,6 +21,18 @@
   become: yes
 
   tasks:
+    - name: Enable DNE2 remote dir
+      command: "lctl set_param mdt.*.enable_remote_dir=1"
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('lctl' not in command_result.stderr)"
+      tags:
+        - 'server'
+
+    - name: Enable DNE2 all users
+      command: "lctl set_param mdt.*.enable_remote_dir_gid=-1"
+      tags:
+        - 'server'
+
     - name: Set server MDT max_mod_rpcs_per_client
       shell: "echo {{ lustre_mdt_max_mod_rpcs_per_client }} > /sys/module/mdt/parameters/max_mod_rpcs_per_client"
       tags:
