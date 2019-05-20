@@ -73,7 +73,7 @@
   tags: [ 'never', 'reformat_mdts', 'format']
 
 - name: Reformat MDTs
-  command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} --mkfsoptions=\"-E lazy_itable_init=0,lazy_journal_init=0 -O ^quota,^has_journal,large_dir,ea_inode\" /dev/mapper/dac--{{ item.key }}-mdt"
+  command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} --mkfsoptions=\"-E lazy_itable_init=0,lazy_journal_init=0 -O ^quota,large_dir,ea_inode\" /dev/mapper/dac--{{ item.key }}-mdt"
   async: 60
   poll: 10
   loop: "{{ mdts|dict2items }}"
@@ -133,7 +133,7 @@
   tags: [ 'never', 'reformat_osts', 'format']
 
 - name: Reformat OSTs
-  command: "/usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} --mkfsoptions=\"-E lazy_itable_init=0,lazy_journal_init=0 -O ^quota,^has_journal\" /dev/mapper/dac--{{ item.key }}-ost"
+  command: "/usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} --mkfsoptions=\"-E lazy_itable_init=0,lazy_journal_init=0 -O ^quota\" /dev/mapper/dac--{{ item.key }}-ost"
   async: 60
   poll: 10
   loop: "{{ osts|dict2items }}"
