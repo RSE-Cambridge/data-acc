@@ -15,6 +15,21 @@
       tags:
         - 'client'
 
+    - name: Set client 16M RPCs
+      command: "sudo lctl set_param osc.{{ lustre_fs_name }}-OST*.max_pages_per_rpc=16M"
+      tags:
+        - 'client'
+
+    - name: Set client max_read_ahead_mb
+      command: "sudo lctl set_param llite.{{ lustre_fs_name }}*.max_read_ahead_mb={{ lustre_max_read_ahead_mb }}"
+      tags:
+        - 'client'
+
+    - name: Set client LNET checksums
+      command: "sudo lctl set_param osc.{{ lustre_fs_name }}*.checksums={{ lustre_checksums }}"
+      tags:
+        - 'client'
+
 - name: 'Server tunings'
   hosts: fs1
   gather_facts: no
@@ -37,3 +52,9 @@
       shell: "echo {{ lustre_mdt_max_mod_rpcs_per_client }} > /sys/module/mdt/parameters/max_mod_rpcs_per_client"
       tags:
         - 'server'
+
+    - name: Set server OSS 16M RPCs
+      shell: "lctl set_param obdfilter.*OST*.brw_size=16"
+      tags:
+        - 'server'
+
