@@ -231,7 +231,7 @@ func executeAnsibleTeardown(fsType FSType, volume registry.Volume, brickAllocati
 		return err
 	}
 
-	formatArgs := "dac.yml -i inventory --tag format"
+	formatArgs := "dac.yml -i inventory --tag clean"
 	err = executeAnsiblePlaybook(dir, formatArgs)
 	if err != nil {
 		return err
