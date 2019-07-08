@@ -1,12 +1,12 @@
 # Data Accelerator
 
 [![CircleCI](https://circleci.com/gh/RSE-Cambridge/data-acc.svg?style=svg&circle-token=4042ee71fb486efc320ce64b7b568afd4f9e0b38)](https://circleci.com/gh/RSE-Cambridge/data-acc)
-
-<!-- [![Build Status](https://travis-ci.org/RSE-Cambridge/data-acc.svg?branch=master)](https://travis-ci.org/RSE-Cambridge/data-acc)
 [![Go Report Card](https://goreportcard.com/badge/github.com/RSE-Cambridge/data-acc)](https://goreportcard.com/report/github.com/RSE-Cambridge/data-acc)
 [![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/RSE-Cambridge/data-acc)
 [![Releases](https://img.shields.io/github/release/RSE-Cambridge/data-acc/all.svg?style=flat-square)](https://github.com/JohnGarbutt/RSE-Cambridge/data-acc)
 [![LICENSE](https://img.shields.io/github/license/RSE-Cambridge/data-acc.svg?style=flat-square)](https://github.com/RSE-Cambridge/data-acc/blob/master/LICENSE)
+
+<!-- [![Build Status](https://travis-ci.org/RSE-Cambridge/data-acc.svg?branch=master)](https://travis-ci.org/RSE-Cambridge/data-acc)
 -->
 
 Data Accelerator uses commodity storage to accelerate HPC jobs.
