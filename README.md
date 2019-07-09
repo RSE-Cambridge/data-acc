@@ -153,7 +153,7 @@ https://circleci.com/docs/2.0/local-cli/
 ## Installation Guide
 
 For an Ansible driven deployment into OpenStack VMs, please take a look at:
-[Development Environment Install Guide](docs/install.md)
+[Development Environment Install Guide](dac-ansible/README.md)
 
 For a manual install there are some pointers in:
 [Manual Install Guide](docs/install.md)
