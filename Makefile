@@ -33,7 +33,7 @@ test-func:
 	./build/func_test.sh
 
 clean:
-	go clean
+	go clean ./...
 	rm -rf `pwd`/bin
 	rm -rf /tmp/etcd-download
 
