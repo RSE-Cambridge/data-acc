@@ -1,47 +1,23 @@
-# Golang CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
   build:
     docker:
-      # specify the version
       - image: circleci/golang:1.12
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-    #### TEMPLATE_NOTE: go expects specific checkout path representing url
-    #### expecting it in the form of
-    ####   /go/src/github.com/circleci/go-tool
-    ####   /go/src/bitbucket.org/circleci/go-tool
-    working_directory: /go/src/github.com/RSE-Cambridge/data-acc
+    working_directory: ~/data-acc
     steps:
       - checkout
       - restore_cache:
-          key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
-          paths:
-              - /go/src/github.com/RSE-Cambridge/data-acc/vendor
-              - /go/pkg/dep
-      - run:
-          name: download-libraries
-          command: |
-            if [ ! -d /go/src/github.com/RSE-Cambridge/data-acc/vendor ]; then
-                curl -L -s https://github.com/golang/dep/releases/download/v0.5.0/dep-linux-amd64 -o /go/bin/dep
-                chmod +x /go/bin/dep
-                /go/bin/dep ensure
-            fi
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
 
       - run: make tar
       - run: make test
       - run: bash <(curl -s https://codecov.io/bash)
 
       - save_cache:
-          key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+          key: go-mod-v1-{{ checksum "go.sum" }}
           paths:
-              - /go/src/github.com/RSE-Cambridge/data-acc/vendor
-              - /go/pkg/dep
+            - "/go/pkg/mod"
+
       - store_artifacts:
-          path: /go/src/github.com/RSE-Cambridge/data-acc/bin
+          path: ~/data-acc/bin
