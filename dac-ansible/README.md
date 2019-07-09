@@ -51,6 +51,14 @@ You can see the dacctl logs here:
     docker exec -it slurmctld bash
     less /var/log/dacctl.log
 
+When you have a buffer that needs to be teared down after fixing
+what may have blocked any previous attempts (such as a bad sudoers files)
+you can try:
+
+    ssh centos@<ip-of-slurm-master>
+    docker exec -it slurmctld bash
+    /usr/local/bin/dacctl teardown --token <job-id>
+
 ### dac[1-3]
 
 The dacd processes are listening to etcd waiting for commands from
