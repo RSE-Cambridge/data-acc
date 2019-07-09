@@ -16,7 +16,7 @@ all: deps buildlocal format test
 
 buildlocal:
 	mkdir -p `pwd`/bin
-	GOBIN=`pwd`/bin go install -ldflags "-X data-acc/pkg/version.VERSION=${VERSION}" -v ./...
+	GOBIN=`pwd`/bin go install -ldflags "-X github.com/RSE-Cambridge/data-acc/pkg/version.VERSION=${VERSION}" -v ./...
 	ls -l `pwd`/bin
 
 format:
