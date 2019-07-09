@@ -1,6 +1,6 @@
-# install data-acc
+# Install data-acc with Ansible
 
-Install data-acc demo with ansible working
+Install data-acc demo with ansible. It creates a bunch of OpenStack VMs, then uses ansible to install a development data-accellerator enviroment.
 
 To run this set of playbooks, please execute:
 
