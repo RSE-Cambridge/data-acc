@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eux
 
+# Based on ideas from:
+# https://github.com/giovtorres/slurm-docker-cluster
+
 echo mysql:$MYSQL_HOST
 echo slurmdb:$SLURM_DB
 echo slurmdb_host:$SLURM_DB_HOST
@@ -22,11 +25,14 @@ then
 
     echo "---> Starting the Slurm Database Daemon (slurmdbd) ..."
 
-    until echo "SELECT 1" | mysql -h $MYSQL_HOST -uslurm -ppassword 2>&1 > /dev/null
-    do
-        echo "-- Waiting for database to become active ..."
-        sleep 2
-    done
+    {
+        . /etc/slurm/slurmdbd.conf
+        until echo "SELECT 1" | mysql -h $StorageHost -u$StorageUser -p$StoragePass 2>&1 > /dev/null
+        do
+            echo "-- Waiting for database to become active ..."
+            sleep 2
+        done
+    }
     echo "-- Database is now active ..."
 
     exec gosu slurm /usr/sbin/slurmdbd -Dvvv
