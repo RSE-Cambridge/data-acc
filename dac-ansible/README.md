@@ -8,6 +8,13 @@ To run this set of playbooks, please execute:
     ./create-servers.py > hosts
     ansible-playbook master.yml -i hosts
 
+Note the above pulls the docker image johngarbutt/data-acc which can be
+pushed by doing something like this:
+
+    cd ../docker-slurm
+    ./build.sh
+    docker-compose push
+
 Once the ansible has finished, you can login and try a slurm test:
 
     ssh centos@<ip-of-slurm-master>
