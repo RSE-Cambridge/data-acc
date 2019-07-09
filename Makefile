@@ -10,9 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+export GO111MODULE=on
 VERSION := $(shell git describe --tags --always --dirty)
 
-all: deps buildlocal format test
+all: buildlocal format test
 
 buildlocal:
 	mkdir -p `pwd`/bin
@@ -35,9 +36,6 @@ clean:
 	go clean
 	rm -rf `pwd`/bin
 	rm -rf /tmp/etcd-download
-
-deps:
-	dep ensure
 
 tar: clean buildlocal
 	tar -cvzf ./bin/data-acc-`git describe --tag --dirty`.tgz ./bin/dacd ./bin/dacctl ./fs-ansible ./tools/*.sh

@@ -36,6 +36,7 @@ func (m *MockVolumeRegistry) EXPECT() *MockVolumeRegistryMockRecorder {
 
 // Jobs mocks base method
 func (m *MockVolumeRegistry) Jobs() ([]registry.Job, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Jobs")
 	ret0, _ := ret[0].([]registry.Job)
 	ret1, _ := ret[1].(error)
@@ -44,11 +45,13 @@ func (m *MockVolumeRegistry) Jobs() ([]registry.Job, error) {
 
 // Jobs indicates an expected call of Jobs
 func (mr *MockVolumeRegistryMockRecorder) Jobs() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Jobs", reflect.TypeOf((*MockVolumeRegistry)(nil).Jobs))
 }
 
 // Job mocks base method
 func (m *MockVolumeRegistry) Job(jobName string) (registry.Job, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Job", jobName)
 	ret0, _ := ret[0].(registry.Job)
 	ret1, _ := ret[1].(error)
@@ -57,11 +60,13 @@ func (m *MockVolumeRegistry) Job(jobName string) (registry.Job, error) {
 
 // Job indicates an expected call of Job
 func (mr *MockVolumeRegistryMockRecorder) Job(jobName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Job", reflect.TypeOf((*MockVolumeRegistry)(nil).Job), jobName)
 }
 
 // AddJob mocks base method
 func (m *MockVolumeRegistry) AddJob(job registry.Job) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddJob", job)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -69,11 +74,13 @@ func (m *MockVolumeRegistry) AddJob(job registry.Job) error {
 
 // AddJob indicates an expected call of AddJob
 func (mr *MockVolumeRegistryMockRecorder) AddJob(job interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddJob", reflect.TypeOf((*MockVolumeRegistry)(nil).AddJob), job)
 }
 
 // JobAttachHosts mocks base method
 func (m *MockVolumeRegistry) JobAttachHosts(jobName string, hosts []string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "JobAttachHosts", jobName, hosts)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -81,11 +88,13 @@ func (m *MockVolumeRegistry) JobAttachHosts(jobName string, hosts []string) erro
 
 // JobAttachHosts indicates an expected call of JobAttachHosts
 func (mr *MockVolumeRegistryMockRecorder) JobAttachHosts(jobName, hosts interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JobAttachHosts", reflect.TypeOf((*MockVolumeRegistry)(nil).JobAttachHosts), jobName, hosts)
 }
 
 // DeleteJob mocks base method
 func (m *MockVolumeRegistry) DeleteJob(jobName string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteJob", jobName)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -93,11 +102,13 @@ func (m *MockVolumeRegistry) DeleteJob(jobName string) error {
 
 // DeleteJob indicates an expected call of DeleteJob
 func (mr *MockVolumeRegistryMockRecorder) DeleteJob(jobName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteJob", reflect.TypeOf((*MockVolumeRegistry)(nil).DeleteJob), jobName)
 }
 
 // AddVolume mocks base method
 func (m *MockVolumeRegistry) AddVolume(volume registry.Volume) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddVolume", volume)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -105,11 +116,13 @@ func (m *MockVolumeRegistry) AddVolume(volume registry.Volume) error {
 
 // AddVolume indicates an expected call of AddVolume
 func (mr *MockVolumeRegistryMockRecorder) AddVolume(volume interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddVolume", reflect.TypeOf((*MockVolumeRegistry)(nil).AddVolume), volume)
 }
 
 // Volume mocks base method
 func (m *MockVolumeRegistry) Volume(name registry.VolumeName) (registry.Volume, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Volume", name)
 	ret0, _ := ret[0].(registry.Volume)
 	ret1, _ := ret[1].(error)
@@ -118,11 +131,13 @@ func (m *MockVolumeRegistry) Volume(name registry.VolumeName) (registry.Volume, 
 
 // Volume indicates an expected call of Volume
 func (mr *MockVolumeRegistryMockRecorder) Volume(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Volume", reflect.TypeOf((*MockVolumeRegistry)(nil).Volume), name)
 }
 
 // AllVolumes mocks base method
 func (m *MockVolumeRegistry) AllVolumes() ([]registry.Volume, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AllVolumes")
 	ret0, _ := ret[0].([]registry.Volume)
 	ret1, _ := ret[1].(error)
@@ -131,11 +146,13 @@ func (m *MockVolumeRegistry) AllVolumes() ([]registry.Volume, error) {
 
 // AllVolumes indicates an expected call of AllVolumes
 func (mr *MockVolumeRegistryMockRecorder) AllVolumes() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllVolumes", reflect.TypeOf((*MockVolumeRegistry)(nil).AllVolumes))
 }
 
 // DeleteVolume mocks base method
 func (m *MockVolumeRegistry) DeleteVolume(name registry.VolumeName) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteVolume", name)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -143,11 +160,13 @@ func (m *MockVolumeRegistry) DeleteVolume(name registry.VolumeName) error {
 
 // DeleteVolume indicates an expected call of DeleteVolume
 func (mr *MockVolumeRegistryMockRecorder) DeleteVolume(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteVolume", reflect.TypeOf((*MockVolumeRegistry)(nil).DeleteVolume), name)
 }
 
 // UpdateState mocks base method
 func (m *MockVolumeRegistry) UpdateState(name registry.VolumeName, state registry.VolumeState) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateState", name, state)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -155,11 +174,13 @@ func (m *MockVolumeRegistry) UpdateState(name registry.VolumeName, state registr
 
 // UpdateState indicates an expected call of UpdateState
 func (mr *MockVolumeRegistryMockRecorder) UpdateState(name, state interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateState", reflect.TypeOf((*MockVolumeRegistry)(nil).UpdateState), name, state)
 }
 
 // UpdateVolumeAttachments mocks base method
 func (m *MockVolumeRegistry) UpdateVolumeAttachments(name registry.VolumeName, attachments []registry.Attachment) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateVolumeAttachments", name, attachments)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -167,11 +188,13 @@ func (m *MockVolumeRegistry) UpdateVolumeAttachments(name registry.VolumeName, a
 
 // UpdateVolumeAttachments indicates an expected call of UpdateVolumeAttachments
 func (mr *MockVolumeRegistryMockRecorder) UpdateVolumeAttachments(name, attachments interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateVolumeAttachments", reflect.TypeOf((*MockVolumeRegistry)(nil).UpdateVolumeAttachments), name, attachments)
 }
 
 // DeleteVolumeAttachments mocks base method
 func (m *MockVolumeRegistry) DeleteVolumeAttachments(name registry.VolumeName, hostnames []string, jobName string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteVolumeAttachments", name, hostnames, jobName)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -179,11 +202,13 @@ func (m *MockVolumeRegistry) DeleteVolumeAttachments(name registry.VolumeName, h
 
 // DeleteVolumeAttachments indicates an expected call of DeleteVolumeAttachments
 func (mr *MockVolumeRegistryMockRecorder) DeleteVolumeAttachments(name, hostnames, jobName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteVolumeAttachments", reflect.TypeOf((*MockVolumeRegistry)(nil).DeleteVolumeAttachments), name, hostnames, jobName)
 }
 
 // WaitForState mocks base method
 func (m *MockVolumeRegistry) WaitForState(name registry.VolumeName, state registry.VolumeState) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WaitForState", name, state)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -191,11 +216,13 @@ func (m *MockVolumeRegistry) WaitForState(name registry.VolumeName, state regist
 
 // WaitForState indicates an expected call of WaitForState
 func (mr *MockVolumeRegistryMockRecorder) WaitForState(name, state interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitForState", reflect.TypeOf((*MockVolumeRegistry)(nil).WaitForState), name, state)
 }
 
 // WaitForCondition mocks base method
 func (m *MockVolumeRegistry) WaitForCondition(volumeName registry.VolumeName, condition func(*registry.VolumeChange) bool) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "WaitForCondition", volumeName, condition)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -203,11 +230,13 @@ func (m *MockVolumeRegistry) WaitForCondition(volumeName registry.VolumeName, co
 
 // WaitForCondition indicates an expected call of WaitForCondition
 func (mr *MockVolumeRegistryMockRecorder) WaitForCondition(volumeName, condition interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitForCondition", reflect.TypeOf((*MockVolumeRegistry)(nil).WaitForCondition), volumeName, condition)
 }
 
 // GetVolumeChanges mocks base method
 func (m *MockVolumeRegistry) GetVolumeChanges(ctx context.Context, volume registry.Volume) registry.VolumeChangeChan {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetVolumeChanges", ctx, volume)
 	ret0, _ := ret[0].(registry.VolumeChangeChan)
 	return ret0
@@ -215,11 +244,13 @@ func (m *MockVolumeRegistry) GetVolumeChanges(ctx context.Context, volume regist
 
 // GetVolumeChanges indicates an expected call of GetVolumeChanges
 func (mr *MockVolumeRegistryMockRecorder) GetVolumeChanges(ctx, volume interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVolumeChanges", reflect.TypeOf((*MockVolumeRegistry)(nil).GetVolumeChanges), ctx, volume)
 }
 
 // VolumeOperationMutex mocks base method
 func (m *MockVolumeRegistry) VolumeOperationMutex(volumeName registry.VolumeName) (registry.Mutex, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VolumeOperationMutex", volumeName)
 	ret0, _ := ret[0].(registry.Mutex)
 	ret1, _ := ret[1].(error)
@@ -228,6 +259,7 @@ func (m *MockVolumeRegistry) VolumeOperationMutex(volumeName registry.VolumeName
 
 // VolumeOperationMutex indicates an expected call of VolumeOperationMutex
 func (mr *MockVolumeRegistryMockRecorder) VolumeOperationMutex(volumeName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VolumeOperationMutex", reflect.TypeOf((*MockVolumeRegistry)(nil).VolumeOperationMutex), volumeName)
 }
 
@@ -256,6 +288,7 @@ func (m *MockMutex) EXPECT() *MockMutexMockRecorder {
 
 // Lock mocks base method
 func (m *MockMutex) Lock(ctx context.Context) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Lock", ctx)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -263,11 +296,13 @@ func (m *MockMutex) Lock(ctx context.Context) error {
 
 // Lock indicates an expected call of Lock
 func (mr *MockMutexMockRecorder) Lock(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lock", reflect.TypeOf((*MockMutex)(nil).Lock), ctx)
 }
 
 // Unlock mocks base method
 func (m *MockMutex) Unlock(ctx context.Context) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Unlock", ctx)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -275,5 +310,6 @@ func (m *MockMutex) Unlock(ctx context.Context) error {
 
 // Unlock indicates an expected call of Unlock
 func (mr *MockMutexMockRecorder) Unlock(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unlock", reflect.TypeOf((*MockMutex)(nil).Unlock), ctx)
 }

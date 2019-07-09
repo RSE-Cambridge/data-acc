@@ -36,6 +36,7 @@ func (m *MockPoolRegistry) EXPECT() *MockPoolRegistryMockRecorder {
 
 // Pools mocks base method
 func (m *MockPoolRegistry) Pools() ([]registry.Pool, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Pools")
 	ret0, _ := ret[0].([]registry.Pool)
 	ret1, _ := ret[1].(error)
@@ -44,11 +45,13 @@ func (m *MockPoolRegistry) Pools() ([]registry.Pool, error) {
 
 // Pools indicates an expected call of Pools
 func (mr *MockPoolRegistryMockRecorder) Pools() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pools", reflect.TypeOf((*MockPoolRegistry)(nil).Pools))
 }
 
 // UpdateHost mocks base method
 func (m *MockPoolRegistry) UpdateHost(bricks []registry.BrickInfo) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateHost", bricks)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -56,11 +59,13 @@ func (m *MockPoolRegistry) UpdateHost(bricks []registry.BrickInfo) error {
 
 // UpdateHost indicates an expected call of UpdateHost
 func (mr *MockPoolRegistryMockRecorder) UpdateHost(bricks interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateHost", reflect.TypeOf((*MockPoolRegistry)(nil).UpdateHost), bricks)
 }
 
 // KeepAliveHost mocks base method
 func (m *MockPoolRegistry) KeepAliveHost(hostname string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "KeepAliveHost", hostname)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -68,11 +73,13 @@ func (m *MockPoolRegistry) KeepAliveHost(hostname string) error {
 
 // KeepAliveHost indicates an expected call of KeepAliveHost
 func (mr *MockPoolRegistryMockRecorder) KeepAliveHost(hostname interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KeepAliveHost", reflect.TypeOf((*MockPoolRegistry)(nil).KeepAliveHost), hostname)
 }
 
 // AllocateBricksForVolume mocks base method
 func (m *MockPoolRegistry) AllocateBricksForVolume(volume registry.Volume) ([]registry.BrickAllocation, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AllocateBricksForVolume", volume)
 	ret0, _ := ret[0].([]registry.BrickAllocation)
 	ret1, _ := ret[1].(error)
@@ -81,11 +88,13 @@ func (m *MockPoolRegistry) AllocateBricksForVolume(volume registry.Volume) ([]re
 
 // AllocateBricksForVolume indicates an expected call of AllocateBricksForVolume
 func (mr *MockPoolRegistryMockRecorder) AllocateBricksForVolume(volume interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocateBricksForVolume", reflect.TypeOf((*MockPoolRegistry)(nil).AllocateBricksForVolume), volume)
 }
 
 // DeallocateBricks mocks base method
 func (m *MockPoolRegistry) DeallocateBricks(volume registry.VolumeName) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeallocateBricks", volume)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -93,11 +102,13 @@ func (m *MockPoolRegistry) DeallocateBricks(volume registry.VolumeName) error {
 
 // DeallocateBricks indicates an expected call of DeallocateBricks
 func (mr *MockPoolRegistryMockRecorder) DeallocateBricks(volume interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeallocateBricks", reflect.TypeOf((*MockPoolRegistry)(nil).DeallocateBricks), volume)
 }
 
 // HardDeleteAllocations mocks base method
 func (m *MockPoolRegistry) HardDeleteAllocations(allocations []registry.BrickAllocation) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HardDeleteAllocations", allocations)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -105,11 +116,13 @@ func (m *MockPoolRegistry) HardDeleteAllocations(allocations []registry.BrickAll
 
 // HardDeleteAllocations indicates an expected call of HardDeleteAllocations
 func (mr *MockPoolRegistryMockRecorder) HardDeleteAllocations(allocations interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HardDeleteAllocations", reflect.TypeOf((*MockPoolRegistry)(nil).HardDeleteAllocations), allocations)
 }
 
 // GetAllocationsForHost mocks base method
 func (m *MockPoolRegistry) GetAllocationsForHost(hostname string) ([]registry.BrickAllocation, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllocationsForHost", hostname)
 	ret0, _ := ret[0].([]registry.BrickAllocation)
 	ret1, _ := ret[1].(error)
@@ -118,11 +131,13 @@ func (m *MockPoolRegistry) GetAllocationsForHost(hostname string) ([]registry.Br
 
 // GetAllocationsForHost indicates an expected call of GetAllocationsForHost
 func (mr *MockPoolRegistryMockRecorder) GetAllocationsForHost(hostname interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllocationsForHost", reflect.TypeOf((*MockPoolRegistry)(nil).GetAllocationsForHost), hostname)
 }
 
 // GetAllocationsForVolume mocks base method
 func (m *MockPoolRegistry) GetAllocationsForVolume(volume registry.VolumeName) ([]registry.BrickAllocation, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllocationsForVolume", volume)
 	ret0, _ := ret[0].([]registry.BrickAllocation)
 	ret1, _ := ret[1].(error)
@@ -131,11 +146,13 @@ func (m *MockPoolRegistry) GetAllocationsForVolume(volume registry.VolumeName) (
 
 // GetAllocationsForVolume indicates an expected call of GetAllocationsForVolume
 func (mr *MockPoolRegistryMockRecorder) GetAllocationsForVolume(volume interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllocationsForVolume", reflect.TypeOf((*MockPoolRegistry)(nil).GetAllocationsForVolume), volume)
 }
 
 // GetBrickInfo mocks base method
 func (m *MockPoolRegistry) GetBrickInfo(hostname, device string) (registry.BrickInfo, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetBrickInfo", hostname, device)
 	ret0, _ := ret[0].(registry.BrickInfo)
 	ret1, _ := ret[1].(error)
@@ -144,11 +161,13 @@ func (m *MockPoolRegistry) GetBrickInfo(hostname, device string) (registry.Brick
 
 // GetBrickInfo indicates an expected call of GetBrickInfo
 func (mr *MockPoolRegistryMockRecorder) GetBrickInfo(hostname, device interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBrickInfo", reflect.TypeOf((*MockPoolRegistry)(nil).GetBrickInfo), hostname, device)
 }
 
 // GetNewHostBrickAllocations mocks base method
 func (m *MockPoolRegistry) GetNewHostBrickAllocations(ctxt context.Context, hostname string) <-chan registry.BrickAllocation {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNewHostBrickAllocations", ctxt, hostname)
 	ret0, _ := ret[0].(<-chan registry.BrickAllocation)
 	return ret0
@@ -156,5 +175,6 @@ func (m *MockPoolRegistry) GetNewHostBrickAllocations(ctxt context.Context, host
 
 // GetNewHostBrickAllocations indicates an expected call of GetNewHostBrickAllocations
 func (mr *MockPoolRegistryMockRecorder) GetNewHostBrickAllocations(ctxt, hostname interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNewHostBrickAllocations", reflect.TypeOf((*MockPoolRegistry)(nil).GetNewHostBrickAllocations), ctxt, hostname)
 }
