@@ -1,5 +1,8 @@
 FROM centos:7
 
+# Ideas mostly from:
+# https://github.com/giovtorres/slurm-docker-cluster/releases/tag/18.08.6
+
 LABEL org.label-schema.docker.cmd="docker-compose up -d" \
       org.label-schema.name="slurm-docker-cluster" \
       org.label-schema.description="Slurm Docker cluster on CentOS 7" \
@@ -32,9 +35,6 @@ RUN yum makecache fast \
            bash-completion \
     && yum clean all \
     && rm -rf /var/cache/yum
-
-RUN pip install Cython nose \
-    && pip3 install Cython nose
 
 ARG GOSU_VERSION=1.10
 
