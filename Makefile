@@ -13,7 +13,7 @@
 export GO111MODULE=on
 VERSION := $(shell git describe --tags --always --dirty)
 
-all: buildlocal format test
+all: buildlocal format buildmocks test
 
 buildlocal:
 	mkdir -p `pwd`/bin
@@ -23,9 +23,11 @@ buildlocal:
 format:
 	go fmt ./...
 
+buildmocks:
+	./build/rebuild_mocks.sh
+
 test: 
 	mkdir -p `pwd`/bin
-	./build/rebuild_mocks.sh
 	go vet ./...
 	go test -cover -race -coverprofile=./bin/coverage.txt ./...
 
