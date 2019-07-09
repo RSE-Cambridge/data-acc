@@ -8,6 +8,14 @@ To run this set of playbooks, please execute:
     ./create-servers.py > hosts
     ansible-playbook master.yml -i hosts
 
+Once the ansible has finished, you can login and try a slurm test:
+
+    ssh centos@<ip-of-slurm-master>
+    docker exec -it slurmctld bash
+    scontrol show burstbuffer
+    cd /usr/local/bin/data-acc/tools/
+    . slurm-test.sh
+
 ## Install notes
 
 You may find this useful to run the above ansible-playbook command:
