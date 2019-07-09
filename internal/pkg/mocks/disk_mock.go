@@ -34,6 +34,7 @@ func (m *MockDisk) EXPECT() *MockDiskMockRecorder {
 
 // Lines mocks base method
 func (m *MockDisk) Lines(filename string) ([]string, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Lines", filename)
 	ret0, _ := ret[0].([]string)
 	ret1, _ := ret[1].(error)
@@ -42,11 +43,13 @@ func (m *MockDisk) Lines(filename string) ([]string, error) {
 
 // Lines indicates an expected call of Lines
 func (mr *MockDiskMockRecorder) Lines(filename interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lines", reflect.TypeOf((*MockDisk)(nil).Lines), filename)
 }
 
 // Write mocks base method
 func (m *MockDisk) Write(filename string, lines []string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Write", filename, lines)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -54,5 +57,6 @@ func (m *MockDisk) Write(filename string, lines []string) error {
 
 // Write indicates an expected call of Write
 func (mr *MockDiskMockRecorder) Write(filename, lines interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Write", reflect.TypeOf((*MockDisk)(nil).Write), filename, lines)
 }
