@@ -124,11 +124,7 @@ The following tests are currently a work in progress:
 
 ## Golang Build and Test (using make)
 
-Ensure you checkout this code in a working golang 1.11 workspace, including setting $GOPATH as required:
-https://golang.org/doc/install#testing
-
-dep 0.5.0 is used to manage dependencies. To install dep please read:
-https://golang.github.io/dep/docs/installation.html#binary-installation
+Built with golang 1.12, using go modules for dependency management.
 
 gomock v1.1.1 is used to generate mocks. The version is fixed to stop
 conflicts with etcd 3.3.x.
