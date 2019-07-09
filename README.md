@@ -9,25 +9,44 @@
 <!-- [![Build Status](https://travis-ci.org/RSE-Cambridge/data-acc.svg?branch=master)](https://travis-ci.org/RSE-Cambridge/data-acc)
 -->
 
-Data Accelerator uses commodity storage to accelerate HPC jobs.
-The software currently supports intigration with the Slurm Burst Buffer plugin to build on demand file systems for HPC applications. This was build using Golang,Ansible and benchmarked on Dell EMC R740xd nodes with Dule OPA (Infiniband is suported but not tested at Cambridge) and 12 Intel P4600 SSDs.
+The Data Accelerator project is working to orchestrate the creation of
+burst buffers built using commodity hardware and existing parallel file
+systems.
+The current focus is around integration of Slurm's Burst Buffer and
+on-demand created Lustre file systems.
 
-## Instalation Guide
-Please see [Orchistrator Instalation Guide](docs/install.md) for more details on how to configure the software and use it within your system.
+The initial development focus has been around
+Cambridge University's Data Accelerator:
 
+* For June 2019 it is #1 in the io500: https://www.vi4io.org/io500/start
+* https://www.hpc.cam.ac.uk/research/data-acc
+* Attached to the Cumulus supercomputer: https://www.top500.org/system/179577
 
-### Currently Suported Filesystems
+Currently this makes use of 24 Dell EMC R740xd nodes. Each contains
+two Intel OmniPath network adapters and 12 Intel P4600 SSDs.
 
-* Lustre 2.12
-* BeeGFS (Updates to the ansible are currently pending)
+## Try me
 
-### Requierments
-* Lustre 2.12 server and 2.10.5+ clients
-* golang 1.11 (See Make Instructions for further dependency versions)
-* etcd 3+
-* Slurm 17.11.12+
+We have a Docker Compose based Integration Test so you can try out how
+we integrated with Slurm.
+To see an end to end demo with Slurm 19.04
+(but without running fs-ansible and not ssh-ing to compute nodes to mount)
+please try:
+```
+cd docker-slurm
+./demo.sh
+```
+
+To clean up after the demo, including removing all docker volumes:
+```
+docker-compose down --vol --rmi all
+```
+
+For more details please see the
+[docker compose README](docker-slurm/README.md).
 
 ## Using with Slurm
+
 When you request a burst buffer via Slurm, the Cray Data Warp plugin is used
 to communicate to **dacctl** to orchestrate the creation of the burst buffer via
 the data accelerator. The user requests a certain capacity - currently the max size of 1 NVMe -, which is rounded
@@ -51,8 +70,6 @@ For persistent buffers the creation of and use of in sucsessave jobs is used as 
 #DW persistentdw name=DAC
 
 ```
-
-
 
 ## Code Guided Tour
 
@@ -105,20 +122,6 @@ The following tests are currently a work in progress:
 * "github.com/RSE-Cambridge/data-acc/internal/pkg/mocks" these are mock interfaces needed for unit testing, created
   using "github.com/golang/mock/gomock" and can be refreshed by running a [build script](build/rebuild_mocks.sh).
 
-## Docker Compose based Integration Test
-
-To see end to end demo with Slurm 18.08
-(but without running fs-ansible and not ssh-ing to compute nodes to mount):
-```
-cd docker-slurm
-./demo.sh
-```
-
-To clean up after the demo, including removing all docker volumes:
-```
-docker-compose down --vol --rmi all
-```
-
 ## Golang Build and Test (using make)
 
 Ensure you checkout this code in a working golang 1.11 workspace, including setting $GOPATH as required:
@@ -150,10 +153,19 @@ make docker
 To mimic what is happening in circleci locally please see:
 https://circleci.com/docs/2.0/local-cli/
 
+## Installation Guide
 
-# License
-This work is licanced under the Apache 2. Please see Licance file for more infomrmation.
+For an Ansible driven deployment into OpenStack VMs, please take a look at:
+[Development Environment Install Guide](docs/install.md)
 
-Copyright © 2018-2019 Alasdair James King University of Cambridge
+For a manual install there are some pointers in:
+[Manual Install Guide](docs/install.md)
 
-Copyright © 2018-2019 John Garbutt StackHPC Ltd
+
+## License
+
+This work is licensed under the Apache 2.
+Please see LICENSE file for more information.
+
+Copyright © 2018-2019 Alasdair James King, University of Cambridge
+Copyright © 2018-2019 John Garbutt, StackHPC Ltd
