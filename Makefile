@@ -10,12 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+VERSION := $(shell git describe --tags --always --dirty)
 
 all: deps buildlocal format test
 
 buildlocal:
 	mkdir -p `pwd`/bin
-	GOBIN=`pwd`/bin go install -v ./...
+	GOBIN=`pwd`/bin go install -ldflags "-X data-acc/pkg/version.VERSION=${VERSION}" -v ./...
 	ls -l `pwd`/bin
 
 format:

@@ -111,7 +111,7 @@ func TestPlugin_GetInventory_MaxMDT(t *testing.T) {
 	}
 
 	var brickAllocations []registry.BrickAllocation
-	for i :=1; i <= 26; i = i+2 {
+	for i := 1; i <= 26; i = i + 2 {
 		brickAllocations = append(brickAllocations, registry.BrickAllocation{
 			Hostname:       fmt.Sprintf("dac%d", i),
 			Device:         "nvme1n1",
