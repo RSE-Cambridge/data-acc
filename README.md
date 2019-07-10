@@ -48,7 +48,7 @@ For more details please see the
 
 ## Using with Slurm
 
-When you request a burst buffer via Slurm, the Cray Data Warp plugin is used
+When you request a burst buffer via Slurm, the Cray DataWarp plugin is used
 to communicate to **dacctl** to orchestrate the creation of the burst buffer via
 the data accelerator. The user requests a certain capacity - currently the max size of 1 NVMe -, which is rounded
 up to a number of NVMe devices. The choen parallel filesystem is created that
