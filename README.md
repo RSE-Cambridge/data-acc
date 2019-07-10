@@ -10,23 +10,21 @@
 [![Build Status](https://travis-ci.org/RSE-Cambridge/data-acc.svg?branch=master)](https://travis-ci.org/RSE-Cambridge/data-acc)
 -->
 
-The Data Accelerator project is working to orchestrate the creation of
-burst buffers built using commodity hardware and existing parallel file
-systems.
-The current focus is around integration of Slurm's Burst Buffer and
-on-demand created Lustre file systems.
+The Data Accelerator orchestrates the creation of burst buffers using
+commodity hardware and existing parallel file systems.
+Current focus is on creating NVMe backed Lustre file systems via
+Slurm's Burst Buffer support.
 
 https://rse-cambridge.github.io/data-acc/
 
-The initial development focus has been around
-Cambridge University's Data Accelerator:
+The initial development focus has been on Cambridge University's Data Accelerator:
 
-* For June 2019 it is #1 in the io500: https://www.vi4io.org/io500/start
+* In June 2019 it got #1 in io500: https://www.vi4io.org/io500/start
 * https://www.hpc.cam.ac.uk/research/data-acc
 * Attached to the Cumulus supercomputer: https://www.top500.org/system/179577
 
-Currently this makes use of 24 Dell EMC R740xd nodes. Each contains
-two Intel OmniPath network adapters and 12 Intel P4600 SSDs.
+Currently this makes use of 24 Dell EMC R740xd nodes.
+Each contains two Intel OmniPath network adapters and 12 Intel P4600 SSDs.
 
 ## Try me
 
