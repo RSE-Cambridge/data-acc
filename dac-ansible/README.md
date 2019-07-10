@@ -59,6 +59,9 @@ you can try:
     docker exec -it slurmctld bash
     /usr/local/bin/dacctl teardown --token <job-id>
 
+Note the above tends to leave client mounts behind, which need to be cleared
+manually via "umount -l <directory>" on slurm-cpu[1-2].
+
 ### dac[1-3]
 
 The dacd processes are listening to etcd waiting for commands from
