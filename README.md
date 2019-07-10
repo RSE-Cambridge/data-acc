@@ -165,4 +165,5 @@ This work is licensed under the Apache 2.
 Please see LICENSE file for more information.
 
 Copyright © 2018-2019 Alasdair James King, University of Cambridge
+
 Copyright © 2018-2019 John Garbutt, StackHPC Ltd
