@@ -89,10 +89,11 @@ DAC_MDT_SIZE="20g"
 DAC_ANSIBLE_DIR=/var/lib/data-acc/fs-ansible/
 ```
 
-Note that in `/var/lib/data-acc/fs-ansible/` you contain the fs-ansible
-from the release tarball. In addition there should be a working virtual
-environment in `/var/lib/data-acc/fs-ansible/.venv`. You can can set
-this up as follows:
+Note that `/var/lib/data-acc/fs-ansible/` should contain the fs-ansible
+scripts from the release tarball.
+In addition there should be a working virtual environment in
+`/var/lib/data-acc/fs-ansible/.venv`.
+You can can create this on each dacd node as follows:
 
 ```
 virtualenv /var/lib/data-acc/fs-ansible/.venv
