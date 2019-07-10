@@ -26,25 +26,6 @@ The initial development focus has been on Cambridge University's Data Accelerato
 Currently this makes use of 24 Dell EMC R740xd nodes.
 Each contains two Intel OmniPath network adapters and 12 Intel P4600 SSDs.
 
-## Architecture
-
-Users request burst buffers via Slurm. Slurm sends the requests via the `dacctl`
-command line tool. It sends the requests to an [etcd](http://etcd.io) cluster,
-secured using TLS certs. Each storage server runs a `dacd` process that is
-able to read, write and watch keys on the `etcd` cluster. Each burst buffer
-has a primary `dacd` process selected. This primary `dacd` runs [ansible](fs-ansible/)
-playbooks to either provision or teardown the burst buffer, as required.
-In a similar way, the primary `dacd` will mount and umount the burst buffers
-on the required compute nodes, just before and just after a job is started
-on those nodes.
-The burst buffer size the user requested is rounded up to the nearerst
-number of NVMe's to provide a filesystem of the requested size.
-With Lustre, each NVMe added into the filesystem adds both a storage (ost)
-and metdata (mdt) capacity.
-
-Further details on the Slurm intergration can be found here:
-https://slurm.schedmd.com/burst_buffer.html
-
 ## Try me in docker-compose
 
 We have a Docker Compose based Integration Test so you can try out how
@@ -96,8 +77,26 @@ For persistent buffers the creation of and use of in sucsessave jobs is used as 
 #BB create_persistent name=DAC capacity=1400GiB access=striped type=scratch pool=default
 #DW persistentdw name=DAC
 ```
+## Architecture Overview
 
-## Code Guided Tour
+Users request burst buffers via Slurm. Slurm sends the requests via the `dacctl`
+command line tool. It sends the requests to an [etcd](http://etcd.io) cluster,
+secured using TLS certs. Each storage server runs a `dacd` process that is
+able to read, write and watch keys on the `etcd` cluster. Each burst buffer
+has a primary `dacd` process selected. This primary `dacd` runs [ansible](fs-ansible/)
+playbooks to either provision or teardown the burst buffer, as required.
+In a similar way, the primary `dacd` will mount and umount the burst buffers
+on the required compute nodes, just before and just after a job is started
+on those nodes.
+The burst buffer size the user requested is rounded up to the nearerst
+number of NVMe's to provide a filesystem of the requested size.
+With Lustre, each NVMe added into the filesystem adds both a storage (ost)
+and metdata (mdt) capacity.
+
+Further details on the Slurm intergration can be found here:
+https://slurm.schedmd.com/burst_buffer.html
+
+### Code Guided Tour
 
 There are two key binaries produced by the golang based code:
 
