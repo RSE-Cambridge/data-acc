@@ -2,10 +2,14 @@
 
 Install data-acc demo with ansible. It creates a bunch of OpenStack VMs, then uses ansible to install a development data-acc enviroment.
 
-To run this set of playbooks, please execute:
+To run this set of playbooks, first we create some VMs in OpenStack:
 
     . openrc
     ./create-servers.py > hosts
+    
+You will likely need to directly modify the above script to match your environment,
+but once the VMs are created, you can now use ansible to deploy the dev environment:
+
     ansible-playbook master.yml -i hosts
 
 Note the above pulls the docker image johngarbutt/data-acc which can be
@@ -14,6 +18,16 @@ pushed by doing something like this:
     cd ../docker-slurm
     ./build.sh
     docker-compose push
+
+Once the ansible has finished, you can login and try a slurm test:
+
+    ssh centos@<ip-of-slurm-master>
+    docker exec -it slurmctld bash
+    scontrol show burstbuffer
+    cd /usr/local/bin/data-acc/tools/
+    . slurm-test.sh
+    squeue
+    scontrol show burstbuffer
 
 ## Install notes
 
@@ -27,17 +41,7 @@ You may find this useful to run the above ansible-playbook command:
 
 ## Debugging Guide
 
-Once the ansible has finished, you can login and try a slurm test:
-
-    ssh centos@<ip-of-slurm-master>
-    docker exec -it slurmctld bash
-    scontrol show burstbuffer
-    cd /usr/local/bin/data-acc/tools/
-    . slurm-test.sh
-
-Note the above currently fails for all the jobs that do any data
-movement, as this development enviromnet currently doesn't
-support data movement in the way it is currently implemented.
+When trying slurm-test.sh or similar, here are some debugging tips.
 
 ### dac-slurm-master
 
