@@ -26,7 +26,7 @@ The initial development focus has been on Cambridge University's Data Accelerato
 Currently this makes use of 24 Dell EMC R740xd nodes.
 Each contains two Intel OmniPath network adapters and 12 Intel P4600 SSDs.
 
-## Try me
+## Try me in docker-compose
 
 We have a Docker Compose based Integration Test so you can try out how
 we integrated with Slurm.
@@ -45,6 +45,14 @@ docker-compose down --vol --rmi all
 
 For more details please see the
 [docker compose README](docker-slurm/README.md).
+
+## Installation Guides
+
+For an Ansible driven deployment into OpenStack VMs, please take a look at:
+[Development Environment Install Guide](dac-ansible/)
+
+For a manual install there are some pointers in:
+[Manual Install Guide](docs/install.md)
 
 ## Using with Slurm
 
@@ -67,9 +75,7 @@ For persistent buffers the creation of and use of in sucsessave jobs is used as 
 
 ```
 #BB create_persistent name=DAC capacity=1400GiB access=striped type=scratch pool=default
-
 #DW persistentdw name=DAC
-
 ```
 
 ## Code Guided Tour
@@ -149,15 +155,6 @@ make docker
 
 To mimic what is happening in circleci locally please see:
 https://circleci.com/docs/2.0/local-cli/
-
-## Installation Guide
-
-For an Ansible driven deployment into OpenStack VMs, please take a look at:
-[Development Environment Install Guide](dac-ansible/)
-
-For a manual install there are some pointers in:
-[Manual Install Guide](docs/install.md)
-
 
 ## License
 
