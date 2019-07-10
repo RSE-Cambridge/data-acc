@@ -35,6 +35,10 @@ Once the ansible has finished, you can login and try a slurm test:
     cd /usr/local/bin/data-acc/tools/
     . slurm-test.sh
 
+Note the above currently fails for all the jobs that do any data
+movement, as this development enviromnet currently doesn't
+support data movement in the way it is currently implemented.
+
 ### dac-slurm-master
 
 Slurm master makes calls to dacctl via the datawarp burst buffer
