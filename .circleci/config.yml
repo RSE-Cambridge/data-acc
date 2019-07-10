@@ -21,3 +21,15 @@ jobs:
 
       - store_artifacts:
           path: ~/data-acc/bin
+
+workflows:
+  version: 2
+  regular-build:
+    jobs:
+      - build
+  tagged-build:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^v.*/

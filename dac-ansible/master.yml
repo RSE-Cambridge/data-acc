@@ -112,7 +112,7 @@
 - hosts: dac_workers:slurm_workers
   become: True
   vars:
-      lustre_release: "2.12.0"
+      lustre_release: "2.12.2"
   tasks:
     - name: enable lustre server repo
       yum_repository:
@@ -139,7 +139,7 @@
 - hosts: dac_workers:slurm_workers
   become: True
   vars:
-      lustre_release: "2.12.0"
+      lustre_release: "2.12.2"
   tasks:
     - name: Install Lustre Server
       yum:
@@ -153,7 +153,7 @@
 - hosts: dac_workers:slurm_workers
   become: True
   vars:
-      lustre_release: "2.12.0"
+      lustre_release: "2.12.2"
   tasks:
     - name: Install Lustre Client
       yum:
@@ -245,7 +245,7 @@
     - name: Ensure passwordless sudo for dac user
       lineinfile:
         path: /etc/sudoers.d/80-dac
-        line: "dac ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /dac/*, /usr/bin/chmod 770 /dac/*, /usr/bin/chmod 0600 /dac/*, /usr/bin/chown * /dac/*, /usr/bin/mount -t lustre * /dac/*, /usr/bin/umount -l /dac/*, /usr/sbin/losetup /dev/loop* /dac/*, /usr/sbin/losetup -d /dev/loop*, /usr/sbin/mkswap /dev/loop*, /usr/sbin/swapon /dev/loop*, /usr/sbin/swapoff /dev/loop*, /usr/bin/ln -s /dac/* /dac/*, /usr/bin/dd if=/dev/zero of=/dac/*, /usr/bin/rm -rf /dac/*, /bin/grep /dac/* /etc/mtab"
+        line: "dac ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /dac/*, /usr/bin/chmod 770 /dac/*, /usr/bin/chmod 0600 /dac/*, /usr/bin/chown * /dac/*, /usr/bin/mount -t lustre * /dac/*, /usr/bin/umount /dac/*, /usr/sbin/losetup /dev/loop* /dac/*, /usr/sbin/losetup -d /dev/loop*, /usr/sbin/mkswap /dev/loop*, /usr/sbin/swapon /dev/loop*, /usr/sbin/swapoff /dev/loop*, /usr/bin/ln -s /dac/* /dac/*, /usr/bin/dd if=/dev/zero of=/dac/*, /usr/bin/rm -rf /dac/*, /bin/grep /dac/* /etc/mtab"
         regexp: "^dac.*$"
         create: yes
         state: present
