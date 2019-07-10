@@ -48,7 +48,9 @@ For more details please see the
 
 ### Other Installation Guides
 
-For an Ansible driven deployment into OpenStack VMs, please take a look at:
+For an Ansible driven deployment into OpenStack VMs
+(useful for testing out the ansble that creates Lustre filesystems on demand),
+please take a look at:
 [Development Environment Install Guide](dac-ansible/)
 
 For a manual install there are some pointers in:
