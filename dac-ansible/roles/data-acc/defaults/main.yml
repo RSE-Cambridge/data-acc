@@ -1,5 +1,5 @@
 ---
-data_acc_version: v0.6
+data_acc_version: v1.3
 data_acc_platform: linux-amd64
 data_acc_mirror: https://github.com/RSE-Cambridge/data-acc/releases/download
 data_acc_install_dir: /usr/local/bin
@@ -10,9 +10,8 @@ data_acc_launch: True
 
 data_acc_name: 'data-acc-{{data_acc_version}}'
 data_acc_tgz: '{{data_acc_name}}.tgz'
-#data_acc_tgz_url: '{{data_acc_mirror}}/{{data_acc_version}}/{{data_acc_tgz}}'
-data_acc_tgz_url: 'https://github.com/RSE-Cambridge/data-acc/releases/download/v1.1/data-acc-v1.1.tgz'
-data_acc_checksum: 'sha256:a88e66046f5d662582d85c6ce5eba56e7eec2e2b1d690206e7181f6e862f39f7'
+data_acc_tgz_url: '{{ data_acc_mirror }}/{{ data_acc_version }}/data-acc-{{ data_acc_version }}.tgz'
+data_acc_checksum: 'sha256:0d6a8a5b9ccc30c7a7505efcf2858997c5c4487d57fd5ef45d075f25877c9485'
 
 data_acc_user: dac
 data_acc_group: dac
