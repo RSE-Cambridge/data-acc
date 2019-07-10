@@ -46,7 +46,7 @@ docker-compose down --vol --rmi all
 For more details please see the
 [docker compose README](docker-slurm/README.md).
 
-## Installation Guides
+### Other Installation Guides
 
 For an Ansible driven deployment into OpenStack VMs, please take a look at:
 [Development Environment Install Guide](dac-ansible/)
@@ -54,49 +54,7 @@ For an Ansible driven deployment into OpenStack VMs, please take a look at:
 For a manual install there are some pointers in:
 [Manual Install Guide](docs/install.md)
 
-## Using with Slurm
-
-When you request a burst buffer via Slurm, the Cray DataWarp plugin is used
-to communicate to **dacctl** to orchestrate the creation of the burst buffer via
-the data accelerator. The user requests a certain capacity - currently the max size of 1 NVMe -, which is rounded
-up to a number of NVMe devices. The choen parallel filesystem is created that
-exposes those NVMe devices to the compute nodes Slurm chooses for the Slurm
-job that requested the burst buffer.
-
-Both per job and persistent buffers are suported, along with three usage modes; private,striped, and swap.
-
-Creating a per job buffer can be done using the following pragma in a job submission script.
-
-```
-#DW jobdw capacity=1400GiB access_mode=striped,private,swap type=scratch
-```
-
-For persistent buffers the creation of and use of in sucsessave jobs is used as sutch:
-
-```
-#BB create_persistent name=DAC capacity=1400GiB access=striped type=scratch pool=default
-#DW persistentdw name=DAC
-```
-## Architecture Overview
-
-Users request burst buffers via Slurm. Slurm sends the requests via the `dacctl`
-command line tool. It sends the requests to an [etcd](http://etcd.io) cluster,
-secured using TLS certs. Each storage server runs a `dacd` process that is
-able to read, write and watch keys on the `etcd` cluster. Each burst buffer
-has a primary `dacd` process selected. This primary `dacd` runs [ansible](fs-ansible/)
-playbooks to either provision or teardown the burst buffer, as required.
-In a similar way, the primary `dacd` will mount and umount the burst buffers
-on the required compute nodes, just before and just after a job is started
-on those nodes.
-The burst buffer size the user requested is rounded up to the nearerst
-number of NVMe's to provide a filesystem of the requested size.
-With Lustre, each NVMe added into the filesystem adds both a storage (ost)
-and metdata (mdt) capacity.
-
-Further details on the Slurm intergration can be found here:
-https://slurm.schedmd.com/burst_buffer.html
-
-### Code Guided Tour
+## How it works
 
 There are two key binaries produced by the golang based code:
 
@@ -105,10 +63,49 @@ There are two key binaries produced by the golang based code:
 
 All the dacd workers and the dacctl communicate using etcd: http://etcd.io
 
-The dacd service makes use of Ansible roles (./fs-ansible) to create the Lustre
+The `dacd` service makes use of Ansible roles (./fs-ansible) to create the Lustre
 or BeeGFS filesystems on demand, using the NVMe drives that have been assigned
-by the data accellerator. Mounting on the compute nodes is done via ssh
+by the data accellerator. Mounting on the compute nodes is currently done via ssh
 (as the user running dacd), rather than using Ansible.
+
+### Slurm Integration
+
+When you request a burst buffer via Slurm, the Cray DataWarp burst buffer plugin is used
+to communicate to `dacctl`. We support both per job and persistent burst buffers.
+
+You can create a peristent burst buffer by submitting a job like this:
+```
+#BB create_persistent name=mytestbuffer capacity=4000GB access=striped type=scratch
+```
+
+To use the above buffer in a job, add the following pragma in a job submission script:
+```
+#DW persistentdw name=mytestbuffer
+#DW jobdw capacity=2TB access_mode=striped,private type=scratch
+#DW swap 1GB
+#DW stage_in source=~/mytestinputfile destination=\$DW_JOB_STRIPED/filename1 type=file
+#DW stage_out source=\$DW_JOB_STRIPED/outdir destination=~/test7outputdir type=directory
+```
+
+Please note the above job does the following:
+
+* mounts the persistent buffer called mytestbuffer
+* create a per job buffer of 2TB in size, with extra space requested for the swap
+* mounts a shared directory on every compute node
+* also mounts a private directory that is specific to each compute node
+* adds a 1GB swap file on each compute node
+* before the job starts copies in the specified file
+* after the job completes copied out the specified output file
+
+To delete a persistent buffer you submit the following:
+```
+#BB destroy_persistent name=mytestbuffer
+```
+
+Further details on the Slurm intergration can be found here:
+https://slurm.schedmd.com/burst_buffer.html
+
+### Orchestrator golang Code Tour
 
 The golang code is built using make, including creating a tarball that includes
 all the ansible that needs to be installed on all the dacd nodes. Currently we
