@@ -12,8 +12,6 @@ echo "#!/bin/bash
 #DW jobdw capacity=2TB access_mode=striped,private type=scratch
 #DW persistentdw name=mytestbuffer
 #DW swap 5MB
-#DW stage_in source=/usr/local/bin/dacd destination=\$DW_JOB_STRIPED/filename1 type=file
-#DW stage_out source=\$DW_JOB_STRIPED/outdir destination=/tmp type=directory
 
 env
 df -h
@@ -25,6 +23,10 @@ ls -al \$DW_JOB_STRIPED > \$DW_JOB_STRIPED/outdir/lsoutput
 
 echo \$HOSTNAME
 " > use-persistent.sh
+
+# TODO: test stage_in and stage_out
+#DW stage_in source=/usr/local/bin/dacd destination=\$DW_JOB_STRIPED/filename1 type=file
+#DW stage_out source=\$DW_JOB_STRIPED/outdir destination=/tmp type=directory
 
 # Ensure Slurm is setup with the cluster name
 /usr/bin/sacctmgr --immediate add cluster name=linux || true
