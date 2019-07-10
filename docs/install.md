@@ -86,7 +86,22 @@ DAC_MGS_DEV=sdb
 DAC_HOST_GROUP=dac-prod
 DAC_SKIP_ANSIBLE=false
 DAC_MDT_SIZE="20g"
+DAC_ANSIBLE_DIR=/var/lib/data-acc/fs-ansible/
+
+Note that in `/var/lib/data-acc/fs-ansible/` you contain the fs-ansible
+from the release tarball. In addition there should be a working virtual
+environment in `/var/lib/data-acc/fs-ansible/.venv`. You can can set
+this up as follows:
+
 ```
+virtualenv /var/lib/data-acc/fs-ansible/.venv
+. /var/lib/data-acc/fs-ansible/.venv/bin/activate
+pip install -U pip
+pip install -U ansible
+```
+
+Note failed ansible runs are current left in /tmp.
+This aids debugging, but left unchecked will consume all disk space.
 
 The Slurm master unit file is updated to have this environment file
 such that the dacctl command line can communicate with etcd:
