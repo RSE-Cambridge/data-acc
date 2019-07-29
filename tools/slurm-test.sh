@@ -37,6 +37,7 @@ echo "Wait for startup to complete..."
 sleep $SLEEP_INTERVAL
 
 scontrol show burstbuffer
+scontrol show bbstat
 
 echo "***Create persistent buffer***"
 cat create-persistent.sh
@@ -79,3 +80,4 @@ squeue
 sleep $SLEEP_INTERVAL
 scontrol show burstbuffer
 squeue
+scontrol show bbstat
