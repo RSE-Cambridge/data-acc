@@ -146,7 +146,7 @@ func (fwa *dacctlActions) RealSize(c CliContext) error {
 		return err
 	}
 	// TODO get GiB vs GB correct here!
-	fmt.Printf(`{"token":"%s", "capacity":%d, "units":"bytes"}`, volume.Name, volume.SizeGB*10737418240)
+	fmt.Printf(`{"token":"%s", "capacity":%d, "units":"bytes"}`, volume.Name, volume.SizeGB*1073741824)
 	return nil
 }
 
