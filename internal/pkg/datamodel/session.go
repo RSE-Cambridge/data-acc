@@ -14,8 +14,8 @@ type Session struct {
 	Revision int
 
 	// unix uid and gid
-	Owner     uint
-	Group     uint
+	Owner uint
+	Group uint
 
 	// utc unix timestamp when buffer created
 	CreatedAt uint
@@ -54,7 +54,6 @@ type Session struct {
 }
 
 type SessionRequest struct {
-
 
 	// swap
 }

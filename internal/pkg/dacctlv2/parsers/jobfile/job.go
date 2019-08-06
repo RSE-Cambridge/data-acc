@@ -31,7 +31,6 @@ func toJson(message interface{}) string {
 	return string(b)
 }
 
-
 // Parse a given job file
 func ParseJobFile(disk fileio.Disk, filename string) (jobSummary, error) {
 	lines, err := disk.Lines(filename)

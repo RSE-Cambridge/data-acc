@@ -9,15 +9,15 @@ import (
 func NewDacctlActions(registry session.Registry, actions session.Actions, disk fileio.Disk) actions.DacctlActions {
 	return &dacctlActions{
 		registry: registry,
-		actions: actions,
-		disk: disk,
+		actions:  actions,
+		disk:     disk,
 	}
 }
 
 type dacctlActions struct {
 	registry session.Registry
-	actions session.Actions
-	disk    fileio.Disk
+	actions  session.Actions
+	disk     fileio.Disk
 }
 
 func (d *dacctlActions) CreatePersistentBuffer(c actions.CliContext) error {
@@ -77,4 +77,3 @@ func (*dacctlActions) PostRun(c actions.CliContext) error {
 func (*dacctlActions) DataOut(c actions.CliContext) error {
 	panic("implement me")
 }
-
