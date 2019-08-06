@@ -179,9 +179,9 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 	for _, host := range hosts {
 		attachment, ok := vlm.volume.FindAttachment(host, jobName)
 		if !ok {
-			return fmt.Errorf(
-				"can't find attachment for volume: %s host: %s job: %s",
+			log.Printf("can't find attachment for volume: %s host: %s job: %s\n",
 				vlm.volume.Name, host, jobName)
+			return nil
 		}
 
 		if attachment.State != registry.Attached {
