@@ -5,14 +5,12 @@ type VolumeName string
 type Volume struct {
 	// e.g. job1 or Foo
 	Name VolumeName
+
 	// its 8 characters long, so works nicely with lustre
 	UUID string
+
 	// True if multiple jobs can attach to this volume
 	MultiJob bool
-
-	// Message requested actions to primary brick host
-	// TODO: move mount and data copy actions to other parts of the volume state
-	State VolumeState
 
 	// Requested pool of bricks for volume
 	Pool string // TODO: PoolName?
@@ -53,10 +51,10 @@ type Volume struct {
 	// TODO: maybe data copy should be a slice associated with the job?
 	// Request certain files to be staged in
 	// Not currently allowed for multi job volumes
-	StageIn DataCopyRequest
+	StageInRequests []DataCopyRequest
 	// Request certain files to be staged in
 	// Not currently allowed for multi job volumes
-	StageOut DataCopyRequest
+	StageOutRequests []DataCopyRequest
 
 	// BeeGFS wants each fs to be assigned a unique port number
 	ClientPort int
@@ -64,9 +62,4 @@ type Volume struct {
 	// Track if we have had bricks assigned
 	// if we request delete, no bricks ever assigned, don't ait for dacd!
 	HadBricksAssigned bool
-
-	// TODO: data model currently does not do these things well:
-	// 1. correctly track multiple jobs at the same time attach to the same persistent buffer
-	// 2. data in/out requests for persistent buffer
-	// 3. track amount of space used by swap and/or metadata
 }
