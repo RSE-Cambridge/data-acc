@@ -165,13 +165,25 @@ func (vlm *volumeLifecycleManager) Mount(hosts []string, jobName string) error {
 	return err
 }
 
+func IsUnmountOK(state registry.VolumeState) bool {
+	switch state {
+	case
+		registry.BricksProvisioned,
+		registry.DataInComplete,
+		registry.DataOutComplete,
+		registry.Error:
+		return true
+	}
+	return false
+}
+
 func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error {
 	if vlm.volume.SizeBricks == 0 {
 		log.Println("skipping postrun for:", vlm.volume.Name) // TODO return error type and handle outside?
 		return nil
 	}
 
-	if vlm.volume.State != registry.BricksProvisioned && vlm.volume.State != registry.DataInComplete && vlm.volume.State != registry.DataOutComplete {
+	if !IsUnmountOK(vlm.volume.State) {
 		return fmt.Errorf("unable to unmount volume: %s in state: %s", vlm.volume.Name, vlm.volume.State)
 	}
 
