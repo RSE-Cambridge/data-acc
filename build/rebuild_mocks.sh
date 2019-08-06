@@ -24,6 +24,11 @@ for i in $items; do
         -package mocks >internal/pkg/mocks/${i}_mock.go
 done
 
-items="interface"
 mockgen -source=internal/pkg/pfsprovider/interface.go \
     -package mocks >internal/pkg/mocks/pfsprovider_mock.go
+
+items="actions session"
+for i in $items; do
+    mockgen -source=internal/pkg/data/session/${i}.go \
+        >internal/pkg/data/mock_session/${i}.go
+done
