@@ -171,7 +171,7 @@ func (vlm *volumeLifecycleManager) Unmount(hosts []string, jobName string) error
 		return nil
 	}
 
-	if vlm.volume.State != registry.BricksProvisioned && vlm.volume.State != registry.DataInComplete {
+	if vlm.volume.State != registry.BricksProvisioned && vlm.volume.State != registry.DataInComplete && vlm.volume.State != registry.DataOutComplete {
 		return fmt.Errorf("unable to unmount volume: %s in state: %s", vlm.volume.Name, vlm.volume.State)
 	}
 
