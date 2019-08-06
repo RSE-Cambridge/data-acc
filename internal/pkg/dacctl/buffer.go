@@ -22,6 +22,12 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry
 		return err
 	}
 
+	// First try unmount everything, to stop the possibility of stuck mounts
+	// TODO: do we need locking here to avoid nastiness?
+	if err := Unmount(volumeRegistry, poolRegistry, job); err != nil {
+		return err
+	}
+
 	if job.JobVolume != "" {
 		volume, err := volumeRegistry.Volume(job.JobVolume)
 		if err != nil {
