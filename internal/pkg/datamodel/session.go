@@ -21,7 +21,7 @@ type Session struct {
 	CreatedAt uint
 
 	// Details of what was requested
-	Request SessionRequest
+	PersistentVolumeRequest PersistentVolumeRequest
 
 	// Records if we have started trying to delete
 	DeleteRequested bool
@@ -53,10 +53,28 @@ type Session struct {
 	Allocations []BrickAllocation
 }
 
-type SessionRequest struct {
-
-	// swap
+type PersistentVolumeRequest struct {
+	Caller        string
+	CapacityBytes int
+	PoolName      string
+	Access        AccessMode
+	Type          BufferType
 }
+
+type AccessMode int
+
+const (
+	Striped           AccessMode = 0
+	Private                      = 1
+	PrivateAndStriped            = 2
+)
+
+type BufferType int
+
+const (
+	Scratch BufferType = iota
+	Cache
+)
 
 type DataCopyRequest struct {
 	// Source points to a File or a Directory,
