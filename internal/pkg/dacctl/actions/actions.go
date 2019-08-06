@@ -259,31 +259,7 @@ func (fwa *dacctlActions) PostRun(c CliContext) error {
 		return err
 	}
 
-	if job.JobVolume == "" {
-		log.Print("No job volume to unmount")
-	} else {
-		volume, err := fwa.volumeRegistry.Volume(job.JobVolume)
-		if err != nil {
-			return err
-		}
-		vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
-		if err := vlm.Unmount(job.AttachHosts, job.Name); err != nil {
-			return err
-		}
-	}
-
-	for _, volumeName := range job.MultiJobVolumes {
-		volume, err := fwa.volumeRegistry.Volume(volumeName)
-		if err != nil {
-			return err
-		}
-		vlm := lifecycle.NewVolumeLifecycleManager(fwa.volumeRegistry, fwa.poolRegistry, volume)
-		if err := vlm.Unmount(job.AttachHosts, job.Name); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return dacctl.Unmount(fwa.volumeRegistry, fwa.poolRegistry, job)
 }
 
 func (fwa *dacctlActions) DataOut(c CliContext) error {

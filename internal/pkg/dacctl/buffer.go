@@ -38,6 +38,33 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry
 	return volumeRegistry.DeleteJob(token)
 }
 
+func Unmount(volumeRegistry registry.VolumeRegistry, poolRegistry registry.PoolRegistry, job registry.Job) error {
+	if job.JobVolume == "" {
+		log.Print("No job volume to unmount")
+	} else {
+		volume, err := volumeRegistry.Volume(job.JobVolume)
+		if err != nil {
+			return err
+		}
+		vlm := lifecycle.NewVolumeLifecycleManager(volumeRegistry, poolRegistry, volume)
+		if err := vlm.Unmount(job.AttachHosts, job.Name); err != nil {
+			return err
+		}
+	}
+
+	for _, volumeName := range job.MultiJobVolumes {
+		volume, err := volumeRegistry.Volume(volumeName)
+		if err != nil {
+			return err
+		}
+		vlm := lifecycle.NewVolumeLifecycleManager(volumeRegistry, poolRegistry, volume)
+		if err := vlm.Unmount(job.AttachHosts, job.Name); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func CreatePerJobBuffer(volumeRegistry registry.VolumeRegistry, poolRegistry registry.PoolRegistry, disk fileio.Disk,
 	token string, user int, group int, capacity string, caller string, jobFile string, nodeFile string) error {
 	summary, err := ParseJobFile(disk, jobFile)
