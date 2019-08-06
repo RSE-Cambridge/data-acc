@@ -93,3 +93,71 @@ func TestDacctlActions_DeleteBuffer(t *testing.T) {
 
 	assert.Equal(t, fakeError, err)
 }
+
+func TestDacctlActions_DataIn(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	registry := mock_session.NewMockRegistry(mockCtrl)
+	session := mock_session.NewMockActions(mockCtrl)
+
+	fakeSession := datamodel.Session{Name: "foo"}
+	registry.EXPECT().GetSession("token").Return(fakeSession, nil)
+	fakeError := errors.New("fake")
+	session.EXPECT().DataIn(fakeSession).Return(fakeError)
+
+	actions := NewDacctlActions(registry, session, nil)
+	err := actions.DataIn(&mockCliContext{})
+
+	assert.Equal(t, fakeError, err)
+}
+
+func TestDacctlActions_DataOut(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	registry := mock_session.NewMockRegistry(mockCtrl)
+	session := mock_session.NewMockActions(mockCtrl)
+
+	fakeSession := datamodel.Session{Name: "foo"}
+	registry.EXPECT().GetSession("token").Return(fakeSession, nil)
+	fakeError := errors.New("fake")
+	session.EXPECT().DataOut(fakeSession).Return(fakeError)
+
+	actions := NewDacctlActions(registry, session, nil)
+	err := actions.DataOut(&mockCliContext{})
+
+	assert.Equal(t, fakeError, err)
+}
+
+func TestDacctlActions_PreRun(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	registry := mock_session.NewMockRegistry(mockCtrl)
+	session := mock_session.NewMockActions(mockCtrl)
+
+	fakeSession := datamodel.Session{Name: "foo"}
+	registry.EXPECT().GetSession("token").Return(fakeSession, nil)
+	fakeError := errors.New("fake")
+	session.EXPECT().AttachVolumes(fakeSession).Return(fakeError)
+
+	actions := NewDacctlActions(registry, session, nil)
+	err := actions.PreRun(&mockCliContext{})
+
+	assert.Equal(t, fakeError, err)
+}
+
+func TestDacctlActions_PostRun(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	registry := mock_session.NewMockRegistry(mockCtrl)
+	session := mock_session.NewMockActions(mockCtrl)
+
+	fakeSession := datamodel.Session{Name: "foo"}
+	registry.EXPECT().GetSession("token").Return(fakeSession, nil)
+	fakeError := errors.New("fake")
+	session.EXPECT().DetachVolumes(fakeSession).Return(fakeError)
+
+	actions := NewDacctlActions(registry, session, nil)
+	err := actions.PostRun(&mockCliContext{})
+
+	assert.Equal(t, fakeError, err)
+}
