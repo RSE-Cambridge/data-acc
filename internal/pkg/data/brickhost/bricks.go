@@ -33,7 +33,7 @@ type BrickRegistry interface {
 	//
 	// Note: you may assign multiple volumes in a single call, but all bricks
 	// for a particular volume must be set in a single call
-	AllocateBricksForVolume(volume Volume) ([]BrickAllocation, error)
+	//AllocateBricksForVolume(volume Volume) ([]BrickAllocation, error)
 
 	// Deallocate all bricks associated with the given volume
 	//
@@ -41,23 +41,23 @@ type BrickRegistry interface {
 	// If any host associated with one of the bricks is down, an error is returned and the deallocate is
 	// recorded as requested and not executed.
 	// Note: this returns as soon as deallocate is requested, doesn't wait for cleanup completion
-	DeallocateBricks(volume VolumeName) error
+	//DeallocateBricks(volume VolumeName) error
 
 	// This is called after DeallocateBricks has been processed
-	HardDeleteAllocations(allocations []BrickAllocation) error
+	//HardDeleteAllocations(allocations []BrickAllocation) error
 
 	// Get all the allocations for bricks associated with the specified hostname
-	GetAllocationsForHost(hostname string) ([]BrickAllocation, error)
+	//GetAllocationsForHost(hostname string) ([]BrickAllocation, error)
 
 	// Get all the allocations for bricks associated with the specific volume
-	GetAllocationsForVolume(volume VolumeName) ([]BrickAllocation, error)
+	//GetAllocationsForVolume(volume VolumeName) ([]BrickAllocation, error)
 
 	// Get information on a specific brick
-	GetBrickInfo(hostname string, device string) (BrickInfo, error)
+	//GetBrickInfo(hostname string, device string) (BrickInfo, error)
 
 	// Returns a channel that reports all new brick allocations for given hostname
 	//
 	// The channel is closed when the context is cancelled or timeout.
 	// Any errors in the watching log the issue and panic
-	GetNewHostBrickAllocations(ctxt context.Context, hostname string) <-chan BrickAllocation
+	//GetNewHostBrickAllocations(ctxt context.Context, hostname string) <-chan BrickAllocation
 }
