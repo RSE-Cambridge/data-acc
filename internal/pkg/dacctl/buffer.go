@@ -34,6 +34,7 @@ func DeleteBufferComponents(volumeRegistry registry.VolumeRegistry, poolRegistry
 		}
 	}
 
+	// TODO this final step is missing when you restart dacd and it tries to tidy up
 	return volumeRegistry.DeleteJob(token)
 }
 
