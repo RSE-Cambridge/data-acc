@@ -1,6 +1,7 @@
 package actionsImpl
 
 import (
+	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/mock_session"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
@@ -74,4 +75,21 @@ func TestDacctlActions_CreatePersistentBuffer(t *testing.T) {
 	err := actions.CreatePersistentBuffer(&mockCliContext{capacity: 2})
 
 	assert.Nil(t, err)
+}
+
+func TestDacctlActions_DeleteBuffer(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	registry := mock_session.NewMockRegistry(mockCtrl)
+	session := mock_session.NewMockActions(mockCtrl)
+
+	fakeSession := datamodel.Session{Name: "foo"}
+	registry.EXPECT().GetSession("token").Return(fakeSession, nil)
+	fakeError := errors.New("fake")
+	session.EXPECT().DeleteSession(fakeSession).Return(fakeError)
+
+	actions := NewDacctlActions(registry, session, nil)
+	err := actions.DeleteBuffer(&mockCliContext{})
+
+	assert.Equal(t, fakeError, err)
 }

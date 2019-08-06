@@ -1,6 +1,7 @@
 package actionsImpl
 
 import (
+	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctlv2/actions"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/session"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
@@ -34,8 +35,14 @@ func checkRequiredStrings(c actions.CliContext, flags ...string) {
 	}
 }
 
-func (*dacctlActions) DeleteBuffer(c actions.CliContext) error {
-	panic("implement me")
+func (d *dacctlActions) DeleteBuffer(c actions.CliContext) error {
+	checkRequiredStrings(c, "token")
+	token := c.String("token")
+	session, err := d.registry.GetSession(token)
+	if err != nil {
+		return fmt.Errorf("unable to find session for token %s", token)
+	}
+	return d.actions.DeleteSession(session)
 }
 
 func (*dacctlActions) CreatePerJobBuffer(c actions.CliContext) error {
