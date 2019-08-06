@@ -101,8 +101,9 @@ func TestVolumeLifecycleManager_Unmount(t *testing.T) {
 	err := vlm.Unmount(hosts, "job2")
 	assert.Equal(t, "attachment must be attached to do unmount for volume: vol1", err.Error())
 
+	// no op rather than return error when you can't find an attachment
 	err = vlm.Unmount(hosts, "job3")
-	assert.Equal(t, "can't find attachment for volume: vol1 host: host1 job: job3", err.Error())
+	assert.Nil(t, err)
 
 	err = vlm.Unmount(hosts, "job1")
 	assert.Equal(t, "unable to unmount volume: vol1 because: attachment for host host1 in error state", err.Error())
