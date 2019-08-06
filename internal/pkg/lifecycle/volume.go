@@ -65,6 +65,8 @@ func (vlm *volumeLifecycleManager) Delete() error {
 		}
 		log.Println("Bricks deleted by brick manager for:", vlm.volume.Name)
 
+		// TODO all this should really happen server side, so it is done when dacd is restarted
+
 		// TODO should we error out here when one of these steps fail?
 		err = vlm.poolRegistry.DeallocateBricks(vlm.volume.Name)
 		if err != nil {
