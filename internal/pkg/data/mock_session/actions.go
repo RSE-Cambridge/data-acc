@@ -5,9 +5,9 @@
 package mock_session
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
-	"github.com/golang/mock/gomock"
-	"reflect"
+	model "github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
+	gomock "github.com/golang/mock/gomock"
+	reflect "reflect"
 )
 
 // MockActions is a mock of Actions interface

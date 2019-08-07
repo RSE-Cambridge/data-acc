@@ -25,4 +25,3 @@ func (*dacctlActions) ListPools() error {
 func (*dacctlActions) ShowConfigurations() error {
 	panic("implement me")
 }
-

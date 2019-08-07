@@ -3,8 +3,8 @@ package actions_impl
 import (
 	"errors"
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/mock_session"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
