@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// TODO: missing a few?
 var sizeSuffixMulitiplyer = map[string]int{
 	"TiB": 1099511627776,
 	"TB":  1000000000000,
@@ -16,7 +17,7 @@ var sizeSuffixMulitiplyer = map[string]int{
 	"MB":  1000000,
 }
 
-func parseSize(raw string) (int, error) {
+func ParseSize(raw string) (int, error) {
 	intVal, err := strconv.Atoi(raw)
 	if err == nil {
 		// specified raw bytes
@@ -42,7 +43,7 @@ func ParseCapacityBytes(raw string) (string, int, error) {
 	}
 	pool := parts[0]
 	rawCapacity := parts[1]
-	sizeBytes, err := parseSize(rawCapacity)
+	sizeBytes, err := ParseSize(rawCapacity)
 	if err != nil {
 		return "", 0, err
 	}

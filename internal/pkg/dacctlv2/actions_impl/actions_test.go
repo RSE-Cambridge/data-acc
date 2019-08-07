@@ -62,10 +62,11 @@ func TestDacctlActions_CreatePersistentBuffer(t *testing.T) {
 		Owner:     1001,
 		Group:     1002,
 		CreatedAt: 123,
-		PersistentVolumeRequest: model.PersistentVolumeRequest{
-			Caller:        "caller",
-			PoolName:      "pool1",
-			CapacityBytes: 2147483648,
+		VolumeRequest: model.VolumeRequest{
+			MultiJob:           true,
+			Caller:             "caller",
+			PoolName:           "pool1",
+			TotalCapacityBytes: 2147483648,
 		},
 	}).Return(fakeSession, nil)
 	session.EXPECT().CreateSessionVolume(fakeSession)

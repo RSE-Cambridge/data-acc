@@ -1,6 +1,7 @@
 package jobfile
 
 import (
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
@@ -39,13 +40,21 @@ func TestGetJobSummary(t *testing.T) {
 		`#DW jobdw capacity=4MiB access_mode=striped,private type=scratch`,
 		`#DW swap 4MB`,
 		`#DW stage_in source=/global/cscratch1/filename1 destination=$DW_JOB_STRIPED/filename1 type=file`,
+		`#DW stage_in source=/global/cscratch1/filename2 destination=$DW_JOB_STRIPED/filename2 type=file`,
 		`#DW stage_out source=$DW_JOB_STRIPED/outdir destination=/global/scratch1/outdir type=directory`,
 	}
 	result, err := getJobSummary(lines)
 
 	assert.Nil(t, err)
-	assert.EqualValues(t, "/global/cscratch1/filename1", result.DataIn.Source)
-	assert.EqualValues(t, "$DW_JOB_STRIPED/outdir", result.DataOut.Source)
+	assert.Equal(t, 2, len(result.DataIn))
+	assert.Equal(t, 1, len(result.DataOut))
+	assert.EqualValues(t, "/global/cscratch1/filename1", result.DataIn[0].Source)
+	assert.EqualValues(t, "/global/cscratch1/filename2", result.DataIn[1].Source)
+	assert.EqualValues(t, "$DW_JOB_STRIPED/outdir", result.DataOut[0].Source)
+
+	assert.Equal(t, 2, len(result.Attachments))
+	assert.Equal(t, model.VolumeName("myBBname1"), result.Attachments[0])
+	assert.Equal(t, model.VolumeName("myBBname2"), result.Attachments[1])
 
 	assert.Equal(t, 4194304, result.PerJobBuffer.CapacityBytes)
 	assert.Equal(t, 4000000, result.Swap.SizeBytes)

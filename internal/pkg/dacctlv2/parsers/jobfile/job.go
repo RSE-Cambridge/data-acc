@@ -3,18 +3,19 @@ package jobfile
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctlv2/parsers/capacity"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"log"
-	"strconv"
 	"strings"
 )
 
 type jobSummary struct {
 	PerJobBuffer *cmdPerJobBuffer
 	Swap         *cmdAttachPerJobSwap
-	Attachments  []cmdAttachPersistent
-	DataIn       *cmdStageInData
-	DataOut      *cmdStageOutData
+	Attachments  []model.VolumeName
+	DataIn       []model.DataCopyRequest
+	DataOut      []model.DataCopyRequest
 	//createPersistent  *cmdCreatePersistent
 	//destroyPersistent *cmdDestroyPersistent
 }
@@ -56,25 +57,24 @@ func getJobSummary(lines []string) (jobSummary, error) {
 				return summary, fmt.Errorf("only one per job buffer allowed")
 			}
 		case cmdAttachPersistent:
-			summary.Attachments = append(summary.Attachments, c)
+			summary.Attachments = append(summary.Attachments, model.VolumeName(c))
 		case cmdAttachPerJobSwap:
 			if summary.Swap != nil {
-				// TODO check amount isn't too big for per job buffer
 				return summary, fmt.Errorf("only one swap request allowed")
 			}
 			summary.Swap = &c
 		case cmdStageOutData:
-			if summary.DataOut != nil {
-				// TODO really should check if data out matches one of the requested buffers
-				return summary, fmt.Errorf("only one per data out requested allowed")
-			}
-			summary.DataOut = &c
+			summary.DataOut = append(summary.DataOut, model.DataCopyRequest{
+				SourceType:  c.SourceType,
+				Source:      c.Source,
+				Destination: c.Destination,
+			})
 		case cmdStageInData:
-			if summary.DataIn != nil {
-				// TODO really should check if data in matches one of the requested buffers
-				return summary, fmt.Errorf("only one per data in requested allowed")
-			}
-			summary.DataIn = &c
+			summary.DataIn = append(summary.DataIn, model.DataCopyRequest{
+				SourceType:  c.SourceType,
+				Source:      c.Source,
+				Destination: c.Destination,
+			})
 		default:
 			// do nothing
 		}
@@ -84,63 +84,44 @@ func getJobSummary(lines []string) (jobSummary, error) {
 
 type jobCommand interface{}
 
-type AccessMode int
-
-const (
-	striped           AccessMode = 0
-	private                      = 1
-	privateAndStriped            = 2
-)
-
-var stringToAccessMode = map[string]AccessMode{
-	"":                striped,
-	"striped":         striped,
-	"private":         private,
-	"private,striped": privateAndStriped,
-	"striped,private": privateAndStriped,
+var stringToAccessMode = map[string]model.AccessMode{
+	"":                model.Striped,
+	"striped":         model.Striped,
+	"private":         model.Private,
+	"private,striped": model.PrivateAndStriped,
+	"striped,private": model.PrivateAndStriped,
 }
 
-func AccessModeFromString(raw string) AccessMode {
+func AccessModeFromString(raw string) model.AccessMode {
 	return stringToAccessMode[strings.ToLower(raw)]
 }
 
-type BufferType int
-
-const (
-	scratch BufferType = iota
-	cache
-)
-
-var stringToBufferType = map[string]BufferType{
-	"":        scratch,
-	"scratch": scratch,
-	"cache":   cache,
+var stringToBufferType = map[string]model.BufferType{
+	"":        model.Scratch,
+	"scratch": model.Scratch,
+	"cache":   model.Cache,
 }
 
 type cmdCreatePersistent struct {
 	Name          string
 	CapacityBytes int
-	AccessMode    AccessMode
-	BufferType    BufferType
+	AccessMode    model.AccessMode
+	BufferType    model.BufferType
 	GenericCmd    bool
 }
 
-func BufferTypeFromString(raw string) BufferType {
+func BufferTypeFromString(raw string) model.BufferType {
 	return stringToBufferType[strings.ToLower(raw)]
 }
 
-type cmdDestroyPersistent struct {
-	Name string
-}
+type cmdDestroyPersistent string
 
-type cmdAttachPersistent struct {
-	Name string
-}
+type cmdAttachPersistent string
 
 type cmdPerJobBuffer struct {
 	CapacityBytes int
-	AccessMode    AccessMode
-	BufferType    BufferType
+	AccessMode    model.AccessMode
+	BufferType    model.BufferType
 	GenericCmd    bool
 }
 
@@ -148,62 +129,19 @@ type cmdAttachPerJobSwap struct {
 	SizeBytes int
 }
 
-type StageType int
-
-const (
-	directory StageType = iota
-	file                // TODO there is also list, but we ignore that for now
-)
-
-var stringToStageType = map[string]StageType{
-	"":          directory,
-	"directory": directory,
-	"file":      file,
+var stringToStageType = map[string]model.SourceType{
+	"directory": model.Directory,
+	"file":      model.File,
+	"list":      model.List,
 }
 
-func stageTypeFromString(raw string) StageType {
+func sourceTypeFromString(raw string) model.SourceType {
 	return stringToStageType[strings.ToLower(raw)]
 }
 
-type cmdStageInData struct {
-	Source      string
-	Destination string
-	StageType   StageType
-}
+type cmdStageInData model.DataCopyRequest
 
-type cmdStageOutData struct {
-	Source      string
-	Destination string
-	StageType   StageType
-}
-
-var sizeSuffixMulitiplyer = map[string]int{
-	"TiB": 1099511627776,
-	"TB":  1000000000000,
-	"GiB": 1073741824,
-	"GB":  1000000000,
-	"MiB": 1048576,
-	"MB":  1000000,
-}
-
-func parseSize(raw string) (int, error) {
-	intVal, err := strconv.Atoi(raw)
-	if err == nil {
-		// specified raw bytes
-		return intVal, nil
-	}
-	for suffix, multiplyer := range sizeSuffixMulitiplyer {
-		if strings.HasSuffix(raw, suffix) {
-			rawInt := strings.TrimSuffix(raw, suffix)
-			intVal, err := strconv.Atoi(rawInt)
-			if err != nil {
-				return 0, err
-			}
-			return intVal * multiplyer, nil
-		}
-	}
-	return 0, fmt.Errorf("unable to parse size: %s", raw)
-}
+type cmdStageOutData model.DataCopyRequest
 
 func parseArgs(rawArgs []string) (map[string]string, error) {
 	args := make(map[string]string, len(rawArgs))
@@ -248,7 +186,7 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 		var command jobCommand
 		switch cmd {
 		case "create_persistent":
-			size, err := parseSize(argKeyPair["capacity"])
+			size, err := capacity.ParseSize(argKeyPair["capacity"])
 			if err != nil {
 				log.Println(err)
 				continue
@@ -261,11 +199,11 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 				BufferType:    BufferTypeFromString(argKeyPair["type"]),
 			}
 		case "destroy_persistent":
-			command = cmdDestroyPersistent{Name: argKeyPair["name"]}
+			command = cmdDestroyPersistent(argKeyPair["name"])
 		case "persistentdw":
-			command = cmdAttachPersistent{Name: argKeyPair["name"]}
+			command = cmdAttachPersistent(argKeyPair["name"])
 		case "jobdw":
-			size, err := parseSize(argKeyPair["capacity"])
+			size, err := capacity.ParseSize(argKeyPair["capacity"])
 			if err != nil {
 				log.Println(err)
 				continue
@@ -280,7 +218,7 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 			if len(args) != 1 {
 				log.Println("Unable to parse swap command:", line)
 			}
-			if size, err := parseSize(args[0]); err != nil {
+			if size, err := capacity.ParseSize(args[0]); err != nil {
 				log.Println(err)
 				continue
 			} else {
@@ -290,13 +228,13 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 			command = cmdStageInData{
 				Source:      argKeyPair["source"],
 				Destination: argKeyPair["destination"],
-				StageType:   stageTypeFromString(argKeyPair["type"]),
+				SourceType:  sourceTypeFromString(argKeyPair["type"]),
 			}
 		case "stage_out":
 			command = cmdStageOutData{
 				Source:      argKeyPair["source"],
 				Destination: argKeyPair["destination"],
-				StageType:   stageTypeFromString(argKeyPair["type"]),
+				SourceType:  sourceTypeFromString(argKeyPair["type"]),
 			}
 		default:
 			log.Println("unrecognised command:", cmd, "with argument length", len(args))

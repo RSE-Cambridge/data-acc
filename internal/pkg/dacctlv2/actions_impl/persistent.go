@@ -45,19 +45,20 @@ func (d *dacctlActions) CreatePersistentBuffer(c actions.CliContext) error {
 	if err != nil {
 		return err
 	}
-	request := model.PersistentVolumeRequest{
-		Caller:        c.String("caller"),
-		CapacityBytes: capacityBytes,
-		PoolName:      pool,
-		Access:        accessModeFromString(c.String("access")),
-		Type:          bufferTypeFromString(c.String("type")),
+	request := model.VolumeRequest{
+		MultiJob:           true,
+		Caller:             c.String("caller"),
+		TotalCapacityBytes: capacityBytes,
+		PoolName:           pool,
+		Access:             accessModeFromString(c.String("access")),
+		Type:               bufferTypeFromString(c.String("type")),
 	}
 	session := model.Session{
-		Name:                    model.SessionName(c.String("token")),
-		PersistentVolumeRequest: request,
-		Owner:                   uint(c.Int("user")),
-		Group:                   uint(c.Int("group")),
-		CreatedAt:               getNow(),
+		Name:          model.SessionName(c.String("token")),
+		VolumeRequest: request,
+		Owner:         uint(c.Int("user")),
+		Group:         uint(c.Int("group")),
+		CreatedAt:     getNow(),
 	}
 	session, err = d.registry.CreateSessionAllocations(session)
 	if err != nil {
