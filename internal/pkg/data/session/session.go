@@ -1,25 +1,25 @@
 package session
 
-import "github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
+import "github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
 
 type Registry interface {
 	// Gets a session and its current allocations
 	// Returns an error if the session is not found
-	GetSession(token string) (datamodel.Session, error)
+	GetSession(token string) (model.Session, error)
 
 	// Any required allocations are created for the given session
 	// such that actions can now be sent to the given session
 	// Returns an error if the session already exists
 	// Note that deleting a session and its allocation is an action, as is any update
-	CreateSessionAllocations(s datamodel.Session) (datamodel.Session, error)
+	CreateSessionAllocations(s model.Session) (model.Session, error)
 
 	// Checks it would be a valid call to CreateAllocations
 	// Error will describe any validation issues
-	ValidateSessionRequest(token string) (datamodel.Session, error)
+	ValidateSessionRequest(token string) (model.Session, error)
 
 	// Used for show instances and show sessions
-	GetAllSessions() ([]datamodel.Session, error)
+	GetAllSessions() ([]model.Session, error)
 
 	// Get all bricks listed by pools
-	GetAllPools() ([]datamodel.Pool, error)
+	GetAllPools() ([]model.Pool, error)
 }

@@ -1,4 +1,4 @@
-package datamodel
+package model
 
 type PoolName string
 

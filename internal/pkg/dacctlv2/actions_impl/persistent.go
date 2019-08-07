@@ -1,32 +1,32 @@
-package actionsImpl
+package actions_impl
 
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctlv2/actions"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctlv2/parsers/capacity"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
 	"strings"
 	"time"
 )
 
-var stringToAccessMode = map[string]datamodel.AccessMode{
-	"":                datamodel.Striped,
-	"striped":         datamodel.Striped,
-	"private":         datamodel.Private,
-	"private,striped": datamodel.PrivateAndStriped,
-	"striped,private": datamodel.PrivateAndStriped,
+var stringToAccessMode = map[string]model.AccessMode{
+	"":                model.Striped,
+	"striped":         model.Striped,
+	"private":         model.Private,
+	"private,striped": model.PrivateAndStriped,
+	"striped,private": model.PrivateAndStriped,
 }
 
-func accessModeFromString(raw string) datamodel.AccessMode {
+func accessModeFromString(raw string) model.AccessMode {
 	return stringToAccessMode[strings.ToLower(raw)]
 }
 
-var stringToBufferType = map[string]datamodel.BufferType{
-	"":        datamodel.Scratch,
-	"scratch": datamodel.Scratch,
-	"cache":   datamodel.Cache,
+var stringToBufferType = map[string]model.BufferType{
+	"":        model.Scratch,
+	"scratch": model.Scratch,
+	"cache":   model.Cache,
 }
 
-func bufferTypeFromString(raw string) datamodel.BufferType {
+func bufferTypeFromString(raw string) model.BufferType {
 	return stringToBufferType[strings.ToLower(raw)]
 }
 
@@ -45,15 +45,15 @@ func (d *dacctlActions) CreatePersistentBuffer(c actions.CliContext) error {
 	if err != nil {
 		return err
 	}
-	request := datamodel.PersistentVolumeRequest{
+	request := model.PersistentVolumeRequest{
 		Caller:        c.String("caller"),
 		CapacityBytes: capacityBytes,
 		PoolName:      pool,
 		Access:        accessModeFromString(c.String("access")),
 		Type:          bufferTypeFromString(c.String("type")),
 	}
-	session := datamodel.Session{
-		Name:                    datamodel.SessionName(c.String("token")),
+	session := model.Session{
+		Name:                    model.SessionName(c.String("token")),
 		PersistentVolumeRequest: request,
 		Owner:                   uint(c.Int("user")),
 		Group:                   uint(c.Int("group")),

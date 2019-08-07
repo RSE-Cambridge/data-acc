@@ -5,9 +5,9 @@
 package mock_session
 
 import (
-	datamodel "github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
-	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
+	"github.com/golang/mock/gomock"
+	"reflect"
 )
 
 // MockActions is a mock of Actions interface
@@ -34,7 +34,7 @@ func (m *MockActions) EXPECT() *MockActionsMockRecorder {
 }
 
 // CreateSessionVolume mocks base method
-func (m *MockActions) CreateSessionVolume(session datamodel.Session) error {
+func (m *MockActions) CreateSessionVolume(session model.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSessionVolume", session)
 	ret0, _ := ret[0].(error)
@@ -48,7 +48,7 @@ func (mr *MockActionsMockRecorder) CreateSessionVolume(session interface{}) *gom
 }
 
 // DeleteSession mocks base method
-func (m *MockActions) DeleteSession(session datamodel.Session) error {
+func (m *MockActions) DeleteSession(session model.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteSession", session)
 	ret0, _ := ret[0].(error)
@@ -62,7 +62,7 @@ func (mr *MockActionsMockRecorder) DeleteSession(session interface{}) *gomock.Ca
 }
 
 // DataIn mocks base method
-func (m *MockActions) DataIn(session datamodel.Session) error {
+func (m *MockActions) DataIn(session model.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DataIn", session)
 	ret0, _ := ret[0].(error)
@@ -76,7 +76,7 @@ func (mr *MockActionsMockRecorder) DataIn(session interface{}) *gomock.Call {
 }
 
 // AttachVolumes mocks base method
-func (m *MockActions) AttachVolumes(session datamodel.Session) error {
+func (m *MockActions) AttachVolumes(session model.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AttachVolumes", session)
 	ret0, _ := ret[0].(error)
@@ -90,7 +90,7 @@ func (mr *MockActionsMockRecorder) AttachVolumes(session interface{}) *gomock.Ca
 }
 
 // DetachVolumes mocks base method
-func (m *MockActions) DetachVolumes(session datamodel.Session) error {
+func (m *MockActions) DetachVolumes(session model.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DetachVolumes", session)
 	ret0, _ := ret[0].(error)
@@ -104,7 +104,7 @@ func (mr *MockActionsMockRecorder) DetachVolumes(session interface{}) *gomock.Ca
 }
 
 // DataOut mocks base method
-func (m *MockActions) DataOut(session datamodel.Session) error {
+func (m *MockActions) DataOut(session model.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DataOut", session)
 	ret0, _ := ret[0].(error)

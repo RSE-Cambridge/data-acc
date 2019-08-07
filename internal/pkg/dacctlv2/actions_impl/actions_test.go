@@ -1,10 +1,10 @@
-package actionsImpl
+package actions_impl
 
 import (
 	"errors"
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/mock_session"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -56,13 +56,13 @@ func TestDacctlActions_CreatePersistentBuffer(t *testing.T) {
 	registry := mock_session.NewMockRegistry(mockCtrl)
 	session := mock_session.NewMockActions(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
-	registry.EXPECT().CreateSessionAllocations(datamodel.Session{
+	fakeSession := model.Session{Name: "foo"}
+	registry.EXPECT().CreateSessionAllocations(model.Session{
 		Name:      "token",
 		Owner:     1001,
 		Group:     1002,
 		CreatedAt: 123,
-		PersistentVolumeRequest: datamodel.PersistentVolumeRequest{
+		PersistentVolumeRequest: model.PersistentVolumeRequest{
 			Caller:        "caller",
 			PoolName:      "pool1",
 			CapacityBytes: 2147483648,
@@ -83,7 +83,7 @@ func TestDacctlActions_DeleteBuffer(t *testing.T) {
 	registry := mock_session.NewMockRegistry(mockCtrl)
 	session := mock_session.NewMockActions(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
+	fakeSession := model.Session{Name: "foo"}
 	registry.EXPECT().GetSession("token").Return(fakeSession, nil)
 	fakeError := errors.New("fake")
 	session.EXPECT().DeleteSession(fakeSession).Return(fakeError)
@@ -100,7 +100,7 @@ func TestDacctlActions_DataIn(t *testing.T) {
 	registry := mock_session.NewMockRegistry(mockCtrl)
 	session := mock_session.NewMockActions(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
+	fakeSession := model.Session{Name: "foo"}
 	registry.EXPECT().GetSession("token").Return(fakeSession, nil)
 	fakeError := errors.New("fake")
 	session.EXPECT().DataIn(fakeSession).Return(fakeError)
@@ -117,7 +117,7 @@ func TestDacctlActions_DataOut(t *testing.T) {
 	registry := mock_session.NewMockRegistry(mockCtrl)
 	session := mock_session.NewMockActions(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
+	fakeSession := model.Session{Name: "foo"}
 	registry.EXPECT().GetSession("token").Return(fakeSession, nil)
 	fakeError := errors.New("fake")
 	session.EXPECT().DataOut(fakeSession).Return(fakeError)
@@ -134,7 +134,7 @@ func TestDacctlActions_PreRun(t *testing.T) {
 	registry := mock_session.NewMockRegistry(mockCtrl)
 	session := mock_session.NewMockActions(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
+	fakeSession := model.Session{Name: "foo"}
 	registry.EXPECT().GetSession("token").Return(fakeSession, nil)
 	fakeError := errors.New("fake")
 	session.EXPECT().AttachVolumes(fakeSession).Return(fakeError)
@@ -151,7 +151,7 @@ func TestDacctlActions_PostRun(t *testing.T) {
 	registry := mock_session.NewMockRegistry(mockCtrl)
 	session := mock_session.NewMockActions(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
+	fakeSession := model.Session{Name: "foo"}
 	registry.EXPECT().GetSession("token").Return(fakeSession, nil)
 	fakeError := errors.New("fake")
 	session.EXPECT().DetachVolumes(fakeSession).Return(fakeError)

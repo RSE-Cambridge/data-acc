@@ -1,10 +1,10 @@
-package actionsImpl
+package actions_impl
 
 import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctlv2/actions"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/session"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"log"
 	"strings"
@@ -36,7 +36,7 @@ func checkRequiredStrings(c actions.CliContext, flags ...string) {
 	}
 }
 
-func (d *dacctlActions) getSession(c actions.CliContext) (datamodel.Session, error) {
+func (d *dacctlActions) getSession(c actions.CliContext) (model.Session, error) {
 	checkRequiredStrings(c, "token")
 	token := c.String("token")
 	s, err := d.registry.GetSession(token)

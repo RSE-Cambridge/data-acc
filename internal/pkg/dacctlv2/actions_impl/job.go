@@ -1,4 +1,4 @@
-package actionsImpl
+package actions_impl
 
 import "github.com/RSE-Cambridge/data-acc/internal/pkg/dacctlv2/actions"
 

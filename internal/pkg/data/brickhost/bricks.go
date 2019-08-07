@@ -1,20 +1,20 @@
 package brickhost
 
-import "github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
+import "github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
 
 type BrickRegistry interface {
 	// Returns a summary of the current state of all pools, including the bricks in each pool
-	Pools() ([]datamodel.Pool, error)
+	Pools() ([]model.Pool, error)
 
 	// BrickHosts need to check they match a pool
 	// which may involve creating the default pool
-	EnsureDefaultPoolCreated(granularityGB int) (datamodel.PoolName, error)
+	EnsureDefaultPoolCreated(granularityGB int) (model.PoolName, error)
 
 	// BrickHost updates bricks on startup
-	UpdateBrickHost(brickHostInfo datamodel.BrickHostInfo) error
+	UpdateBrickHost(brickHostInfo model.BrickHostInfo) error
 
 	// Get information on the BrickHost
-	GetBrickHostInfo(name datamodel.BrickHostName) (datamodel.BrickHostInfo, error)
+	GetBrickHostInfo(name model.BrickHostName) (model.BrickHostInfo, error)
 
 	// While the process is still running this notifies others the host is up
 	//

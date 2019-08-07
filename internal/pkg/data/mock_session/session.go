@@ -5,9 +5,9 @@
 package mock_session
 
 import (
-	datamodel "github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
-	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
+	"github.com/golang/mock/gomock"
+	"reflect"
 )
 
 // MockRegistry is a mock of Registry interface
@@ -34,10 +34,10 @@ func (m *MockRegistry) EXPECT() *MockRegistryMockRecorder {
 }
 
 // GetSession mocks base method
-func (m *MockRegistry) GetSession(token string) (datamodel.Session, error) {
+func (m *MockRegistry) GetSession(token string) (model.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSession", token)
-	ret0, _ := ret[0].(datamodel.Session)
+	ret0, _ := ret[0].(model.Session)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -49,10 +49,10 @@ func (mr *MockRegistryMockRecorder) GetSession(token interface{}) *gomock.Call {
 }
 
 // CreateSessionAllocations mocks base method
-func (m *MockRegistry) CreateSessionAllocations(s datamodel.Session) (datamodel.Session, error) {
+func (m *MockRegistry) CreateSessionAllocations(s model.Session) (model.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSessionAllocations", s)
-	ret0, _ := ret[0].(datamodel.Session)
+	ret0, _ := ret[0].(model.Session)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -64,10 +64,10 @@ func (mr *MockRegistryMockRecorder) CreateSessionAllocations(s interface{}) *gom
 }
 
 // ValidateSessionRequest mocks base method
-func (m *MockRegistry) ValidateSessionRequest(token string) (datamodel.Session, error) {
+func (m *MockRegistry) ValidateSessionRequest(token string) (model.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateSessionRequest", token)
-	ret0, _ := ret[0].(datamodel.Session)
+	ret0, _ := ret[0].(model.Session)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -79,10 +79,10 @@ func (mr *MockRegistryMockRecorder) ValidateSessionRequest(token interface{}) *g
 }
 
 // GetAllSessions mocks base method
-func (m *MockRegistry) GetAllSessions() ([]datamodel.Session, error) {
+func (m *MockRegistry) GetAllSessions() ([]model.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllSessions")
-	ret0, _ := ret[0].([]datamodel.Session)
+	ret0, _ := ret[0].([]model.Session)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -94,10 +94,10 @@ func (mr *MockRegistryMockRecorder) GetAllSessions() *gomock.Call {
 }
 
 // GetAllPools mocks base method
-func (m *MockRegistry) GetAllPools() ([]datamodel.Pool, error) {
+func (m *MockRegistry) GetAllPools() ([]model.Pool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllPools")
-	ret0, _ := ret[0].([]datamodel.Pool)
+	ret0, _ := ret[0].([]model.Pool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

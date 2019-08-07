@@ -1,4 +1,4 @@
-package datamodel
+package model
 
 // You can only have zero or one allocations records for each Brick
 type BrickAllocation struct {
