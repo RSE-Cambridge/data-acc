@@ -27,7 +27,7 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	}
 	disk.EXPECT().Lines("jobfile").Return(lines, nil)
 	fakeSession := model.Session{Name: "foo"}
-	registry.EXPECT().CreateSessionAllocations(model.Session{
+	registry.EXPECT().CreateSession(model.Session{
 		Name:            "token",
 		Owner:           1001,
 		Group:           1002,

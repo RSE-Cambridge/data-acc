@@ -51,7 +51,20 @@ type Session struct {
 	// List of the bricks allocated to implement the JobVolume
 	// One is the primary brick that should be watching for all actions
 	Allocations []BrickAllocation
+
+	// If not empty, says where to send actions too
+	// If empty the session has not yet been acknowledged by the dacd process
+	SessionActionPrefix string
 }
+
+type SessionAction struct {
+	Uuid    string
+	Session Session
+	Action  SessionActionType
+}
+
+// TODO: turn into enum
+type SessionActionType string
 
 type VolumeRequest struct {
 	MultiJob           bool

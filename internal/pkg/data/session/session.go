@@ -1,6 +1,9 @@
 package session
 
-import "github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
+import (
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/data/utils"
+)
 
 type Registry interface {
 	// Gets a session and its current allocations
@@ -11,7 +14,7 @@ type Registry interface {
 	// such that actions can now be sent to the given session
 	// Returns an error if the session already exists
 	// Note that deleting a session and its allocation is an action, as is any update
-	CreateSessionAllocations(s model.Session) (model.Session, error)
+	CreateSession(s model.Session) (model.Session, error)
 
 	// Checks it would be a valid call to CreateAllocations
 	// Error will describe any validation issues
@@ -21,5 +24,10 @@ type Registry interface {
 	GetAllSessions() ([]model.Session, error)
 
 	// Get all bricks listed by pools
-	GetAllPools() ([]model.Pool, error)
+	GetAllPools() ([]model.PoolInfo, error)
+
+	// Get this mutex before calling GetAllPools
+	// choosing the required bricks, then calling
+	// CreateSession that creates the allocation records
+	GetAllocationMutex() (utils.Mutex, error)
 }

@@ -14,11 +14,12 @@ import (
 
 // TODO: this is the client side, need server side too
 func NewSessionActions(keystore store.Keystore) session.Actions {
-	return &sessionActions{keystore: keystore}
+	return &sessionActions{keystore: keystore, defaultTimeout: time.Minute * 20}
 }
 
 type sessionActions struct {
-	keystore store.Keystore
+	keystore       store.Keystore
+	defaultTimeout time.Duration
 }
 
 func toJson(message interface{}) string {
@@ -32,6 +33,9 @@ func toJson(message interface{}) string {
 func (s *sessionActions) sendAction(session model.Session, action string) error {
 	// TODO: update session?
 
+	// TODO: check primary session host is alive before sending event
+	// TODO: If we timeout, cancel the event only if the host is now not alive
+
 	actionId := uuid.New().String()
 	sessionPrefix := fmt.Sprintf("/Session/Actions/%s", session.Name)
 	actionPrefix := fmt.Sprintf("%s/%s", sessionPrefix, actionId)
@@ -40,7 +44,7 @@ func (s *sessionActions) sendAction(session model.Session, action string) error 
 	if err != nil {
 		return fmt.Errorf("unable to start action due to: %s", err.Error())
 	}
-	mctxt, cancel := context.WithTimeout(context.Background(), time.Minute*20)
+	mctxt, cancel := context.WithTimeout(context.Background(), s.defaultTimeout)
 	defer cancel()
 	err = mutex.Lock(mctxt)
 	if err != nil {
@@ -48,7 +52,7 @@ func (s *sessionActions) sendAction(session model.Session, action string) error 
 	}
 	defer mutex.Unlock(context.Background())
 
-	ctxt, cancel := context.WithTimeout(context.Background(), time.Minute*20)
+	ctxt, cancel := context.WithTimeout(context.Background(), s.defaultTimeout)
 	defer cancel()
 	responses := s.keystore.Watch(ctxt, fmt.Sprintf("%s/%s", actionPrefix, "output"), false)
 
@@ -61,6 +65,7 @@ func (s *sessionActions) sendAction(session model.Session, action string) error 
 		return err
 	}
 
+	// TODO: how do we detect a timeout here?
 	for response := range responses {
 		if response.Err != nil {
 			return response.Err

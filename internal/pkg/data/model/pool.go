@@ -10,3 +10,13 @@ type Pool struct {
 	// It is the minimum size of any registered brick
 	GranularityGB uint
 }
+
+type PoolInfo struct {
+	Pool Pool
+
+	// Bricks from alive hosts
+	AvailableBricks []BrickInfo
+
+	// All currently active bricks
+	AllocatedBricks []BrickAllocation
+}

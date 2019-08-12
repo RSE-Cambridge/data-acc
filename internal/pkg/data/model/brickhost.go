@@ -8,11 +8,15 @@ type BrickHostInfo struct {
 	// Returns all bricks
 	Bricks []BrickInfo
 
-	// True if dacd is detected as running
-	Alive bool
-
 	// True if allowing new volumes to use bricks from this host
 	Enabled bool
+}
+
+type BrickHostStatus struct {
+	Info BrickHostInfo
+
+	// True is current keepalive key exists
+	Alive bool
 }
 
 type BrickInfo struct {

@@ -82,7 +82,7 @@ func (d *dacctlActions) CreatePerJobBuffer(c actions.CliContext) error {
 	}
 	session.Paths = getPaths(session)
 
-	session, err = d.registry.CreateSessionAllocations(session)
+	session, err = d.registry.CreateSession(session)
 	if err != nil {
 		return err
 	}

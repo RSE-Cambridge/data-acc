@@ -6,6 +6,7 @@ package mock_session
 
 import (
 	model "github.com/RSE-Cambridge/data-acc/internal/pkg/data/model"
+	utils "github.com/RSE-Cambridge/data-acc/internal/pkg/data/utils"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -48,19 +49,19 @@ func (mr *MockRegistryMockRecorder) GetSession(token interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSession", reflect.TypeOf((*MockRegistry)(nil).GetSession), token)
 }
 
-// CreateSessionAllocations mocks base method
-func (m *MockRegistry) CreateSessionAllocations(s model.Session) (model.Session, error) {
+// CreateSession mocks base method
+func (m *MockRegistry) CreateSession(s model.Session) (model.Session, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSessionAllocations", s)
+	ret := m.ctrl.Call(m, "CreateSession", s)
 	ret0, _ := ret[0].(model.Session)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateSessionAllocations indicates an expected call of CreateSessionAllocations
-func (mr *MockRegistryMockRecorder) CreateSessionAllocations(s interface{}) *gomock.Call {
+// CreateSession indicates an expected call of CreateSession
+func (mr *MockRegistryMockRecorder) CreateSession(s interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSessionAllocations", reflect.TypeOf((*MockRegistry)(nil).CreateSessionAllocations), s)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockRegistry)(nil).CreateSession), s)
 }
 
 // ValidateSessionRequest mocks base method
@@ -94,10 +95,10 @@ func (mr *MockRegistryMockRecorder) GetAllSessions() *gomock.Call {
 }
 
 // GetAllPools mocks base method
-func (m *MockRegistry) GetAllPools() ([]model.Pool, error) {
+func (m *MockRegistry) GetAllPools() ([]model.PoolInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllPools")
-	ret0, _ := ret[0].([]model.Pool)
+	ret0, _ := ret[0].([]model.PoolInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -106,4 +107,19 @@ func (m *MockRegistry) GetAllPools() ([]model.Pool, error) {
 func (mr *MockRegistryMockRecorder) GetAllPools() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllPools", reflect.TypeOf((*MockRegistry)(nil).GetAllPools))
+}
+
+// GetAllocationMutex mocks base method
+func (m *MockRegistry) GetAllocationMutex() (utils.Mutex, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllocationMutex")
+	ret0, _ := ret[0].(utils.Mutex)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllocationMutex indicates an expected call of GetAllocationMutex
+func (mr *MockRegistryMockRecorder) GetAllocationMutex() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllocationMutex", reflect.TypeOf((*MockRegistry)(nil).GetAllocationMutex))
 }
