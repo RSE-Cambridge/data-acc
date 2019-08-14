@@ -4,6 +4,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_workflow"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -12,8 +13,8 @@ import (
 func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	registry := mock_registry.NewMockRegistry(mockCtrl)
-	session := mock_registry.NewMockActions(mockCtrl)
+	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
+	session := mock_workflow.NewMockSession(mockCtrl)
 	disk := mocks.NewMockDisk(mockCtrl)
 
 	lines := []string{
