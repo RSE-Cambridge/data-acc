@@ -11,14 +11,9 @@ type BrickHostRegistry interface {
 	EnsurePoolCreated(poolName model.PoolName, granularityGB int) (model.PoolName, error)
 
 	// BrickHost updates bricks on startup
+	// This will error if we remove a brick that has an allocation
+	// for a Session that isn't in an error state
 	UpdateBrickHost(brickHostInfo model.BrickHostInfo) error
-
-	// While the process is still running this notifies others the host is up
-	//
-	// When a host is dead non of its bricks will get new volumes assigned,
-	// and no bricks will get cleaned up until the next service start.
-	// Error will be returned if the host info has not yet been written.
-	KeepAliveHost(hostname string) error
 
 	// Get sessions where given hostname is the primary brick
 	// Created by dacctl via CreateSessionAllocations
@@ -32,6 +27,13 @@ type BrickHostRegistry interface {
 	// any actions that are not marked as complete
 	// New tasks are only sent if the keepalive key is active
 	GetNewSessionAction(ctxt context.Context, hostname model.BrickHostName) (<-chan model.SessionAction, error)
+
+	// While the process is still running this notifies others the host is up
+	//
+	// When a host is dead non of its bricks will get new volumes assigned,
+	// and no bricks will get cleaned up until the next service start.
+	// Error will be returned if the host info has not yet been written.
+	KeepAliveHost(hostname string) error
 
 	// Update provided session
 	// Ensures there are no other updates to Session since the revision contained in it

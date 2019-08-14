@@ -55,6 +55,11 @@ type Session struct {
 	// If not empty, says where to send actions too
 	// If empty the session has not yet been acknowledged by the dacd process
 	SessionActionPrefix string
+
+	// If not nil, the session has an unresolved error
+	// and can't be mounted by any new sessions
+	// it can be deleted
+	Error error
 }
 
 type SessionAction struct {
