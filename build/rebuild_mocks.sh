@@ -38,3 +38,9 @@ for i in $items; do
     mockgen -source=internal/pkg/v2/workflow/${i}.go \
         >internal/pkg/v2/mock_workflow/${i}.go
 done
+
+items="keystore"
+for i in $items; do
+    mockgen -source=internal/pkg/v2/store/${i}.go \
+        >internal/pkg/v2/mock_store/${i}.go
+done
