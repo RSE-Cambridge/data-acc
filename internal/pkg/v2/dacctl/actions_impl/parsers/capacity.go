@@ -43,8 +43,8 @@ func ParseCapacityBytes(raw string) (string, int, error) {
 	if len(parts) != 2 {
 		return "", 0, errors.New("must format capacity correctly and include pool")
 	}
-	pool := parts[0]
-	rawCapacity := parts[1]
+	pool := strings.TrimSpace(parts[0])
+	rawCapacity := strings.TrimSpace(parts[1])
 	sizeBytes, err := ParseSize(rawCapacity)
 	if err != nil {
 		return "", 0, err

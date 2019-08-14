@@ -36,5 +36,26 @@ func TestParseSize(t *testing.T) {
 	size, err = ParseSize("1MiB")
 	assert.Nil(t, err)
 	assert.Equal(t, 1048576, size)
+}
 
+func TestParseCapacityBytes(t *testing.T) {
+	pool, size, err := ParseCapacityBytes("foo:1MB")
+	assert.Nil(t, err)
+	assert.Equal(t, "foo", pool)
+	assert.Equal(t, 1000000, size)
+
+	pool, size, err = ParseCapacityBytes("foo : 1 MB")
+	assert.Equal(t, "foo", pool)
+	assert.Equal(t, 1000000, size)
+	assert.Nil(t, err)
+
+	pool, size, err = ParseCapacityBytes("foo1MB")
+	assert.Equal(t, "must format capacity correctly and include pool", err.Error())
+	assert.Equal(t, "", pool)
+	assert.Equal(t, 0, size)
+
+	pool, size, err = ParseCapacityBytes("foo:1B")
+	assert.Equal(t, "unable to parse size: 1B", err.Error())
+	assert.Equal(t, "", pool)
+	assert.Equal(t, 0, size)
 }
