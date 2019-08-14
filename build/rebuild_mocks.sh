@@ -27,8 +27,14 @@ done
 mockgen -source=internal/pkg/pfsprovider/interface.go \
     -package mocks >internal/pkg/mocks/pfsprovider_mock.go
 
-items="actions session"
+items="allocation brick pool session session_actions"
 for i in $items; do
-    mockgen -source=internal/pkg/data/session/${i}.go \
-        >internal/pkg/data/mock_session/${i}.go
+    mockgen -source=internal/pkg/v2/registry/${i}.go \
+        >internal/pkg/v2/mock_registry/${i}.go
+done
+
+items="session"
+for i in $items; do
+    mockgen -source=internal/pkg/v2/workflow/${i}.go \
+        >internal/pkg/v2/mock_workflow/${i}.go
 done

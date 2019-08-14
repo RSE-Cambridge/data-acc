@@ -168,7 +168,7 @@ type Volume struct {
 	// if we request delete, no bricks ever assigned, don't ait for dacd!
 	HadBricksAssigned bool
 
-	// TODO: data model currently does not do these things well:
+	// TODO: data datamodel currently does not do these things well:
 	// 1. correctly track multiple jobs at the same time attach to the same persistent buffer
 	// 2. data in/out requests for persistent buffer
 	// 3. track amount of space used by swap and/or metadata
