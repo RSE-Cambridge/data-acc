@@ -42,6 +42,8 @@ func TestGetJobSummary(t *testing.T) {
 		`#DW stage_in source=/global/cscratch1/filename1 destination=$DW_JOB_STRIPED/filename1 type=file`,
 		`#DW stage_in source=/global/cscratch1/filename2 destination=$DW_JOB_STRIPED/filename2 type=file`,
 		`#DW stage_out source=$DW_JOB_STRIPED/outdir destination=/global/scratch1/outdir type=directory`,
+		`skipping other lines that we`,
+		`don't understand`,
 	}
 	result, err := getJobSummary(lines)
 
@@ -58,4 +60,31 @@ func TestGetJobSummary(t *testing.T) {
 
 	assert.Equal(t, 4194304, result.PerJobBuffer.CapacityBytes)
 	assert.Equal(t, 4000000, result.Swap.SizeBytes)
+}
+
+func TestGetJobSummary_Errors(t *testing.T) {
+	lines := []string{`#DW bad_command asdf=asdf`}
+	result, err := getJobSummary(lines)
+	assert.Equal(t, "unrecognised command: bad_command with arguments: [asdf=asdf]", err.Error())
+	assert.Nil(t, result.PerJobBuffer)
+
+	lines = []string{`#DW swap 1B asdf`}
+	result, err = getJobSummary(lines)
+	assert.Equal(t, "unable to parse swap command: #DW swap 1B asdf", err.Error())
+	assert.Nil(t, result.PerJobBuffer)
+
+	lines = []string{`#DW swap 1B`}
+	result, err = getJobSummary(lines)
+	assert.Equal(t, "unable to parse size: 1B", err.Error())
+	assert.Nil(t, result.PerJobBuffer)
+
+	lines = []string{`#DW jobdw capacity=4B access_mode=striped,private type=scratch`}
+	result, err = getJobSummary(lines)
+	assert.Equal(t, "unable to parse size: 4B", err.Error())
+	assert.Nil(t, result.PerJobBuffer)
+
+	lines = []string{`#BB create_persistent name=myBBname capacity=100B access_mode=striped type=scratch`}
+	result, err = getJobSummary(lines)
+	assert.Equal(t, "unable to parse size: 100B", err.Error())
+	assert.Nil(t, result.PerJobBuffer)
 }

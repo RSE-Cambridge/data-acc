@@ -1,7 +1,6 @@
 package parsers
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
@@ -15,23 +14,11 @@ type jobSummary struct {
 	Attachments  []datamodel.VolumeName
 	DataIn       []datamodel.DataCopyRequest
 	DataOut      []datamodel.DataCopyRequest
+	// TODO: support create and destroy persistent?
 	//createPersistent  *cmdCreatePersistent
 	//destroyPersistent *cmdDestroyPersistent
 }
 
-func (s jobSummary) String() string {
-	return toJson(s)
-}
-
-func toJson(message interface{}) string {
-	b, error := json.Marshal(message)
-	if error != nil {
-		log.Fatal(error)
-	}
-	return string(b)
-}
-
-// Parse a given job file
 func ParseJobFile(disk fileio.Disk, filename string) (jobSummary, error) {
 	lines, err := disk.Lines(filename)
 	if err != nil {
@@ -91,7 +78,7 @@ var stringToAccessMode = map[string]datamodel.AccessMode{
 	"striped,private": datamodel.PrivateAndStriped,
 }
 
-func AccessModeFromString(raw string) datamodel.AccessMode {
+func accessModeFromString(raw string) datamodel.AccessMode {
 	return stringToAccessMode[strings.ToLower(raw)]
 }
 
@@ -109,7 +96,7 @@ type cmdCreatePersistent struct {
 	GenericCmd    bool
 }
 
-func BufferTypeFromString(raw string) datamodel.BufferType {
+func bufferTypeFromString(raw string) datamodel.BufferType {
 	return stringToBufferType[strings.ToLower(raw)]
 }
 
@@ -188,14 +175,14 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 			size, err := ParseSize(argKeyPair["capacity"])
 			if err != nil {
 				log.Println(err)
-				continue
+				return nil, err
 			}
 			command = cmdCreatePersistent{
 				Name:          argKeyPair["name"],
 				CapacityBytes: size,
 				GenericCmd:    isGeneric,
-				AccessMode:    AccessModeFromString(argKeyPair["access_mode"]),
-				BufferType:    BufferTypeFromString(argKeyPair["type"]),
+				AccessMode:    accessModeFromString(argKeyPair["access_mode"]),
+				BufferType:    bufferTypeFromString(argKeyPair["type"]),
 			}
 		case "destroy_persistent":
 			command = cmdDestroyPersistent(argKeyPair["name"])
@@ -205,21 +192,21 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 			size, err := ParseSize(argKeyPair["capacity"])
 			if err != nil {
 				log.Println(err)
-				continue
+				return nil, err
 			}
 			command = cmdPerJobBuffer{
 				CapacityBytes: size,
 				GenericCmd:    isGeneric,
-				AccessMode:    AccessModeFromString(argKeyPair["access_mode"]),
-				BufferType:    BufferTypeFromString(argKeyPair["type"]),
+				AccessMode:    accessModeFromString(argKeyPair["access_mode"]),
+				BufferType:    bufferTypeFromString(argKeyPair["type"]),
 			}
 		case "swap":
 			if len(args) != 1 {
-				log.Println("Unable to parse swap command:", line)
+				return nil, fmt.Errorf("unable to parse swap command: %s", line)
 			}
 			if size, err := ParseSize(args[0]); err != nil {
 				log.Println(err)
-				continue
+				return nil, err
 			} else {
 				command = cmdAttachPerJobSwap{SizeBytes: size}
 			}
@@ -236,8 +223,7 @@ func parseJobRequest(lines []string) ([]jobCommand, error) {
 				SourceType:  sourceTypeFromString(argKeyPair["type"]),
 			}
 		default:
-			log.Println("unrecognised command:", cmd, "with argument length", len(args))
-			continue
+			return nil, fmt.Errorf("unrecognised command: %s with arguments: %s", cmd, args)
 		}
 		commands = append(commands, command)
 	}
