@@ -3,6 +3,7 @@ package parsers
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -25,12 +26,13 @@ func ParseSize(raw string) (int, error) {
 	}
 	for suffix, multiplier := range sizeSuffixMultiplier {
 		if strings.HasSuffix(raw, suffix) {
-			rawInt := strings.TrimSuffix(raw, suffix)
-			intVal, err := strconv.Atoi(rawInt)
+			rawInt := strings.TrimSpace(strings.TrimSuffix(raw, suffix))
+			floatVal, err := strconv.ParseFloat(rawInt, 64)
 			if err != nil {
 				return 0, err
 			}
-			return intVal * multiplier, nil
+			floatBytes := floatVal * float64(multiplier)
+			return int(math.Ceil(floatBytes)), nil
 		}
 	}
 	return 0, fmt.Errorf("unable to parse size: %s", raw)
