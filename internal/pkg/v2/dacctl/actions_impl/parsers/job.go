@@ -40,13 +40,13 @@ func getJobSummary(lines []string) (jobSummary, error) {
 			if summary.PerJobBuffer == nil {
 				summary.PerJobBuffer = &c
 			} else {
-				return summary, fmt.Errorf("only one per job buffer allowed")
+				return jobSummary{}, fmt.Errorf("only one per job buffer allowed")
 			}
 		case cmdAttachPersistent:
 			summary.Attachments = append(summary.Attachments, datamodel.VolumeName(c))
 		case cmdAttachPerJobSwap:
 			if summary.Swap != nil {
-				return summary, fmt.Errorf("only one swap request allowed")
+				return jobSummary{}, fmt.Errorf("only one swap request allowed")
 			}
 			summary.Swap = &c
 		case cmdStageOutData:
@@ -61,8 +61,6 @@ func getJobSummary(lines []string) (jobSummary, error) {
 				Source:      c.Source,
 				Destination: c.Destination,
 			})
-		default:
-			// do nothing
 		}
 	}
 	return summary, nil

@@ -36,6 +36,10 @@ func TestParseSize(t *testing.T) {
 	size, err = ParseSize("1MiB")
 	assert.Nil(t, err)
 	assert.Equal(t, 1048576, size)
+
+	size, err = ParseSize("AMiB")
+	assert.Equal(t, "strconv.ParseFloat: parsing \"A\": invalid syntax", err.Error())
+	assert.Equal(t, 0, size)
 }
 
 func TestParseCapacityBytes(t *testing.T) {

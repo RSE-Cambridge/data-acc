@@ -1,11 +1,34 @@
 package parsers
 
 import (
+	"errors"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
 )
+
+func TestParseJobFile(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockFileIO := mocks.NewMockDisk(mockCtrl)
+	mockFileIO.EXPECT().Lines("testfile").Return(nil, errors.New("asdf"))
+
+	lines, err := ParseJobFile(mockFileIO, "testfile")
+	assert.Equal(t, jobSummary{}, lines)
+	assert.Equal(t, "asdf", err.Error())
+
+	mockFileIO = mocks.NewMockDisk(mockCtrl)
+	mockFileIO.EXPECT().Lines("testfile").Return([]string{`#DW swap asdf`}, nil)
+
+	lines, err = ParseJobFile(mockFileIO, "testfile")
+	assert.Equal(t, jobSummary{}, lines)
+	assert.Equal(t, "unable to parse size: asdf", err.Error())
+
+}
 
 func TestParseJobRequest(t *testing.T) {
 	jobRequest := []string{
@@ -86,5 +109,18 @@ func TestGetJobSummary_Errors(t *testing.T) {
 	lines = []string{`#BB create_persistent name=myBBname capacity=100B access_mode=striped type=scratch`}
 	result, err = getJobSummary(lines)
 	assert.Equal(t, "unable to parse size: 100B", err.Error())
+	assert.Nil(t, result.PerJobBuffer)
+
+	lines = []string{`#DW swap 1MB`, `#DW swap 2MB`}
+	result, err = getJobSummary(lines)
+	assert.Equal(t, "only one swap request allowed", err.Error())
+	assert.Nil(t, result.PerJobBuffer)
+
+	lines = []string{
+		`#DW jobdw capacity=4MiB access_mode=private type=scratch`,
+		`#DW jobdw capacity=5MiB access_mode=striped type=scratch`,
+	}
+	result, err = getJobSummary(lines)
+	assert.Equal(t, "only one per job buffer allowed", err.Error())
 	assert.Nil(t, result.PerJobBuffer)
 }
