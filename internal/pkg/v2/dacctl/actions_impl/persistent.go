@@ -40,7 +40,7 @@ func getNow() uint {
 }
 
 func (d *dacctlActions) CreatePersistentBuffer(c dacctl.CliContext) error {
-	checkRequiredStrings(c, "token", "caller", "capacity", "user", "access", "type")
+	checkRequiredStrings(c, "token", "caller", "capacity", "access", "type")
 	pool, capacityBytes, err := parsers.ParseCapacityBytes(c.String("capacity"))
 	if err != nil {
 		return err

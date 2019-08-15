@@ -3,6 +3,7 @@ package dacctl
 type CliContext interface {
 	String(name string) string
 	Int(name string) int
+	Bool(name string) bool
 }
 
 type DacctlActions interface {

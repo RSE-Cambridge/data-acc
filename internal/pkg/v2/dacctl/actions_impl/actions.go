@@ -1,6 +1,7 @@
 package actions_impl
 
 import (
+	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
@@ -8,6 +9,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/workflow"
 	"log"
+	"regexp"
 	"strings"
 )
 
@@ -25,7 +27,7 @@ type dacctlActions struct {
 	disk     fileio.Disk
 }
 
-func checkRequiredStrings(c dacctl.CliContext, flags ...string) {
+func checkRequiredStrings(c dacctl.CliContext, flags ...string) error {
 	var errs []string
 	for _, flag := range flags {
 		if str := c.String(flag); str == "" {
@@ -33,59 +35,67 @@ func checkRequiredStrings(c dacctl.CliContext, flags ...string) {
 		}
 	}
 	if len(errs) > 0 {
-		log.Fatalf("Please provide these required parameters: %s", strings.Join(errs, ", "))
+		errStr := fmt.Sprintf("Please provide these required parameters: %s", strings.Join(errs, ", "))
+		log.Println(errStr)
+		return errors.New(errStr)
 	}
+	return nil
 }
 
-func (d *dacctlActions) getSession(c dacctl.CliContext) (datamodel.Session, error) {
-	// TODO - not sure we need this now...?
-	checkRequiredStrings(c, "token")
-	token := c.String("token")
-	sessionName := datamodel.SessionName(token)
-	s, err := d.registry.GetSession(sessionName)
+func (d *dacctlActions) getSessionName(c dacctl.CliContext) (datamodel.SessionName, error) {
+	err := checkRequiredStrings(c, "token")
 	if err != nil {
-		return s, fmt.Errorf("unable to find session for token %s", token)
+		return "", err
 	}
-	return s, nil
+
+	token := c.String("token")
+	re := regexp.MustCompile("[a-zA-Z0-9]*")
+	if !re.Match([]byte(`seafood fool`)) {
+		return "", fmt.Errorf("badly formatted session name: %s", token)
+	}
+
+	return datamodel.SessionName(token), nil
 }
 
 func (d *dacctlActions) DeleteBuffer(c dacctl.CliContext) error {
-	s, err := d.getSession(c)
+	sessionName, err := d.getSessionName(c)
 	if err != nil {
 		return err
 	}
-	return d.session.DeleteSession(s.Name)
+	hurry := c.Bool("hurry")
+	return d.session.DeleteSession(sessionName, hurry)
 }
 
 func (d *dacctlActions) DataIn(c dacctl.CliContext) error {
-	s, err := d.getSession(c)
+	sessionName, err := d.getSessionName(c)
 	if err != nil {
 		return err
 	}
-	return d.session.DataIn(s.Name)
+	return d.session.DataIn(sessionName)
 }
 
 func (d *dacctlActions) PreRun(c dacctl.CliContext) error {
-	s, err := d.getSession(c)
+	sessionName, err := d.getSessionName(c)
 	if err != nil {
 		return err
 	}
-	// TODO - fix attach hosts
-	return d.session.AttachVolumes(s.Name, nil)
+
+	// TODO - fix hosts
+	return d.session.AttachVolumes(sessionName, nil, nil)
 }
 
 func (d *dacctlActions) PostRun(c dacctl.CliContext) error {
-	s, err := d.getSession(c)
+	sessionName, err := d.getSessionName(c)
 	if err != nil {
 		return err
 	}
-	return d.session.DetachVolumes(s.Name)
+	return d.session.DetachVolumes(sessionName)
 }
 
 func (d *dacctlActions) DataOut(c dacctl.CliContext) error {
-	s, err := d.getSession(c)
+	sessionName, err := d.getSessionName(c)
 	if err != nil {
 		return err
 	}
-	return d.session.DataOut(s.Name)
+	return d.session.DataOut(sessionName)
 }

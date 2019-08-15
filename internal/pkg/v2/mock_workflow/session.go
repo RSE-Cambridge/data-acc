@@ -48,17 +48,17 @@ func (mr *MockSessionMockRecorder) CreateSessionVolume(session interface{}) *gom
 }
 
 // DeleteSession mocks base method
-func (m *MockSession) DeleteSession(sessionName datamodel.SessionName) error {
+func (m *MockSession) DeleteSession(sessionName datamodel.SessionName, hurry bool) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSession", sessionName)
+	ret := m.ctrl.Call(m, "DeleteSession", sessionName, hurry)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteSession indicates an expected call of DeleteSession
-func (mr *MockSessionMockRecorder) DeleteSession(sessionName interface{}) *gomock.Call {
+func (mr *MockSessionMockRecorder) DeleteSession(sessionName, hurry interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession", reflect.TypeOf((*MockSession)(nil).DeleteSession), sessionName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession", reflect.TypeOf((*MockSession)(nil).DeleteSession), sessionName, hurry)
 }
 
 // DataIn mocks base method
@@ -76,17 +76,17 @@ func (mr *MockSessionMockRecorder) DataIn(sessionName interface{}) *gomock.Call 
 }
 
 // AttachVolumes mocks base method
-func (m *MockSession) AttachVolumes(sessionName datamodel.SessionName, attachHosts []string) error {
+func (m *MockSession) AttachVolumes(sessionName datamodel.SessionName, computeNodes, loginNodes []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AttachVolumes", sessionName, attachHosts)
+	ret := m.ctrl.Call(m, "AttachVolumes", sessionName, computeNodes, loginNodes)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AttachVolumes indicates an expected call of AttachVolumes
-func (mr *MockSessionMockRecorder) AttachVolumes(sessionName, attachHosts interface{}) *gomock.Call {
+func (mr *MockSessionMockRecorder) AttachVolumes(sessionName, computeNodes, loginNodes interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AttachVolumes", reflect.TypeOf((*MockSession)(nil).AttachVolumes), sessionName, attachHosts)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AttachVolumes", reflect.TypeOf((*MockSession)(nil).AttachVolumes), sessionName, computeNodes, loginNodes)
 }
 
 // DetachVolumes mocks base method

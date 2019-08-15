@@ -71,7 +71,7 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	fakeTime = 123
 
 	actions := NewDacctlActions(registry, session, disk)
-	err := actions.CreatePerJobBuffer(&mockCliContext{capacity: 2})
+	err := actions.CreatePerJobBuffer(getMockCliContext(2))
 
 	assert.Nil(t, err)
 }

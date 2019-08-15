@@ -10,13 +10,15 @@ type Session interface {
 	CreateSessionVolume(session datamodel.Session) error
 
 	// Deletes the requested volume and session allocation
-	DeleteSession(sessionName datamodel.SessionName) error
+	// If hurry, there is no stage-out attempted
+	// Unmount is always attempted before deleting the buffer
+	DeleteSession(sessionName datamodel.SessionName, hurry bool) error
 
 	// Update the session and trigger requested data copy in
 	DataIn(sessionName datamodel.SessionName) error
 
 	// Update session hosts and attach volumes as needed
-	AttachVolumes(sessionName datamodel.SessionName, attachHosts []string) error
+	AttachVolumes(sessionName datamodel.SessionName, computeNodes []string, loginNodes []string) error
 
 	// Attempt to detach volumes
 	DetachVolumes(sessionName datamodel.SessionName) error

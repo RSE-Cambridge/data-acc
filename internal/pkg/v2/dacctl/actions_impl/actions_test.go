@@ -12,71 +12,40 @@ import (
 )
 
 type mockCliContext struct {
-	capacity int
+	strings map[string]string
+	integers map[string]int
+	booleans map[string]bool
 }
 
 func (c *mockCliContext) String(name string) string {
-	switch name {
-	case "capacity":
-		return fmt.Sprintf("pool1:%dGiB", c.capacity)
-	case "token":
-		return "token"
-	case "caller":
-		return "caller"
-	case "user":
-		return "user"
-	case "access":
-		return "access"
-	case "type":
-		return "type"
-	case "job":
-		return "jobfile"
-	case "nodehostnamefile":
-		return "nodehostnamefile1"
-	case "pathfile":
-		return "pathfile1"
-	default:
-		return "foobar1"
-	}
+	return c.strings[name]
 }
 
 func (c *mockCliContext) Int(name string) int {
-	switch name {
-	case "user":
-		return 1001
-	case "group":
-		return 1002
-	default:
-		return 42 + len(name)
-	}
+	return c.integers[name]
 }
 
-func TestDacctlActions_CreatePersistentBuffer(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
-	session := mock_workflow.NewMockSession(mockCtrl)
+func (c *mockCliContext) Bool(name string) bool {
+	return c.booleans[name]
+}
 
-	fakeSession := datamodel.Session{Name: "foo"}
-	registry.EXPECT().CreateSession(datamodel.Session{
-		Name:      "token",
-		Owner:     1001,
-		Group:     1002,
-		CreatedAt: 123,
-		VolumeRequest: datamodel.VolumeRequest{
-			MultiJob:           true,
-			Caller:             "caller",
-			PoolName:           "pool1",
-			TotalCapacityBytes: 2147483648,
-		},
-	}).Return(fakeSession, nil)
-	session.EXPECT().CreateSessionVolume(fakeSession)
-	fakeTime = 123
-
-	actions := NewDacctlActions(registry, session, nil)
-	err := actions.CreatePersistentBuffer(&mockCliContext{capacity: 2})
-
-	assert.Nil(t, err)
+func getMockCliContext(capacity int) *mockCliContext {
+	ctxt := mockCliContext{}
+	ctxt.strings = map[string]string{
+		"capacity":         fmt.Sprintf("pool1:%dGiB", capacity),
+		"token":            "token",
+		"caller":           "caller",
+		"access":           "asdf",
+		"type":             "type",
+		"job":              "jobfile",
+		"nodehostnamefile": "nodehostnamefile1",
+		"pathfile":         "pathfile1",
+	}
+	ctxt.integers = map[string]int{
+		"user":  1001,
+		"group": 1002,
+	}
+	return &ctxt
 }
 
 func TestDacctlActions_DeleteBuffer(t *testing.T) {
@@ -85,13 +54,14 @@ func TestDacctlActions_DeleteBuffer(t *testing.T) {
 	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
 	session := mock_workflow.NewMockSession(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
-	registry.EXPECT().GetSession(datamodel.SessionName("token")).Return(fakeSession, nil)
 	fakeError := errors.New("fake")
-	session.EXPECT().DeleteSession(fakeSession.Name).Return(fakeError)
+	session.EXPECT().DeleteSession(datamodel.SessionName("bar"), true).Return(fakeError)
 
 	actions := NewDacctlActions(registry, session, nil)
-	err := actions.DeleteBuffer(&mockCliContext{})
+	err := actions.DeleteBuffer(&mockCliContext{
+		strings: map[string]string{"token": "bar"},
+		booleans: map[string]bool{"hurry": true},
+	})
 
 	assert.Equal(t, fakeError, err)
 }
@@ -102,15 +72,18 @@ func TestDacctlActions_DataIn(t *testing.T) {
 	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
 	session := mock_workflow.NewMockSession(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
-	registry.EXPECT().GetSession(datamodel.SessionName("token")).Return(fakeSession, nil)
 	fakeError := errors.New("fake")
-	session.EXPECT().DataIn(fakeSession.Name).Return(fakeError)
+	session.EXPECT().DataIn(datamodel.SessionName("bar")).Return(fakeError)
 
 	actions := NewDacctlActions(registry, session, nil)
-	err := actions.DataIn(&mockCliContext{})
+	err := actions.DataIn(&mockCliContext{
+		strings: map[string]string{"token": "bar"},
+	})
 
 	assert.Equal(t, fakeError, err)
+
+	err = actions.DataIn(&mockCliContext{})
+	assert.Equal(t, "Please provide these required parameters: token", err.Error())
 }
 
 func TestDacctlActions_DataOut(t *testing.T) {
@@ -119,13 +92,13 @@ func TestDacctlActions_DataOut(t *testing.T) {
 	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
 	session := mock_workflow.NewMockSession(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
-	registry.EXPECT().GetSession(datamodel.SessionName("token")).Return(fakeSession, nil)
 	fakeError := errors.New("fake")
-	session.EXPECT().DataOut(fakeSession.Name).Return(fakeError)
+	session.EXPECT().DataOut(datamodel.SessionName("bar")).Return(fakeError)
 
 	actions := NewDacctlActions(registry, session, nil)
-	err := actions.DataOut(&mockCliContext{})
+	err := actions.DataOut(&mockCliContext{
+		strings: map[string]string{"token": "bar"},
+	})
 
 	assert.Equal(t, fakeError, err)
 }
@@ -136,13 +109,13 @@ func TestDacctlActions_PreRun(t *testing.T) {
 	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
 	session := mock_workflow.NewMockSession(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
-	registry.EXPECT().GetSession(datamodel.SessionName("token")).Return(fakeSession, nil)
 	fakeError := errors.New("fake")
-	session.EXPECT().AttachVolumes(fakeSession.Name, nil).Return(fakeError)
+	session.EXPECT().AttachVolumes(datamodel.SessionName("bar"), nil, nil).Return(fakeError)
 
 	actions := NewDacctlActions(registry, session, nil)
-	err := actions.PreRun(&mockCliContext{})
+	err := actions.PreRun(&mockCliContext{
+		strings: map[string]string{"token": "bar"},
+	})
 
 	assert.Equal(t, fakeError, err)
 }
@@ -153,13 +126,13 @@ func TestDacctlActions_PostRun(t *testing.T) {
 	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
 	session := mock_workflow.NewMockSession(mockCtrl)
 
-	fakeSession := datamodel.Session{Name: "foo"}
-	registry.EXPECT().GetSession(datamodel.SessionName("token")).Return(fakeSession, nil)
 	fakeError := errors.New("fake")
-	session.EXPECT().DetachVolumes(fakeSession.Name).Return(fakeError)
+	session.EXPECT().DetachVolumes(datamodel.SessionName("bar")).Return(fakeError)
 
 	actions := NewDacctlActions(registry, session, nil)
-	err := actions.PostRun(&mockCliContext{})
+	err := actions.PostRun(&mockCliContext{
+		strings: map[string]string{"token": "bar"},
+	})
 
 	assert.Equal(t, fakeError, err)
 }
