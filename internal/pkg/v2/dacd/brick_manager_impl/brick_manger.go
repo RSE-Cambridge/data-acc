@@ -2,20 +2,21 @@ package brick_manager_impl
 
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/brick_manager"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
 )
 
 func NewBrickManager(brickRegistry registry.BrickRegistry) brick_manager.BrickManager {
-	return &brickManager{config: getConfig(), brickRegistry: brickRegistry}
+	return &brickManager{config: config.GetBrickManagerConfig(), brickRegistry: brickRegistry}
 }
 
 type brickManager struct {
-	config brickManagerConfiguration
+	config        config.BrickManagerConfig
 	brickRegistry registry.BrickRegistry
 }
 
 func (bm *brickManager) Hostname() string {
-	return bm.config.hostname
+	return bm.config.Hostname
 }
 
 func (bm *brickManager) Startup(drainSessions bool) error {

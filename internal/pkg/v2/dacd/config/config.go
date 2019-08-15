@@ -1,16 +1,16 @@
-package brick_manager_impl
+package config
 
 import (
 	"log"
 	"os"
 )
 
-type brickManagerConfiguration struct {
-	hostname string
+type BrickManagerConfig struct {
+	Hostname string
 }
 
-func getConfig() brickManagerConfiguration {
-	config := brickManagerConfiguration{
+func GetBrickManagerConfig() BrickManagerConfig {
+	config := BrickManagerConfig{
 		getHostname(),
 	}
 	return config
