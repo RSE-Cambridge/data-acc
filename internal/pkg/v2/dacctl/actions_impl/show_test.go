@@ -1,6 +1,8 @@
 package actions_impl
 
 import (
+	"errors"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_workflow"
 	"github.com/golang/mock/gomock"
@@ -24,4 +26,47 @@ func TestDacctlActions_RealSize(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, `{"token":"bar", "capacity":123, "units":"bytes"}`, output)
+
+	_, err = actions.RealSize(&mockCliContext{})
+	assert.Equal(t, "Please provide these required parameters: token", err.Error())
+}
+
+func TestDacctlActions_Paths(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	session := mock_workflow.NewMockSession(mockCtrl)
+	disk := mocks.NewMockDisk(mockCtrl)
+
+	session.EXPECT().GetSession(datamodel.SessionName("bar")).Return(datamodel.Session{
+		Name: datamodel.SessionName("bar"),
+		Paths: map[string]string{
+			"foo1": "bar1",
+			"foo2": "bar2",
+		},
+	}, nil)
+	disk.EXPECT().Write("paths", []string{"foo1=bar1", "foo2=bar2"})
+
+	actions := NewDacctlActions(session, disk)
+	err := actions.Paths(&mockCliContext{
+		strings: map[string]string{
+			"token":    "bar",
+			"pathfile": "paths",
+		},
+	})
+
+	assert.Nil(t, err)
+
+	err = actions.Paths(&mockCliContext{})
+	assert.Equal(t, "Please provide these required parameters: token, pathfile", err.Error())
+
+	fakeError := errors.New("fake")
+	session.EXPECT().GetSession(datamodel.SessionName("bar")).Return(datamodel.Session{}, fakeError)
+	err = actions.Paths(&mockCliContext{
+		strings: map[string]string{
+			"token":    "bar",
+			"pathfile": "paths",
+		},
+	})
+	assert.Equal(t, fakeError, err)
+
 }
