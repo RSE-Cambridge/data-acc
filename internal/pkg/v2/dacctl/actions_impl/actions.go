@@ -7,24 +7,21 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/workflow"
 	"log"
 	"strings"
 )
 
-func NewDacctlActions(registry registry.SessionRegistry, actions workflow.Session, disk fileio.Disk) dacctl.DacctlActions {
+func NewDacctlActions(actions workflow.Session, disk fileio.Disk) dacctl.DacctlActions {
 	return &dacctlActions{
-		registry: registry,
-		session:  actions,
-		disk:     disk,
+		session: actions,
+		disk:    disk,
 	}
 }
 
 type dacctlActions struct {
-	registry registry.SessionRegistry
-	session  workflow.Session
-	disk     fileio.Disk
+	session workflow.Session
+	disk    fileio.Disk
 }
 
 func checkRequiredStrings(c dacctl.CliContext, flags ...string) error {

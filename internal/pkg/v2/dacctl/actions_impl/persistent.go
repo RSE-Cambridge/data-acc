@@ -60,9 +60,5 @@ func (d *dacctlActions) CreatePersistentBuffer(c dacctl.CliContext) error {
 		Group:         uint(c.Int("group")),
 		CreatedAt:     getNow(),
 	}
-	session, err = d.registry.CreateSession(session)
-	if err != nil {
-		return err
-	}
 	return d.session.CreateSessionVolume(session)
 }

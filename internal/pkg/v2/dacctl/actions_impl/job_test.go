@@ -3,7 +3,6 @@ package actions_impl
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_workflow"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -13,13 +12,12 @@ import (
 func TestDacctlActions_ValidateJob_BadInput(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
 	session := mock_workflow.NewMockSession(mockCtrl)
 	disk := mocks.NewMockDisk(mockCtrl)
 
 	lines := []string{`#DW bad cmd`}
 	disk.EXPECT().Lines("jobfile").Return(lines, nil)
-	actions := NewDacctlActions(registry, session, disk)
+	actions := NewDacctlActions(session, disk)
 	err := actions.ValidateJob(&mockCliContext{
 		strings: map[string]string{
 			"job": "jobfile",
@@ -35,7 +33,6 @@ func TestDacctlActions_ValidateJob_BadInput(t *testing.T) {
 func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
 	session := mock_workflow.NewMockSession(mockCtrl)
 	disk := mocks.NewMockDisk(mockCtrl)
 
@@ -49,8 +46,7 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 		`#DW stage_out source=$DW_JOB_STRIPED/outdir destination=/global/scratch1/outdir type=directory`,
 	}
 	disk.EXPECT().Lines("jobfile").Return(lines, nil)
-	fakeSession := datamodel.Session{Name: "foo"}
-	registry.EXPECT().CreateSession(datamodel.Session{
+	session.EXPECT().CreateSessionVolume(datamodel.Session{
 		Name:            "token",
 		Owner:           1001,
 		Group:           1002,
@@ -88,11 +84,10 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 			"DW_PERSISTENT_STRIPED_myBBname1": "/dac/token_persistent_myBBname1",
 			"DW_PERSISTENT_STRIPED_myBBname2": "/dac/token_persistent_myBBname2",
 		},
-	}).Return(fakeSession, nil)
-	session.EXPECT().CreateSessionVolume(fakeSession)
-	fakeTime = 123
+	}).Return(nil)
 
-	actions := NewDacctlActions(registry, session, disk)
+	fakeTime = 123
+	actions := NewDacctlActions(session, disk)
 	err := actions.CreatePerJobBuffer(getMockCliContext(2))
 
 	assert.Nil(t, err)
