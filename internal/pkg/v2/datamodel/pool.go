@@ -8,7 +8,7 @@ type Pool struct {
 
 	// This is the allocation unit for the pool
 	// It is the minimum size of any registered brick
-	GranularityGB uint
+	GranularityBytes uint
 }
 
 type PoolInfo struct {

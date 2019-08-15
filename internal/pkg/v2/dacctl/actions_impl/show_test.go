@@ -142,10 +142,43 @@ func TestDacctlActions_ShowSessions(t *testing.T) {
 }
 
 func TestDacctlActions_ListPools(t *testing.T) {
-	actions := NewDacctlActions(nil, nil)
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	session := mock_workflow.NewMockSession(mockCtrl)
+	session.EXPECT().GetPools().Return([]datamodel.PoolInfo{
+		{
+			Pool: datamodel.Pool{
+				Name:             "default",
+				GranularityBytes: 1024,
+			},
+			AllocatedBricks: []datamodel.BrickAllocation{
+				{
+					Brick: datamodel.Brick{Device: "sda"},
+				},
+			},
+			AvailableBricks: []datamodel.Brick{
+				{Device: "sdb"},
+				{Device: "sdc"},
+			},
+		},
+	}, nil)
+	actions := NewDacctlActions(session, nil)
+
 	output, err := actions.ListPools()
 	assert.Nil(t, err)
-	assert.Equal(t, `{"configurations":[]}`, output)
+	expexted := `{"pools":[{"id":"default","units":"bytes","granularity":1024,"quantity":3,"free":2}]}`
+	assert.Equal(t, expexted, output)
+
+	session.EXPECT().GetPools().Return(nil, nil)
+	output, err = actions.ListPools()
+	assert.Nil(t, err)
+	assert.Equal(t, `{"pools":[]}`, output)
+
+	fakeErr := errors.New("fake")
+	session.EXPECT().GetPools().Return(nil, fakeErr)
+	output, err = actions.ListPools()
+	assert.Equal(t, fakeErr, err)
+	assert.Equal(t, "", output)
 }
 
 func TestDacctlActions_ShowConfigurations(t *testing.T) {

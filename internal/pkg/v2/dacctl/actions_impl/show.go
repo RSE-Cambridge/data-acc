@@ -48,7 +48,7 @@ func (d *dacctlActions) ShowInstances() (string, error) {
 		return "", err
 	}
 
-	instances := []instance{}
+	instances := instances{}
 	for _, session := range allSessions {
 		instances = append(instances, instance{
 			Id:       string(session.Name),
@@ -78,7 +78,24 @@ func (d *dacctlActions) ShowSessions() (string, error) {
 }
 
 func (d *dacctlActions) ListPools() (string, error) {
-	panic("implement me")
+	allPools, err := d.session.GetPools()
+	if err != nil {
+		return "", err
+	}
+
+	pools := pools{}
+	for _, regPool := range allPools {
+		free := len(regPool.AvailableBricks)
+		quantity := free + len(regPool.AllocatedBricks)
+		pools = append(pools, pool{
+			Id:          string(regPool.Pool.Name),
+			Units:       "bytes",
+			Granularity: regPool.Pool.GranularityBytes,
+			Quantity:    uint(quantity),
+			Free:        uint(free),
+		})
+	}
+	return getPoolsAsString(pools), nil
 }
 
 func (d *dacctlActions) ShowConfigurations() (string, error) {

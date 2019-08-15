@@ -5,6 +5,7 @@
       <w>dacctl</w>
       <w>dacd</w>
       <w>nodehostnamefile</w>
+      <w>slurm</w>
     </words>
   </dictionary>
 </component>
