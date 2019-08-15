@@ -42,18 +42,18 @@ func (d *dacctlActions) Paths(c dacctl.CliContext) error {
 	return d.disk.Write(c.String("pathfile"), paths)
 }
 
-func (d *dacctlActions) ShowInstances() error {
+func (d *dacctlActions) ShowInstances() (string, error) {
 	panic("implement me")
 }
 
-func (d *dacctlActions) ShowSessions() error {
+func (d *dacctlActions) ShowSessions() (string, error) {
 	panic("implement me")
 }
 
-func (d *dacctlActions) ListPools() error {
+func (d *dacctlActions) ListPools() (string, error) {
 	panic("implement me")
 }
 
-func (d *dacctlActions) ShowConfigurations() error {
+func (d *dacctlActions) ShowConfigurations() (string, error) {
 	panic("implement me")
 }

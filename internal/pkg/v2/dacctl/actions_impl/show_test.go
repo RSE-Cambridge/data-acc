@@ -68,5 +68,8 @@ func TestDacctlActions_Paths(t *testing.T) {
 		},
 	})
 	assert.Equal(t, fakeError, err)
+}
+
+func TestDacctlActions_ShowInstances(t *testing.T) {
 
 }
