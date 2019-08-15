@@ -1,35 +1,53 @@
 package brick_manager_impl
 
 import (
+	"context"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/brick_manager"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/workflow"
+	"log"
 )
 
-func NewBrickManager(brickRegistry registry.BrickRegistry) brick_manager.BrickManager {
+func NewBrickManager(brickRegistry registry.BrickRegistry, handler workflow.SessionActionHandler) brick_manager.BrickManager {
 	return &brickManager{
 		config: config.GetBrickManagerConfig(config.DefaultEnv),
-		brickRegistry: brickRegistry}
+		brickRegistry: brickRegistry,
+		sessionActionHandler: handler,
+	}
 }
 
 type brickManager struct {
 	config        config.BrickManagerConfig
 	brickRegistry registry.BrickRegistry
+	sessionActionHandler workflow.SessionActionHandler
 }
 
 func (bm *brickManager) Hostname() string {
-	return string(bm.config.Hostname)
+	return string(bm.config.BrickHostName)
 }
 
 func (bm *brickManager) Startup(drainSessions bool) error {
-	return bm.brickRegistry.UpdateBrickHost(getBrickHost(bm.config))
-	// * update current brick status
-	//   ** error out if removing bricks with existing assignments?
-	// * start listening for create sessions (new primary bricks) and session actions
-	// * report we are listening with keep-alive
-	// * check all brick assignments
-	//   ** ensure all brick hosts are up, warn if there are issues
-	//   ** if primary brick, refresh Ansible run (i.e. recover from host reboot)
+	err := bm.brickRegistry.UpdateBrickHost(getBrickHost(bm.config))
+	if err != nil {
+		return err
+	}
+
+	// If we are are enabled, this includes new create session requests
+	events, err := bm.brickRegistry.GetSessionActions(context.TODO(), bm.config.BrickHostName)
+
+	go func() {
+		for event := range events {
+			bm.sessionActionHandler.ProcessSessionAction(event)
+		}
+		log.Println("ERROR: stopped waiting for new Session Actions")
+	}()
+
+	// TODO: try to recover all existing filesystems on restart
+	//   including a check to make sure all related brick hosts are alive
+
+	// Tell everyone we are listening
+	return bm.brickRegistry.KeepAliveHost(context.TODO(), bm.config.BrickHostName)
 }
 
 func (bm *brickManager) Shutdown() error {

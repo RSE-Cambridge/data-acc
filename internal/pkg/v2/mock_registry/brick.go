@@ -64,17 +64,17 @@ func (mr *MockBrickRegistryMockRecorder) GetSessionActions(ctxt, brickHostName i
 }
 
 // KeepAliveHost mocks base method
-func (m *MockBrickRegistry) KeepAliveHost(brickHostName datamodel.BrickHostName) error {
+func (m *MockBrickRegistry) KeepAliveHost(ctxt context.Context, brickHostName datamodel.BrickHostName) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "KeepAliveHost", brickHostName)
+	ret := m.ctrl.Call(m, "KeepAliveHost", ctxt, brickHostName)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // KeepAliveHost indicates an expected call of KeepAliveHost
-func (mr *MockBrickRegistryMockRecorder) KeepAliveHost(brickHostName interface{}) *gomock.Call {
+func (mr *MockBrickRegistryMockRecorder) KeepAliveHost(ctxt, brickHostName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KeepAliveHost", reflect.TypeOf((*MockBrickRegistry)(nil).KeepAliveHost), brickHostName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KeepAliveHost", reflect.TypeOf((*MockBrickRegistry)(nil).KeepAliveHost), ctxt, brickHostName)
 }
 
 // IsBrickHostAlive mocks base method

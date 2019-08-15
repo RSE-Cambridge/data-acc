@@ -7,7 +7,7 @@ import (
 )
 
 type BrickManagerConfig struct {
-	Hostname             datamodel.BrickHostName
+	BrickHostName        datamodel.BrickHostName
 	PoolName             datamodel.PoolName
 	DeviceCapacityGiB    uint
 	DeviceCount          uint
@@ -84,7 +84,7 @@ func (systemEnv) LookupEnv(key string) (string, bool) {
 }
 
 func (systemEnv) Hostname() (string, error) {
-	// TODO return os.Hostname()
+	// TODO return os.BrickHostName()
 	return "hostname", nil
 }
 

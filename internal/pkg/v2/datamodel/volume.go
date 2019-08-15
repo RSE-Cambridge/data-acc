@@ -70,7 +70,7 @@ type Volume struct {
 }
 
 type Attachment struct {
-	// Hostname, Job and Volume name uniquely identify an attachment
+	// BrickHostName, Job and Volume name uniquely identify an attachment
 	Hostname string
 
 	// Associated jobName

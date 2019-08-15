@@ -33,7 +33,7 @@ for i in $items; do
         >internal/pkg/v2/mock_registry/${i}.go
 done
 
-items="session"
+items="session session_action_handler"
 for i in $items; do
     mockgen -source=internal/pkg/v2/workflow/${i}.go \
         >internal/pkg/v2/mock_workflow/${i}.go

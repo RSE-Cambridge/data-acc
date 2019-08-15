@@ -25,7 +25,7 @@ type BrickRegistry interface {
 	// When a host is dead non of its bricks will get new volumes assigned,
 	// and no bricks will get cleaned up until the next service start.
 	// Error will be returned if the host info has not yet been written.
-	KeepAliveHost(brickHostName datamodel.BrickHostName) error
+	KeepAliveHost(ctxt context.Context, brickHostName datamodel.BrickHostName) error
 
 	// Check if given brick host is alive
 	//

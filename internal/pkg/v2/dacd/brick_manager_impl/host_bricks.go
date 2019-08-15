@@ -21,14 +21,14 @@ func getBrickHost(brickManagerConfig config.BrickManagerConfig) datamodel.BrickH
 	for _, device := range getDevices(brickManagerConfig) {
 		bricks = append(bricks, datamodel.Brick{
 			Device:        device,
-			BrickHostName: brickManagerConfig.Hostname,
+			BrickHostName: brickManagerConfig.BrickHostName,
 			PoolName:      brickManagerConfig.PoolName,
 			CapacityGiB:   brickManagerConfig.DeviceCapacityGiB,
 		})
 	}
 
 	return datamodel.BrickHost{
-		Name:    brickManagerConfig.Hostname,
+		Name:    brickManagerConfig.BrickHostName,
 		Bricks:  bricks,
 		Enabled: brickManagerConfig.HostEnabled,
 	}
