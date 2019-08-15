@@ -140,3 +140,17 @@ func TestDacctlActions_ShowSessions(t *testing.T) {
 	expected = `{"sessions":[]}`
 	assert.Equal(t, expected, output)
 }
+
+func TestDacctlActions_ListPools(t *testing.T) {
+	actions := NewDacctlActions(nil, nil)
+	output, err := actions.ListPools()
+	assert.Nil(t, err)
+	assert.Equal(t, `{"configurations":[]}`, output)
+}
+
+func TestDacctlActions_ShowConfigurations(t *testing.T) {
+	actions := NewDacctlActions(nil, nil)
+	output, err := actions.ShowConfigurations()
+	assert.Nil(t, err)
+	assert.Equal(t, `{"configurations":[]}`, output)
+}

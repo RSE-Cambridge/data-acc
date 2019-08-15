@@ -82,5 +82,6 @@ func (d *dacctlActions) ListPools() (string, error) {
 }
 
 func (d *dacctlActions) ShowConfigurations() (string, error) {
-	panic("implement me")
+	// NOTE: Slurm doesn't read any of the output, so we don't send anything
+	return configurationToString(configurations{}), nil
 }
