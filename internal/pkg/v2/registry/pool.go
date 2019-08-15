@@ -6,7 +6,7 @@ import (
 
 type PoolRegistry interface {
 	// Get all registered pools
-	GetPools() ([]datamodel.Pool, error)
+	GetPool(name datamodel.PoolName) (datamodel.Pool, error)
 
 	// Creates the pool if it doesn't exist
 	// error if the granularity doesn't match and existing pool

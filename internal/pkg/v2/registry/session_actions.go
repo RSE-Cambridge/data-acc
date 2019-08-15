@@ -12,7 +12,7 @@ type SessionActions interface {
 	// Error if session volume has already been created
 	// Error if primary brick host is not alive or not enabled
 	// Error is context is cancelled or timed-out
-	CreateSessionVolume(ctxt context.Context, sessionName datamodel.SessionName) (<-chan datamodel.Session, error)
+	CreateSessionVolume(ctxt context.Context, sessionName datamodel.SessionName) (<-chan datamodel.SessionAction, error)
 
 	// Updates session, then requests action
 	//

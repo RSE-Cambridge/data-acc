@@ -61,7 +61,7 @@ type Session struct {
 
 	// If not nil, the session has an unresolved error
 	// and can't be mounted by any new sessions
-	// it can be deleted
+	// but it can be deleted
 	Error error
 }
 
@@ -69,6 +69,7 @@ type SessionAction struct {
 	Uuid    string
 	Session Session
 	Action  SessionActionType
+	Error   error
 }
 
 // TODO: turn into enum
@@ -78,7 +79,7 @@ type VolumeRequest struct {
 	MultiJob           bool
 	Caller             string
 	TotalCapacityBytes int
-	PoolName           string
+	PoolName           PoolName
 	Access             AccessMode
 	Type               BufferType
 	SwapBytes          int
