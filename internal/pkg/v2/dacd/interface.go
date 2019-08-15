@@ -1,4 +1,4 @@
-package brick_manager
+package dacd
 
 type BrickManager interface {
 	// Get the current hostname key that is being kept alive

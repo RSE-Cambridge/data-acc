@@ -2,14 +2,14 @@ package brick_manager_impl
 
 import (
 	"context"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/brick_manager"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/workflow"
 	"log"
 )
 
-func NewBrickManager(brickRegistry registry.BrickRegistry, handler workflow.SessionActionHandler) brick_manager.BrickManager {
+func NewBrickManager(brickRegistry registry.BrickRegistry, handler workflow.SessionActionHandler) dacd.BrickManager {
 	return &brickManager{
 		config:               config.GetBrickManagerConfig(config.DefaultEnv),
 		brickRegistry:        brickRegistry,
