@@ -18,6 +18,7 @@ func TestBrickManager_Startup(t *testing.T) {
 	defer mockCtrl.Finish()
 	brickRegistry := mock_registry.NewMockBrickRegistry(mockCtrl)
 	brickManager := NewBrickManager(brickRegistry)
+	brickRegistry.EXPECT().UpdateBrickHost(gomock.Any())
 
 	err := brickManager.Startup(false)
 

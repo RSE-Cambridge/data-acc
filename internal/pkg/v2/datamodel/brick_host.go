@@ -33,5 +33,5 @@ type Brick struct {
 	PoolName PoolName
 
 	// Size of the brick, defines the pool granularity
-	CapacityGB uint
+	CapacityGiB uint
 }

@@ -7,7 +7,9 @@ import (
 )
 
 func NewBrickManager(brickRegistry registry.BrickRegistry) brick_manager.BrickManager {
-	return &brickManager{config: config.GetBrickManagerConfig(), brickRegistry: brickRegistry}
+	return &brickManager{
+		config: config.GetBrickManagerConfig(config.DefaultEnv),
+		brickRegistry: brickRegistry}
 }
 
 type brickManager struct {
@@ -16,11 +18,11 @@ type brickManager struct {
 }
 
 func (bm *brickManager) Hostname() string {
-	return bm.config.Hostname
+	return string(bm.config.Hostname)
 }
 
 func (bm *brickManager) Startup(drainSessions bool) error {
-	panic("implement me")
+	return bm.brickRegistry.UpdateBrickHost(getBrickHost(bm.config))
 	// * update current brick status
 	//   ** error out if removing bricks with existing assignments?
 	// * start listening for create sessions (new primary bricks) and session actions
