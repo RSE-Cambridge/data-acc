@@ -9,7 +9,11 @@ import (
 )
 
 func (d *dacctlActions) ValidateJob(c dacctl.CliContext) error {
-	checkRequiredStrings(c, "job")
+	err := checkRequiredStrings(c, "job")
+	if err != nil {
+		return err
+	}
+
 	jobFile := c.String("job")
 	summary, err := parsers.ParseJobFile(d.disk, jobFile)
 	if err != nil {
@@ -51,7 +55,7 @@ func (d *dacctlActions) CreatePerJobBuffer(c dacctl.CliContext) error {
 	bufferType := datamodel.Scratch
 	if summary.PerJobBuffer != nil {
 		access = summary.PerJobBuffer.AccessMode
-		if summary.PerJobBuffer.BufferType == datamodel.Cache {
+		if summary.PerJobBuffer.BufferType != datamodel.Scratch {
 			return fmt.Errorf("cache is not supported")
 		}
 	}

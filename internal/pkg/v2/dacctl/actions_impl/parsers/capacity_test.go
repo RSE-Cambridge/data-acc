@@ -19,7 +19,7 @@ func TestParseSize(t *testing.T) {
 	assert.Equal(t, 10000000000, size)
 
 	size, err = ParseSize("10B")
-	assert.Equal(t,"unable to parse size: 10B", err.Error())
+	assert.Equal(t, "unable to parse size: 10B", err.Error())
 
 	size, err = ParseSize("10.1234567MB")
 	assert.Nil(t, err)

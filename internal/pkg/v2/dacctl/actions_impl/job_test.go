@@ -10,21 +10,26 @@ import (
 	"testing"
 )
 
-func TestDacctlActions_ValidateJob(t *testing.T) {
+func TestDacctlActions_ValidateJob_BadInput(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
 	session := mock_workflow.NewMockSession(mockCtrl)
 	disk := mocks.NewMockDisk(mockCtrl)
 
-	lines := []string{
-		`#DW bad cmd`,
-	}
+	lines := []string{`#DW bad cmd`}
 	disk.EXPECT().Lines("jobfile").Return(lines, nil)
 	actions := NewDacctlActions(registry, session, disk)
-	err := actions.ValidateJob(getMockCliContext(2))
+	err := actions.ValidateJob(&mockCliContext{
+		strings: map[string]string{
+			"job": "jobfile",
+		},
+	})
 
 	assert.Equal(t, "unrecognised command: bad with arguments: [cmd]", err.Error())
+
+	err = actions.ValidateJob(&mockCliContext{})
+	assert.Equal(t, "Please provide these required parameters: job", err.Error())
 }
 
 func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {

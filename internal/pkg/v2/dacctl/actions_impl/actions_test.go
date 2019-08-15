@@ -12,7 +12,7 @@ import (
 )
 
 type mockCliContext struct {
-	strings map[string]string
+	strings  map[string]string
 	integers map[string]int
 	booleans map[string]bool
 }
@@ -58,7 +58,7 @@ func TestDacctlActions_DeleteBuffer(t *testing.T) {
 
 	actions := NewDacctlActions(nil, session, nil)
 	err := actions.DeleteBuffer(&mockCliContext{
-		strings: map[string]string{"token": "bar"},
+		strings:  map[string]string{"token": "bar"},
 		booleans: map[string]bool{"hurry": true},
 	})
 
@@ -127,8 +127,8 @@ func TestDacctlActions_PreRun(t *testing.T) {
 	actions := NewDacctlActions(nil, session, disk)
 	err := actions.PreRun(&mockCliContext{
 		strings: map[string]string{
-			"token": "bar",
-			"nodehostnamefile": "computehostfile",
+			"token":                "bar",
+			"nodehostnamefile":     "computehostfile",
 			"jobexecutionnodefile": "loginhostfile",
 		},
 	})
@@ -138,7 +138,7 @@ func TestDacctlActions_PreRun(t *testing.T) {
 	err = actions.PreRun(&mockCliContext{})
 	assert.Equal(t, "Please provide these required parameters: token", err.Error())
 
-	err = actions.PreRun(&mockCliContext{strings: map[string]string{"token":"bar"}})
+	err = actions.PreRun(&mockCliContext{strings: map[string]string{"token": "bar"}})
 	assert.Equal(t, "Please provide these required parameters: nodehostnamefile", err.Error())
 }
 
@@ -156,7 +156,7 @@ func TestDacctlActions_PreRun_NoLoginHosts(t *testing.T) {
 	actions := NewDacctlActions(nil, session, disk)
 	err := actions.PreRun(&mockCliContext{
 		strings: map[string]string{
-			"token": "bar",
+			"token":            "bar",
 			"nodehostnamefile": "computehostfile",
 		},
 	})
@@ -175,7 +175,7 @@ func TestDacctlActions_PreRun_BadHosts(t *testing.T) {
 	actions := NewDacctlActions(nil, nil, disk)
 	err := actions.PreRun(&mockCliContext{
 		strings: map[string]string{
-			"token": "bar",
+			"token":            "bar",
 			"nodehostnamefile": "computehostfile",
 		},
 	})
@@ -193,14 +193,12 @@ func TestDacctlActions_PreRun_BadLoginHosts(t *testing.T) {
 	loginHosts := []string{"login/asdf"}
 	disk.EXPECT().Lines("computehostfile").Return(computeHosts, nil)
 	disk.EXPECT().Lines("loginhostfile").Return(loginHosts, nil)
-	fakeError := errors.New("fake")
-	session.EXPECT().AttachVolumes(datamodel.SessionName("bar"), computeHosts, loginHosts).Return(fakeError)
 
 	actions := NewDacctlActions(nil, session, disk)
 	err := actions.PreRun(&mockCliContext{
 		strings: map[string]string{
-			"token": "bar",
-			"nodehostnamefile": "computehostfile",
+			"token":                "bar",
+			"nodehostnamefile":     "computehostfile",
 			"jobexecutionnodefile": "loginhostfile",
 		},
 	})
@@ -218,7 +216,7 @@ func TestDacctlActions_PreRun_NoHosts(t *testing.T) {
 	actions := NewDacctlActions(nil, nil, disk)
 	err := actions.PreRun(&mockCliContext{
 		strings: map[string]string{
-			"token": "bar",
+			"token":            "bar",
 			"nodehostnamefile": "computehostfile",
 		},
 	})
