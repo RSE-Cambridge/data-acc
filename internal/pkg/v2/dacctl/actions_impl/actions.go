@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/workflow"
 	"log"
-	"regexp"
 	"strings"
 )
 
@@ -49,8 +49,7 @@ func (d *dacctlActions) getSessionName(c dacctl.CliContext) (datamodel.SessionNa
 	}
 
 	token := c.String("token")
-	re := regexp.MustCompile("[a-zA-Z0-9]*")
-	if !re.Match([]byte(`seafood fool`)) {
+	if !parsers.IsValidName(token) {
 		return "", fmt.Errorf("badly formatted session name: %s", token)
 	}
 
@@ -79,9 +78,29 @@ func (d *dacctlActions) PreRun(c dacctl.CliContext) error {
 	if err != nil {
 		return err
 	}
+	err = checkRequiredStrings(c, "nodehostnamefile")
+	if err != nil {
+		return err
+	}
 
-	// TODO - fix hosts
-	return d.session.AttachVolumes(sessionName, nil, nil)
+	computeHosts, err := parsers.GetHostnamesFromFile(d.disk, c.String("nodehostnamefile"))
+	if err != nil {
+		return err
+	}
+	if len(computeHosts) < 1 {
+		return errors.New("unable to mount to zero compute hosts")
+	}
+
+	loginNodeFilename := c.String("jobexecutionnodefile")
+	var loginNodeHosts []string
+	if loginNodeFilename != "" {
+		loginNodeHosts, err = parsers.GetHostnamesFromFile(d.disk, loginNodeFilename)
+		if err != nil {
+			return err
+		}
+	}
+
+	return d.session.AttachVolumes(sessionName, computeHosts, loginNodeHosts)
 }
 
 func (d *dacctlActions) PostRun(c dacctl.CliContext) error {
