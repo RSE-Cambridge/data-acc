@@ -89,4 +89,10 @@ func TestDacctlActions_ShowInstances(t *testing.T) {
 	assert.Nil(t, err)
 	expected := `{"instances":[{"id":"foo","capacity":{"bytes":123,"nodes":0},"links":{"session":"foo"}},{"id":"bar","capacity":{"bytes":456,"nodes":0},"links":{"session":"bar"}}]}`
 	assert.Equal(t, expected, output)
+
+	fakeErr := errors.New("fake")
+	session.EXPECT().GetAllSessions().Return(nil, fakeErr)
+	output, err = actions.ShowInstances()
+	assert.Equal(t, "", output)
+	assert.Equal(t, fakeErr, err)
 }
