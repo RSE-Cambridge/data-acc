@@ -41,10 +41,9 @@ func TestDacctlActions_Paths(t *testing.T) {
 		Name: datamodel.SessionName("bar"),
 		Paths: map[string]string{
 			"foo1": "bar1",
-			"foo2": "bar2",
 		},
 	}, nil)
-	disk.EXPECT().Write("paths", []string{"foo1=bar1", "foo2=bar2"})
+	disk.EXPECT().Write("paths", []string{"foo1=bar1"})
 
 	actions := NewDacctlActions(session, disk)
 	err := actions.Paths(&mockCliContext{
@@ -71,5 +70,23 @@ func TestDacctlActions_Paths(t *testing.T) {
 }
 
 func TestDacctlActions_ShowInstances(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	session := mock_workflow.NewMockSession(mockCtrl)
+	session.EXPECT().GetAllSessions().Return([]datamodel.Session{
+		{
+			Name:            datamodel.SessionName("foo"),
+			ActualSizeBytes: 123,
+		},
+		{
+			Name:            datamodel.SessionName("bar"),
+			ActualSizeBytes: 456,
+		},
+	}, nil)
 
+	actions := NewDacctlActions(session, nil)
+	output, err := actions.ShowInstances()
+	assert.Nil(t, err)
+	expected := `{"instances":[{"id":"foo","capacity":{"bytes":123,"nodes":0},"links":{"session":"foo"}},{"id":"bar","capacity":{"bytes":456,"nodes":0},"links":{"session":"bar"}}]}`
+	assert.Equal(t, expected, output)
 }

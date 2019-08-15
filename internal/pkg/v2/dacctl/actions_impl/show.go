@@ -43,7 +43,20 @@ func (d *dacctlActions) Paths(c dacctl.CliContext) error {
 }
 
 func (d *dacctlActions) ShowInstances() (string, error) {
-	panic("implement me")
+	allSessions, err := d.session.GetAllSessions()
+	if err != nil {
+		return "", err
+	}
+
+	var instances []instance
+	for _, session := range allSessions {
+		instances = append(instances, instance{
+			Id:       string(session.Name),
+			Capacity: instanceCapacity{Bytes: uint(session.ActualSizeBytes)},
+			Links:    instanceLinks{string(session.Name)},
+		})
+	}
+	return instancesToString(instances), nil
 }
 
 func (d *dacctlActions) ShowSessions() (string, error) {
