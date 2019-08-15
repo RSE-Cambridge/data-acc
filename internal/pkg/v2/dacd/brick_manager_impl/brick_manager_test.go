@@ -12,7 +12,7 @@ import (
 )
 
 func TestBrickManager_Hostname(t *testing.T) {
-	brickManager := brickManager{config:config.BrickManagerConfig{BrickHostName: "host"}}
+	brickManager := brickManager{config: config.BrickManagerConfig{BrickHostName: "host"}}
 	assert.Equal(t, "host", brickManager.Hostname())
 }
 

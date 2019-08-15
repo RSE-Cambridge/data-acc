@@ -76,7 +76,7 @@ func getBool(env ReadEnvironemnt, key string, defaultVal bool) bool {
 	return boolVal
 }
 
-type systemEnv struct {}
+type systemEnv struct{}
 
 func (systemEnv) LookupEnv(key string) (string, bool) {
 	// TODO return os.LookupEnv(key)

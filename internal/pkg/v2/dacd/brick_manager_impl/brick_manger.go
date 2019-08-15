@@ -11,15 +11,15 @@ import (
 
 func NewBrickManager(brickRegistry registry.BrickRegistry, handler workflow.SessionActionHandler) brick_manager.BrickManager {
 	return &brickManager{
-		config: config.GetBrickManagerConfig(config.DefaultEnv),
-		brickRegistry: brickRegistry,
+		config:               config.GetBrickManagerConfig(config.DefaultEnv),
+		brickRegistry:        brickRegistry,
 		sessionActionHandler: handler,
 	}
 }
 
 type brickManager struct {
-	config        config.BrickManagerConfig
-	brickRegistry registry.BrickRegistry
+	config               config.BrickManagerConfig
+	brickRegistry        registry.BrickRegistry
 	sessionActionHandler workflow.SessionActionHandler
 }
 
