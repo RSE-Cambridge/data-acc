@@ -83,9 +83,10 @@ func TestDacctlActions_ShowInstances(t *testing.T) {
 			ActualSizeBytes: 456,
 		},
 	}, nil)
-
 	actions := NewDacctlActions(session, nil)
+
 	output, err := actions.ShowInstances()
+
 	assert.Nil(t, err)
 	expected := `{"instances":[{"id":"foo","capacity":{"bytes":123,"nodes":0},"links":{"session":"foo"}},{"id":"bar","capacity":{"bytes":456,"nodes":0},"links":{"session":"bar"}}]}`
 	assert.Equal(t, expected, output)
@@ -95,4 +96,47 @@ func TestDacctlActions_ShowInstances(t *testing.T) {
 	output, err = actions.ShowInstances()
 	assert.Equal(t, "", output)
 	assert.Equal(t, fakeErr, err)
+
+	session.EXPECT().GetAllSessions().Return(nil, nil)
+	output, err = actions.ShowInstances()
+	assert.Nil(t, err)
+	expected = `{"instances":[]}`
+	assert.Equal(t, expected, output)
+}
+
+func TestDacctlActions_ShowSessions(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	session := mock_workflow.NewMockSession(mockCtrl)
+	session.EXPECT().GetAllSessions().Return([]datamodel.Session{
+		{
+			Name:      datamodel.SessionName("foo"),
+			Owner:     42,
+			CreatedAt: 1234,
+		},
+		{
+			Name:      datamodel.SessionName("bar"),
+			Owner:     43,
+			CreatedAt: 5678,
+		},
+	}, nil)
+	actions := NewDacctlActions(session, nil)
+
+	output, err := actions.ShowSessions()
+
+	assert.Nil(t, err)
+	expected := `{"sessions":[{"id":"foo","created":1234,"owner":42,"token":"foo"},{"id":"bar","created":5678,"owner":43,"token":"bar"}]}`
+	assert.Equal(t, expected, output)
+
+	fakeErr := errors.New("fake")
+	session.EXPECT().GetAllSessions().Return(nil, fakeErr)
+	output, err = actions.ShowSessions()
+	assert.Equal(t, "", output)
+	assert.Equal(t, fakeErr, err)
+
+	session.EXPECT().GetAllSessions().Return(nil, nil)
+	output, err = actions.ShowSessions()
+	assert.Nil(t, err)
+	expected = `{"sessions":[]}`
+	assert.Equal(t, expected, output)
 }

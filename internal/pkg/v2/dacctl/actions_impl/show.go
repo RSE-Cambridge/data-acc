@@ -48,7 +48,7 @@ func (d *dacctlActions) ShowInstances() (string, error) {
 		return "", err
 	}
 
-	var instances []instance
+	instances := []instance{}
 	for _, session := range allSessions {
 		instances = append(instances, instance{
 			Id:       string(session.Name),
@@ -60,7 +60,21 @@ func (d *dacctlActions) ShowInstances() (string, error) {
 }
 
 func (d *dacctlActions) ShowSessions() (string, error) {
-	panic("implement me")
+	allSessions, err := d.session.GetAllSessions()
+	if err != nil {
+		return "", err
+	}
+
+	sessions := sessions{}
+	for _, s := range allSessions {
+		sessions = append(sessions, session{
+			Id:      string(s.Name),
+			Created: s.CreatedAt,
+			Owner:   s.Owner,
+			Token:   string(s.Name),
+		})
+	}
+	return sessonsToString(sessions), nil
 }
 
 func (d *dacctlActions) ListPools() (string, error) {
