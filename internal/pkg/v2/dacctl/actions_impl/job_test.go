@@ -10,6 +10,23 @@ import (
 	"testing"
 )
 
+func TestDacctlActions_ValidateJob(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
+	session := mock_workflow.NewMockSession(mockCtrl)
+	disk := mocks.NewMockDisk(mockCtrl)
+
+	lines := []string{
+		`#DW bad cmd`,
+	}
+	disk.EXPECT().Lines("jobfile").Return(lines, nil)
+	actions := NewDacctlActions(registry, session, disk)
+	err := actions.ValidateJob(getMockCliContext(2))
+
+	assert.Equal(t, "unrecognised command: bad with arguments: [cmd]", err.Error())
+}
+
 func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
