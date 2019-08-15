@@ -33,19 +33,19 @@ func (m *MockPoolRegistry) EXPECT() *MockPoolRegistryMockRecorder {
 	return m.recorder
 }
 
-// GetPools mocks base method
-func (m *MockPoolRegistry) GetPools() ([]datamodel.Pool, error) {
+// GetPool mocks base method
+func (m *MockPoolRegistry) GetPool(name datamodel.PoolName) (datamodel.Pool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPools")
-	ret0, _ := ret[0].([]datamodel.Pool)
+	ret := m.ctrl.Call(m, "GetPool", name)
+	ret0, _ := ret[0].(datamodel.Pool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetPools indicates an expected call of GetPools
-func (mr *MockPoolRegistryMockRecorder) GetPools() *gomock.Call {
+// GetPool indicates an expected call of GetPool
+func (mr *MockPoolRegistryMockRecorder) GetPool(name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPools", reflect.TypeOf((*MockPoolRegistry)(nil).GetPools))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPool", reflect.TypeOf((*MockPoolRegistry)(nil).GetPool), name)
 }
 
 // EnsurePoolCreated mocks base method

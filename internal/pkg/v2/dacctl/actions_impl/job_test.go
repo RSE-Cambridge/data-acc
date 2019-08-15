@@ -47,11 +47,11 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	}
 	disk.EXPECT().Lines("jobfile").Return(lines, nil)
 	session.EXPECT().CreateSessionVolume(datamodel.Session{
-		Name:            "token",
-		Owner:           1001,
-		Group:           1002,
-		CreatedAt:       123,
-		MultiJobVolumes: []datamodel.VolumeName{"myBBname1", "myBBname2"},
+		Name:                "token",
+		Owner:               1001,
+		Group:               1002,
+		CreatedAt:           123,
+		MultiJobAttachments: []datamodel.SessionName{"myBBname1", "myBBname2"},
 		StageInRequests: []datamodel.DataCopyRequest{
 			{
 				SourceType:  datamodel.File,

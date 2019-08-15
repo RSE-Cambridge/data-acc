@@ -11,7 +11,7 @@ import (
 type jobSummary struct {
 	PerJobBuffer *cmdPerJobBuffer
 	Swap         *cmdAttachPerJobSwap
-	Attachments  []datamodel.VolumeName
+	Attachments  []datamodel.SessionName
 	DataIn       []datamodel.DataCopyRequest
 	DataOut      []datamodel.DataCopyRequest
 	// TODO: support create and destroy persistent?
@@ -43,7 +43,7 @@ func getJobSummary(lines []string) (jobSummary, error) {
 				return jobSummary{}, fmt.Errorf("only one per job buffer allowed")
 			}
 		case cmdAttachPersistent:
-			summary.Attachments = append(summary.Attachments, datamodel.VolumeName(c))
+			summary.Attachments = append(summary.Attachments, datamodel.SessionName(c))
 		case cmdAttachPerJobSwap:
 			if summary.Swap != nil {
 				return jobSummary{}, fmt.Errorf("only one swap request allowed")

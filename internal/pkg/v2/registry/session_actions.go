@@ -20,7 +20,7 @@ type SessionActions interface {
 	// Error if context is cancelled or timed-out
 	SendSessionAction(
 		ctxt context.Context, actionType datamodel.SessionActionType,
-		session datamodel.Session) (<-chan datamodel.Session, error)
+		session datamodel.Session) (<-chan datamodel.SessionAction, error)
 
 	// Get session volume create requests,
 	// where given hostname is the primary brick host

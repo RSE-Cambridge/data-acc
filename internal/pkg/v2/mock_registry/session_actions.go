@@ -35,10 +35,10 @@ func (m *MockSessionActions) EXPECT() *MockSessionActionsMockRecorder {
 }
 
 // CreateSessionVolume mocks base method
-func (m *MockSessionActions) CreateSessionVolume(ctxt context.Context, sessionName datamodel.SessionName) (<-chan datamodel.Session, error) {
+func (m *MockSessionActions) CreateSessionVolume(ctxt context.Context, sessionName datamodel.SessionName) (<-chan datamodel.SessionAction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSessionVolume", ctxt, sessionName)
-	ret0, _ := ret[0].(<-chan datamodel.Session)
+	ret0, _ := ret[0].(<-chan datamodel.SessionAction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -50,10 +50,10 @@ func (mr *MockSessionActionsMockRecorder) CreateSessionVolume(ctxt, sessionName 
 }
 
 // SendSessionAction mocks base method
-func (m *MockSessionActions) SendSessionAction(ctxt context.Context, actionType datamodel.SessionActionType, session datamodel.Session) (<-chan datamodel.Session, error) {
+func (m *MockSessionActions) SendSessionAction(ctxt context.Context, actionType datamodel.SessionActionType, session datamodel.Session) (<-chan datamodel.SessionAction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendSessionAction", ctxt, actionType, session)
-	ret0, _ := ret[0].(<-chan datamodel.Session)
+	ret0, _ := ret[0].(<-chan datamodel.SessionAction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

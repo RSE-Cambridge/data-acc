@@ -49,6 +49,21 @@ func (mr *MockAllocationRegistryMockRecorder) GetBricksByPool() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBricksByPool", reflect.TypeOf((*MockAllocationRegistry)(nil).GetBricksByPool))
 }
 
+// GetPoolInfo mocks base method
+func (m *MockAllocationRegistry) GetPoolInfo(poolName datamodel.PoolName) (datamodel.PoolInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPoolInfo", poolName)
+	ret0, _ := ret[0].(datamodel.PoolInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPoolInfo indicates an expected call of GetPoolInfo
+func (mr *MockAllocationRegistryMockRecorder) GetPoolInfo(poolName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPoolInfo", reflect.TypeOf((*MockAllocationRegistry)(nil).GetPoolInfo), poolName)
+}
+
 // GetAllocationMutex mocks base method
 func (m *MockAllocationRegistry) GetAllocationMutex() (store.Mutex, error) {
 	m.ctrl.T.Helper()

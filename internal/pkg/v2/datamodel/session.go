@@ -23,8 +23,8 @@ type Session struct {
 	// Details of what was requested
 	VolumeRequest VolumeRequest
 
-	// Records if we have started trying to delete
-	DeleteRequested bool
+	// Flags about current state of the buffer
+	Status SessionStatus
 
 	// Request certain files to be staged in
 	// Not currently allowed for multi job volumes
@@ -34,35 +34,38 @@ type Session struct {
 	// Not currently allowed for multi job volumes
 	StageOutRequests []DataCopyRequest
 
-	// The hosts that want to mount the storage
-	// Note: to allow for copy in/out the brick hosts are assumed to have an attachment
-	AttachHosts []string
-
-	// If non-zero capacity requested, a volume is created for this job
-	// It may be exposed to the attach hosts in a variety of ways, as defined by the volume
-	JobVolume VolumeName
-
 	// There maybe be attachments to multiple shared volumes
-	MultiJobVolumes []VolumeName
+	MultiJobAttachments []SessionName
 
 	// Environment variables for each volume associated with the job
 	Paths map[string]string
+
+	// Resources used by session once pool granularity is taken into account
+	ActualSizeBytes int
 
 	// List of the bricks allocated to implement the JobVolume
 	// One is the primary brick that should be watching for all actions
 	Allocations []BrickAllocation
 
-	// If not empty, says where to send actions too
-	// If empty the session has not yet been acknowledged by the dacd process
-	SessionActionPrefix string
+	// Where session requests should be sent
+	PrimaryBrickHost BrickHostName
 
-	// Resources used by session once pool granularity is taken into account
-	ActualSizeBytes int
+	// The hosts that want to mount the storage
+	// Note: to allow for copy in/out the brick hosts are assumed to have an attachment
+	AttachHosts []string
+}
 
+type SessionStatus struct {
 	// If not nil, the session has an unresolved error
 	// and can't be mounted by any new sessions
 	// but it can be deleted
 	Error error
+
+	// CreateVolume has succeeded, so other actions can now happen
+	FileSystemCreated bool
+
+	// Records if we have started trying to delete
+	DeleteRequested bool
 }
 
 type SessionAction struct {

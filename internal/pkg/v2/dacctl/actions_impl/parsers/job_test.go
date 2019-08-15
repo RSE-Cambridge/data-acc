@@ -78,8 +78,8 @@ func TestGetJobSummary(t *testing.T) {
 	assert.EqualValues(t, "$DW_JOB_STRIPED/outdir", result.DataOut[0].Source)
 
 	assert.Equal(t, 2, len(result.Attachments))
-	assert.Equal(t, datamodel.VolumeName("myBBname1"), result.Attachments[0])
-	assert.Equal(t, datamodel.VolumeName("myBBname2"), result.Attachments[1])
+	assert.Equal(t, datamodel.SessionName("myBBname1"), result.Attachments[0])
+	assert.Equal(t, datamodel.SessionName("myBBname2"), result.Attachments[1])
 
 	assert.Equal(t, 4194304, result.PerJobBuffer.CapacityBytes)
 	assert.Equal(t, 4000000, result.Swap.SizeBytes)

@@ -6,6 +6,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/workflow"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -16,10 +17,10 @@ func NewSessionWorkflow() workflow.Session {
 }
 
 type sessionWorkflow struct {
-	session registry.SessionRegistry
-	actions  registry.SessionActions
+	session     registry.SessionRegistry
+	actions     registry.SessionActions
 	allocations registry.AllocationRegistry
-	pool registry.PoolRegistry
+	pool        registry.PoolRegistry
 }
 
 func (s sessionWorkflow) CreateSessionVolume(session datamodel.Session) error {
@@ -30,7 +31,7 @@ func (s sessionWorkflow) CreateSessionVolume(session datamodel.Session) error {
 		return err
 	}
 
-	// Get session lock, drop on function exit
+	// Get session lock
 	sessionMutex, err := s.session.GetSessionMutex(session.Name)
 	if err != nil {
 		return fmt.Errorf("unable to get session mutex: %s due to: %s", session.Name, err)
@@ -75,7 +76,6 @@ func (s sessionWorkflow) validateSession(session datamodel.Session) error {
 	return nil
 }
 
-
 func (s sessionWorkflow) doSessionAllocation(session datamodel.Session) (datamodel.Session, error) {
 	allocationMutex, err := s.allocations.GetAllocationMutex()
 	if err != nil {
@@ -88,15 +88,24 @@ func (s sessionWorkflow) doSessionAllocation(session datamodel.Session) (datamod
 	}
 	defer allocationMutex.Unlock(context.TODO())
 
-	// Write allocations first
-	actualSizeBytes, allocations, err := s.getBricks(session.VolumeRequest.PoolName, session.VolumeRequest.TotalCapacityBytes)
-	if err != nil {
-		return session, fmt.Errorf("can't allocate for session: %s due to %s", session.Name, err)
-	}
-	session.ActualSizeBytes = actualSizeBytes
-	s.allocations.CreateAllocations(session.Name, allocations)
+	if session.VolumeRequest.TotalCapacityBytes > 0 {
+		// Write allocations first
+		actualSizeBytes, chosenBricks, err := s.getBricks(session.VolumeRequest.PoolName, session.VolumeRequest.TotalCapacityBytes)
+		if err != nil {
+			return session, fmt.Errorf("can't allocate for session: %s due to %s", session.Name, err)
+		}
+		session.ActualSizeBytes = actualSizeBytes
 
-	// Create initial version of session
+		allocations, err := s.allocations.CreateAllocations(session.Name, chosenBricks)
+		if err != nil {
+			return session, err
+		}
+
+		session.Allocations = allocations
+		session.PrimaryBrickHost = allocations[0].Brick.BrickHostName
+	}
+
+	// Store initial version of session
 	session, err = s.session.CreateSession(session)
 	if err != nil {
 		// TODO: remove allocations
@@ -152,10 +161,49 @@ func getBricks(bricksRequired int, poolInfo datamodel.PoolInfo) []datamodel.Bric
 }
 
 func (s sessionWorkflow) DeleteSession(sessionName datamodel.SessionName, hurry bool) error {
-	// TODO get the session mutex, then update the session, then send the event
-	//   note the actions registry will error out if the host is not up
-	//   release the mutex and wait for the server to complete its work or we timeout
-	panic("implement me")
+	// Get session lock
+	sessionMutex, err := s.session.GetSessionMutex(sessionName)
+	if err != nil {
+		return fmt.Errorf("unable to get session mutex: %s due to: %s", sessionName, err)
+	}
+	err = sessionMutex.Lock(context.TODO())
+	if err != nil {
+		return fmt.Errorf("unable to lock session mutex: %s due to: %s", sessionName, err)
+	}
+
+	session, err := s.session.GetSession(sessionName)
+	if err != nil {
+		log.Println("Unable to find session:", sessionName)
+		sessionMutex.Unlock(context.TODO())
+		return nil
+	}
+
+	// Record we want this deleted, in case host is not alive
+	// can be deleted when it is next stated
+	session.Status.DeleteRequested = true
+	session, err = s.session.UpdateSession(session)
+	if err != nil {
+		sessionMutex.Unlock(context.TODO())
+		return err
+	}
+	// TODO: send the hurry, i.e. request data copy out first
+
+	// This will error out if the host is not currently up
+	sessionAction, err := s.actions.SendSessionAction(context.TODO(), datamodel.SessionActionType("delete"), session)
+	if err != nil {
+		return err
+	}
+
+	// Drop mutex to allow server to lock the session
+	err = sessionMutex.Unlock(context.TODO())
+	if err != nil {
+		// TODO: cancel above waiting around?
+		return err
+	}
+
+	// wait for server to complete, or timeout
+	result := <-sessionAction
+	return result.Error
 }
 
 func (s sessionWorkflow) DataIn(sessionName datamodel.SessionName) error {

@@ -40,7 +40,10 @@ func getNow() uint {
 }
 
 func (d *dacctlActions) CreatePersistentBuffer(c dacctl.CliContext) error {
-	checkRequiredStrings(c, "token", "caller", "capacity", "access", "type")
+	err := checkRequiredStrings(c, "token", "caller", "capacity", "access", "type")
+	if err != nil {
+		return err
+	}
 	pool, capacityBytes, err := parsers.ParseCapacityBytes(c.String("capacity"))
 	if err != nil {
 		return err
@@ -49,7 +52,7 @@ func (d *dacctlActions) CreatePersistentBuffer(c dacctl.CliContext) error {
 		MultiJob:           true,
 		Caller:             c.String("caller"),
 		TotalCapacityBytes: capacityBytes,
-		PoolName:           pool,
+		PoolName:           datamodel.PoolName(pool),
 		Access:             accessModeFromString(c.String("access")),
 		Type:               bufferTypeFromString(c.String("type")),
 	}

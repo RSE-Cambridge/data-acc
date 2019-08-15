@@ -59,7 +59,7 @@ func (d *dacctlActions) CreatePerJobBuffer(c dacctl.CliContext) error {
 			return fmt.Errorf("cache is not supported")
 		}
 	}
-	var multiJobVolumes []datamodel.VolumeName
+	var multiJobVolumes []datamodel.SessionName
 	for _, attachment := range summary.Attachments {
 		multiJobVolumes = append(multiJobVolumes, attachment)
 	}
@@ -68,20 +68,20 @@ func (d *dacctlActions) CreatePerJobBuffer(c dacctl.CliContext) error {
 		MultiJob:           false,
 		Caller:             c.String("caller"),
 		TotalCapacityBytes: capacityBytes,
-		PoolName:           pool,
+		PoolName:           datamodel.PoolName(pool),
 		Access:             access,
 		Type:               bufferType,
 		SwapBytes:          swapBytes,
 	}
 	session := datamodel.Session{
-		Name:             datamodel.SessionName(c.String("token")),
-		Owner:            uint(c.Int("user")),
-		Group:            uint(c.Int("group")),
-		CreatedAt:        getNow(),
-		VolumeRequest:    request,
-		MultiJobVolumes:  multiJobVolumes,
-		StageInRequests:  summary.DataIn,
-		StageOutRequests: summary.DataOut,
+		Name:                datamodel.SessionName(c.String("token")),
+		Owner:               uint(c.Int("user")),
+		Group:               uint(c.Int("group")),
+		CreatedAt:           getNow(),
+		VolumeRequest:       request,
+		MultiJobAttachments: multiJobVolumes,
+		StageInRequests:     summary.DataIn,
+		StageOutRequests:    summary.DataOut,
 	}
 	session.Paths = getPaths(session)
 
@@ -98,7 +98,7 @@ func getPaths(session datamodel.Session) map[string]string {
 			paths["DW_JOB_STRIPED"] = fmt.Sprintf("/dac/%s_job/global", session.Name)
 		}
 	}
-	for _, multiJobVolume := range session.MultiJobVolumes {
+	for _, multiJobVolume := range session.MultiJobAttachments {
 		paths[fmt.Sprintf("DW_PERSISTENT_STRIPED_%s", multiJobVolume)] = fmt.Sprintf(
 			"/dac/%s_persistent_%s", session.Name, multiJobVolume)
 	}

@@ -13,7 +13,6 @@ type AllocationRegistry interface {
 	// bricks are only available if corresponding host currently alive
 	GetPoolInfo(poolName datamodel.PoolName) (datamodel.PoolInfo, error)
 
-
 	// Caller should acquire this mutex before calling GetAllPools then CreateAllocations
 	GetAllocationMutex() (store.Mutex, error)
 
