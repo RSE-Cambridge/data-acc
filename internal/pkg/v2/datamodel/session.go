@@ -13,8 +13,10 @@ type Session struct {
 	// this is checked when an update is requested
 	Revision int
 
-	// unix uid and gid
+	// unix uid
 	Owner uint
+
+	// unix group id
 	Group uint
 
 	// utc unix timestamp when buffer created
@@ -50,9 +52,39 @@ type Session struct {
 	// Where session requests should be sent
 	PrimaryBrickHost BrickHostName
 
-	// The hosts that want to mount the storage
-	// Note: to allow for copy in/out the brick hosts are assumed to have an attachment
-	AttachHosts []string
+	// Compute hosts for this session
+	// Note: should be empty for multi-job volumes
+	RequestedAttachHosts []string
+
+	// Used by filesystem provider to store internal state
+	// and track if the filesystem had a recent error
+	FilesystemStatus FilesystemStatus
+
+	// For multi-job volumes these are always other sessions
+	// for job volumes this is always for just this session
+	CurrentAttachments map[SessionName]AttachmentSessionStatus
+}
+
+type FilesystemStatus struct {
+	Error        error
+	InternalName string
+	InternalData string
+}
+
+type AttachmentSession struct {
+	SessionName SessionName
+	Hosts       []string
+}
+
+type AttachmentSessionStatus struct {
+	AttachmentSession AttachmentSession
+
+	GlobalMount  bool
+	PrivateMount bool
+	SwapBytes    int
+
+	DetachRequested bool
+	Error           error
 }
 
 type SessionStatus struct {
@@ -63,6 +95,10 @@ type SessionStatus struct {
 
 	// CreateVolume has succeeded, so other actions can now happen
 	FileSystemCreated bool
+
+	// Assuming one data in / data out cycle per job
+	CopyDataInComplete  bool
+	CopyDataOutComplete bool
 
 	// Records if we have started trying to delete
 	DeleteRequested bool
