@@ -33,18 +33,18 @@ func (m *MockActions) EXPECT() *MockActionsMockRecorder {
 	return m.recorder
 }
 
-// CreateSessionVolume mocks base method
+// CreateSession mocks base method
 func (m *MockActions) CreateSessionVolume(session datamodel.Session) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSessionVolume", session)
+	ret := m.ctrl.Call(m, "CreateSession", session)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CreateSessionVolume indicates an expected call of CreateSessionVolume
+// CreateSession indicates an expected call of CreateSession
 func (mr *MockActionsMockRecorder) CreateSessionVolume(session interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSessionVolume", reflect.TypeOf((*MockActions)(nil).CreateSessionVolume), session)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockActions)(nil).CreateSessionVolume), session)
 }
 
 // DeleteSession mocks base method
@@ -61,58 +61,58 @@ func (mr *MockActionsMockRecorder) DeleteSession(session interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession", reflect.TypeOf((*MockActions)(nil).DeleteSession), session)
 }
 
-// DataIn mocks base method
+// CopyDataIn mocks base method
 func (m *MockActions) DataIn(session datamodel.Session) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DataIn", session)
+	ret := m.ctrl.Call(m, "CopyDataIn", session)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DataIn indicates an expected call of DataIn
+// CopyDataIn indicates an expected call of CopyDataIn
 func (mr *MockActionsMockRecorder) DataIn(session interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DataIn", reflect.TypeOf((*MockActions)(nil).DataIn), session)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CopyDataIn", reflect.TypeOf((*MockActions)(nil).DataIn), session)
 }
 
-// AttachVolumes mocks base method
+// Mount mocks base method
 func (m *MockActions) AttachVolumes(session datamodel.Session) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AttachVolumes", session)
+	ret := m.ctrl.Call(m, "Mount", session)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AttachVolumes indicates an expected call of AttachVolumes
+// Mount indicates an expected call of Mount
 func (mr *MockActionsMockRecorder) AttachVolumes(session interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AttachVolumes", reflect.TypeOf((*MockActions)(nil).AttachVolumes), session)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mount", reflect.TypeOf((*MockActions)(nil).AttachVolumes), session)
 }
 
-// DetachVolumes mocks base method
+// Unmount mocks base method
 func (m *MockActions) DetachVolumes(session datamodel.Session) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DetachVolumes", session)
+	ret := m.ctrl.Call(m, "Unmount", session)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DetachVolumes indicates an expected call of DetachVolumes
+// Unmount indicates an expected call of Unmount
 func (mr *MockActionsMockRecorder) DetachVolumes(session interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DetachVolumes", reflect.TypeOf((*MockActions)(nil).DetachVolumes), session)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unmount", reflect.TypeOf((*MockActions)(nil).DetachVolumes), session)
 }
 
-// DataOut mocks base method
+// CopyDataOut mocks base method
 func (m *MockActions) DataOut(session datamodel.Session) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DataOut", session)
+	ret := m.ctrl.Call(m, "CopyDataOut", session)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DataOut indicates an expected call of DataOut
+// CopyDataOut indicates an expected call of CopyDataOut
 func (mr *MockActionsMockRecorder) DataOut(session interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DataOut", reflect.TypeOf((*MockActions)(nil).DataOut), session)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CopyDataOut", reflect.TypeOf((*MockActions)(nil).DataOut), session)
 }

@@ -35,8 +35,8 @@ done
 
 items="session session_action_handler"
 for i in $items; do
-    mockgen -source=internal/pkg/v2/workflow/${i}.go \
-        >internal/pkg/v2/mock_workflow/${i}.go
+    mockgen -source=internal/pkg/v2/facade/${i}.go \
+        >internal/pkg/v2/mock_facade/${i}.go
 done
 
 items="keystore"

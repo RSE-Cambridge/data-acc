@@ -2,7 +2,7 @@ package actions_impl
 
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_workflow"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_facade"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -11,9 +11,9 @@ import (
 func TestDacctlActions_CreatePersistentBuffer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 
-	session.EXPECT().CreateSessionVolume(datamodel.Session{
+	session.EXPECT().CreateSession(datamodel.Session{
 		Name:      "token",
 		Owner:     1001,
 		Group:     1002,

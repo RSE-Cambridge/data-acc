@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_workflow"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_facade"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -51,7 +51,7 @@ func getMockCliContext(capacity int) *mockCliContext {
 func TestDacctlActions_DeleteBuffer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 
 	fakeError := errors.New("fake")
 	session.EXPECT().DeleteSession(datamodel.SessionName("bar"), true).Return(fakeError)
@@ -71,10 +71,10 @@ func TestDacctlActions_DeleteBuffer(t *testing.T) {
 func TestDacctlActions_DataIn(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 
 	fakeError := errors.New("fake")
-	session.EXPECT().DataIn(datamodel.SessionName("bar")).Return(fakeError)
+	session.EXPECT().CopyDataIn(datamodel.SessionName("bar")).Return(fakeError)
 
 	actions := NewDacctlActions(session, nil)
 	err := actions.DataIn(&mockCliContext{
@@ -95,10 +95,10 @@ func TestDacctlActions_DataIn(t *testing.T) {
 func TestDacctlActions_DataOut(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 
 	fakeError := errors.New("fake")
-	session.EXPECT().DataOut(datamodel.SessionName("bar")).Return(fakeError)
+	session.EXPECT().CopyDataOut(datamodel.SessionName("bar")).Return(fakeError)
 
 	actions := NewDacctlActions(session, nil)
 	err := actions.DataOut(&mockCliContext{
@@ -114,7 +114,7 @@ func TestDacctlActions_DataOut(t *testing.T) {
 func TestDacctlActions_PreRun(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 	disk := mocks.NewMockDisk(mockCtrl)
 
 	computeHosts := []string{"host1", "host2"}
@@ -122,7 +122,7 @@ func TestDacctlActions_PreRun(t *testing.T) {
 	disk.EXPECT().Lines("computehostfile").Return(computeHosts, nil)
 	disk.EXPECT().Lines("loginhostfile").Return(loginHosts, nil)
 	fakeError := errors.New("fake")
-	session.EXPECT().AttachVolumes(datamodel.SessionName("bar"), computeHosts, loginHosts).Return(fakeError)
+	session.EXPECT().Mount(datamodel.SessionName("bar"), computeHosts, loginHosts).Return(fakeError)
 
 	actions := NewDacctlActions(session, disk)
 	err := actions.PreRun(&mockCliContext{
@@ -145,13 +145,13 @@ func TestDacctlActions_PreRun(t *testing.T) {
 func TestDacctlActions_PreRun_NoLoginHosts(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 	disk := mocks.NewMockDisk(mockCtrl)
 
 	computeHosts := []string{"host1", "host2"}
 	disk.EXPECT().Lines("computehostfile").Return(computeHosts, nil)
 	fakeError := errors.New("fake")
-	session.EXPECT().AttachVolumes(datamodel.SessionName("bar"), computeHosts, nil).Return(fakeError)
+	session.EXPECT().Mount(datamodel.SessionName("bar"), computeHosts, nil).Return(fakeError)
 
 	actions := NewDacctlActions(session, disk)
 	err := actions.PreRun(&mockCliContext{
@@ -186,7 +186,7 @@ func TestDacctlActions_PreRun_BadHosts(t *testing.T) {
 func TestDacctlActions_PreRun_BadLoginHosts(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 	disk := mocks.NewMockDisk(mockCtrl)
 
 	computeHosts := []string{"host1", "host2"}
@@ -227,10 +227,10 @@ func TestDacctlActions_PreRun_NoHosts(t *testing.T) {
 func TestDacctlActions_PostRun(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 
 	fakeError := errors.New("fake")
-	session.EXPECT().DetachVolumes(datamodel.SessionName("bar")).Return(fakeError)
+	session.EXPECT().Unmount(datamodel.SessionName("bar")).Return(fakeError)
 
 	actions := NewDacctlActions(session, nil)
 	err := actions.PostRun(&mockCliContext{

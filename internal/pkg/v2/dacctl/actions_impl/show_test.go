@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_workflow"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_facade"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -13,7 +13,7 @@ import (
 func TestDacctlActions_RealSize(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 	session.EXPECT().GetSession(datamodel.SessionName("bar")).Return(datamodel.Session{
 		Name:            datamodel.SessionName("bar"),
 		ActualSizeBytes: 123,
@@ -34,7 +34,7 @@ func TestDacctlActions_RealSize(t *testing.T) {
 func TestDacctlActions_Paths(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 	disk := mocks.NewMockDisk(mockCtrl)
 
 	session.EXPECT().GetSession(datamodel.SessionName("bar")).Return(datamodel.Session{
@@ -72,7 +72,7 @@ func TestDacctlActions_Paths(t *testing.T) {
 func TestDacctlActions_ShowInstances(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 	session.EXPECT().GetAllSessions().Return([]datamodel.Session{
 		{
 			Name:            datamodel.SessionName("foo"),
@@ -107,7 +107,7 @@ func TestDacctlActions_ShowInstances(t *testing.T) {
 func TestDacctlActions_ShowSessions(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 	session.EXPECT().GetAllSessions().Return([]datamodel.Session{
 		{
 			Name:      datamodel.SessionName("foo"),
@@ -144,7 +144,7 @@ func TestDacctlActions_ShowSessions(t *testing.T) {
 func TestDacctlActions_ListPools(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	session := mock_workflow.NewMockSession(mockCtrl)
+	session := mock_facade.NewMockSession(mockCtrl)
 	session.EXPECT().GetPools().Return([]datamodel.PoolInfo{
 		{
 			Pool: datamodel.Pool{

@@ -1,4 +1,4 @@
-package workflow
+package facade
 
 import "github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 

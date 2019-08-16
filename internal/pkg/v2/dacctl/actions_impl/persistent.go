@@ -63,5 +63,5 @@ func (d *dacctlActions) CreatePersistentBuffer(c dacctl.CliContext) error {
 		Group:         uint(c.Int("group")),
 		CreatedAt:     getNow(),
 	}
-	return d.session.CreateSessionVolume(session)
+	return d.session.CreateSession(session)
 }

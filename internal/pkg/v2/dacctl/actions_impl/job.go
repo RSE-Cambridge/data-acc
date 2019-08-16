@@ -85,7 +85,7 @@ func (d *dacctlActions) CreatePerJobBuffer(c dacctl.CliContext) error {
 	}
 	session.Paths = getPaths(session)
 
-	return d.session.CreateSessionVolume(session)
+	return d.session.CreateSession(session)
 }
 
 func getPaths(session datamodel.Session) map[string]string {

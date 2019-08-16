@@ -2,12 +2,12 @@ package brick_manager_impl
 
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/facade"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/workflow"
 	"log"
 )
 
-func NewSessionActionHandler(actions registry.SessionActions) workflow.SessionActionHandler {
+func NewSessionActionHandler(actions registry.SessionActions) facade.SessionActionHandler {
 	return &sessionActionHandler{actions: actions}
 }
 

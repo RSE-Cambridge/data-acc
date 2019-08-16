@@ -4,26 +4,26 @@ import (
 	"context"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/facade"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/workflow"
 	"log"
 	"math"
 	"math/rand"
 	"time"
 )
 
-func NewSessionWorkflow() workflow.Session {
-	return sessionWorkflow{}
+func NewSessionFacade() facade.Session {
+	return sessionFacade{}
 }
 
-type sessionWorkflow struct {
+type sessionFacade struct {
 	session     registry.SessionRegistry
 	actions     registry.SessionActions
 	allocations registry.AllocationRegistry
 	pool        registry.PoolRegistry
 }
 
-func (s sessionWorkflow) CreateSessionVolume(session datamodel.Session) error {
+func (s sessionFacade) CreateSession(session datamodel.Session) error {
 	// TODO needs to get the allocation mutex, create the session, then create the allocations
 	//   failing if the pool isn't known, or doesn't have enough space
 	err := s.validateSession(session)
@@ -67,7 +67,7 @@ func (s sessionWorkflow) CreateSessionVolume(session datamodel.Session) error {
 	return sessionAction.Error
 }
 
-func (s sessionWorkflow) validateSession(session datamodel.Session) error {
+func (s sessionFacade) validateSession(session datamodel.Session) error {
 	_, err := s.pool.GetPool(session.VolumeRequest.PoolName)
 	if err != nil {
 		return fmt.Errorf("invalid session, unable to find pool %s", session.VolumeRequest.PoolName)
@@ -76,7 +76,7 @@ func (s sessionWorkflow) validateSession(session datamodel.Session) error {
 	return nil
 }
 
-func (s sessionWorkflow) doSessionAllocation(session datamodel.Session) (datamodel.Session, error) {
+func (s sessionFacade) doSessionAllocation(session datamodel.Session) (datamodel.Session, error) {
 	allocationMutex, err := s.allocations.GetAllocationMutex()
 	if err != nil {
 		return session, err
@@ -114,7 +114,7 @@ func (s sessionWorkflow) doSessionAllocation(session datamodel.Session) (datamod
 	return session, err
 }
 
-func (s sessionWorkflow) getBricks(poolName datamodel.PoolName, bytes int) (int, []datamodel.Brick, error) {
+func (s sessionFacade) getBricks(poolName datamodel.PoolName, bytes int) (int, []datamodel.Brick, error) {
 	pool, err := s.allocations.GetPoolInfo(poolName)
 	if err != nil {
 		return 0, nil, err
@@ -160,7 +160,7 @@ func getBricks(bricksRequired int, poolInfo datamodel.PoolInfo) []datamodel.Bric
 	return chosenBricks
 }
 
-func (s sessionWorkflow) DeleteSession(sessionName datamodel.SessionName, hurry bool) error {
+func (s sessionFacade) DeleteSession(sessionName datamodel.SessionName, hurry bool) error {
 	// Get session lock
 	sessionMutex, err := s.session.GetSessionMutex(sessionName)
 	if err != nil {
@@ -206,30 +206,30 @@ func (s sessionWorkflow) DeleteSession(sessionName datamodel.SessionName, hurry 
 	return result.Error
 }
 
-func (s sessionWorkflow) DataIn(sessionName datamodel.SessionName) error {
+func (s sessionFacade) CopyDataIn(sessionName datamodel.SessionName) error {
 	panic("implement me")
 }
 
-func (s sessionWorkflow) AttachVolumes(sessionName datamodel.SessionName, computeNodes []string, loginNodes []string) error {
+func (s sessionFacade) Mount(sessionName datamodel.SessionName, computeNodes []string, loginNodes []string) error {
 	panic("implement me")
 }
 
-func (s sessionWorkflow) DetachVolumes(sessionName datamodel.SessionName) error {
+func (s sessionFacade) Unmount(sessionName datamodel.SessionName) error {
 	panic("implement me")
 }
 
-func (s sessionWorkflow) DataOut(sessionName datamodel.SessionName) error {
+func (s sessionFacade) CopyDataOut(sessionName datamodel.SessionName) error {
 	panic("implement me")
 }
 
-func (s sessionWorkflow) GetPools() ([]datamodel.PoolInfo, error) {
+func (s sessionFacade) GetPools() ([]datamodel.PoolInfo, error) {
 	panic("implement me")
 }
 
-func (s sessionWorkflow) GetSession(sessionName datamodel.SessionName) (datamodel.Session, error) {
+func (s sessionFacade) GetSession(sessionName datamodel.SessionName) (datamodel.Session, error) {
 	panic("implement me")
 }
 
-func (s sessionWorkflow) GetAllSessions() ([]datamodel.Session, error) {
+func (s sessionFacade) GetAllSessions() ([]datamodel.Session, error) {
 	panic("implement me")
 }

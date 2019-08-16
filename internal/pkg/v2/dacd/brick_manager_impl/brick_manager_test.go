@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_facade"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_registry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_workflow"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -20,7 +20,7 @@ func TestBrickManager_Startup(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	brickRegistry := mock_registry.NewMockBrickRegistry(mockCtrl)
-	handler := mock_workflow.NewMockSessionActionHandler(mockCtrl)
+	handler := mock_facade.NewMockSessionActionHandler(mockCtrl)
 	brickManager := NewBrickManager(brickRegistry, handler)
 
 	// TODO...

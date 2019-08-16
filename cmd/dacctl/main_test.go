@@ -125,7 +125,7 @@ func TestFlow(t *testing.T) {
 	assert.Equal(t, "RealSize", err.Error())
 
 	err = runCli([]string{"--function", "data_in", "--token", "a", "--job", "b"})
-	assert.Equal(t, "DataIn", err.Error())
+	assert.Equal(t, "CopyDataIn", err.Error())
 
 	err = runCli([]string{"--function", "paths", "--token", "a", "--job", "b", "--pathfile", "c"})
 	assert.Equal(t, "Paths", err.Error())
@@ -137,7 +137,7 @@ func TestFlow(t *testing.T) {
 	assert.Equal(t, "PostRun", err.Error())
 
 	err = runCli([]string{"--function", "data_out", "--token", "a", "--job", "b"})
-	assert.Equal(t, "DataOut", err.Error())
+	assert.Equal(t, "CopyDataOut", err.Error())
 }
 
 type stubKeystore struct{}
@@ -209,7 +209,7 @@ func (*stubDacctlActions) RealSize(c actions.CliContext) error {
 	return errors.New("RealSize")
 }
 func (*stubDacctlActions) DataIn(c actions.CliContext) error {
-	return errors.New("DataIn")
+	return errors.New("CopyDataIn")
 }
 func (*stubDacctlActions) Paths(c actions.CliContext) error {
 	return errors.New("Paths")
@@ -221,5 +221,5 @@ func (*stubDacctlActions) PostRun(c actions.CliContext) error {
 	return errors.New("PostRun")
 }
 func (*stubDacctlActions) DataOut(c actions.CliContext) error {
-	return errors.New("DataOut")
+	return errors.New("CopyDataOut")
 }

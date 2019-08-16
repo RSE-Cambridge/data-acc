@@ -7,12 +7,12 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/workflow"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/facade"
 	"log"
 	"strings"
 )
 
-func NewDacctlActions(actions workflow.Session, disk fileio.Disk) dacctl.DacctlActions {
+func NewDacctlActions(actions facade.Session, disk fileio.Disk) dacctl.DacctlActions {
 	return &dacctlActions{
 		session: actions,
 		disk:    disk,
@@ -20,7 +20,7 @@ func NewDacctlActions(actions workflow.Session, disk fileio.Disk) dacctl.DacctlA
 }
 
 type dacctlActions struct {
-	session workflow.Session
+	session facade.Session
 	disk    fileio.Disk
 }
 
@@ -67,7 +67,7 @@ func (d *dacctlActions) DataIn(c dacctl.CliContext) error {
 	if err != nil {
 		return err
 	}
-	return d.session.DataIn(sessionName)
+	return d.session.CopyDataIn(sessionName)
 }
 
 func (d *dacctlActions) PreRun(c dacctl.CliContext) error {
@@ -97,7 +97,7 @@ func (d *dacctlActions) PreRun(c dacctl.CliContext) error {
 		}
 	}
 
-	return d.session.AttachVolumes(sessionName, computeHosts, loginNodeHosts)
+	return d.session.Mount(sessionName, computeHosts, loginNodeHosts)
 }
 
 func (d *dacctlActions) PostRun(c dacctl.CliContext) error {
@@ -105,7 +105,7 @@ func (d *dacctlActions) PostRun(c dacctl.CliContext) error {
 	if err != nil {
 		return err
 	}
-	return d.session.DetachVolumes(sessionName)
+	return d.session.Unmount(sessionName)
 }
 
 func (d *dacctlActions) DataOut(c dacctl.CliContext) error {
@@ -113,5 +113,5 @@ func (d *dacctlActions) DataOut(c dacctl.CliContext) error {
 	if err != nil {
 		return err
 	}
-	return d.session.DataOut(sessionName)
+	return d.session.CopyDataOut(sessionName)
 }

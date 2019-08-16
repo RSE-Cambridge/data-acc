@@ -1,4 +1,4 @@
-package workflow
+package facade
 
 import "github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 
@@ -7,7 +7,7 @@ import "github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 // All the calls block until they are complete, or an error occurs
 type Session interface {
 	// Allocates storage and
-	CreateSessionVolume(session datamodel.Session) error
+	CreateSession(session datamodel.Session) error
 
 	// Deletes the requested volume and session allocation
 	// If hurry, there is no stage-out attempted
@@ -15,16 +15,16 @@ type Session interface {
 	DeleteSession(sessionName datamodel.SessionName, hurry bool) error
 
 	// Update the session and trigger requested data copy in
-	DataIn(sessionName datamodel.SessionName) error
+	CopyDataIn(sessionName datamodel.SessionName) error
 
 	// Update session hosts and attach volumes as needed
-	AttachVolumes(sessionName datamodel.SessionName, computeNodes []string, loginNodes []string) error
+	Mount(sessionName datamodel.SessionName, computeNodes []string, loginNodes []string) error
 
 	// Attempt to detach volumes
-	DetachVolumes(sessionName datamodel.SessionName) error
+	Unmount(sessionName datamodel.SessionName) error
 
 	// Update the session and trigger requested data copy out
-	DataOut(sessionName datamodel.SessionName) error
+	CopyDataOut(sessionName datamodel.SessionName) error
 
 	// Get brick availability by pool
 	GetPools() ([]datamodel.PoolInfo, error)
