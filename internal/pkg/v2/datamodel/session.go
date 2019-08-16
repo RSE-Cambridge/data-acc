@@ -71,16 +71,6 @@ type SessionStatus struct {
 	DeleteSkipCopyDataOut bool
 }
 
-type SessionAction struct {
-	Uuid    string
-	Session Session
-	Action  SessionActionType
-	Error   error
-}
-
-// TODO: turn into enum
-type SessionActionType string
-
 type VolumeRequest struct {
 	MultiJob           bool
 	Caller             string

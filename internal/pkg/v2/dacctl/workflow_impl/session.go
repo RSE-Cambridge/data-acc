@@ -203,7 +203,7 @@ func (s sessionFacade) DeleteSession(sessionName datamodel.SessionName, hurry bo
 	}
 
 	// This will error out if the host is not currently up
-	sessionAction, err := s.actions.SendSessionAction(context.TODO(), datamodel.SessionActionType("delete"), session)
+	sessionAction, err := s.actions.SendSessionAction(context.TODO(), datamodel.SessionDelete, session)
 	if err != nil {
 		return err
 	}

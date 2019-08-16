@@ -164,7 +164,7 @@ func TestSessionFacade_DeleteSession(t *testing.T) {
 	}
 	sessionRegistry.EXPECT().UpdateSession(updatedSession).Return(initialSession, nil)
 	actionChan := make(chan datamodel.SessionAction)
-	actions.EXPECT().SendSessionAction(context.TODO(), datamodel.SessionActionType("delete"), initialSession).Return(actionChan, nil)
+	actions.EXPECT().SendSessionAction(context.TODO(), datamodel.SessionDelete, initialSession).Return(actionChan, nil)
 	sessionMutex.EXPECT().Unlock(context.TODO())
 	fakeErr := errors.New("fake")
 	go func() {
