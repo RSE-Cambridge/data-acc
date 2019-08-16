@@ -43,23 +43,27 @@ func (s sessionFacade) CreateSession(session datamodel.Session) error {
 
 	// Allocate bricks, and choose brick host server
 	session, err = s.doSessionAllocation(session)
-	if err != nil {
+	// if no bricks allocated, no need to call CreateSessionVolume
+	if err != nil || session.ActualSizeBytes == 0 {
 		sessionMutex.Unlock(context.TODO())
 		return err
 	}
 
 	// Create filesystem on the brick host server
 	// TODO: add timeout
-	eventChan, err := s.actions.CreateSessionVolume(context.TODO(), session.Name)
-	if err != nil {
-		return err
-	}
+	eventChan, createErr := s.actions.CreateSessionVolume(context.TODO(), session.Name)
 
 	// Drop mutex so the server can take it
 	err = sessionMutex.Unlock(context.TODO())
 	if err != nil {
 		// TODO: cancel above action?
 		return err
+	}
+
+	// Always drop the mutex, but check error before checking the channel
+	if createErr != nil {
+		// TODO: session should go into Error State? Maybe its up the above call in this case?
+		return createErr
 	}
 
 	// Wait for the server to create the filesystem
@@ -77,39 +81,44 @@ func (s sessionFacade) validateSession(session datamodel.Session) error {
 }
 
 func (s sessionFacade) doSessionAllocation(session datamodel.Session) (datamodel.Session, error) {
-	allocationMutex, err := s.allocations.GetAllocationMutex()
-	if err != nil {
-		return session, err
-	}
-
-	err = allocationMutex.Lock(context.TODO())
-	if err != nil {
-		return session, err
-	}
-	defer allocationMutex.Unlock(context.TODO())
-
 	if session.VolumeRequest.TotalCapacityBytes > 0 {
-		// Write allocations first
+		allocationMutex, err := s.allocations.GetAllocationMutex()
+		if err != nil {
+			return session, err
+		}
+
+		err = allocationMutex.Lock(context.TODO())
+		if err != nil {
+			return session, err
+		}
+		defer allocationMutex.Unlock(context.TODO())
+
+		// Write allocations before creating the session
 		actualSizeBytes, chosenBricks, err := s.getBricks(session.VolumeRequest.PoolName, session.VolumeRequest.TotalCapacityBytes)
 		if err != nil {
 			return session, fmt.Errorf("can't allocate for session: %s due to %s", session.Name, err)
 		}
-		session.ActualSizeBytes = actualSizeBytes
 
 		allocations, err := s.allocations.CreateAllocations(session.Name, chosenBricks)
 		if err != nil {
 			return session, err
 		}
 
+		session.ActualSizeBytes = actualSizeBytes
 		session.Allocations = allocations
 		session.PrimaryBrickHost = allocations[0].Brick.BrickHostName
 	}
 
 	// Store initial version of session
-	session, err = s.session.CreateSession(session)
+	// returned session will have updated revision info
+	session, err := s.session.CreateSession(session)
 	if err != nil {
-		// TODO: remove allocations
-		return session, err
+		if session.Allocations != nil {
+			deleteErr := s.allocations.DeleteAllocations(session.Allocations)
+			if deleteErr != nil {
+				log.Println("Failed to clean up allocations due to:", deleteErr)
+			}
+		}
 	}
 	return session, err
 }
@@ -123,7 +132,7 @@ func (s sessionFacade) getBricks(poolName datamodel.PoolName, bytes int) (int, [
 	bricksRequired := int(math.Ceil(float64(bytes) / float64(pool.Pool.GranularityBytes)))
 	actualSize := bricksRequired * int(pool.Pool.GranularityBytes)
 
-	bricks := getBricks(bricksRequired, pool)
+	bricks := pickBricks(bricksRequired, pool)
 	if len(bricks) != bricksRequired {
 		return 0, nil, fmt.Errorf(
 			"unable to get number of requested bricks (%d) for given pool (%s)",
@@ -132,7 +141,7 @@ func (s sessionFacade) getBricks(poolName datamodel.PoolName, bytes int) (int, [
 	return actualSize, bricks, nil
 }
 
-func getBricks(bricksRequired int, poolInfo datamodel.PoolInfo) []datamodel.Brick {
+func pickBricks(bricksRequired int, poolInfo datamodel.PoolInfo) []datamodel.Brick {
 	// pick some of the available bricks
 	s := rand.NewSource(time.Now().Unix())
 	r := rand.New(s) // initialize local pseudorandom generator
