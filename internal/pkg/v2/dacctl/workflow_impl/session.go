@@ -188,12 +188,19 @@ func (s sessionFacade) DeleteSession(sessionName datamodel.SessionName, hurry bo
 	// Record we want this deleted, in case host is not alive
 	// can be deleted when it is next stated
 	session.Status.DeleteRequested = true
+	session.Status.DeleteSkipCopyDataOut = hurry
 	session, err = s.session.UpdateSession(session)
 	if err != nil {
 		sessionMutex.Unlock(context.TODO())
 		return err
 	}
 	// TODO: send the hurry, i.e. request data copy out first
+
+	if session.PrimaryBrickHost == "" {
+		// TODO: session has no primary brick host
+		//  so need to do local umount
+
+	}
 
 	// This will error out if the host is not currently up
 	sessionAction, err := s.actions.SendSessionAction(context.TODO(), datamodel.SessionActionType("delete"), session)

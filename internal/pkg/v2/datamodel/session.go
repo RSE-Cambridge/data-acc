@@ -66,6 +66,9 @@ type SessionStatus struct {
 
 	// Records if we have started trying to delete
 	DeleteRequested bool
+
+	// Records if we should skip copy data out on delete
+	DeleteSkipCopyDataOut bool
 }
 
 type SessionAction struct {
