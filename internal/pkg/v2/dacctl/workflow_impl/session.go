@@ -24,8 +24,6 @@ type sessionFacade struct {
 }
 
 func (s sessionFacade) CreateSession(session datamodel.Session) error {
-	// TODO needs to get the allocation mutex, create the session, then create the allocations
-	//   failing if the pool isn't known, or doesn't have enough space
 	err := s.validateSession(session)
 	if err != nil {
 		return err
