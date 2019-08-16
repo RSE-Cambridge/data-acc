@@ -221,19 +221,24 @@ func (s sessionFacade) DeleteSession(sessionName datamodel.SessionName, hurry bo
 }
 
 func (s sessionFacade) CopyDataIn(sessionName datamodel.SessionName) error {
-	panic("implement me")
+	// TODO: complete implementation of all actions
+	log.Println("FAKE CopyDataIn")
+	return nil
 }
 
 func (s sessionFacade) Mount(sessionName datamodel.SessionName, computeNodes []string, loginNodes []string) error {
-	panic("implement me")
+	log.Println("FAKE Mount")
+	return nil
 }
 
 func (s sessionFacade) Unmount(sessionName datamodel.SessionName) error {
-	panic("implement me")
+	log.Println("FAKE Unmount")
+	return nil
 }
 
 func (s sessionFacade) CopyDataOut(sessionName datamodel.SessionName) error {
-	panic("implement me")
+	log.Println("FAKE CopyDataOut")
+	return nil
 }
 
 func (s sessionFacade) GetPools() ([]datamodel.PoolInfo, error) {
