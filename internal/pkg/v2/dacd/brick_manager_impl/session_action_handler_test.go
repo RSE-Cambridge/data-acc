@@ -1,20 +1,39 @@
 package brick_manager_impl
 
 import (
+	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_registry"
-	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestSessionActionHandler_ProcessSessionAction(t *testing.T) {
+func TestSessionActionHandler_ProcessSessionAction_Unknown(t *testing.T) {
 	action := datamodel.SessionAction{}
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	registry := mock_registry.NewMockSessionActions(mockCtrl)
-	registry.EXPECT().CompleteSessionAction(action, nil)
-	handler := NewSessionActionHandler(registry)
+	handler := NewSessionActionHandler(nil)
 
-	// TODO...
+	assert.PanicsWithValue(t,
+		fmt.Sprintf("not yet implemented action for %+v", action),
+		func() { handler.ProcessSessionAction(action) })
+}
+
+func TestSessionActionHandler_ProcessSessionAction_Create(t *testing.T) {
+	action := datamodel.SessionAction{
+		ActionType: datamodel.SessionCreate,
+	}
+	handler := sessionActionHandler{skipActions: true}
+
 	handler.ProcessSessionAction(action)
+
+	assert.Equal(t, datamodel.SessionCreate, handler.actionCalled)
+}
+
+func TestSessionActionHandler_ProcessSessionAction_Delete(t *testing.T) {
+	action := datamodel.SessionAction{
+		ActionType: datamodel.SessionDelete,
+	}
+	handler := sessionActionHandler{skipActions: true}
+
+	handler.ProcessSessionAction(action)
+
+	assert.Equal(t, datamodel.SessionDelete, handler.actionCalled)
 }

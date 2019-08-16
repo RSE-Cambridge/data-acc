@@ -1,10 +1,10 @@
 package datamodel
 
 type SessionAction struct {
-	Uuid    string
-	Session Session
-	Action  SessionActionType
-	Error   error
+	Uuid       string
+	Session    Session
+	ActionType SessionActionType
+	Error      error
 }
 
 type SessionActionType int
