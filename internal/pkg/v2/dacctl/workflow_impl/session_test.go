@@ -130,8 +130,14 @@ func TestSessionFacade_CreateSession_WithBricks_CreateSessionError(t *testing.T)
 	sessionRegistry.EXPECT().CreateSession(updatedSession).Return(returnedSession, nil)
 	allocationMutex.EXPECT().Unlock(context.TODO())
 	fakeErr := errors.New("fake")
-	actions.EXPECT().CreateSessionVolume(context.TODO(), initialSession.Name).Return(nil, fakeErr)
+	actionChan := make(chan datamodel.SessionAction)
+	actions.EXPECT().CreateSessionVolume(context.TODO(), initialSession.Name).Return(actionChan, nil)
 	sessionMutex.EXPECT().Unlock(context.TODO())
+	go func() {
+		actionChan <- datamodel.SessionAction{Error: fakeErr}
+		close(actionChan)
+	}()
+	defer close(actionChan)
 
 	err := facade.CreateSession(initialSession)
 
