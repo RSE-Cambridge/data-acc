@@ -38,19 +38,19 @@ func (s *sessionActionHandler) ProcessSessionAction(action datamodel.SessionActi
 
 func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 	log.Println("create")
-	err := s.actions.CompleteSessionAction(action, nil)
-	if err != nil {
-		log.Println("Failed to complete ActionType:", err)
-		return
-	}
-	log.Println("Stopped processing action:", action)
+	s.reportComplete(action)
 }
 
 func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
 	log.Println("delete")
+	s.reportComplete(action)
+}
+
+func (s *sessionActionHandler) reportComplete(action datamodel.SessionAction) {
 	err := s.actions.CompleteSessionAction(action, nil)
 	if err != nil {
 		log.Println("Failed to complete ActionType:", err)
+		// TODO: put session into error state?
 		return
 	}
 	log.Println("Stopped processing action:", action)

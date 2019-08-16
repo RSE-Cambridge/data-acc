@@ -44,7 +44,7 @@ func TestSessionActionHandler_handleCreate(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	actions := mock_registry.NewMockSessionActions(mockCtrl)
-	handler := sessionActionHandler{actions:actions}
+	handler := sessionActionHandler{actions: actions}
 	action := datamodel.SessionAction{
 		ActionType: datamodel.SessionCreate,
 	}
@@ -58,7 +58,7 @@ func TestSessionActionHandler_handleDelete(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	actions := mock_registry.NewMockSessionActions(mockCtrl)
-	handler := sessionActionHandler{actions:actions}
+	handler := sessionActionHandler{actions: actions}
 	action := datamodel.SessionAction{
 		ActionType: datamodel.SessionDelete,
 	}
