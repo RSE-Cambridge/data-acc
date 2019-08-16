@@ -237,13 +237,13 @@ func (s sessionFacade) CopyDataOut(sessionName datamodel.SessionName) error {
 }
 
 func (s sessionFacade) GetPools() ([]datamodel.PoolInfo, error) {
-	panic("implement me")
+	return s.allocations.GetBricksByPool()
 }
 
 func (s sessionFacade) GetSession(sessionName datamodel.SessionName) (datamodel.Session, error) {
-	panic("implement me")
+	return s.session.GetSession(sessionName)
 }
 
 func (s sessionFacade) GetAllSessions() ([]datamodel.Session, error) {
-	panic("implement me")
+	return s.session.GetAllSessions()
 }
