@@ -10,7 +10,8 @@ import (
 	"testing"
 )
 
-var emptySessionString = []byte(`{"Name":"foo","Revision":0,"Owner":0,"Group":0,"CreatedAt":0,"VolumeRequest":{"MultiJob":false,"Caller":"","TotalCapacityBytes":0,"PoolName":"","Access":0,"Type":0,"SwapBytes":0},"Status":{"Error":null,"FileSystemCreated":false,"CopyDataInComplete":false,"CopyDataOutComplete":false,"DeleteRequested":false,"DeleteSkipCopyDataOut":false},"StageInRequests":null,"StageOutRequests":null,"MultiJobAttachments":null,"Paths":null,"ActualSizeBytes":0,"Allocations":null,"PrimaryBrickHost":"","RequestedAttachHosts":null,"FilesystemStatus":{"Error":null,"InternalName":"","InternalData":""},"CurrentAttachments":null}`)
+var exampleSessionString = []byte(`{"Name":"foo","Revision":0,"Owner":0,"Group":0,"CreatedAt":0,"VolumeRequest":{"MultiJob":false,"Caller":"","TotalCapacityBytes":0,"PoolName":"","Access":0,"Type":0,"SwapBytes":0},"Status":{"Error":null,"FileSystemCreated":false,"CopyDataInComplete":false,"CopyDataOutComplete":false,"DeleteRequested":false,"DeleteSkipCopyDataOut":false},"StageInRequests":null,"StageOutRequests":null,"MultiJobAttachments":null,"Paths":null,"ActualSizeBytes":0,"Allocations":null,"PrimaryBrickHost":"host1","RequestedAttachHosts":null,"FilesystemStatus":{"Error":null,"InternalName":"","InternalData":""},"CurrentAttachments":null}`)
+var exampleSession = datamodel.Session{Name: "foo", PrimaryBrickHost: "host1"}
 
 func TestSessionRegistry_GetSessionMutex(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
@@ -34,33 +35,27 @@ func TestSessionRegistry_CreateSession(t *testing.T) {
 	defer mockCtrl.Finish()
 	keystore := mock_store.NewMockKeystore(mockCtrl)
 	registry := NewSessionRegistry(keystore)
-	keystore.EXPECT().Create("/session/foo", emptySessionString).Return(store.KeyValueVersion{ModRevision: 42}, nil)
+	keystore.EXPECT().Create("/session/foo", exampleSessionString).Return(store.KeyValueVersion{ModRevision: 42}, nil)
 
-	session, err := registry.CreateSession(datamodel.Session{Name: "foo"})
+	session, err := registry.CreateSession(exampleSession)
 	assert.Nil(t, err)
 	assert.Equal(t, int64(42), session.Revision)
 
 	assert.PanicsWithValue(t, "invalid session name: 'foo/bar'", func() {
-		registry.CreateSession(datamodel.Session{Name: "foo/bar"})
+		registry.CreateSession(datamodel.Session{Name: "foo/bar", PrimaryBrickHost: "host1"})
 	})
 	assert.PanicsWithValue(t, "session must have allocations before being created: foo", func() {
-		registry.CreateSession(datamodel.Session{Name: "foo", ActualSizeBytes: 1024})
-	})
-	assert.PanicsWithValue(t, "session must have a primary brick host set: foo", func() {
-		registry.CreateSession(datamodel.Session{
-			Name:            "foo",
-			ActualSizeBytes: 1024,
-			Allocations:     []datamodel.BrickAllocation{{}},
-		})
+		registry.CreateSession(datamodel.Session{Name: "foo", ActualSizeBytes: 1024, PrimaryBrickHost: "host1"})
 	})
 	assert.PanicsWithValue(t, "allocations out of sync with ActualSizeBytes: foo", func() {
 		registry.CreateSession(datamodel.Session{
-			Name:        "foo",
-			Allocations: []datamodel.BrickAllocation{{}},
+			Name:             "foo",
+			Allocations:      []datamodel.BrickAllocation{{}},
+			PrimaryBrickHost: "host1",
 		})
 	})
-	assert.PanicsWithValue(t, "PrimaryBrickHost should be empty if no bricks assigned: foo", func() {
-		registry.CreateSession(datamodel.Session{Name: "foo", PrimaryBrickHost: "foo"})
+	assert.PanicsWithValue(t, "PrimaryBrickHost must be set before creating session: foo", func() {
+		registry.CreateSession(datamodel.Session{Name: "foo", PrimaryBrickHost: ""})
 	})
 }
 
@@ -71,13 +66,13 @@ func TestSessionRegistry_GetSession(t *testing.T) {
 	registry := NewSessionRegistry(keystore)
 	keystore.EXPECT().Get("/session/foo").Return(store.KeyValueVersion{
 		ModRevision: 42,
-		Value:       emptySessionString,
+		Value:       exampleSessionString,
 	}, nil)
 
 	session, err := registry.GetSession("foo")
 
 	assert.Nil(t, err)
-	assert.Equal(t, datamodel.Session{Name: "foo", Revision: 42}, session)
+	assert.Equal(t, datamodel.Session{Name: "foo", Revision: 42, PrimaryBrickHost: "host1"}, session)
 
 	assert.PanicsWithValue(t, "invalid session name: 'foo/bar'", func() {
 		registry.GetSession("foo/bar")
@@ -104,12 +99,12 @@ func TestSessionRegistry_GetAllSessions(t *testing.T) {
 	registry := NewSessionRegistry(keystore)
 	keystore.EXPECT().GetAll("/session/").Return([]store.KeyValueVersion{{
 		ModRevision: 42,
-		Value:       emptySessionString,
+		Value:       exampleSessionString,
 	}}, nil)
 
 	sessions, err := registry.GetAllSessions()
 	assert.Nil(t, err)
-	assert.Equal(t, []datamodel.Session{{Name: "foo", Revision: 42}}, sessions)
+	assert.Equal(t, []datamodel.Session{{Name: "foo", Revision: 42, PrimaryBrickHost: "host1"}}, sessions)
 
 	fakeErr := errors.New("fake")
 	keystore.EXPECT().GetAll("/session/").Return(nil, fakeErr)
@@ -134,15 +129,15 @@ func TestSessionRegistry_UpdateSession(t *testing.T) {
 	defer mockCtrl.Finish()
 	keystore := mock_store.NewMockKeystore(mockCtrl)
 	registry := NewSessionRegistry(keystore)
-	keystore.EXPECT().Update("/session/foo", emptySessionString, int64(0)).Return(store.KeyValueVersion{
+	keystore.EXPECT().Update("/session/foo", exampleSessionString, int64(0)).Return(store.KeyValueVersion{
 		ModRevision: 44,
-		Value:       emptySessionString,
+		Value:       exampleSessionString,
 	}, nil)
 
-	session, err := registry.UpdateSession(datamodel.Session{Name: "foo", Revision: 0})
+	session, err := registry.UpdateSession(datamodel.Session{Name: "foo", PrimaryBrickHost: "host1", Revision: 0})
 
 	assert.Nil(t, err)
-	assert.Equal(t, datamodel.Session{Name: "foo", Revision: 44}, session)
+	assert.Equal(t, datamodel.Session{Name: "foo", PrimaryBrickHost: "host1", Revision: 44}, session)
 }
 
 func TestSessionRegistry_DeleteSession(t *testing.T) {

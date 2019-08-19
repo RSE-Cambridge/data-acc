@@ -104,6 +104,19 @@ func (s sessionFacade) doAllocationAndWriteSession(session datamodel.Session) (d
 		session.ActualSizeBytes = actualSizeBytes
 		session.Allocations = allocations
 		session.PrimaryBrickHost = allocations[0].Brick.BrickHostName
+	} else {
+		// Pick a random alive host to be the PrimaryBrickHost anyway
+		pools, err := s.allocations.GetAllPoolInfos()
+		if err != nil {
+			return session, err
+		}
+		if len(pools) == 0 {
+			return session, fmt.Errorf("unable to find any pools")
+		}
+		// TODO: need to pick the default pool, but right now only one
+		poolInfo := pools[0]
+		bricks := pickBricks(1, poolInfo)
+		session.PrimaryBrickHost = bricks[0].BrickHostName
 	}
 
 	// Store initial version of session

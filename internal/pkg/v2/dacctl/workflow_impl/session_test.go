@@ -32,6 +32,9 @@ func TestSessionFacade_CreateSession_NoBricks(t *testing.T) {
 	sessionMutex := mock_store.NewMockMutex(mockCtrl)
 	sessionRegistry.EXPECT().GetSessionMutex(initialSession.Name).Return(sessionMutex, nil)
 	sessionMutex.EXPECT().Lock(context.TODO())
+	brickList := []datamodel.Brick{{Device: "sda", BrickHostName: datamodel.BrickHostName("host1")}}
+	allocations.EXPECT().GetAllPoolInfos().Return([]datamodel.PoolInfo{{AvailableBricks: brickList}}, nil)
+	initialSession.PrimaryBrickHost = "host1"
 	sessionRegistry.EXPECT().CreateSession(initialSession).Return(initialSession, nil)
 	sessionMutex.EXPECT().Unlock(context.TODO())
 
