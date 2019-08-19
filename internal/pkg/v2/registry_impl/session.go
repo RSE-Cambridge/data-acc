@@ -39,17 +39,17 @@ func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Se
 	// TODO: more validation?
 	if session.ActualSizeBytes > 0 {
 		if len(session.Allocations) == 0 {
-			return session, fmt.Errorf("session must have allocations before being created")
+			log.Panicf("session must have allocations before being created: %s", session.Name)
 		}
 		if session.PrimaryBrickHost == "" {
-			return session, fmt.Errorf("session must have a primary brick host set")
+			log.Panicf("session must have a primary brick host set: %s", session.Name)
 		}
 	} else {
 		if len(session.Allocations) != 0 {
-			return session, fmt.Errorf("allocations out of sync with ActualSizeBytes")
+			log.Panicf("allocations out of sync with ActualSizeBytes: %s", session.Name)
 		}
 		if session.PrimaryBrickHost != "" {
-			return session, fmt.Errorf("PrimaryBrickHost should be empty if no bricks assigned")
+			log.Panicf("PrimaryBrickHost should be empty if no bricks assigned: %s", session.Name)
 		}
 	}
 

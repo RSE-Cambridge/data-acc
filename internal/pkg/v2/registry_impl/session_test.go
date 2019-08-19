@@ -43,28 +43,25 @@ func TestSessionRegistry_CreateSession(t *testing.T) {
 	assert.PanicsWithValue(t, "invalid session name: 'foo/bar'", func() {
 		registry.CreateSession(datamodel.Session{Name: "foo/bar"})
 	})
-	_, err = registry.CreateSession(datamodel.Session{Name: "foo", ActualSizeBytes: 1024})
-	assert.NotNil(t, err)
-	assert.Equal(t, "session must have allocations before being created", err.Error())
-
-	_, err = registry.CreateSession(datamodel.Session{
-		Name:            "foo",
-		ActualSizeBytes: 1024,
-		Allocations:     []datamodel.BrickAllocation{{}},
+	assert.PanicsWithValue(t, "session must have allocations before being created: foo", func() {
+		registry.CreateSession(datamodel.Session{Name: "foo", ActualSizeBytes: 1024})
 	})
-	assert.NotNil(t, err)
-	assert.Equal(t, "session must have a primary brick host set", err.Error())
-
-	_, err = registry.CreateSession(datamodel.Session{
-		Name:        "foo",
-		Allocations: []datamodel.BrickAllocation{{}},
+	assert.PanicsWithValue(t, "session must have a primary brick host set: foo", func() {
+		registry.CreateSession(datamodel.Session{
+			Name:            "foo",
+			ActualSizeBytes: 1024,
+			Allocations:     []datamodel.BrickAllocation{{}},
+		})
 	})
-	assert.NotNil(t, err)
-	assert.Equal(t, "allocations out of sync with ActualSizeBytes", err.Error())
-
-	_, err = registry.CreateSession(datamodel.Session{Name: "foo", PrimaryBrickHost: "foo"})
-	assert.NotNil(t, err)
-	assert.Equal(t, "PrimaryBrickHost should be empty if no bricks assigned", err.Error())
+	assert.PanicsWithValue(t, "allocations out of sync with ActualSizeBytes: foo", func() {
+		registry.CreateSession(datamodel.Session{
+			Name:        "foo",
+			Allocations: []datamodel.BrickAllocation{{}},
+		})
+	})
+	assert.PanicsWithValue(t, "PrimaryBrickHost should be empty if no bricks assigned: foo", func() {
+		registry.CreateSession(datamodel.Session{Name: "foo", PrimaryBrickHost: "foo"})
+	})
 }
 
 func TestSessionRegistry_GetSession(t *testing.T) {
