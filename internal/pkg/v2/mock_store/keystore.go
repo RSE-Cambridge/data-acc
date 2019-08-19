@@ -64,7 +64,7 @@ func (mr *MockKeystoreMockRecorder) Create(key, value interface{}) *gomock.Call 
 }
 
 // Update mocks base method
-func (m *MockKeystore) Update(key string, value []byte, modRevision int) (store.KeyValueVersion, error) {
+func (m *MockKeystore) Update(key string, value []byte, modRevision int64) (store.KeyValueVersion, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", key, value, modRevision)
 	ret0, _ := ret[0].(store.KeyValueVersion)
@@ -79,7 +79,7 @@ func (mr *MockKeystoreMockRecorder) Update(key, value, modRevision interface{}) 
 }
 
 // Delete mocks base method
-func (m *MockKeystore) Delete(key string, modRevision int) error {
+func (m *MockKeystore) Delete(key string, modRevision int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", key, modRevision)
 	ret0, _ := ret[0].(error)

@@ -21,7 +21,7 @@ type Keystore interface {
 	// Otherwise if the revisions of any key doesn't
 	// match the current revision of that key, the update fails.
 	// When update fails an error is returned and no keyValues are updated
-	Update(key string, value []byte, modRevision int) (KeyValueVersion, error)
+	Update(key string, value []byte, modRevision int64) (KeyValueVersion, error)
 
 	// Delete the specified key values, atomically
 	//
@@ -29,7 +29,7 @@ type Keystore interface {
 	// ignores ModRevision if not zero.
 	// If any keys are not currently present, the request fails.
 	// Deletes no keys if an error is returned
-	Delete(key string, modRevision int) error
+	Delete(key string, modRevision int64) error
 
 	// Removes all keys with given prefix
 	DeleteAllKeysWithPrefix(keyPrefix string) error

@@ -130,3 +130,26 @@ func TestSessionRegistry_GetAllSessions(t *testing.T) {
 		"unable parse session from store due to: unexpected end of JSON input",
 		func() { registry.GetAllSessions() })
 }
+
+func TestSessionRegistry_UpdateSession(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	keystore := mock_store.NewMockKeystore(mockCtrl)
+	registry := NewSessionRegistry(keystore)
+	keystore.EXPECT().Update("/session/foo", emptySessionString, int64(0)).Return(store.KeyValueVersion{
+		ModRevision: 42,
+		Value:       emptySessionString,
+	}, nil)
+
+	registry.UpdateSession(datamodel.Session{Name: "foo", Revision: 0})
+}
+
+func TestSessionRegistry_DeleteSession(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	keystore := mock_store.NewMockKeystore(mockCtrl)
+	registry := NewSessionRegistry(keystore)
+	keystore.EXPECT().Delete("/session/foo", int64(40))
+
+	registry.DeleteSession(datamodel.Session{Name: "foo", Revision: 40})
+}

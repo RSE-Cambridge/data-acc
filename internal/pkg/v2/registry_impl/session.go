@@ -116,9 +116,34 @@ func (s *sessionRegistry) GetAllSessions() ([]datamodel.Session, error) {
 }
 
 func (s *sessionRegistry) UpdateSession(session datamodel.Session) (datamodel.Session, error) {
-	panic("implement me")
+	sessionKey, err := getSessionKey(session.Name)
+	if err != nil {
+		log.Panicf("invalid session name")
+	}
+
+	sessionAsStr, err := json.Marshal(session)
+	if err != nil {
+		log.Panicf("unable to convert session to json due to: %s", err.Error())
+	}
+
+	keyValueVersion, err := s.store.Update(sessionKey, sessionAsStr, session.Revision)
+	if err != nil {
+		return session, fmt.Errorf("unable to update session due to: %s", err.Error())
+	}
+
+	newSession := datamodel.Session{}
+	err = json.Unmarshal(keyValueVersion.Value, &newSession)
+	if err != nil {
+		log.Panicf("unable parse session from store due to: %s", err)
+	}
+	newSession.Revision = keyValueVersion.ModRevision
+	return newSession, nil
 }
 
 func (s *sessionRegistry) DeleteSession(session datamodel.Session) error {
-	panic("implement me")
+	sessionKey, err := getSessionKey(session.Name)
+	if err != nil {
+		log.Panicf("invalid session name")
+	}
+	return s.store.Delete(sessionKey, session.Revision)
 }
