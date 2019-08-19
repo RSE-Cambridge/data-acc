@@ -45,10 +45,10 @@ func TestGetHostnamesFromFile_ErrorOnBadHostname(t *testing.T) {
 	defer mockCtrl.Finish()
 	disk := mocks.NewMockDisk(mockCtrl)
 
-	fakeHosts := []string{"Test", "test", "test1", "test2.com", "bad hostname", "foo/bar"}
+	fakeHosts := []string{"Test", "test", "test1", "test2.com", "bad hostname", "foo/bar", ""}
 	disk.EXPECT().Lines("file").Return(fakeHosts, nil)
 
 	hosts, err := GetHostnamesFromFile(disk, "file")
 	assert.Nil(t, hosts)
-	assert.Equal(t, "invalid hostname in: [bad hostname foo/bar]", err.Error())
+	assert.Equal(t, "invalid hostname in: [bad hostname foo/bar ]", err.Error())
 }
