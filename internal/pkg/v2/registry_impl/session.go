@@ -39,6 +39,23 @@ func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Se
 		return session, err
 	}
 
+	// TODO: more validation?
+	if session.ActualSizeBytes > 0 {
+		if len(session.Allocations) == 0 {
+			return session, fmt.Errorf("session must have allocations before being created")
+		}
+		if session.PrimaryBrickHost == "" {
+			return session, fmt.Errorf("session must have a primary brick host set")
+		}
+	} else {
+		if len(session.Allocations) != 0 {
+			return session, fmt.Errorf("allocations out of sync with ActualSizeBytes")
+		}
+		if session.PrimaryBrickHost != "" {
+			return session, fmt.Errorf("PrimaryBrickHost should be empty if no bricks assigned")
+		}
+	}
+
 	sessionAsString, err := json.Marshal(session)
 	if err != nil {
 		return session, fmt.Errorf("unable to convert session to json due to: %s", err)
