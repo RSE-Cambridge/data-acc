@@ -20,7 +20,6 @@ type sessionFacade struct {
 	session     registry.SessionRegistry
 	actions     registry.SessionActions
 	allocations registry.AllocationRegistry
-	pool        registry.PoolRegistry
 }
 
 func (s sessionFacade) CreateSession(session datamodel.Session) error {
@@ -40,7 +39,7 @@ func (s sessionFacade) CreateSession(session datamodel.Session) error {
 	}
 
 	// Allocate bricks, and choose brick host server
-	session, err = s.doSessionAllocation(session)
+	session, err = s.doAllocationAndWriteSession(session)
 	// if no bricks allocated, no need to call CreateSessionVolume
 	if err != nil || session.ActualSizeBytes == 0 {
 		sessionMutex.Unlock(context.TODO())
@@ -49,7 +48,7 @@ func (s sessionFacade) CreateSession(session datamodel.Session) error {
 
 	// Create filesystem on the brick host server
 	// TODO: add timeout
-	eventChan, createErr := s.actions.CreateSessionVolume(context.TODO(), session.Name)
+	eventChan, createErr := s.actions.SendSessionAction(context.TODO(), datamodel.SessionCreateFilesystem, session)
 
 	// Drop mutex so the server can take it
 	err = sessionMutex.Unlock(context.TODO())
@@ -70,7 +69,7 @@ func (s sessionFacade) CreateSession(session datamodel.Session) error {
 }
 
 func (s sessionFacade) validateSession(session datamodel.Session) error {
-	_, err := s.pool.GetPool(session.VolumeRequest.PoolName)
+	_, err := s.allocations.GetPool(session.VolumeRequest.PoolName)
 	if err != nil {
 		return fmt.Errorf("invalid session, unable to find pool %s", session.VolumeRequest.PoolName)
 	}
@@ -78,7 +77,7 @@ func (s sessionFacade) validateSession(session datamodel.Session) error {
 	return nil
 }
 
-func (s sessionFacade) doSessionAllocation(session datamodel.Session) (datamodel.Session, error) {
+func (s sessionFacade) doAllocationAndWriteSession(session datamodel.Session) (datamodel.Session, error) {
 	if session.VolumeRequest.TotalCapacityBytes > 0 {
 		allocationMutex, err := s.allocations.GetAllocationMutex()
 		if err != nil {
@@ -242,7 +241,7 @@ func (s sessionFacade) CopyDataOut(sessionName datamodel.SessionName) error {
 }
 
 func (s sessionFacade) GetPools() ([]datamodel.PoolInfo, error) {
-	return s.allocations.GetBricksByPool()
+	return s.allocations.GetAllPoolInfos()
 }
 
 func (s sessionFacade) GetSession(sessionName datamodel.SessionName) (datamodel.Session, error) {

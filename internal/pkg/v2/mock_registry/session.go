@@ -34,6 +34,21 @@ func (m *MockSessionRegistry) EXPECT() *MockSessionRegistryMockRecorder {
 	return m.recorder
 }
 
+// GetSessionMutex mocks base method
+func (m *MockSessionRegistry) GetSessionMutex(sessionName datamodel.SessionName) (store.Mutex, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSessionMutex", sessionName)
+	ret0, _ := ret[0].(store.Mutex)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSessionMutex indicates an expected call of GetSessionMutex
+func (mr *MockSessionRegistryMockRecorder) GetSessionMutex(sessionName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionMutex", reflect.TypeOf((*MockSessionRegistry)(nil).GetSessionMutex), sessionName)
+}
+
 // CreateSession mocks base method
 func (m *MockSessionRegistry) CreateSession(session datamodel.Session) (datamodel.Session, error) {
 	m.ctrl.T.Helper()
@@ -106,19 +121,4 @@ func (m *MockSessionRegistry) DeleteSession(session datamodel.Session) error {
 func (mr *MockSessionRegistryMockRecorder) DeleteSession(session interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession", reflect.TypeOf((*MockSessionRegistry)(nil).DeleteSession), session)
-}
-
-// GetSessionMutex mocks base method
-func (m *MockSessionRegistry) GetSessionMutex(sessionName datamodel.SessionName) (store.Mutex, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSessionMutex", sessionName)
-	ret0, _ := ret[0].(store.Mutex)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSessionMutex indicates an expected call of GetSessionMutex
-func (mr *MockSessionRegistryMockRecorder) GetSessionMutex(sessionName interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionMutex", reflect.TypeOf((*MockSessionRegistry)(nil).GetSessionMutex), sessionName)
 }

@@ -6,6 +6,11 @@ import (
 )
 
 type SessionRegistry interface {
+	// This mutex should be held before doing any operations on given session
+	//
+	// No error if the session doesn't exist, as this is also used when creating a session
+	GetSessionMutex(sessionName datamodel.SessionName) (store.Mutex, error)
+
 	// Update provided session
 	//
 	// Error is session already exists
@@ -32,9 +37,4 @@ type SessionRegistry interface {
 	// Error if session doesn't match current revision
 	// No error if session has already been deleted
 	DeleteSession(session datamodel.Session) error
-
-	// This mutex should be held before doing any operations on given session
-	//
-	// No error if the session doesn't exist, as this is also used when creating a session
-	GetSessionMutex(sessionName datamodel.SessionName) (store.Mutex, error)
 }

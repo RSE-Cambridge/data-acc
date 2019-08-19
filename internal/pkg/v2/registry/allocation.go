@@ -6,8 +6,16 @@ import (
 )
 
 type AllocationRegistry interface {
+	// Get all registered pools
+	GetPool(name datamodel.PoolName) (datamodel.Pool, error)
+
+	// Creates the pool if it doesn't exist
+	// error if the granularity doesn't match and existing pool
+	// TODO package method called by brick registry?
+	//EnsurePoolCreated(poolName datamodel.PoolName, granularityGB int) (datamodel.Pool, error)
+
 	// Get brick availability by pool
-	GetBricksByPool() ([]datamodel.PoolInfo, error)
+	GetAllPoolInfos() ([]datamodel.PoolInfo, error)
 
 	// Get brick availability for one pool
 	// bricks are only available if corresponding host currently alive

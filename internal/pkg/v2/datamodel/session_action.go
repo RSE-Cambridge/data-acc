@@ -11,8 +11,8 @@ type SessionActionType int
 
 const (
 	UnknownSessionAction SessionActionType = iota
+	SessionCreateFilesystem
 	SessionDelete
-	SessionCreate
 	SessionCopyDataIn
 	SessionMount
 	SessionUnmount

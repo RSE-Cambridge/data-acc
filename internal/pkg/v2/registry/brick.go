@@ -9,6 +9,7 @@ type BrickRegistry interface {
 	// BrickHost updates bricks on startup
 	// This will error if we remove a brick that has an allocation
 	// for a Session that isn't in an error state
+	// This includes ensuring the pool exists and is consistent with the given brick host info
 	UpdateBrickHost(brickHostInfo datamodel.BrickHost) error
 
 	// Gets all new actions for the given Session
@@ -30,5 +31,6 @@ type BrickRegistry interface {
 	// Check if given brick host is alive
 	//
 	// Error if brick host doesn't exist
-	IsBrickHostAlive(brickHostName datamodel.BrickHostName) (bool, error)
+	// TODO: private method?
+	//IsBrickHostAlive(brickHostName datamodel.BrickHostName) (bool, error)
 }

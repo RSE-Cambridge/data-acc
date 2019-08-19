@@ -30,8 +30,8 @@ func (s *sessionActionHandler) ProcessSessionAction(action datamodel.SessionActi
 		if !s.skipActions {
 			go s.handleDelete(action)
 		}
-	case datamodel.SessionCreate:
-		s.actionCalled = datamodel.SessionCreate
+	case datamodel.SessionCreateFilesystem:
+		s.actionCalled = datamodel.SessionCreateFilesystem
 		if !s.skipActions {
 			go s.handleCreate(action)
 		}
@@ -88,5 +88,7 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 
 func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
 	log.Println("delete")
+	// TODO: clearly need mutex here, etc
+	s.registry.DeleteSession(action.Session)
 	s.actions.CompleteSessionAction(action, nil)
 }

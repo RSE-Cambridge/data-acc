@@ -23,13 +23,13 @@ func TestSessionActionHandler_ProcessSessionAction_Unknown(t *testing.T) {
 
 func TestSessionActionHandler_ProcessSessionAction_Create(t *testing.T) {
 	action := datamodel.SessionAction{
-		ActionType: datamodel.SessionCreate,
+		ActionType: datamodel.SessionCreateFilesystem,
 	}
 	handler := sessionActionHandler{skipActions: true}
 
 	handler.ProcessSessionAction(action)
 
-	assert.Equal(t, datamodel.SessionCreate, handler.actionCalled)
+	assert.Equal(t, datamodel.SessionCreateFilesystem, handler.actionCalled)
 }
 
 func TestSessionActionHandler_ProcessSessionAction_Delete(t *testing.T) {
@@ -53,7 +53,7 @@ func TestSessionActionHandler_handleCreate(t *testing.T) {
 		registry: registry, actions: actions, fsProvider: fsProvider,
 	}
 	action := datamodel.SessionAction{
-		ActionType: datamodel.SessionCreate,
+		ActionType: datamodel.SessionCreateFilesystem,
 		Session:    datamodel.Session{Name: "test"},
 	}
 	sessionMutex := mock_store.NewMockMutex(mockCtrl)
@@ -68,7 +68,7 @@ func TestSessionActionHandler_handleCreate(t *testing.T) {
 	}
 	registry.EXPECT().UpdateSession(updatedSession).Return(updatedSession, nil)
 	updatedAction := datamodel.SessionAction{
-		ActionType: datamodel.SessionCreate,
+		ActionType: datamodel.SessionCreateFilesystem,
 		Session:    updatedSession,
 	}
 	actions.EXPECT().CompleteSessionAction(updatedAction, nil)
@@ -80,11 +80,13 @@ func TestSessionActionHandler_handleDelete(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	actions := mock_registry.NewMockSessionActions(mockCtrl)
-	handler := sessionActionHandler{actions: actions}
+	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
+	handler := sessionActionHandler{actions: actions, registry: registry}
 	action := datamodel.SessionAction{
 		ActionType: datamodel.SessionDelete,
 	}
-
+	// TODO: need to pass session better? who deletes allocations?
+	registry.EXPECT().DeleteSession(action.Session)
 	actions.EXPECT().CompleteSessionAction(action, nil)
 
 	handler.handleDelete(action)

@@ -23,13 +23,12 @@ func TestSessionFacade_CreateSession_NoBricks(t *testing.T) {
 	defer mockCtrl.Finish()
 	actions := mock_registry.NewMockSessionActions(mockCtrl)
 	sessionRegistry := mock_registry.NewMockSessionRegistry(mockCtrl)
-	poolRegistry := mock_registry.NewMockPoolRegistry(mockCtrl)
 	allocations := mock_registry.NewMockAllocationRegistry(mockCtrl)
 	facade := sessionFacade{
-		session: sessionRegistry, actions: actions, pool: poolRegistry, allocations: allocations,
+		session: sessionRegistry, actions: actions, allocations: allocations,
 	}
 
-	poolRegistry.EXPECT().GetPool(datamodel.PoolName("pool1")).Return(datamodel.Pool{Name: "pool1"}, nil)
+	allocations.EXPECT().GetPool(datamodel.PoolName("pool1")).Return(datamodel.Pool{Name: "pool1"}, nil)
 	sessionMutex := mock_store.NewMockMutex(mockCtrl)
 	sessionRegistry.EXPECT().GetSessionMutex(initialSession.Name).Return(sessionMutex, nil)
 	sessionMutex.EXPECT().Lock(context.TODO())
@@ -53,13 +52,12 @@ func TestSessionFacade_CreateSession_WithBricks_AllocationError(t *testing.T) {
 	defer mockCtrl.Finish()
 	actions := mock_registry.NewMockSessionActions(mockCtrl)
 	sessionRegistry := mock_registry.NewMockSessionRegistry(mockCtrl)
-	poolRegistry := mock_registry.NewMockPoolRegistry(mockCtrl)
 	allocations := mock_registry.NewMockAllocationRegistry(mockCtrl)
 	facade := sessionFacade{
-		session: sessionRegistry, actions: actions, pool: poolRegistry, allocations: allocations,
+		session: sessionRegistry, actions: actions, allocations: allocations,
 	}
 
-	poolRegistry.EXPECT().GetPool(datamodel.PoolName("pool1")).Return(datamodel.Pool{Name: "pool1"}, nil)
+	allocations.EXPECT().GetPool(datamodel.PoolName("pool1")).Return(datamodel.Pool{Name: "pool1"}, nil)
 	sessionMutex := mock_store.NewMockMutex(mockCtrl)
 	sessionRegistry.EXPECT().GetSessionMutex(initialSession.Name).Return(sessionMutex, nil)
 	sessionMutex.EXPECT().Lock(context.TODO())
@@ -91,13 +89,12 @@ func TestSessionFacade_CreateSession_WithBricks_CreateSessionError(t *testing.T)
 	defer mockCtrl.Finish()
 	actions := mock_registry.NewMockSessionActions(mockCtrl)
 	sessionRegistry := mock_registry.NewMockSessionRegistry(mockCtrl)
-	poolRegistry := mock_registry.NewMockPoolRegistry(mockCtrl)
 	allocations := mock_registry.NewMockAllocationRegistry(mockCtrl)
 	facade := sessionFacade{
-		session: sessionRegistry, actions: actions, pool: poolRegistry, allocations: allocations,
+		session: sessionRegistry, actions: actions, allocations: allocations,
 	}
 
-	poolRegistry.EXPECT().GetPool(datamodel.PoolName("pool1")).Return(datamodel.Pool{Name: "pool1"}, nil)
+	allocations.EXPECT().GetPool(datamodel.PoolName("pool1")).Return(datamodel.Pool{Name: "pool1"}, nil)
 	sessionMutex := mock_store.NewMockMutex(mockCtrl)
 	sessionRegistry.EXPECT().GetSessionMutex(initialSession.Name).Return(sessionMutex, nil)
 	sessionMutex.EXPECT().Lock(context.TODO())
@@ -131,7 +128,7 @@ func TestSessionFacade_CreateSession_WithBricks_CreateSessionError(t *testing.T)
 	allocationMutex.EXPECT().Unlock(context.TODO())
 	fakeErr := errors.New("fake")
 	actionChan := make(chan datamodel.SessionAction)
-	actions.EXPECT().CreateSessionVolume(context.TODO(), initialSession.Name).Return(actionChan, nil)
+	actions.EXPECT().SendSessionAction(context.TODO(), datamodel.SessionCreateFilesystem, returnedSession).Return(actionChan, nil)
 	sessionMutex.EXPECT().Unlock(context.TODO())
 	go func() {
 		actionChan <- datamodel.SessionAction{Error: fakeErr}

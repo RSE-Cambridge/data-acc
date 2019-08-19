@@ -34,21 +34,6 @@ func (m *MockSessionActions) EXPECT() *MockSessionActionsMockRecorder {
 	return m.recorder
 }
 
-// CreateSessionVolume mocks base method
-func (m *MockSessionActions) CreateSessionVolume(ctxt context.Context, sessionName datamodel.SessionName) (<-chan datamodel.SessionAction, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSessionVolume", ctxt, sessionName)
-	ret0, _ := ret[0].(<-chan datamodel.SessionAction)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateSessionVolume indicates an expected call of CreateSessionVolume
-func (mr *MockSessionActionsMockRecorder) CreateSessionVolume(ctxt, sessionName interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSessionVolume", reflect.TypeOf((*MockSessionActions)(nil).CreateSessionVolume), ctxt, sessionName)
-}
-
 // SendSessionAction mocks base method
 func (m *MockSessionActions) SendSessionAction(ctxt context.Context, actionType datamodel.SessionActionType, session datamodel.Session) (<-chan datamodel.SessionAction, error) {
 	m.ctrl.T.Helper()
@@ -62,21 +47,6 @@ func (m *MockSessionActions) SendSessionAction(ctxt context.Context, actionType 
 func (mr *MockSessionActionsMockRecorder) SendSessionAction(ctxt, actionType, session interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendSessionAction", reflect.TypeOf((*MockSessionActions)(nil).SendSessionAction), ctxt, actionType, session)
-}
-
-// GetCreateSessionVolumeRequests mocks base method
-func (m *MockSessionActions) GetCreateSessionVolumeRequests(ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCreateSessionVolumeRequests", ctxt, brickHostName)
-	ret0, _ := ret[0].(<-chan datamodel.SessionAction)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCreateSessionVolumeRequests indicates an expected call of GetCreateSessionVolumeRequests
-func (mr *MockSessionActionsMockRecorder) GetCreateSessionVolumeRequests(ctxt, brickHostName interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCreateSessionVolumeRequests", reflect.TypeOf((*MockSessionActions)(nil).GetCreateSessionVolumeRequests), ctxt, brickHostName)
 }
 
 // GetSessionActions mocks base method

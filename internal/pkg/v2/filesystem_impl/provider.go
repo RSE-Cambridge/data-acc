@@ -6,7 +6,7 @@ import (
 )
 
 func NewFileSystemProvider(ansible filesystem.Ansible) filesystem.Provider {
-	return &fileSystemProvider{ansible:ansible}
+	return &fileSystemProvider{ansible: ansible}
 }
 
 type fileSystemProvider struct {

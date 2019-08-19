@@ -34,19 +34,34 @@ func (m *MockAllocationRegistry) EXPECT() *MockAllocationRegistryMockRecorder {
 	return m.recorder
 }
 
-// GetBricksByPool mocks base method
-func (m *MockAllocationRegistry) GetBricksByPool() ([]datamodel.PoolInfo, error) {
+// GetPool mocks base method
+func (m *MockAllocationRegistry) GetPool(name datamodel.PoolName) (datamodel.Pool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBricksByPool")
+	ret := m.ctrl.Call(m, "GetPool", name)
+	ret0, _ := ret[0].(datamodel.Pool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPool indicates an expected call of GetPool
+func (mr *MockAllocationRegistryMockRecorder) GetPool(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPool", reflect.TypeOf((*MockAllocationRegistry)(nil).GetPool), name)
+}
+
+// GetAllPoolInfos mocks base method
+func (m *MockAllocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllPoolInfos")
 	ret0, _ := ret[0].([]datamodel.PoolInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetBricksByPool indicates an expected call of GetBricksByPool
-func (mr *MockAllocationRegistryMockRecorder) GetBricksByPool() *gomock.Call {
+// GetAllPoolInfos indicates an expected call of GetAllPoolInfos
+func (mr *MockAllocationRegistryMockRecorder) GetAllPoolInfos() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBricksByPool", reflect.TypeOf((*MockAllocationRegistry)(nil).GetBricksByPool))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllPoolInfos", reflect.TypeOf((*MockAllocationRegistry)(nil).GetAllPoolInfos))
 }
 
 // GetPoolInfo mocks base method

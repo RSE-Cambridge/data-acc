@@ -6,14 +6,6 @@ import (
 )
 
 type SessionActions interface {
-	// Client requests session volume is created
-	//
-	// Error if session does not have bricks allocated
-	// Error if session volume has already been created
-	// Error if primary brick host is not alive or not enabled
-	// Error is context is cancelled or timed-out
-	CreateSessionVolume(ctxt context.Context, sessionName datamodel.SessionName) (<-chan datamodel.SessionAction, error)
-
 	// Updates session, then requests action
 	//
 	// Error if current revision of session doesn't match
@@ -21,14 +13,6 @@ type SessionActions interface {
 	SendSessionAction(
 		ctxt context.Context, actionType datamodel.SessionActionType,
 		session datamodel.Session) (<-chan datamodel.SessionAction, error)
-
-	// Get session volume create requests,
-	// where given hostname is the primary brick host
-	// Called very time brick host is started
-	//
-	// Error is context is cancelled or timed-out
-	GetCreateSessionVolumeRequests(
-		ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error)
 
 	// Gets all new actions for the given Session
 	//
