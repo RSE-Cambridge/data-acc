@@ -24,9 +24,9 @@ func TestSessionRegistry_GetSessionMutex(t *testing.T) {
 	assert.Nil(t, mutex)
 	assert.Equal(t, fakeErr, err)
 
-	mutex, err = registry.GetSessionMutex("foo/bar")
-	assert.Nil(t, mutex)
-	assert.Equal(t, "invalid session name foo/bar", err.Error())
+	assert.PanicsWithValue(t, "invalid session name: 'foo/bar'", func() {
+		registry.GetSessionMutex("foo/bar")
+	})
 }
 
 func TestSessionRegistry_CreateSession(t *testing.T) {
@@ -40,10 +40,9 @@ func TestSessionRegistry_CreateSession(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int64(42), session.Revision)
 
-	session, err = registry.CreateSession(datamodel.Session{Name: "foo/bar"})
-	assert.NotNil(t, err)
-	assert.Equal(t, "invalid session name foo/bar", err.Error())
-
+	assert.PanicsWithValue(t, "invalid session name: 'foo/bar'", func() {
+		registry.CreateSession(datamodel.Session{Name: "foo/bar"})
+	})
 	_, err = registry.CreateSession(datamodel.Session{Name: "foo", ActualSizeBytes: 1024})
 	assert.NotNil(t, err)
 	assert.Equal(t, "session must have allocations before being created", err.Error())
@@ -83,9 +82,9 @@ func TestSessionRegistry_GetSession(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, datamodel.Session{Name: "foo", Revision: 42}, session)
 
-	session, err = registry.GetSession("foo/bar")
-	assert.NotNil(t, err)
-	assert.Equal(t, "invalid session name foo/bar", err.Error())
+	assert.PanicsWithValue(t, "invalid session name: 'foo/bar'", func() {
+		registry.GetSession("foo/bar")
+	})
 
 	fakeErr := errors.New("fake")
 	keystore.EXPECT().Get("/session/foo").Return(store.KeyValueVersion{}, fakeErr)

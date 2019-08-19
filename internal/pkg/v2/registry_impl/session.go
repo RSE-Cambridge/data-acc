@@ -19,28 +19,22 @@ type sessionRegistry struct {
 }
 
 func (s *sessionRegistry) GetSessionMutex(sessionName datamodel.SessionName) (store.Mutex, error) {
-	sessionKey, err := getSessionKey(sessionName)
-	if err != nil {
-		return nil, err
-	}
+	sessionKey := getSessionKey(sessionName)
 	lockKey := fmt.Sprintf("/lock%s", sessionKey)
 	return s.store.NewMutex(lockKey)
 }
 
 const sessionPrefix = "/session/"
 
-func getSessionKey(sessionName datamodel.SessionName) (string, error) {
+func getSessionKey(sessionName datamodel.SessionName) string {
 	if !parsers.IsValidName(string(sessionName)) {
-		return "", fmt.Errorf("invalid session name %s", sessionName)
+		log.Panicf("invalid session name: '%s'", sessionName)
 	}
-	return fmt.Sprintf("%s%s", sessionPrefix, sessionName), nil
+	return fmt.Sprintf("%s%s", sessionPrefix, sessionName)
 }
 
 func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Session, error) {
-	sessionKey, err := getSessionKey(session.Name)
-	if err != nil {
-		return session, err
-	}
+	sessionKey := getSessionKey(session.Name)
 
 	// TODO: more validation?
 	if session.ActualSizeBytes > 0 {
@@ -75,10 +69,7 @@ func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Se
 }
 
 func (s *sessionRegistry) GetSession(sessionName datamodel.SessionName) (datamodel.Session, error) {
-	sessionKey, err := getSessionKey(sessionName)
-	if err != nil {
-		return datamodel.Session{}, err
-	}
+	sessionKey := getSessionKey(sessionName)
 
 	keyValueVersion, err := s.store.Get(sessionKey)
 	if err != nil {
@@ -116,10 +107,7 @@ func (s *sessionRegistry) GetAllSessions() ([]datamodel.Session, error) {
 }
 
 func (s *sessionRegistry) UpdateSession(session datamodel.Session) (datamodel.Session, error) {
-	sessionKey, err := getSessionKey(session.Name)
-	if err != nil {
-		log.Panicf("invalid session name")
-	}
+	sessionKey := getSessionKey(session.Name)
 
 	sessionAsStr, err := json.Marshal(session)
 	if err != nil {
@@ -141,9 +129,6 @@ func (s *sessionRegistry) UpdateSession(session datamodel.Session) (datamodel.Se
 }
 
 func (s *sessionRegistry) DeleteSession(session datamodel.Session) error {
-	sessionKey, err := getSessionKey(session.Name)
-	if err != nil {
-		log.Panicf("invalid session name")
-	}
+	sessionKey := getSessionKey(session.Name)
 	return s.store.Delete(sessionKey, session.Revision)
 }
