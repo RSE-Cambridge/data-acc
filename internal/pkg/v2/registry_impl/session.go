@@ -2,6 +2,7 @@ package registry_impl
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
@@ -16,7 +17,19 @@ type sessionRegistry struct {
 }
 
 func (s *sessionRegistry) GetSessionMutex(sessionName datamodel.SessionName) (store.Mutex, error) {
-	return s.store.NewMutex(fmt.Sprintf("/session_lock/%s", sessionName))
+	sessionKey, err := getSessionKey(sessionName)
+	if err != nil {
+		return nil, err
+	}
+	lockKey := fmt.Sprintf("/lock%s", sessionKey)
+	return s.store.NewMutex(lockKey)
+}
+
+func getSessionKey(sessionName datamodel.SessionName) (string, error) {
+	if !parsers.IsValidName(string(sessionName)) {
+		return "", fmt.Errorf("invalid session name %s", sessionName)
+	}
+	return fmt.Sprintf("/session/%s", sessionName), nil
 }
 
 func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Session, error) {

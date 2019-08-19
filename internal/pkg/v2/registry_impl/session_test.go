@@ -14,10 +14,13 @@ func TestSessionRegistry_GetSessionMutex(t *testing.T) {
 	store := mock_store.NewMockKeystore(mockCtrl)
 	registry := NewSessionRegistry(store)
 	fakeErr := errors.New("fake")
-	store.EXPECT().NewMutex("/session_lock/foo").Return(nil, fakeErr)
+	store.EXPECT().NewMutex("/lock/session/foo").Return(nil, fakeErr)
 
 	mutex, err := registry.GetSessionMutex("foo")
-
 	assert.Nil(t, mutex)
 	assert.Equal(t, fakeErr, err)
+
+	mutex, err = registry.GetSessionMutex("foo/bar")
+	assert.Nil(t, mutex)
+	assert.Equal(t, "invalid session name foo/bar", err.Error())
 }
