@@ -53,12 +53,7 @@ func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Se
 		}
 	}
 
-	sessionAsString, err := json.Marshal(session)
-	if err != nil {
-		return session, fmt.Errorf("unable to convert session to json due to: %s", err)
-	}
-
-	keyValueVersion, err := s.store.Create(sessionKey, sessionAsString)
+	keyValueVersion, err := s.store.Create(sessionKey, sessionToRaw(session))
 	if err != nil {
 		return session, fmt.Errorf("unable to create session due to: %s", err)
 	}
@@ -69,19 +64,12 @@ func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Se
 }
 
 func (s *sessionRegistry) GetSession(sessionName datamodel.SessionName) (datamodel.Session, error) {
-	sessionKey := getSessionKey(sessionName)
-
-	keyValueVersion, err := s.store.Get(sessionKey)
+	keyValueVersion, err := s.store.Get(getSessionKey(sessionName))
 	if err != nil {
 		return datamodel.Session{}, fmt.Errorf("unable to get session due to: %s", err)
 	}
 
-	session := datamodel.Session{}
-	err = json.Unmarshal(keyValueVersion.Value, &session)
-	if err != nil {
-		return datamodel.Session{}, fmt.Errorf("unable parse session from store due to: %s", err)
-	}
-
+	session := sessionFromRaw(keyValueVersion.Value)
 	session.Revision = keyValueVersion.ModRevision
 	return session, nil
 }
@@ -94,11 +82,7 @@ func (s *sessionRegistry) GetAllSessions() ([]datamodel.Session, error) {
 
 	var sessions []datamodel.Session
 	for _, keyValueVersion := range results {
-		session := datamodel.Session{}
-		err = json.Unmarshal(keyValueVersion.Value, &session)
-		if err != nil {
-			log.Panicf("unable parse session from store due to: %s", err)
-		}
+		session := sessionFromRaw(keyValueVersion.Value)
 		session.Revision = keyValueVersion.ModRevision
 		sessions = append(sessions, session)
 	}
@@ -107,9 +91,7 @@ func (s *sessionRegistry) GetAllSessions() ([]datamodel.Session, error) {
 }
 
 func (s *sessionRegistry) UpdateSession(session datamodel.Session) (datamodel.Session, error) {
-	sessionKey := getSessionKey(session.Name)
-
-	keyValueVersion, err := s.store.Update(sessionKey, sessionToRaw(session), session.Revision)
+	keyValueVersion, err := s.store.Update(getSessionKey(session.Name), sessionToRaw(session), session.Revision)
 	if err != nil {
 		return session, fmt.Errorf("unable to update session due to: %s", err.Error())
 	}
@@ -120,8 +102,7 @@ func (s *sessionRegistry) UpdateSession(session datamodel.Session) (datamodel.Se
 }
 
 func (s *sessionRegistry) DeleteSession(session datamodel.Session) error {
-	sessionKey := getSessionKey(session.Name)
-	return s.store.Delete(sessionKey, session.Revision)
+	return s.store.Delete(getSessionKey(session.Name), session.Revision)
 }
 
 func sessionToRaw(session datamodel.Session) []byte {
