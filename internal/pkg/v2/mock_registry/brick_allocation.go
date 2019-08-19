@@ -49,6 +49,21 @@ func (mr *MockAllocationRegistryMockRecorder) GetPool(name interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPool", reflect.TypeOf((*MockAllocationRegistry)(nil).GetPool), name)
 }
 
+// EnsurePoolCreated mocks base method
+func (m *MockAllocationRegistry) EnsurePoolCreated(poolName datamodel.PoolName, granularityGB int) (datamodel.Pool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnsurePoolCreated", poolName, granularityGB)
+	ret0, _ := ret[0].(datamodel.Pool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnsurePoolCreated indicates an expected call of EnsurePoolCreated
+func (mr *MockAllocationRegistryMockRecorder) EnsurePoolCreated(poolName, granularityGB interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnsurePoolCreated", reflect.TypeOf((*MockAllocationRegistry)(nil).EnsurePoolCreated), poolName, granularityGB)
+}
+
 // GetAllPoolInfos mocks base method
 func (m *MockAllocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
 	m.ctrl.T.Helper()
