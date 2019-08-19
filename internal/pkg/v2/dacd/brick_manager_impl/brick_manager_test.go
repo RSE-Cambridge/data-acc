@@ -20,12 +20,13 @@ func TestBrickManager_Startup(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	brickRegistry := mock_registry.NewMockBrickHostRegistry(mockCtrl)
+	sessionActions := mock_registry.NewMockSessionActions(mockCtrl)
 	handler := mock_facade.NewMockSessionActionHandler(mockCtrl)
-	brickManager := NewBrickManager(brickRegistry, handler)
+	brickManager := NewBrickManager(brickRegistry, sessionActions, handler)
 
 	// TODO...
 	brickRegistry.EXPECT().UpdateBrickHost(gomock.Any())
-	brickRegistry.EXPECT().GetSessionActions(context.TODO(), gomock.Any())
+	sessionActions.EXPECT().GetSessionActions(context.TODO(), gomock.Any())
 	brickRegistry.EXPECT().KeepAliveHost(context.TODO(), datamodel.BrickHostName("hostname"))
 
 	err := brickManager.Startup(false)

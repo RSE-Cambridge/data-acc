@@ -50,18 +50,18 @@ func (mr *MockSessionActionsMockRecorder) SendSessionAction(ctxt, actionType, se
 }
 
 // GetSessionActions mocks base method
-func (m *MockSessionActions) GetSessionActions(ctxt context.Context, sessionName datamodel.SessionName) (<-chan datamodel.SessionAction, error) {
+func (m *MockSessionActions) GetSessionActions(ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSessionActions", ctxt, sessionName)
+	ret := m.ctrl.Call(m, "GetSessionActions", ctxt, brickHostName)
 	ret0, _ := ret[0].(<-chan datamodel.SessionAction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetSessionActions indicates an expected call of GetSessionActions
-func (mr *MockSessionActionsMockRecorder) GetSessionActions(ctxt, sessionName interface{}) *gomock.Call {
+func (mr *MockSessionActionsMockRecorder) GetSessionActions(ctxt, brickHostName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionActions", reflect.TypeOf((*MockSessionActions)(nil).GetSessionActions), ctxt, sessionName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionActions", reflect.TypeOf((*MockSessionActions)(nil).GetSessionActions), ctxt, brickHostName)
 }
 
 // CompleteSessionAction mocks base method

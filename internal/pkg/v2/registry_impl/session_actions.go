@@ -12,9 +12,9 @@ import (
 	"log"
 )
 
-func NewSessionActionsRegistry(store store.Keystore) registry.SessionActions {
+func NewSessionActionsRegistry(store store.Keystore, brickHostRegistry registry.BrickHostRegistry) registry.SessionActions {
 	// TODO: create brickHostRegistry
-	return &sessionActions{store, nil}
+	return &sessionActions{store, brickHostRegistry}
 }
 
 type sessionActions struct {
@@ -124,8 +124,8 @@ func (s *sessionActions) SendSessionAction(
 	return responseChan, nil
 }
 
-func (s *sessionActions) GetSessionActions(
-	ctxt context.Context, sessionName datamodel.SessionName) (<-chan datamodel.SessionAction, error) {
+func (s *sessionActions) GetSessionActions(ctxt context.Context,
+	brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error) {
 	panic("implement me")
 }
 

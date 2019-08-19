@@ -48,21 +48,6 @@ func (mr *MockBrickHostRegistryMockRecorder) UpdateBrickHost(brickHostInfo inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBrickHost", reflect.TypeOf((*MockBrickHostRegistry)(nil).UpdateBrickHost), brickHostInfo)
 }
 
-// GetSessionActions mocks base method
-func (m *MockBrickHostRegistry) GetSessionActions(ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSessionActions", ctxt, brickHostName)
-	ret0, _ := ret[0].(<-chan datamodel.SessionAction)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSessionActions indicates an expected call of GetSessionActions
-func (mr *MockBrickHostRegistryMockRecorder) GetSessionActions(ctxt, brickHostName interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionActions", reflect.TypeOf((*MockBrickHostRegistry)(nil).GetSessionActions), ctxt, brickHostName)
-}
-
 // KeepAliveHost mocks base method
 func (m *MockBrickHostRegistry) KeepAliveHost(ctxt context.Context, brickHostName datamodel.BrickHostName) error {
 	m.ctrl.T.Helper()

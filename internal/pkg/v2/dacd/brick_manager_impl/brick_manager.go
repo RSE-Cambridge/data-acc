@@ -9,10 +9,12 @@ import (
 	"log"
 )
 
-func NewBrickManager(brickRegistry registry.BrickHostRegistry, handler facade.SessionActionHandler) dacd.BrickManager {
+func NewBrickManager(brickRegistry registry.BrickHostRegistry, sessionActions registry.SessionActions,
+	handler facade.SessionActionHandler) dacd.BrickManager {
 	return &brickManager{
 		config:               config.GetBrickManagerConfig(config.DefaultEnv),
 		brickRegistry:        brickRegistry,
+		sessionActions:       sessionActions,
 		sessionActionHandler: handler,
 	}
 }
@@ -20,6 +22,7 @@ func NewBrickManager(brickRegistry registry.BrickHostRegistry, handler facade.Se
 type brickManager struct {
 	config               config.BrickManagerConfig
 	brickRegistry        registry.BrickHostRegistry
+	sessionActions       registry.SessionActions
 	sessionActionHandler facade.SessionActionHandler
 }
 
@@ -34,7 +37,7 @@ func (bm *brickManager) Startup(drainSessions bool) error {
 	}
 
 	// If we are are enabled, this includes new create session requests
-	events, err := bm.brickRegistry.GetSessionActions(context.TODO(), bm.config.BrickHostName)
+	events, err := bm.sessionActions.GetSessionActions(context.TODO(), bm.config.BrickHostName)
 
 	go func() {
 		for event := range events {

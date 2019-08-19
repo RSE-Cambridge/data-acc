@@ -12,15 +12,6 @@ type BrickHostRegistry interface {
 	// This includes ensuring the pool exists and is consistent with the given brick host info
 	UpdateBrickHost(brickHostInfo datamodel.BrickHost) error
 
-	// Gets all new actions for the given Session
-	// This confirms that dacd is ready to service requests for this session
-	// and updates the session with an appropriate SessionActionPrefix
-	// The channel tracks all actions sent to that sub keys of the above prefix
-	// This is also called when dacd is restarted and you want to resume sending
-	// any actions that are not marked as complete
-	// New tasks are only sent if the keepalive key is active
-	GetSessionActions(ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error)
-
 	// While the process is still running this notifies others the host is up
 	//
 	// When a host is dead non of its bricks will get new volumes assigned,
