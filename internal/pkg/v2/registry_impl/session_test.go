@@ -119,4 +119,14 @@ func TestSessionRegistry_GetAllSessions(t *testing.T) {
 	assert.Nil(t, sessions)
 	assert.NotNil(t, err)
 	assert.Equal(t, "unable to get all sessions due to: fake", err.Error())
+
+	keystore.EXPECT().GetAll("/session/").Return(nil, nil)
+	sessions, err = registry.GetAllSessions()
+	assert.Nil(t, err)
+	assert.Nil(t, sessions)
+
+	keystore.EXPECT().GetAll("/session/").Return([]store.KeyValueVersion{{}}, nil)
+	assert.PanicsWithValue(t,
+		"unable parse session from store due to: unexpected end of JSON input",
+		func() { registry.GetAllSessions() })
 }
