@@ -98,3 +98,25 @@ func TestSessionRegistry_GetSession(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, "unable parse session from store due to: unexpected end of JSON input", err.Error())
 }
+
+func TestSessionRegistry_GetAllSessions(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	keystore := mock_store.NewMockKeystore(mockCtrl)
+	registry := NewSessionRegistry(keystore)
+	keystore.EXPECT().GetAll("/session/").Return([]store.KeyValueVersion{{
+		ModRevision: 42,
+		Value:       emptySessionString,
+	}}, nil)
+
+	sessions, err := registry.GetAllSessions()
+	assert.Nil(t, err)
+	assert.Equal(t, []datamodel.Session{{Name: "foo", Revision: 42}}, sessions)
+
+	fakeErr := errors.New("fake")
+	keystore.EXPECT().GetAll("/session/").Return(nil, fakeErr)
+	sessions, err = registry.GetAllSessions()
+	assert.Nil(t, sessions)
+	assert.NotNil(t, err)
+	assert.Equal(t, "unable to get all sessions due to: fake", err.Error())
+}

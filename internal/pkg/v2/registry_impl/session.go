@@ -7,6 +7,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
+	"log"
 )
 
 func NewSessionRegistry(store store.Keystore) registry.SessionRegistry {
@@ -26,11 +27,13 @@ func (s *sessionRegistry) GetSessionMutex(sessionName datamodel.SessionName) (st
 	return s.store.NewMutex(lockKey)
 }
 
+const sessionPrefix = "/session/"
+
 func getSessionKey(sessionName datamodel.SessionName) (string, error) {
 	if !parsers.IsValidName(string(sessionName)) {
 		return "", fmt.Errorf("invalid session name %s", sessionName)
 	}
-	return fmt.Sprintf("/session/%s", sessionName), nil
+	return fmt.Sprintf("%s%s", sessionPrefix, sessionName), nil
 }
 
 func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Session, error) {
@@ -93,7 +96,23 @@ func (s *sessionRegistry) GetSession(sessionName datamodel.SessionName) (datamod
 }
 
 func (s *sessionRegistry) GetAllSessions() ([]datamodel.Session, error) {
-	panic("implement me")
+	results, err := s.store.GetAll(sessionPrefix)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get all sessions due to: %s", err.Error())
+	}
+
+	var sessions []datamodel.Session
+	for _, keyValueVersion := range results {
+		session := datamodel.Session{}
+		err = json.Unmarshal(keyValueVersion.Value, &session)
+		if err != nil {
+			log.Panicf("unable parse session from store due to: %s", err)
+		}
+		session.Revision = keyValueVersion.ModRevision
+		sessions = append(sessions, session)
+	}
+
+	return sessions, nil
 }
 
 func (s *sessionRegistry) UpdateSession(session datamodel.Session) (datamodel.Session, error) {
