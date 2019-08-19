@@ -45,7 +45,7 @@ for i in $items; do
         >internal/pkg/v2/mock_store/${i}.go
 done
 
-items="provider"
+items="provider ansible"
 for i in $items; do
     mockgen -source=internal/pkg/v2/filesystem/${i}.go \
         >internal/pkg/v2/mock_filesystem/${i}.go
