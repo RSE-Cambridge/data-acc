@@ -13,7 +13,7 @@ type Keystore interface {
 	//
 	// If an error occurs no keyvalues are written.
 	// Error is returned if any key already exists.
-	Create(key string, value string) (KeyValueVersion, error)
+	Create(key string, value []byte) (KeyValueVersion, error)
 
 	// Update the specified key values, atomically
 	//
@@ -21,7 +21,7 @@ type Keystore interface {
 	// Otherwise if the revisions of any key doesn't
 	// match the current revision of that key, the update fails.
 	// When update fails an error is returned and no keyValues are updated
-	Update(key string, value string, modRevision int) (KeyValueVersion, error)
+	Update(key string, value []byte, modRevision int) (KeyValueVersion, error)
 
 	// Delete the specified key values, atomically
 	//
@@ -59,7 +59,7 @@ type KeyValueUpdateChan <-chan KeyValueUpdate
 
 type KeyValueVersion struct {
 	Key            string
-	Value          string
+	Value          []byte
 	CreateRevision int64
 	ModRevision    int64
 }

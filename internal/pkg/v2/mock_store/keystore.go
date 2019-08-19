@@ -49,7 +49,7 @@ func (mr *MockKeystoreMockRecorder) Close() *gomock.Call {
 }
 
 // Create mocks base method
-func (m *MockKeystore) Create(key, value string) (store.KeyValueVersion, error) {
+func (m *MockKeystore) Create(key string, value []byte) (store.KeyValueVersion, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", key, value)
 	ret0, _ := ret[0].(store.KeyValueVersion)
@@ -64,7 +64,7 @@ func (mr *MockKeystoreMockRecorder) Create(key, value interface{}) *gomock.Call 
 }
 
 // Update mocks base method
-func (m *MockKeystore) Update(key, value string, modRevision int) (store.KeyValueVersion, error) {
+func (m *MockKeystore) Update(key string, value []byte, modRevision int) (store.KeyValueVersion, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", key, value, modRevision)
 	ret0, _ := ret[0].(store.KeyValueVersion)

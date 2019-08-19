@@ -61,7 +61,7 @@ func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Se
 		return session, fmt.Errorf("unable to convert session to json due to: %s", err)
 	}
 
-	keyValueVersion, err := s.store.Create(sessionKey, string(sessionAsString))
+	keyValueVersion, err := s.store.Create(sessionKey, sessionAsString)
 	if err != nil {
 		return session, fmt.Errorf("unable to create session due to: %s", err)
 	}
@@ -72,7 +72,24 @@ func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Se
 }
 
 func (s *sessionRegistry) GetSession(sessionName datamodel.SessionName) (datamodel.Session, error) {
-	panic("implement me")
+	sessionKey, err := getSessionKey(sessionName)
+	if err != nil {
+		return datamodel.Session{}, err
+	}
+
+	keyValueVersion, err := s.store.Get(sessionKey)
+	if err != nil {
+		return datamodel.Session{}, fmt.Errorf("unable to get session due to: %s", err)
+	}
+
+	session := datamodel.Session{}
+	err = json.Unmarshal(keyValueVersion.Value, &session)
+	if err != nil {
+		return datamodel.Session{}, fmt.Errorf("unable parse session from store due to: %s", err)
+	}
+
+	session.Revision = keyValueVersion.ModRevision
+	return session, nil
 }
 
 func (s *sessionRegistry) GetAllSessions() ([]datamodel.Session, error) {
