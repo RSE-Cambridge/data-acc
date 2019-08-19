@@ -39,6 +39,10 @@ func TestSessionRegistry_CreateSession(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int64(42), session.Revision)
 
+	session, err = registry.CreateSession(datamodel.Session{Name:"foo/bar"})
+	assert.NotNil(t, err)
+	assert.Equal(t, "invalid session name foo/bar", err.Error())
+
 	_, err = registry.CreateSession(datamodel.Session{Name:"foo", ActualSizeBytes:1024})
 	assert.NotNil(t, err)
 	assert.Equal(t, "session must have allocations before being created", err.Error())
