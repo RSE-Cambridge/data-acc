@@ -49,31 +49,31 @@ func (mr *MockSessionActionsMockRecorder) SendSessionAction(ctxt, actionType, se
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendSessionAction", reflect.TypeOf((*MockSessionActions)(nil).SendSessionAction), ctxt, actionType, session)
 }
 
-// GetSessionActions mocks base method
-func (m *MockSessionActions) GetSessionActions(ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error) {
+// GetSessionActionRequests mocks base method
+func (m *MockSessionActions) GetSessionActionRequests(ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSessionActions", ctxt, brickHostName)
+	ret := m.ctrl.Call(m, "GetSessionActionRequests", ctxt, brickHostName)
 	ret0, _ := ret[0].(<-chan datamodel.SessionAction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetSessionActions indicates an expected call of GetSessionActions
-func (mr *MockSessionActionsMockRecorder) GetSessionActions(ctxt, brickHostName interface{}) *gomock.Call {
+// GetSessionActionRequests indicates an expected call of GetSessionActionRequests
+func (mr *MockSessionActionsMockRecorder) GetSessionActionRequests(ctxt, brickHostName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionActions", reflect.TypeOf((*MockSessionActions)(nil).GetSessionActions), ctxt, brickHostName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionActionRequests", reflect.TypeOf((*MockSessionActions)(nil).GetSessionActionRequests), ctxt, brickHostName)
 }
 
 // CompleteSessionAction mocks base method
-func (m *MockSessionActions) CompleteSessionAction(action datamodel.SessionAction, err error) error {
+func (m *MockSessionActions) CompleteSessionAction(action datamodel.SessionAction) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CompleteSessionAction", action, err)
+	ret := m.ctrl.Call(m, "CompleteSessionAction", action)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CompleteSessionAction indicates an expected call of CompleteSessionAction
-func (mr *MockSessionActionsMockRecorder) CompleteSessionAction(action, err interface{}) *gomock.Call {
+func (mr *MockSessionActionsMockRecorder) CompleteSessionAction(action interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CompleteSessionAction", reflect.TypeOf((*MockSessionActions)(nil).CompleteSessionAction), action, err)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CompleteSessionAction", reflect.TypeOf((*MockSessionActions)(nil).CompleteSessionAction), action)
 }

@@ -37,7 +37,7 @@ func (bm *brickManager) Startup(drainSessions bool) error {
 	}
 
 	// If we are are enabled, this includes new create session requests
-	events, err := bm.sessionActions.GetSessionActions(context.TODO(), bm.config.BrickHostName)
+	events, err := bm.sessionActions.GetSessionActionRequests(context.TODO(), bm.config.BrickHostName)
 
 	go func() {
 		for event := range events {

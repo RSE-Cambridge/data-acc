@@ -15,11 +15,11 @@ type SessionActions interface {
 		session datamodel.Session) (<-chan datamodel.SessionAction, error)
 
 	// Gets all actions for the given host
-	GetSessionActions(ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error)
+	GetSessionActionRequests(ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error)
 
 	// Server reports given action is complete
 	// Includes callbacks for Create Session Volume
 	//
 	// Error if action has already completed or doesn't exist
-	CompleteSessionAction(action datamodel.SessionAction, err error) error
+	CompleteSessionAction(action datamodel.SessionAction) error
 }

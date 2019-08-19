@@ -71,7 +71,7 @@ func TestSessionActionHandler_handleCreate(t *testing.T) {
 		ActionType: datamodel.SessionCreateFilesystem,
 		Session:    updatedSession,
 	}
-	actions.EXPECT().CompleteSessionAction(updatedAction, nil)
+	actions.EXPECT().CompleteSessionAction(updatedAction)
 
 	handler.handleCreate(action)
 }
@@ -87,7 +87,7 @@ func TestSessionActionHandler_handleDelete(t *testing.T) {
 	}
 	// TODO: need to pass session better? who deletes allocations?
 	registry.EXPECT().DeleteSession(action.Session)
-	actions.EXPECT().CompleteSessionAction(action, nil)
+	actions.EXPECT().CompleteSessionAction(action)
 
 	handler.handleDelete(action)
 }

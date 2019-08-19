@@ -26,7 +26,7 @@ func TestBrickManager_Startup(t *testing.T) {
 
 	// TODO...
 	brickRegistry.EXPECT().UpdateBrickHost(gomock.Any())
-	sessionActions.EXPECT().GetSessionActions(context.TODO(), gomock.Any())
+	sessionActions.EXPECT().GetSessionActionRequests(context.TODO(), gomock.Any())
 	brickRegistry.EXPECT().KeepAliveHost(context.TODO(), datamodel.BrickHostName("hostname"))
 
 	err := brickManager.Startup(false)

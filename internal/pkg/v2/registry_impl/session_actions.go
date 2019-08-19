@@ -124,11 +124,51 @@ func (s *sessionActions) SendSessionAction(
 	return responseChan, nil
 }
 
-func (s *sessionActions) GetSessionActions(ctxt context.Context,
+func (s *sessionActions) GetSessionActionRequests(ctxt context.Context,
 	brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error) {
-	panic("implement me")
+	requestHostPrefix := getSessionActionRequestHostPrefix(brickHostName)
+
+	// TODO: how do we check for any pending actions that exist before we start watching?
+	//   or do we only care about pending deletes, and we let them just timeout?
+	requestUpdates := s.store.Watch(ctxt, requestHostPrefix, true)
+
+	sessionActionChan := make(chan datamodel.SessionAction)
+	go func() {
+		log.Printf("Starting watching for SessionActionRequests for %s\n", brickHostName)
+		for update := range requestUpdates {
+			if update.IsDelete {
+				log.Printf("Seen SessionActionRequest deleted for %s\n", brickHostName)
+				continue
+			}
+			if !update.IsCreate || update.New.Value == nil {
+				log.Panicf("don't expect to see updates of session action request key")
+			}
+			log.Printf("Seen SessionActionRequest created for %s\n", brickHostName)
+
+			sessionAction := sessionActionFromRaw(update.New.Value)
+			sessionActionChan <- sessionAction
+		}
+		log.Printf("Stopped watching for SessionActionRequests for %s\n", brickHostName)
+		close(sessionActionChan)
+	}()
+	return sessionActionChan, nil
 }
 
-func (s *sessionActions) CompleteSessionAction(action datamodel.SessionAction, err error) error {
-	panic("implement me")
+func (s *sessionActions) CompleteSessionAction(sessionAction datamodel.SessionAction) error {
+	// TODO: when you delete a session, you should delete all completion records?
+
+	// Tell caller we are done by writing this key
+	responseKey := getSessionActionResponseKey(sessionAction)
+	_, err := s.store.Create(responseKey, sessionActionToRaw(sessionAction))
+	if err != nil {
+		return fmt.Errorf("unable to create response message due to: %s", err)
+	}
+
+	// Delete the request, not it is processed
+	requestKey := getSessionActionRequestKey(sessionAction)
+	err = s.store.Delete(requestKey, 0)
+	if err != nil {
+		return fmt.Errorf("unable to delete stale request message due to: %s", err)
+	}
+	return nil
 }

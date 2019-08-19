@@ -45,13 +45,15 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 	sessionMutex, err := s.registry.GetSessionMutex(sessionName)
 	if err != nil {
 		log.Printf("unable to get session mutex: %s due to: %s\n", sessionName, err)
-		s.actions.CompleteSessionAction(action, err)
+		action.Error = err
+		s.actions.CompleteSessionAction(action)
 		return
 	}
 	err = sessionMutex.Lock(context.TODO())
 	if err != nil {
 		log.Printf("unable to lock session mutex: %s due to: %s\n", sessionName, err)
-		s.actions.CompleteSessionAction(action, err)
+		action.Error = err
+		s.actions.CompleteSessionAction(action)
 		return
 	}
 	defer func() {
@@ -72,11 +74,13 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 	session, err = s.registry.UpdateSession(session)
 	if err != nil {
 		log.Printf("Failed to update session: %+v", session)
+		action.Error = err
 	} else {
 		action.Session = session
+		action.Error = session.Status.Error
 	}
 
-	if err := s.actions.CompleteSessionAction(action, action.Session.Status.Error); err != nil {
+	if err := s.actions.CompleteSessionAction(action); err != nil {
 		log.Printf("Failed to complete action: %+v", action)
 	}
 	if action.Session.Status.Error != nil {
@@ -90,5 +94,5 @@ func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
 	log.Println("delete")
 	// TODO: clearly need mutex here, etc
 	s.registry.DeleteSession(action.Session)
-	s.actions.CompleteSessionAction(action, nil)
+	s.actions.CompleteSessionAction(action)
 }
