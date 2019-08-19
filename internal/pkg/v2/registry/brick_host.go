@@ -31,6 +31,5 @@ type BrickHostRegistry interface {
 	// Check if given brick host is alive
 	//
 	// Error if brick host doesn't exist
-	// TODO: private method?
-	//IsBrickHostAlive(brickHostName datamodel.BrickHostName) (bool, error)
+	IsBrickHostAlive(brickHostName datamodel.BrickHostName) (bool, error)
 }

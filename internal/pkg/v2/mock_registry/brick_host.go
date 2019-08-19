@@ -76,3 +76,18 @@ func (mr *MockBrickHostRegistryMockRecorder) KeepAliveHost(ctxt, brickHostName i
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KeepAliveHost", reflect.TypeOf((*MockBrickHostRegistry)(nil).KeepAliveHost), ctxt, brickHostName)
 }
+
+// IsBrickHostAlive mocks base method
+func (m *MockBrickHostRegistry) IsBrickHostAlive(brickHostName datamodel.BrickHostName) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsBrickHostAlive", brickHostName)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsBrickHostAlive indicates an expected call of IsBrickHostAlive
+func (mr *MockBrickHostRegistryMockRecorder) IsBrickHostAlive(brickHostName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsBrickHostAlive", reflect.TypeOf((*MockBrickHostRegistry)(nil).IsBrickHostAlive), brickHostName)
+}
