@@ -109,21 +109,12 @@ func (s *sessionRegistry) GetAllSessions() ([]datamodel.Session, error) {
 func (s *sessionRegistry) UpdateSession(session datamodel.Session) (datamodel.Session, error) {
 	sessionKey := getSessionKey(session.Name)
 
-	sessionAsStr, err := json.Marshal(session)
-	if err != nil {
-		log.Panicf("unable to convert session to json due to: %s", err.Error())
-	}
-
-	keyValueVersion, err := s.store.Update(sessionKey, sessionAsStr, session.Revision)
+	keyValueVersion, err := s.store.Update(sessionKey, sessionToRaw(session), session.Revision)
 	if err != nil {
 		return session, fmt.Errorf("unable to update session due to: %s", err.Error())
 	}
 
-	newSession := datamodel.Session{}
-	err = json.Unmarshal(keyValueVersion.Value, &newSession)
-	if err != nil {
-		log.Panicf("unable parse session from store due to: %s", err)
-	}
+	newSession := sessionFromRaw(keyValueVersion.Value)
 	newSession.Revision = keyValueVersion.ModRevision
 	return newSession, nil
 }
@@ -131,4 +122,21 @@ func (s *sessionRegistry) UpdateSession(session datamodel.Session) (datamodel.Se
 func (s *sessionRegistry) DeleteSession(session datamodel.Session) error {
 	sessionKey := getSessionKey(session.Name)
 	return s.store.Delete(sessionKey, session.Revision)
+}
+
+func sessionToRaw(session datamodel.Session) []byte {
+	rawSession, err := json.Marshal(session)
+	if err != nil {
+		log.Panicf("unable to convert session to json due to: %s", err.Error())
+	}
+	return rawSession
+}
+
+func sessionFromRaw(raw []byte) datamodel.Session {
+	session := datamodel.Session{}
+	err := json.Unmarshal(raw, &session)
+	if err != nil {
+		log.Panicf("unable parse session from store due to: %s", err)
+	}
+	return session
 }
