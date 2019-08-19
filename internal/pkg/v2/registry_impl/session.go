@@ -1,6 +1,7 @@
 package registry_impl
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
@@ -33,7 +34,24 @@ func getSessionKey(sessionName datamodel.SessionName) (string, error) {
 }
 
 func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Session, error) {
-	panic("implement me")
+	sessionKey, err := getSessionKey(session.Name)
+	if err != nil {
+		return session, err
+	}
+
+	sessionAsString, err := json.Marshal(session)
+	if err != nil {
+		return session, fmt.Errorf("unable to convert session to json due to: %s", err)
+	}
+
+	keyValueVersion, err := s.store.Create(sessionKey, string(sessionAsString))
+	if err != nil {
+		return session, fmt.Errorf("unable to create session due to: %s", err)
+	}
+
+	// Return the last modification revision
+	session.Revision = keyValueVersion.ModRevision
+	return session, nil
 }
 
 func (s *sessionRegistry) GetSession(sessionName datamodel.SessionName) (datamodel.Session, error) {

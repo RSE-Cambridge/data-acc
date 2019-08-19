@@ -11,7 +11,7 @@ type Session struct {
 
 	// Currently stored revision
 	// this is checked when an update is requested
-	Revision int
+	Revision int64
 
 	// unix uid
 	Owner uint
