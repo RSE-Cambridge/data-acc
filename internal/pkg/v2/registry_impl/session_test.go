@@ -137,11 +137,14 @@ func TestSessionRegistry_UpdateSession(t *testing.T) {
 	keystore := mock_store.NewMockKeystore(mockCtrl)
 	registry := NewSessionRegistry(keystore)
 	keystore.EXPECT().Update("/session/foo", emptySessionString, int64(0)).Return(store.KeyValueVersion{
-		ModRevision: 42,
+		ModRevision: 44,
 		Value:       emptySessionString,
 	}, nil)
 
-	registry.UpdateSession(datamodel.Session{Name: "foo", Revision: 0})
+	session, err := registry.UpdateSession(datamodel.Session{Name: "foo", Revision: 0})
+
+	assert.Nil(t, err)
+	assert.Equal(t, datamodel.Session{Name: "foo", Revision: 44}, session)
 }
 
 func TestSessionRegistry_DeleteSession(t *testing.T) {
@@ -149,7 +152,10 @@ func TestSessionRegistry_DeleteSession(t *testing.T) {
 	defer mockCtrl.Finish()
 	keystore := mock_store.NewMockKeystore(mockCtrl)
 	registry := NewSessionRegistry(keystore)
-	keystore.EXPECT().Delete("/session/foo", int64(40))
+	fakeErr := errors.New("fake")
+	keystore.EXPECT().Delete("/session/foo", int64(40)).Return(fakeErr)
 
-	registry.DeleteSession(datamodel.Session{Name: "foo", Revision: 40})
+	err := registry.DeleteSession(datamodel.Session{Name: "foo", Revision: 40})
+
+	assert.Equal(t, fakeErr, err)
 }
