@@ -19,7 +19,7 @@ func TestBrickManager_Hostname(t *testing.T) {
 func TestBrickManager_Startup(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	brickRegistry := mock_registry.NewMockBrickRegistry(mockCtrl)
+	brickRegistry := mock_registry.NewMockBrickHostRegistry(mockCtrl)
 	handler := mock_facade.NewMockSessionActionHandler(mockCtrl)
 	brickManager := NewBrickManager(brickRegistry, handler)
 

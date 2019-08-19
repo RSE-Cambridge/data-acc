@@ -5,7 +5,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 )
 
-type BrickRegistry interface {
+type BrickHostRegistry interface {
 	// BrickHost updates bricks on startup
 	// This will error if we remove a brick that has an allocation
 	// for a Session that isn't in an error state

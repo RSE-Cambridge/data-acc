@@ -9,7 +9,7 @@ import (
 	"log"
 )
 
-func NewBrickManager(brickRegistry registry.BrickRegistry, handler facade.SessionActionHandler) dacd.BrickManager {
+func NewBrickManager(brickRegistry registry.BrickHostRegistry, handler facade.SessionActionHandler) dacd.BrickManager {
 	return &brickManager{
 		config:               config.GetBrickManagerConfig(config.DefaultEnv),
 		brickRegistry:        brickRegistry,
@@ -19,7 +19,7 @@ func NewBrickManager(brickRegistry registry.BrickRegistry, handler facade.Sessio
 
 type brickManager struct {
 	config               config.BrickManagerConfig
-	brickRegistry        registry.BrickRegistry
+	brickRegistry        registry.BrickHostRegistry
 	sessionActionHandler facade.SessionActionHandler
 }
 

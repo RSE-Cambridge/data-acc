@@ -27,7 +27,7 @@ done
 mockgen -source=internal/pkg/pfsprovider/interface.go \
     -package mocks >internal/pkg/mocks/pfsprovider_mock.go
 
-items="allocation brick session session_actions"
+items="brick_allocation brick_host session session_actions"
 for i in $items; do
     mockgen -source=internal/pkg/v2/registry/${i}.go \
         >internal/pkg/v2/mock_registry/${i}.go

@@ -48,75 +48,77 @@ func (mr *MockKeystoreMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockKeystore)(nil).Close))
 }
 
-// CleanPrefix mocks base method
-func (m *MockKeystore) CleanPrefix(prefix string) error {
+// Create mocks base method
+func (m *MockKeystore) Create(key, value string) (store.KeyValueVersion, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CleanPrefix", prefix)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "Create", key, value)
+	ret0, _ := ret[0].(store.KeyValueVersion)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
-// CleanPrefix indicates an expected call of CleanPrefix
-func (mr *MockKeystoreMockRecorder) CleanPrefix(prefix interface{}) *gomock.Call {
+// Create indicates an expected call of Create
+func (mr *MockKeystoreMockRecorder) Create(key, value interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CleanPrefix", reflect.TypeOf((*MockKeystore)(nil).CleanPrefix), prefix)
-}
-
-// Add mocks base method
-func (m *MockKeystore) Add(keyValue store.KeyValue) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Add", keyValue)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Add indicates an expected call of Add
-func (mr *MockKeystoreMockRecorder) Add(keyValue interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockKeystore)(nil).Add), keyValue)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockKeystore)(nil).Create), key, value)
 }
 
 // Update mocks base method
-func (m *MockKeystore) Update(keyValue store.KeyValueVersion) error {
+func (m *MockKeystore) Update(key, value string, modRevision int) (store.KeyValueVersion, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", keyValue)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "Update", key, value, modRevision)
+	ret0, _ := ret[0].(store.KeyValueVersion)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Update indicates an expected call of Update
-func (mr *MockKeystoreMockRecorder) Update(keyValue interface{}) *gomock.Call {
+func (mr *MockKeystoreMockRecorder) Update(key, value, modRevision interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockKeystore)(nil).Update), keyValue)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockKeystore)(nil).Update), key, value, modRevision)
 }
 
-// DeleteAll mocks base method
-func (m *MockKeystore) DeleteAll(keyValues []store.KeyValueVersion) error {
+// Delete mocks base method
+func (m *MockKeystore) Delete(key string, modRevision int) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteAll", keyValues)
+	ret := m.ctrl.Call(m, "Delete", key, modRevision)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteAll indicates an expected call of DeleteAll
-func (mr *MockKeystoreMockRecorder) DeleteAll(keyValues interface{}) *gomock.Call {
+// Delete indicates an expected call of Delete
+func (mr *MockKeystoreMockRecorder) Delete(key, modRevision interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAll", reflect.TypeOf((*MockKeystore)(nil).DeleteAll), keyValues)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockKeystore)(nil).Delete), key, modRevision)
+}
+
+// DeleteAllKeysWithPrefix mocks base method
+func (m *MockKeystore) DeleteAllKeysWithPrefix(keyPrefix string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAllKeysWithPrefix", keyPrefix)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAllKeysWithPrefix indicates an expected call of DeleteAllKeysWithPrefix
+func (mr *MockKeystoreMockRecorder) DeleteAllKeysWithPrefix(keyPrefix interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAllKeysWithPrefix", reflect.TypeOf((*MockKeystore)(nil).DeleteAllKeysWithPrefix), keyPrefix)
 }
 
 // GetAll mocks base method
-func (m *MockKeystore) GetAll(prefix string) ([]store.KeyValueVersion, error) {
+func (m *MockKeystore) GetAll(keyPrefix string) ([]store.KeyValueVersion, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", prefix)
+	ret := m.ctrl.Call(m, "GetAll", keyPrefix)
 	ret0, _ := ret[0].([]store.KeyValueVersion)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockKeystoreMockRecorder) GetAll(prefix interface{}) *gomock.Call {
+func (mr *MockKeystoreMockRecorder) GetAll(keyPrefix interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockKeystore)(nil).GetAll), prefix)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockKeystore)(nil).GetAll), keyPrefix)
 }
 
 // Get mocks base method
@@ -149,17 +151,17 @@ func (mr *MockKeystoreMockRecorder) Watch(ctxt, key, withPrefix interface{}) *go
 }
 
 // KeepAliveKey mocks base method
-func (m *MockKeystore) KeepAliveKey(key string) error {
+func (m *MockKeystore) KeepAliveKey(ctxt context.Context, key string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "KeepAliveKey", key)
+	ret := m.ctrl.Call(m, "KeepAliveKey", ctxt, key)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // KeepAliveKey indicates an expected call of KeepAliveKey
-func (mr *MockKeystoreMockRecorder) KeepAliveKey(key interface{}) *gomock.Call {
+func (mr *MockKeystoreMockRecorder) KeepAliveKey(ctxt, key interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KeepAliveKey", reflect.TypeOf((*MockKeystore)(nil).KeepAliveKey), key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KeepAliveKey", reflect.TypeOf((*MockKeystore)(nil).KeepAliveKey), ctxt, key)
 }
 
 // NewMutex mocks base method
