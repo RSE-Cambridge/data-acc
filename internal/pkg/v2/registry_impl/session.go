@@ -20,8 +20,7 @@ type sessionRegistry struct {
 
 func (s *sessionRegistry) GetSessionMutex(sessionName datamodel.SessionName) (store.Mutex, error) {
 	sessionKey := getSessionKey(sessionName)
-	lockKey := fmt.Sprintf("/lock%s", sessionKey)
-	return s.store.NewMutex(lockKey)
+	return s.store.NewMutex(sessionKey)
 }
 
 const sessionPrefix = "/session/"

@@ -23,7 +23,7 @@ type allocationRegistry struct {
 }
 
 const poolPrefix = "/Pool/"
-const allocationLockKey = "/LockAllocation/"
+const allocationLockKey = "LockAllocation"
 
 func (a *allocationRegistry) GetAllocationMutex() (store.Mutex, error) {
 	return a.store.NewMutex(allocationLockKey)

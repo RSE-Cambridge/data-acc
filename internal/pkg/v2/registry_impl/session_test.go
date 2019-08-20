@@ -19,7 +19,7 @@ func TestSessionRegistry_GetSessionMutex(t *testing.T) {
 	keystore := mock_store.NewMockKeystore(mockCtrl)
 	registry := NewSessionRegistry(keystore)
 	fakeErr := errors.New("fake")
-	keystore.EXPECT().NewMutex("/lock/session/foo").Return(nil, fakeErr)
+	keystore.EXPECT().NewMutex("/session/foo").Return(nil, fakeErr)
 
 	mutex, err := registry.GetSessionMutex("foo")
 	assert.Nil(t, mutex)
