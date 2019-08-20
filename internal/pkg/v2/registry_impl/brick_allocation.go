@@ -157,5 +157,15 @@ func (a *allocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
 }
 
 func (a *allocationRegistry) GetPoolInfo(poolName datamodel.PoolName) (datamodel.PoolInfo, error) {
-	panic("implement me")
+	allInfo, err := a.GetAllPoolInfos()
+	if err != nil {
+		return datamodel.PoolInfo{}, err
+	}
+
+	for _, poolInfo := range allInfo {
+		if poolInfo.Pool.Name == poolName {
+			return poolInfo, nil
+		}
+	}
+	return datamodel.PoolInfo{}, fmt.Errorf("unable to find pool %s", poolName)
 }
