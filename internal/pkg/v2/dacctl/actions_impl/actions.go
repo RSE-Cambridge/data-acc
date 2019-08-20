@@ -6,15 +6,17 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/workflow_impl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/facade"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
 	"log"
 	"strings"
 )
 
-func NewDacctlActions(actions facade.Session, disk fileio.Disk) dacctl.DacctlActions {
+func NewDacctlActions(keystore store.Keystore, disk fileio.Disk) dacctl.DacctlActions {
 	return &dacctlActions{
-		session: actions,
+		session: workflow_impl.NewSessionFacade(keystore),
 		disk:    disk,
 	}
 }

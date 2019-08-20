@@ -27,7 +27,7 @@ func TestDacctlActions_CreatePersistentBuffer(t *testing.T) {
 	}).Return(nil)
 	fakeTime = 123
 
-	actions := NewDacctlActions(session, nil)
+	actions := dacctlActions{session: session}
 	err := actions.CreatePersistentBuffer(getMockCliContext(2))
 
 	assert.Nil(t, err)

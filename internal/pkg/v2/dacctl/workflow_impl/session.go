@@ -6,14 +6,20 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/facade"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry_impl"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
 	"log"
 	"math"
 	"math/rand"
 	"time"
 )
 
-func NewSessionFacade() facade.Session {
-	return sessionFacade{}
+func NewSessionFacade(keystore store.Keystore) facade.Session {
+	return sessionFacade{
+		session:     registry_impl.NewSessionRegistry(keystore),
+		actions:     registry_impl.NewSessionActionsRegistry(keystore),
+		allocations: registry_impl.NewAllocationRegistry(keystore),
+	}
 }
 
 type sessionFacade struct {

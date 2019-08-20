@@ -56,7 +56,7 @@ func TestDacctlActions_DeleteBuffer(t *testing.T) {
 	fakeError := errors.New("fake")
 	session.EXPECT().DeleteSession(datamodel.SessionName("bar"), true).Return(fakeError)
 
-	actions := NewDacctlActions(session, nil)
+	actions := dacctlActions{session: session}
 	err := actions.DeleteBuffer(&mockCliContext{
 		strings:  map[string]string{"token": "bar"},
 		booleans: map[string]bool{"hurry": true},
@@ -76,7 +76,7 @@ func TestDacctlActions_DataIn(t *testing.T) {
 	fakeError := errors.New("fake")
 	session.EXPECT().CopyDataIn(datamodel.SessionName("bar")).Return(fakeError)
 
-	actions := NewDacctlActions(session, nil)
+	actions := dacctlActions{session: session}
 	err := actions.DataIn(&mockCliContext{
 		strings: map[string]string{"token": "bar"},
 	})
@@ -100,7 +100,7 @@ func TestDacctlActions_DataOut(t *testing.T) {
 	fakeError := errors.New("fake")
 	session.EXPECT().CopyDataOut(datamodel.SessionName("bar")).Return(fakeError)
 
-	actions := NewDacctlActions(session, nil)
+	actions := dacctlActions{session: session}
 	err := actions.DataOut(&mockCliContext{
 		strings: map[string]string{"token": "bar"},
 	})
@@ -124,7 +124,7 @@ func TestDacctlActions_PreRun(t *testing.T) {
 	fakeError := errors.New("fake")
 	session.EXPECT().Mount(datamodel.SessionName("bar"), computeHosts, loginHosts).Return(fakeError)
 
-	actions := NewDacctlActions(session, disk)
+	actions := dacctlActions{session: session, disk: disk}
 	err := actions.PreRun(&mockCliContext{
 		strings: map[string]string{
 			"token":                "bar",
@@ -153,7 +153,7 @@ func TestDacctlActions_PreRun_NoLoginHosts(t *testing.T) {
 	fakeError := errors.New("fake")
 	session.EXPECT().Mount(datamodel.SessionName("bar"), computeHosts, nil).Return(fakeError)
 
-	actions := NewDacctlActions(session, disk)
+	actions := dacctlActions{session: session, disk: disk}
 	err := actions.PreRun(&mockCliContext{
 		strings: map[string]string{
 			"token":            "bar",
@@ -172,7 +172,7 @@ func TestDacctlActions_PreRun_BadHosts(t *testing.T) {
 	computeHosts := []string{"host1", "host/2"}
 	disk.EXPECT().Lines("computehostfile").Return(computeHosts, nil)
 
-	actions := NewDacctlActions(nil, disk)
+	actions := dacctlActions{disk: disk}
 	err := actions.PreRun(&mockCliContext{
 		strings: map[string]string{
 			"token":            "bar",
@@ -194,7 +194,7 @@ func TestDacctlActions_PreRun_BadLoginHosts(t *testing.T) {
 	disk.EXPECT().Lines("computehostfile").Return(computeHosts, nil)
 	disk.EXPECT().Lines("loginhostfile").Return(loginHosts, nil)
 
-	actions := NewDacctlActions(session, disk)
+	actions := dacctlActions{session: session, disk: disk}
 	err := actions.PreRun(&mockCliContext{
 		strings: map[string]string{
 			"token":                "bar",
@@ -232,7 +232,7 @@ func TestDacctlActions_PostRun(t *testing.T) {
 	fakeError := errors.New("fake")
 	session.EXPECT().Unmount(datamodel.SessionName("bar")).Return(fakeError)
 
-	actions := NewDacctlActions(session, nil)
+	actions := dacctlActions{session: session}
 	err := actions.PostRun(&mockCliContext{
 		strings: map[string]string{"token": "bar"},
 	})

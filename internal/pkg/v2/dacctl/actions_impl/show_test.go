@@ -19,7 +19,7 @@ func TestDacctlActions_RealSize(t *testing.T) {
 		ActualSizeBytes: 123,
 	}, nil)
 
-	actions := NewDacctlActions(session, nil)
+	actions := dacctlActions{session: session}
 	output, err := actions.RealSize(&mockCliContext{
 		strings: map[string]string{"token": "bar"},
 	})
@@ -45,7 +45,7 @@ func TestDacctlActions_Paths(t *testing.T) {
 	}, nil)
 	disk.EXPECT().Write("paths", []string{"foo1=bar1"})
 
-	actions := NewDacctlActions(session, disk)
+	actions := dacctlActions{session: session, disk: disk}
 	err := actions.Paths(&mockCliContext{
 		strings: map[string]string{
 			"token":    "bar",
@@ -83,7 +83,7 @@ func TestDacctlActions_ShowInstances(t *testing.T) {
 			ActualSizeBytes: 456,
 		},
 	}, nil)
-	actions := NewDacctlActions(session, nil)
+	actions := dacctlActions{session: session}
 
 	output, err := actions.ShowInstances()
 
@@ -120,7 +120,7 @@ func TestDacctlActions_ShowSessions(t *testing.T) {
 			CreatedAt: 5678,
 		},
 	}, nil)
-	actions := NewDacctlActions(session, nil)
+	actions := dacctlActions{session: session}
 
 	output, err := actions.ShowSessions()
 
@@ -162,7 +162,7 @@ func TestDacctlActions_ListPools(t *testing.T) {
 			},
 		},
 	}, nil)
-	actions := NewDacctlActions(session, nil)
+	actions := dacctlActions{session: session}
 
 	output, err := actions.ListPools()
 	assert.Nil(t, err)
@@ -182,7 +182,7 @@ func TestDacctlActions_ListPools(t *testing.T) {
 }
 
 func TestDacctlActions_ShowConfigurations(t *testing.T) {
-	actions := NewDacctlActions(nil, nil)
+	actions := dacctlActions{}
 	output, err := actions.ShowConfigurations()
 	assert.Nil(t, err)
 	assert.Equal(t, `{"configurations":[]}`, output)

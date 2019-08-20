@@ -12,9 +12,9 @@ import (
 	"log"
 )
 
-func NewSessionActionsRegistry(store store.Keystore, brickHostRegistry registry.BrickHostRegistry) registry.SessionActions {
+func NewSessionActionsRegistry(store store.Keystore) registry.SessionActions {
 	// TODO: create brickHostRegistry
-	return &sessionActions{store, brickHostRegistry}
+	return &sessionActions{store, NewBrickHostRegistry(store)}
 }
 
 type sessionActions struct {

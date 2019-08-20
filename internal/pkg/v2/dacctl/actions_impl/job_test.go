@@ -17,7 +17,7 @@ func TestDacctlActions_ValidateJob_BadInput(t *testing.T) {
 
 	lines := []string{`#DW bad cmd`}
 	disk.EXPECT().Lines("jobfile").Return(lines, nil)
-	actions := NewDacctlActions(session, disk)
+	actions := dacctlActions{session: session, disk: disk}
 	err := actions.ValidateJob(&mockCliContext{
 		strings: map[string]string{
 			"job": "jobfile",
@@ -87,7 +87,7 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	}).Return(nil)
 
 	fakeTime = 123
-	actions := NewDacctlActions(session, disk)
+	actions := dacctlActions{session: session, disk: disk}
 	err := actions.CreatePerJobBuffer(getMockCliContext(2))
 
 	assert.Nil(t, err)
