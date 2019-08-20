@@ -81,3 +81,4 @@ sleep $SLEEP_INTERVAL
 scontrol show burstbuffer
 squeue
 scontrol show bbstat
+sacct -o jobid'%10',reqtres'%45',alloctres'%45' -X
