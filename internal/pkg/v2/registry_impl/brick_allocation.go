@@ -21,6 +21,11 @@ type allocationRegistry struct {
 }
 
 const poolPrefix = "/Pool/"
+const allocationLockKey = "/LockAllocation/"
+
+func (a *allocationRegistry) GetAllocationMutex() (store.Mutex, error) {
+	return a.store.NewMutex(allocationLockKey)
+}
 
 func getPoolKey(poolName datamodel.PoolName) string {
 	if !parsers.IsValidName(string(poolName)) {
@@ -81,10 +86,6 @@ func (a *allocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
 }
 
 func (a *allocationRegistry) GetPoolInfo(poolName datamodel.PoolName) (datamodel.PoolInfo, error) {
-	panic("implement me")
-}
-
-func (a *allocationRegistry) GetAllocationMutex() (store.Mutex, error) {
 	panic("implement me")
 }
 
