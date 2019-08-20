@@ -138,8 +138,8 @@ func (client *etcKeystore) Update(key string, value []byte, modRevision int64) (
 	var ifOps []clientv3.Cmp
 	var thenOps []clientv3.Op
 
-	ifOps = append(ifOps, clientv3util.KeyExists(key))
 	if modRevision > 0 {
+		ifOps = append(ifOps, clientv3util.KeyExists(key))
 		checkModRev := clientv3.Compare(clientv3.ModRevision(key), "=", modRevision)
 		ifOps = append(ifOps, checkModRev)
 	}
