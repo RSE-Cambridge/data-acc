@@ -62,7 +62,18 @@ func (a *allocationRegistry) EnsurePoolCreated(poolName datamodel.PoolName, gran
 }
 
 func (a *allocationRegistry) GetPool(poolName datamodel.PoolName) (datamodel.Pool, error) {
-	panic("implement me")
+	key := getPoolKey(poolName)
+	keyValueVersion, err := a.store.Get(key)
+	pool := datamodel.Pool{}
+	if err != nil {
+		return pool, fmt.Errorf("unable to get pool due to: %s", err)
+	}
+
+	err = json.Unmarshal(keyValueVersion.Value, &pool)
+	if err != nil {
+		log.Panicf("unable to parse pool")
+	}
+	return pool, nil
 }
 
 func (a *allocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
