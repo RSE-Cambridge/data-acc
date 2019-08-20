@@ -191,10 +191,6 @@ func (client *etcKeystore) GetAll(prefix string) ([]store.KeyValueVersion, error
 	response, err := kvc.Get(context.Background(), prefix, clientv3.WithPrefix())
 	handleError(err)
 
-	if response.Count == 0 {
-		return []store.KeyValueVersion{},
-			fmt.Errorf("unable to find any values for prefix: %s", prefix)
-	}
 	var values []store.KeyValueVersion
 	for _, rawKeyValue := range response.Kvs {
 		values = append(values, *getKeyValueVersion(rawKeyValue))
@@ -242,7 +238,7 @@ func (client *etcKeystore) KeepAliveKey(ctxt context.Context, key string) error 
 		Commit()
 	handleError(err)
 	if !txnResponse.Succeeded {
-		return fmt.Errorf("unable to create keep-alive key: %s", key)
+		return fmt.Errorf("unable to create keep-alive key %s due to: %+v", key, txnResponse.Responses)
 	}
 
 	ch, err := client.Client.KeepAlive(ctxt, leaseID)

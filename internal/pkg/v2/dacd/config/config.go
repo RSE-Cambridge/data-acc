@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"log"
+	"os"
 	"strconv"
 )
 
@@ -79,13 +80,13 @@ func getBool(env ReadEnvironemnt, key string, defaultVal bool) bool {
 type systemEnv struct{}
 
 func (systemEnv) LookupEnv(key string) (string, bool) {
-	// TODO return os.LookupEnv(key)
-	return "", false
+	return os.LookupEnv(key)
+	//return "", false
 }
 
 func (systemEnv) Hostname() (string, error) {
-	// TODO return os.BrickHostName()
-	return "hostname", nil
+	return os.Hostname()
+	//return "hostname", nil
 }
 
 var DefaultEnv ReadEnvironemnt = systemEnv{}

@@ -8,6 +8,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_registry"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 )
 
@@ -30,7 +31,8 @@ func TestBrickManager_Startup(t *testing.T) {
 	// TODO...
 	brickRegistry.EXPECT().UpdateBrickHost(gomock.Any())
 	sessionActions.EXPECT().GetSessionActionRequests(context.TODO(), gomock.Any())
-	brickRegistry.EXPECT().KeepAliveHost(context.TODO(), datamodel.BrickHostName("hostname"))
+	hostname, _ := os.Hostname()
+	brickRegistry.EXPECT().KeepAliveHost(context.TODO(), datamodel.BrickHostName(hostname))
 
 	brickManager.Startup()
 }
