@@ -28,50 +28,64 @@ type sessionFacade struct {
 	allocations registry.AllocationRegistry
 }
 
+func (s sessionFacade) submitJob(sessionName datamodel.SessionName, actionType datamodel.SessionActionType,
+	getSession func() (datamodel.Session, error)) error {
+
+	sessionMutex, err := s.session.GetSessionMutex(sessionName)
+	if err != nil {
+		return fmt.Errorf("unable to get session mutex: %s due to: %s", sessionName, err)
+	}
+	err = sessionMutex.Lock(context.TODO())
+	if err != nil {
+		return fmt.Errorf("unable to lock session mutex: %s due to: %s", sessionName, err)
+	}
+
+	session, err := getSession()
+	if err != nil {
+		sessionMutex.Unlock(context.TODO())
+		return err
+	}
+	if session.Name == "" && err == nil {
+		// skip processing for this session
+		// e.g. its a delete and we have already been deleted
+		sessionMutex.Unlock(context.TODO())
+		return nil
+	}
+
+	// This will error out if the host is not currently up
+	sessionAction, err := s.actions.SendSessionAction(context.TODO(), actionType, session)
+	mutexErr := sessionMutex.Unlock(context.TODO())
+	if err != nil {
+		return err
+	}
+	if mutexErr != nil {
+		return mutexErr
+	}
+
+	// wait for server to complete, or timeout
+	result := <-sessionAction
+	return result.Error
+}
+
 func (s sessionFacade) CreateSession(session datamodel.Session) error {
 	err := s.validateSession(session)
 	if err != nil {
 		return err
 	}
 
-	// Get session lock
-	sessionMutex, err := s.session.GetSessionMutex(session.Name)
-	if err != nil {
-		return fmt.Errorf("unable to get session mutex: %s due to: %s", session.Name, err)
-	}
-	err = sessionMutex.Lock(context.TODO())
-	if err != nil {
-		return fmt.Errorf("unable to lock session mutex: %s due to: %s", session.Name, err)
-	}
-
-	// Allocate bricks, and choose brick host server
-	session, err = s.doAllocationAndWriteSession(session)
-	// if no bricks allocated, no need to call CreateSessionVolume
-	if err != nil || session.ActualSizeBytes == 0 {
-		sessionMutex.Unlock(context.TODO())
-		return err
-	}
-
-	// Create filesystem on the brick host server
-	// TODO: add timeout
-	eventChan, createErr := s.actions.SendSessionAction(context.TODO(), datamodel.SessionCreateFilesystem, session)
-
-	// Drop mutex so the server can take it
-	err = sessionMutex.Unlock(context.TODO())
-	if err != nil {
-		// TODO: cancel above action?
-		return err
-	}
-
-	// Always drop the mutex, but check error before checking the channel
-	if createErr != nil {
-		// TODO: session should go into Error State? Maybe its up the above call in this case?
-		return createErr
-	}
-
-	// Wait for the server to create the filesystem
-	sessionAction := <-eventChan
-	return sessionAction.Error
+	return s.submitJob(session.Name, datamodel.SessionCreateFilesystem,
+		func() (datamodel.Session, error) {
+			// Allocate bricks, and choose brick host server
+			session, err := s.doAllocationAndWriteSession(session)
+			if err != nil {
+				return session, err
+			}
+			if session.ActualSizeBytes == 0 {
+				// Skip creating an empty filesystem
+				return datamodel.Session{}, nil
+			}
+			return session, nil
+		})
 }
 
 func (s sessionFacade) validateSession(session datamodel.Session) error {
@@ -172,56 +186,20 @@ func pickBricks(bricksRequired int, poolInfo datamodel.PoolInfo) []datamodel.Bri
 }
 
 func (s sessionFacade) DeleteSession(sessionName datamodel.SessionName, hurry bool) error {
-	// Get session lock
-	sessionMutex, err := s.session.GetSessionMutex(sessionName)
-	if err != nil {
-		return fmt.Errorf("unable to get session mutex: %s due to: %s", sessionName, err)
-	}
-	err = sessionMutex.Lock(context.TODO())
-	if err != nil {
-		return fmt.Errorf("unable to lock session mutex: %s due to: %s", sessionName, err)
-	}
+	return s.submitJob(sessionName, datamodel.SessionDelete,
+		func() (datamodel.Session, error) {
+			session, err := s.session.GetSession(sessionName)
+			if err != nil {
+				log.Println("Unable to find session, skipping delete:", sessionName)
+				return session, nil
+			}
 
-	session, err := s.session.GetSession(sessionName)
-	if err != nil {
-		log.Println("Unable to find session:", sessionName)
-		sessionMutex.Unlock(context.TODO())
-		return nil
-	}
-
-	// Record we want this deleted, in case host is not alive
-	// can be deleted when it is next stated
-	session.Status.DeleteRequested = true
-	session.Status.DeleteSkipCopyDataOut = hurry
-	session, err = s.session.UpdateSession(session)
-	if err != nil {
-		sessionMutex.Unlock(context.TODO())
-		return err
-	}
-	// TODO: send the hurry, i.e. request data copy out first
-
-	if session.PrimaryBrickHost == "" {
-		// TODO: session has no primary brick host
-		//  so need to do local umount
-
-	}
-
-	// This will error out if the host is not currently up
-	sessionAction, err := s.actions.SendSessionAction(context.TODO(), datamodel.SessionDelete, session)
-	if err != nil {
-		return err
-	}
-
-	// Drop mutex to allow server to lock the session
-	err = sessionMutex.Unlock(context.TODO())
-	if err != nil {
-		// TODO: cancel above waiting around?
-		return err
-	}
-
-	// wait for server to complete, or timeout
-	result := <-sessionAction
-	return result.Error
+			// Record we want this deleted, in case host is not alive
+			// can be deleted when it is next stated
+			session.Status.DeleteRequested = true
+			session.Status.DeleteSkipCopyDataOut = hurry
+			return s.session.UpdateSession(session)
+		})
 }
 
 func (s sessionFacade) CopyDataIn(sessionName datamodel.SessionName) error {

@@ -16,7 +16,7 @@ type fileSystemProvider struct {
 
 func (f *fileSystemProvider) Create(session datamodel.Session) (datamodel.FilesystemStatus, error) {
 	log.Println("FAKE Create")
-	return datamodel.FilesystemStatus{}, nil
+	return datamodel.FilesystemStatus{InternalName: "foo", InternalData: "bar"}, nil
 }
 
 func (f *fileSystemProvider) Delete(session datamodel.Session) error {
@@ -25,17 +25,24 @@ func (f *fileSystemProvider) Delete(session datamodel.Session) error {
 }
 
 func (f *fileSystemProvider) DataCopyIn(session datamodel.Session) error {
-	panic("implement me")
+	log.Println("FAKE DataCopyIn")
+	return nil
+
 }
 
 func (f *fileSystemProvider) DataCopyOut(session datamodel.Session) error {
-	panic("implement me")
+	log.Println("FAKE DataCopyOut")
+	return nil
+
 }
 
 func (f *fileSystemProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSession) datamodel.AttachmentSessionStatus {
-	panic("implement me")
+	log.Println("FAKE Mount")
+	return datamodel.AttachmentSessionStatus{}
+
 }
 
 func (f *fileSystemProvider) Unmount(session datamodel.Session, attachments datamodel.AttachmentSession) datamodel.AttachmentSessionStatus {
-	panic("implement me")
+	log.Println("FAKE Unmount")
+	return datamodel.AttachmentSessionStatus{}
 }
