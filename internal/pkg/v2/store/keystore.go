@@ -40,6 +40,9 @@ type Keystore interface {
 	// Get given key
 	Get(key string) (KeyValueVersion, error)
 
+	// Check if a given key exists
+	IsExist(key string) (bool, error)
+
 	// Get a channel containing all KeyValueUpdate events
 	//
 	// Use the context to control if you watch forever, or if you choose to cancel when a key

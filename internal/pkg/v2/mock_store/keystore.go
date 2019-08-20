@@ -136,6 +136,21 @@ func (mr *MockKeystoreMockRecorder) Get(key interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockKeystore)(nil).Get), key)
 }
 
+// IsExist mocks base method
+func (m *MockKeystore) IsExist(key string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsExist", key)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsExist indicates an expected call of IsExist
+func (mr *MockKeystoreMockRecorder) IsExist(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsExist", reflect.TypeOf((*MockKeystore)(nil).IsExist), key)
+}
+
 // Watch mocks base method
 func (m *MockKeystore) Watch(ctxt context.Context, key string, withPrefix bool) store.KeyValueUpdateChan {
 	m.ctrl.T.Helper()

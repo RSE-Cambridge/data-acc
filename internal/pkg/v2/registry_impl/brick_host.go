@@ -21,6 +21,9 @@ type brickHostRegistry struct {
 	allocation registry.AllocationRegistry
 }
 
+const brickHostPrefix = "/BrickHostStore/"
+const keepAlivePrefix = "/BrickHostAlive/"
+
 func (b *brickHostRegistry) UpdateBrickHost(brickHostInfo datamodel.BrickHost) error {
 
 	// find out granularity for each reported pool
@@ -56,7 +59,7 @@ func (b *brickHostRegistry) UpdateBrickHost(brickHostInfo datamodel.BrickHost) e
 	if !parsers.IsValidName(string(brickHostInfo.Name)) {
 		log.Panicf("invalid brick host name: %s", brickHostInfo.Name)
 	}
-	key := fmt.Sprintf("/brickhost/%s", brickHostInfo.Name)
+	key := fmt.Sprintf("%s%s", brickHostPrefix, brickHostInfo.Name)
 	value, err := json.Marshal(brickHostInfo)
 	if err != nil {
 		log.Panicf("unable to covert brick host to json: %s", brickHostInfo.Name)
@@ -67,10 +70,17 @@ func (b *brickHostRegistry) UpdateBrickHost(brickHostInfo datamodel.BrickHost) e
 	return err
 }
 
+func getKeepAliveKey(brickHostName datamodel.BrickHostName) string {
+	if !parsers.IsValidName(string(brickHostName)) {
+		log.Panicf("invalid brick host name: %s", brickHostName)
+	}
+	return fmt.Sprintf("%s%s", keepAlivePrefix, brickHostName)
+}
+
 func (b *brickHostRegistry) KeepAliveHost(ctxt context.Context, brickHostName datamodel.BrickHostName) error {
-	panic("implement me")
+	return b.store.KeepAliveKey(ctxt, getKeepAliveKey(brickHostName))
 }
 
 func (b *brickHostRegistry) IsBrickHostAlive(brickHostName datamodel.BrickHostName) (bool, error) {
-	panic("implement me")
+	return b.store.IsExist(getKeepAliveKey(brickHostName))
 }
