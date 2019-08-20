@@ -1,0 +1,76 @@
+package registry_impl
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
+	"log"
+)
+
+func NewBrickHostRegistry(store store.Keystore) registry.BrickHostRegistry {
+	// TODO: create AllocationRegistry
+	return &brickHostRegistry{store, nil}
+}
+
+type brickHostRegistry struct {
+	store      store.Keystore
+	allocation registry.AllocationRegistry
+}
+
+func (b *brickHostRegistry) UpdateBrickHost(brickHostInfo datamodel.BrickHost) error {
+
+	// find out granularity for each reported pool
+	if len(brickHostInfo.Bricks) == 0 {
+		log.Panicf("brick host must have some bricks: %s", brickHostInfo.Name)
+	}
+	poolGranularityGiBMap := make(map[datamodel.PoolName]uint)
+	for _, brick := range brickHostInfo.Bricks {
+		for !parsers.IsValidName(string(brick.PoolName)) {
+			log.Panicf("invalid pool name: %+v", brick)
+		}
+		poolGranularity, ok := poolGranularityGiBMap[brick.PoolName]
+		if !ok {
+			if brick.CapacityGiB <= 0 {
+				log.Panicf("invalid brick size: %+v", brick)
+			}
+			poolGranularityGiBMap[brick.PoolName] = brick.CapacityGiB
+		} else {
+			if brick.CapacityGiB != poolGranularity {
+				log.Panicf("inconsistent brick size: %+v", brick)
+			}
+		}
+	}
+
+	// Check existing pools match what this brick host is reporting
+	for poolName, granularityGiB := range poolGranularityGiBMap {
+		_, err := b.allocation.EnsurePoolCreated(poolName, granularityGiB)
+		if err != nil {
+			return fmt.Errorf("unable to create pool due to: %s", err)
+		}
+	}
+
+	if !parsers.IsValidName(string(brickHostInfo.Name)) {
+		log.Panicf("invalid brick host name: %s", brickHostInfo.Name)
+	}
+	key := fmt.Sprintf("/brickhost/%s", brickHostInfo.Name)
+	value, err := json.Marshal(brickHostInfo)
+	if err != nil {
+		log.Panicf("unable to covert brick host to json: %s", brickHostInfo.Name)
+	}
+
+	// Always overwrite any pre-existing key
+	_, err = b.store.Update(key, value, 0)
+	return err
+}
+
+func (b *brickHostRegistry) KeepAliveHost(ctxt context.Context, brickHostName datamodel.BrickHostName) error {
+	panic("implement me")
+}
+
+func (b *brickHostRegistry) IsBrickHostAlive(brickHostName datamodel.BrickHostName) (bool, error) {
+	panic("implement me")
+}
