@@ -33,7 +33,12 @@ func getActions(keystore store.Keystore) dacctl.DacctlActions {
 func createPersistent(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
-	return getActions(keystore).CreatePersistentBuffer(c)
+	err := getActions(keystore).CreatePersistentBuffer(c)
+	if err == nil {
+		// Slurm is looking for the string "created" to know this worked
+		fmt.Printf("created %s\n", c.String("token"))
+	}
+	return err
 }
 
 func printOutput(function func() (string, error)) error {
