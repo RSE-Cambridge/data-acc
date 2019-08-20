@@ -135,8 +135,6 @@ func (a *allocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
 
 		for _, brickHost := range brickHosts {
 			for _, brick := range brickHost.Bricks {
-				log.Println(brick)
-				// Check if in allocated list
 				allocated := false
 				for _, allocatedDevice := range allocatedDevicesByBrickHost[brick.BrickHostName] {
 					if allocatedDevice == brick.Device {
