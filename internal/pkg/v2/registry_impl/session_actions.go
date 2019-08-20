@@ -40,19 +40,14 @@ func getSessionActionRequestKey(action datamodel.SessionAction) string {
 
 const sessionActionResponsePrefix = "/session_action/response/"
 
-func getSessionActionResponseHostPrefix(brickHost datamodel.BrickHostName) string {
-	if !parsers.IsValidName(string(brickHost)) {
+func getSessionActionResponseKey(action datamodel.SessionAction) string {
+	if !parsers.IsValidName(string(action.Session.Name)) {
 		log.Panicf("invalid session PrimaryBrickHost")
 	}
-	return fmt.Sprintf("%s%s/", sessionActionResponsePrefix, brickHost)
-}
-
-func getSessionActionResponseKey(action datamodel.SessionAction) string {
-	hostPrefix := getSessionActionResponseHostPrefix(action.Session.PrimaryBrickHost)
 	if !parsers.IsValidName(action.Uuid) {
 		log.Panicf("invalid session action uuid %s", action.Uuid)
 	}
-	return fmt.Sprintf("%s%s", hostPrefix, action.Uuid)
+	return fmt.Sprintf("%s%s/%s", sessionActionResponsePrefix, action.Session.Name, action.Uuid)
 }
 
 func sessionActionToRaw(session datamodel.SessionAction) []byte {
