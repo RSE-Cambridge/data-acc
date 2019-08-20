@@ -70,7 +70,21 @@ func (b *brickHostRegistry) UpdateBrickHost(brickHostInfo datamodel.BrickHost) e
 }
 
 func (b *brickHostRegistry) GetAllBrickHosts() ([]datamodel.BrickHost, error) {
-	panic("implement me")
+	allKeyValues, err := b.store.GetAll(brickHostPrefix)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get all bricks hosts due to: %s", err)
+	}
+
+	var allBrickHosts []datamodel.BrickHost
+	for _, keyValueVersion := range allKeyValues {
+		brickHost := datamodel.BrickHost{}
+		err := json.Unmarshal(keyValueVersion.Value, &brickHost)
+		if err != nil {
+			log.Panicf("unable to parse brick host due to: %s", err)
+		}
+		allBrickHosts = append(allBrickHosts, brickHost)
+	}
+	return allBrickHosts, nil
 }
 
 func getKeepAliveKey(brickHostName datamodel.BrickHostName) string {
