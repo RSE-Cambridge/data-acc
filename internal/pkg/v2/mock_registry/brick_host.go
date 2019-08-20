@@ -48,6 +48,21 @@ func (mr *MockBrickHostRegistryMockRecorder) UpdateBrickHost(brickHostInfo inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBrickHost", reflect.TypeOf((*MockBrickHostRegistry)(nil).UpdateBrickHost), brickHostInfo)
 }
 
+// GetAllBrickHosts mocks base method
+func (m *MockBrickHostRegistry) GetAllBrickHosts() ([]datamodel.BrickHost, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllBrickHosts")
+	ret0, _ := ret[0].([]datamodel.BrickHost)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllBrickHosts indicates an expected call of GetAllBrickHosts
+func (mr *MockBrickHostRegistryMockRecorder) GetAllBrickHosts() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllBrickHosts", reflect.TypeOf((*MockBrickHostRegistry)(nil).GetAllBrickHosts))
+}
+
 // KeepAliveHost mocks base method
 func (m *MockBrickHostRegistry) KeepAliveHost(ctxt context.Context, brickHostName datamodel.BrickHostName) error {
 	m.ctrl.T.Helper()

@@ -5,6 +5,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
 )
 
+// TODO: rename to instance? or filesystem? or just in the object model?
 type SessionRegistry interface {
 	// This mutex should be held before doing any operations on given session
 	//

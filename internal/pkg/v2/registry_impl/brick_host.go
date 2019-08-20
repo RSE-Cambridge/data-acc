@@ -69,6 +69,10 @@ func (b *brickHostRegistry) UpdateBrickHost(brickHostInfo datamodel.BrickHost) e
 	return err
 }
 
+func (b *brickHostRegistry) GetAllBrickHosts() ([]datamodel.BrickHost, error) {
+	panic("implement me")
+}
+
 func getKeepAliveKey(brickHostName datamodel.BrickHostName) string {
 	if !parsers.IsValidName(string(brickHostName)) {
 		log.Panicf("invalid brick host name: %s", brickHostName)

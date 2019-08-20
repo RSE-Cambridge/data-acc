@@ -48,6 +48,7 @@ func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Se
 		if len(session.AllocatedBricks) != 0 {
 			log.Panicf("allocations out of sync with ActualSizeBytes: %s", session.Name)
 		}
+		// TODO: ensure not allocated to any other session?
 	}
 
 	keyValueVersion, err := s.store.Create(sessionKey, sessionToRaw(session))

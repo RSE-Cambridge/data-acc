@@ -12,12 +12,13 @@ import (
 
 func NewAllocationRegistry(store store.Keystore) registry.AllocationRegistry {
 	// TODO: create brickHostRegistry
-	return &allocationRegistry{store, nil}
+	return &allocationRegistry{store, nil, nil}
 }
 
 type allocationRegistry struct {
 	store             store.Keystore
 	brickHostRegistry registry.BrickHostRegistry
+	sessionRegistry   registry.SessionRegistry
 }
 
 const poolPrefix = "/Pool/"
@@ -81,7 +82,37 @@ func (a *allocationRegistry) GetPool(poolName datamodel.PoolName) (datamodel.Poo
 	return pool, nil
 }
 
+func (a *allocationRegistry) getAllPools() (map[datamodel.PoolName]datamodel.Pool, error) {
+	allKeyValues, err := a.store.GetAll(poolPrefix)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get pools due to: %s", err)
+	}
+	pools := make(map[datamodel.PoolName]datamodel.Pool)
+	for _, keyValueVersion := range allKeyValues {
+		pool := datamodel.Pool{}
+		err = json.Unmarshal(keyValueVersion.Value, &pool)
+		if err != nil {
+			log.Panicf("unable to parse pool")
+		}
+		pools[pool.Name] = pool
+	}
+	return pools, nil
+}
+
 func (a *allocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
+	pools, err := a.getAllPools()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get pools due to: %s", err)
+	}
+
+	sessions, err := a.sessionRegistry.GetAllSessions()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get all sessions due to: %s", err)
+	}
+	//brickHosts := a.brickHostRegistry.GetAllBrickHosts()
+
+	log.Println(sessions)
+	log.Println(pools)
 	panic("implement me")
 }
 

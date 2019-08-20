@@ -12,6 +12,9 @@ type BrickHostRegistry interface {
 	// This includes ensuring the pool exists and is consistent with the given brick host info
 	UpdateBrickHost(brickHostInfo datamodel.BrickHost) error
 
+	// Get all brick hosts
+	GetAllBrickHosts() ([]datamodel.BrickHost, error)
+
 	// While the process is still running this notifies others the host is up
 	//
 	// When a host is dead non of its bricks will get new volumes assigned,
