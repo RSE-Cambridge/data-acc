@@ -104,16 +104,56 @@ func (a *allocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to get pools due to: %s", err)
 	}
-
 	sessions, err := a.sessionRegistry.GetAllSessions()
 	if err != nil {
 		return nil, fmt.Errorf("unable to get all sessions due to: %s", err)
 	}
-	//brickHosts := a.brickHostRegistry.GetAllBrickHosts()
+	brickHosts, err := a.brickHostRegistry.GetAllBrickHosts()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get all briks due to: %s", err)
+	}
 
-	log.Println(sessions)
-	log.Println(pools)
-	panic("implement me")
+	var allPoolInfos []datamodel.PoolInfo
+
+	for _, pool := range pools {
+		poolInfo := datamodel.PoolInfo{Pool: pool}
+
+		allocatedDevicesByBrickHost := make(map[datamodel.BrickHostName][]string)
+		for _, session := range sessions {
+			for i, brick := range session.AllocatedBricks {
+				if brick.PoolName == pool.Name {
+					poolInfo.AllocatedBricks = append(poolInfo.AllocatedBricks, datamodel.BrickAllocation{
+						Session:        session.Name,
+						Brick:          brick,
+						AllocatedIndex: uint(i),
+					})
+					allocatedDevicesByBrickHost[brick.BrickHostName] = append(allocatedDevicesByBrickHost[brick.BrickHostName], brick.Device)
+				}
+			}
+		}
+
+		for _, brickHost := range brickHosts {
+			for _, brick := range brickHost.Bricks {
+				log.Println(brick)
+				// Check if in allocated list
+				allocated := false
+				for _, allocatedDevice := range allocatedDevicesByBrickHost[brick.BrickHostName] {
+					if allocatedDevice == brick.Device {
+						if allocated {
+							log.Panicf("detected duplicated brick allocation: %+v", brick)
+						}
+						allocated = true
+					}
+				}
+				if !allocated {
+					poolInfo.AvailableBricks = append(poolInfo.AvailableBricks, brick)
+				}
+			}
+		}
+
+		allPoolInfos = append(allPoolInfos, poolInfo)
+	}
+	return allPoolInfos, nil
 }
 
 func (a *allocationRegistry) GetPoolInfo(poolName datamodel.PoolName) (datamodel.PoolInfo, error) {
