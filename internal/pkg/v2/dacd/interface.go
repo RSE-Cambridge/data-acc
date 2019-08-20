@@ -7,10 +7,8 @@ type BrickManager interface {
 	// Tidy up from previous shutdowns
 	// , then start waiting for session actions
 	// notify dacctl we are listening via keep alive key
-	// if drainSessions = True, we don't allow new
-	Startup(drainSessions bool) error
-
+	Startup()
 	// Wait for any events to complete
 	// then do any tidy up required for a graceful shutdown
-	Shutdown() error
+	Shutdown()
 }

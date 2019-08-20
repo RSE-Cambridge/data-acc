@@ -6,16 +6,17 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/facade"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
 	"log"
 )
 
-func NewBrickManager(brickRegistry registry.BrickHostRegistry, sessionActions registry.SessionActions,
-	handler facade.SessionActionHandler) dacd.BrickManager {
+func NewBrickManager(keystore store.Keystore) dacd.BrickManager {
+	// TODO: call concrete options
 	return &brickManager{
 		config:               config.GetBrickManagerConfig(config.DefaultEnv),
-		brickRegistry:        brickRegistry,
-		sessionActions:       sessionActions,
-		sessionActionHandler: handler,
+		brickRegistry:        nil,
+		sessionActions:       nil,
+		sessionActionHandler: nil,
 	}
 }
 
@@ -30,12 +31,13 @@ func (bm *brickManager) Hostname() string {
 	return string(bm.config.BrickHostName)
 }
 
-func (bm *brickManager) Startup(drainSessions bool) error {
+func (bm *brickManager) Startup() {
 	// TODO: should we get the allocation mutex until we are started the keep alive?
+	// TODO: add a drain configuration?
 
 	err := bm.brickRegistry.UpdateBrickHost(getBrickHost(bm.config))
 	if err != nil {
-		return err
+		log.Panicf("failed to update brick host: %s", err)
 	}
 
 	// If we are are enabled, this includes new create session requests
@@ -52,12 +54,15 @@ func (bm *brickManager) Startup(drainSessions bool) error {
 	//   including a check to make sure all related brick hosts are alive
 
 	// Tell everyone we are listening
-	return bm.brickRegistry.KeepAliveHost(context.TODO(), bm.config.BrickHostName)
+	err = bm.brickRegistry.KeepAliveHost(context.TODO(), bm.config.BrickHostName)
+	if err != nil {
+		log.Panicf("failed to start keep alive host: %s", err)
+	}
 }
 
-func (bm *brickManager) Shutdown() error {
+func (bm *brickManager) Shutdown() {
 	// Delete the keepalive key, to stop new actions being sent
 	// Wait for existing actions by trying to get a lock on all
 	// sessions we for which we are the primary brick
-	panic("implement me")
+	// TODO...
 }

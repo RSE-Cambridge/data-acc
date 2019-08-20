@@ -22,14 +22,15 @@ func TestBrickManager_Startup(t *testing.T) {
 	brickRegistry := mock_registry.NewMockBrickHostRegistry(mockCtrl)
 	sessionActions := mock_registry.NewMockSessionActions(mockCtrl)
 	handler := mock_facade.NewMockSessionActionHandler(mockCtrl)
-	brickManager := NewBrickManager(brickRegistry, sessionActions, handler)
+	brickManager := brickManager{
+		config:        config.GetBrickManagerConfig(config.DefaultEnv),
+		brickRegistry: brickRegistry, sessionActions: sessionActions, sessionActionHandler: handler,
+	}
 
 	// TODO...
 	brickRegistry.EXPECT().UpdateBrickHost(gomock.Any())
 	sessionActions.EXPECT().GetSessionActionRequests(context.TODO(), gomock.Any())
 	brickRegistry.EXPECT().KeepAliveHost(context.TODO(), datamodel.BrickHostName("hostname"))
 
-	err := brickManager.Startup(false)
-
-	assert.Nil(t, err)
+	brickManager.Startup()
 }

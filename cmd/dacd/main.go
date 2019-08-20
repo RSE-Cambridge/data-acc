@@ -1,37 +1,36 @@
 package main
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/etcdregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/lifecycle/brickmanager"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/brick_manager_impl"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store_impl"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-func waitForShutdown() {
+func waitForShutdown(manager dacd.BrickManager) {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGINT)
 	<-c
 	log.Println("I have been asked to shutdown, doing tidy up...")
+	manager.Shutdown()
 	os.Exit(1)
 }
 
 func main() {
 	log.Println("Starting data-accelerator's brick manager")
 
-	keystore := etcdregistry.NewKeystore()
-	defer keystore.Close()
-	poolRegistry := keystoreregistry.NewPoolRegistry(keystore)
-	volumeRegistry := keystoreregistry.NewVolumeRegistry(keystore)
+	keystore := store_impl.NewKeystore()
+	defer func() {
+		log.Println("keystore closed with error: ", keystore.Close())
+	}()
 
-	manager := brickmanager.NewBrickManager(poolRegistry, volumeRegistry)
-	if err := manager.Start(); err != nil {
-		log.Fatal(err)
-	}
+	manager := brick_manager_impl.NewBrickManager(keystore)
+	manager.Startup()
 
 	log.Println("Brick manager started for:", manager.Hostname())
 
-	waitForShutdown()
+	waitForShutdown(manager)
 }
