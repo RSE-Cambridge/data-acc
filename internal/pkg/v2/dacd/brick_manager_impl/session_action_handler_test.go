@@ -71,19 +71,3 @@ func TestSessionActionHandler_handleCreate(t *testing.T) {
 
 	handler.handleCreate(action)
 }
-
-func TestSessionActionHandler_handleDelete(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	actions := mock_registry.NewMockSessionActions(mockCtrl)
-	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
-	handler := sessionActionHandler{actions: actions, sessionRegistry: registry}
-	action := datamodel.SessionAction{
-		ActionType: datamodel.SessionDelete,
-	}
-	// TODO: need to pass session better? who deletes allocations?
-	registry.EXPECT().DeleteSession(action.Session)
-	actions.EXPECT().CompleteSessionAction(action)
-
-	handler.handleDelete(action)
-}

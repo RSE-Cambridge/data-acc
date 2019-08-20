@@ -35,12 +35,21 @@ func (s *sessionActionHandler) ProcessSessionAction(action datamodel.SessionActi
 	case datamodel.SessionDelete:
 		// TODO... must test this better!
 		if !s.skipActions {
-			go s.handleDelete(action)
+			s.handleDelete(action)
 		}
 	case datamodel.SessionCreateFilesystem:
 		if !s.skipActions {
-			go s.handleCreate(action)
+			// TODO: really should all happen in a goroutine
+			s.handleCreate(action)
 		}
+	case datamodel.SessionCopyDataIn:
+		s.handleCopyIn(action)
+	case datamodel.SessionMount:
+		s.handleMount(action)
+	case datamodel.SessionUnmount:
+		s.handleUnmount(action)
+	case datamodel.SessionCopyDataOut:
+		s.handleCopyOut(action)
 	default:
 		log.Panicf("not yet implemented action for %+v", action)
 	}
@@ -97,8 +106,56 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 }
 
 func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
-	log.Println("delete")
-	// TODO: clearly need mutex here, etc
+	// TODO... mutex, etc?
+	s.doUnmount(action)
+	if !action.Session.Status.DeleteSkipCopyDataOut && !action.Session.Status.CopyDataOutComplete {
+		s.fsProvider.DataCopyOut(action.Session)
+	}
+	s.fsProvider.Delete(action.Session)
 	s.sessionRegistry.DeleteSession(action.Session)
+	s.actions.CompleteSessionAction(action)
+}
+
+func (s *sessionActionHandler) handleCopyIn(action datamodel.SessionAction) {
+	s.fsProvider.DataCopyIn(action.Session)
+	s.actions.CompleteSessionAction(action)
+}
+
+func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
+	if action.Session.ActualSizeBytes > 0 {
+		s.fsProvider.Mount(action.Session,
+			datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
+	}
+	for _, sessionName := range action.Session.MultiJobAttachments {
+		session, _ := s.sessionRegistry.GetSession(sessionName)
+		if session.VolumeRequest.MultiJob {
+			s.fsProvider.Mount(session,
+				datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
+		}
+	}
+	s.actions.CompleteSessionAction(action)
+}
+
+func (s *sessionActionHandler) doUnmount(action datamodel.SessionAction) {
+	if action.Session.ActualSizeBytes > 0 {
+		s.fsProvider.Unmount(action.Session,
+			datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
+	}
+	for _, sessionName := range action.Session.MultiJobAttachments {
+		session, _ := s.sessionRegistry.GetSession(sessionName)
+		if session.VolumeRequest.MultiJob {
+			s.fsProvider.Mount(session,
+				datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
+		}
+	}
+}
+func (s *sessionActionHandler) handleUnmount(action datamodel.SessionAction) {
+	s.doUnmount(action)
+	s.actions.CompleteSessionAction(action)
+}
+
+func (s *sessionActionHandler) handleCopyOut(action datamodel.SessionAction) {
+	s.fsProvider.DataCopyOut(action.Session)
+	// TODO: update session.CopyDataOutComplete, mutex, etc.
 	s.actions.CompleteSessionAction(action)
 }

@@ -93,6 +93,7 @@ func (s sessionFacade) validateSession(session datamodel.Session) error {
 	if err != nil {
 		return fmt.Errorf("invalid session, unable to find pool %s", session.VolumeRequest.PoolName)
 	}
+	// TODO: validate multi-job volumes exist
 	// TODO: check for multi-job restrictions, etc?
 	return nil
 }
@@ -203,24 +204,39 @@ func (s sessionFacade) DeleteSession(sessionName datamodel.SessionName, hurry bo
 }
 
 func (s sessionFacade) CopyDataIn(sessionName datamodel.SessionName) error {
-	// TODO: complete implementation of all actions
-	log.Println("FAKE CopyDataIn")
-	return nil
+	return s.submitJob(sessionName, datamodel.SessionCopyDataIn,
+		func() (datamodel.Session, error) {
+			return s.session.GetSession(sessionName)
+		})
 }
 
 func (s sessionFacade) Mount(sessionName datamodel.SessionName, computeNodes []string, loginNodes []string) error {
-	log.Println("FAKE Mount")
-	return nil
+	return s.submitJob(sessionName, datamodel.SessionMount,
+		func() (datamodel.Session, error) {
+			session, err := s.session.GetSession(sessionName)
+			if err != nil {
+				log.Println("Unable to find session, skipping delete:", sessionName)
+				return session, nil
+			}
+
+			// TODO: what about the login nodes? what do we want to do there?
+			session.RequestedAttachHosts = computeNodes
+			return s.session.UpdateSession(session)
+		})
 }
 
 func (s sessionFacade) Unmount(sessionName datamodel.SessionName) error {
-	log.Println("FAKE Unmount")
-	return nil
+	return s.submitJob(sessionName, datamodel.SessionUnmount,
+		func() (datamodel.Session, error) {
+			return s.session.GetSession(sessionName)
+		})
 }
 
 func (s sessionFacade) CopyDataOut(sessionName datamodel.SessionName) error {
-	log.Println("FAKE CopyDataOut")
-	return nil
+	return s.submitJob(sessionName, datamodel.SessionCopyDataOut,
+		func() (datamodel.Session, error) {
+			return s.session.GetSession(sessionName)
+		})
 }
 
 func (s sessionFacade) GetPools() ([]datamodel.PoolInfo, error) {
