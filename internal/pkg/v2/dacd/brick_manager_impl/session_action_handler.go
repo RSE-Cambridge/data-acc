@@ -2,6 +2,7 @@ package brick_manager_impl
 
 import (
 	"context"
+	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/facade"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/filesystem"
@@ -55,54 +56,66 @@ func (s *sessionActionHandler) ProcessSessionAction(action datamodel.SessionActi
 	}
 }
 
-func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
+func (s *sessionActionHandler) processWithMutex(action datamodel.SessionAction, process func() (datamodel.Session, error)) {
+
 	sessionName := action.Session.Name
 	sessionMutex, err := s.sessionRegistry.GetSessionMutex(sessionName)
 	if err != nil {
 		log.Printf("unable to get session mutex: %s due to: %s\n", sessionName, err)
 		action.Error = err
-		s.actions.CompleteSessionAction(action)
 		return
 	}
 	err = sessionMutex.Lock(context.TODO())
 	if err != nil {
 		log.Printf("unable to lock session mutex: %s due to: %s\n", sessionName, err)
 		action.Error = err
-		s.actions.CompleteSessionAction(action)
 		return
 	}
+
+	// Always complete action and drop mutex on function exit
 	defer func() {
+		if err := s.actions.CompleteSessionAction(action); err != nil {
+			log.Printf("failed to complete action %+v\n", action)
+		}
 		if err := sessionMutex.Unlock(context.TODO()); err != nil {
 			log.Println("failed to drop mutex for:", sessionName)
 		}
 	}()
-	log.Printf("starting create for %+v\n", sessionName)
 
-	// Get latest session now we have the mutex
-	session, err := s.sessionRegistry.GetSession(sessionName)
+	log.Printf("starting action %+v\n", action)
 
-	fsStatus, err := s.fsProvider.Create(action.Session)
-	session.FilesystemStatus = fsStatus
-	session.Status.FileSystemCreated = err == nil
-	session.Status.Error = err
-
-	session, err = s.sessionRegistry.UpdateSession(session)
+	session, err := process()
 	if err != nil {
-		log.Printf("Failed to update session: %+v", session)
 		action.Error = err
+		log.Printf("error during action %+v\n", action)
 	} else {
 		action.Session = session
-		action.Error = session.Status.Error
+		log.Printf("finished action %+v\n", action)
 	}
+}
 
-	if err := s.actions.CompleteSessionAction(action); err != nil {
-		log.Printf("Failed to complete action: %+v", action)
-	}
-	if action.Session.Status.Error != nil {
-		log.Println("error during create for", sessionName, err)
-	} else {
-		log.Printf("completed create for %+v\n", sessionName)
-	}
+func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
+	s.processWithMutex(action, func() (datamodel.Session, error) {
+		// Get latest session now we have the mutex
+		session, err := s.sessionRegistry.GetSession(action.Session.Name)
+		if err != nil {
+			return action.Session, fmt.Errorf("error getting session: %s", err)
+		}
+
+		fsStatus, err := s.fsProvider.Create(action.Session)
+		session.FilesystemStatus = fsStatus
+		session.Status.FileSystemCreated = err == nil
+		session.Status.Error = err
+
+		session, updateErr := s.sessionRegistry.UpdateSession(session)
+		if updateErr != nil {
+			log.Println("Failed to update session:", updateErr)
+			if err == nil {
+				err = updateErr
+			}
+		}
+		return session, err
+	})
 }
 
 func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
