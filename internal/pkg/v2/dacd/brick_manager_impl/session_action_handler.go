@@ -119,19 +119,54 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 }
 
 func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
-	// TODO... mutex, etc?
-	s.doUnmount(action)
-	if !action.Session.Status.DeleteSkipCopyDataOut && !action.Session.Status.CopyDataOutComplete {
-		s.fsProvider.DataCopyOut(action.Session)
-	}
-	s.fsProvider.Delete(action.Session)
-	s.sessionRegistry.DeleteSession(action.Session)
-	s.actions.CompleteSessionAction(action)
+	s.processWithMutex(action, func() (datamodel.Session, error) {
+		if err := s.doUnmount(action); err != nil {
+			log.Println("failed unmount during delete", action.Session.Name)
+		}
+		if !action.Session.Status.DeleteSkipCopyDataOut && !action.Session.Status.CopyDataOutComplete {
+			if err := s.fsProvider.DataCopyOut(action.Session); err != nil {
+				log.Println("failed DataCopyOut during delete", action.Session.Name)
+			}
+		}
+
+		if err := s.fsProvider.Delete(action.Session); err != nil {
+			return action.Session, err
+		}
+
+		return action.Session, s.sessionRegistry.DeleteSession(action.Session)
+	})
 }
 
 func (s *sessionActionHandler) handleCopyIn(action datamodel.SessionAction) {
-	s.fsProvider.DataCopyIn(action.Session)
-	s.actions.CompleteSessionAction(action)
+	s.processWithMutex(action, func() (datamodel.Session, error) {
+		err := s.fsProvider.DataCopyIn(action.Session)
+		if err != nil {
+			return action.Session, err
+		}
+
+		session, err := s.sessionRegistry.GetSession(action.Session.Name)
+		if err != nil {
+			session = action.Session
+		}
+		session.Status.CopyDataInComplete = true
+		return s.sessionRegistry.UpdateSession(session)
+	})
+}
+
+func (s *sessionActionHandler) handleCopyOut(action datamodel.SessionAction) {
+	s.processWithMutex(action, func() (datamodel.Session, error) {
+		err := s.fsProvider.DataCopyOut(action.Session)
+		if err != nil {
+			return action.Session, err
+		}
+
+		session, err := s.sessionRegistry.GetSession(action.Session.Name)
+		if err != nil {
+			session = action.Session
+		}
+		session.Status.CopyDataOutComplete = true
+		return s.sessionRegistry.UpdateSession(session)
+	})
 }
 
 func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
@@ -149,7 +184,8 @@ func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
 	s.actions.CompleteSessionAction(action)
 }
 
-func (s *sessionActionHandler) doUnmount(action datamodel.SessionAction) {
+func (s *sessionActionHandler) doUnmount(action datamodel.SessionAction) error {
+	var lastError error
 	if action.Session.ActualSizeBytes > 0 {
 		s.fsProvider.Unmount(action.Session,
 			datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
@@ -161,14 +197,10 @@ func (s *sessionActionHandler) doUnmount(action datamodel.SessionAction) {
 				datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
 		}
 	}
-}
-func (s *sessionActionHandler) handleUnmount(action datamodel.SessionAction) {
-	s.doUnmount(action)
-	s.actions.CompleteSessionAction(action)
+	return lastError
 }
 
-func (s *sessionActionHandler) handleCopyOut(action datamodel.SessionAction) {
-	s.fsProvider.DataCopyOut(action.Session)
-	// TODO: update session.CopyDataOutComplete, mutex, etc.
+func (s *sessionActionHandler) handleUnmount(action datamodel.SessionAction) {
+	s.doUnmount(action)
 	s.actions.CompleteSessionAction(action)
 }
