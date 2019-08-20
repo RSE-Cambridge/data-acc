@@ -36,13 +36,13 @@ func (f *fileSystemProvider) DataCopyOut(session datamodel.Session) error {
 
 }
 
-func (f *fileSystemProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSession) datamodel.AttachmentSessionStatus {
+func (f *fileSystemProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSessionStatus) error {
 	log.Println("FAKE Mount")
-	return datamodel.AttachmentSessionStatus{}
+	return nil
 
 }
 
-func (f *fileSystemProvider) Unmount(session datamodel.Session, attachments datamodel.AttachmentSession) datamodel.AttachmentSessionStatus {
+func (f *fileSystemProvider) Unmount(session datamodel.Session, attachments datamodel.AttachmentSessionStatus) error {
 	log.Println("FAKE Unmount")
-	return datamodel.AttachmentSessionStatus{}
+	return nil
 }

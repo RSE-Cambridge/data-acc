@@ -83,7 +83,7 @@ type AttachmentSessionStatus struct {
 	PrivateMount bool
 	SwapBytes    int
 
-	DetachRequested bool
+	DetachRequested bool // TODO: delete this bit?
 	Error           error
 }
 

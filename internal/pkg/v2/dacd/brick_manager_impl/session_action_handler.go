@@ -165,34 +165,81 @@ func (s *sessionActionHandler) handleCopyOut(action datamodel.SessionAction) {
 }
 
 func (s *sessionActionHandler) doAllMounts(action datamodel.SessionAction) error {
-	if action.Session.ActualSizeBytes > 0 {
-		s.fsProvider.Mount(action.Session,
-			datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
+	attachmentSession := datamodel.AttachmentSession{
+		Hosts:       action.Session.RequestedAttachHosts,
+		SessionName: action.Session.Name,
 	}
-	for _, sessionName := range action.Session.MultiJobAttachments {
-		session, _ := s.sessionRegistry.GetSession(sessionName)
-		if session.VolumeRequest.MultiJob {
-			s.fsProvider.Mount(session,
-				datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
+	if action.Session.ActualSizeBytes > 0 {
+		session, err := s.sessionRegistry.GetSession(action.Session.Name)
+		if err != nil {
+			return err
+		}
+		jobAttachmentStatus := datamodel.AttachmentSessionStatus{
+			AttachmentSession: attachmentSession,
+			GlobalMount:       session.VolumeRequest.Access == datamodel.Striped || session.VolumeRequest.Access == datamodel.PrivateAndStriped,
+			PrivateMount:      session.VolumeRequest.Access == datamodel.Private || session.VolumeRequest.Access == datamodel.PrivateAndStriped,
+			SwapBytes:         session.VolumeRequest.SwapBytes,
+		}
+		if session.CurrentAttachments == nil {
+			session.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSessionStatus{
+				session.Name: jobAttachmentStatus,
+			}
+		} else {
+			session.CurrentAttachments[session.Name] = jobAttachmentStatus
+		}
+		session, err = s.sessionRegistry.UpdateSession(session)
+		if err != nil {
+			return err
+		}
+
+		if err := s.fsProvider.Mount(action.Session, jobAttachmentStatus); err != nil {
+			return err
 		}
 	}
-	// TODO: error handling!!!
+	for _, sessionName := range action.Session.MultiJobAttachments {
+		// TODO: get lock on multiJobSession? do it in order to avoid deadlock?
+		multiJobAttachmentStatus := datamodel.AttachmentSessionStatus{
+			AttachmentSession: attachmentSession,
+			GlobalMount:       true,
+		}
+		multiJobSession, _ := s.sessionRegistry.GetSession(sessionName)
+		if multiJobSession.CurrentAttachments == nil {
+			multiJobSession.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSessionStatus{
+				attachmentSession.SessionName: multiJobAttachmentStatus,
+			}
+		} else {
+			multiJobSession.CurrentAttachments[attachmentSession.SessionName] = multiJobAttachmentStatus
+		}
+		multiJobSession, err := s.sessionRegistry.UpdateSession(multiJobSession)
+		if err != nil {
+			return err
+		}
+
+		if !multiJobSession.VolumeRequest.MultiJob {
+			log.Panicf("trying multi-job attach to non-multi job session %s", multiJobSession.Name)
+		}
+		if err := s.fsProvider.Mount(multiJobSession, multiJobAttachmentStatus); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 func (s *sessionActionHandler) doAllUnmounts(action datamodel.SessionAction) error {
 	if action.Session.ActualSizeBytes > 0 {
-		s.fsProvider.Unmount(action.Session,
-			datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
+		if err := s.fsProvider.Unmount(action.Session, action.Session.CurrentAttachments[action.Session.Name]); err != nil {
+			return err
+		}
+		// TODO: delete attachments?
 	}
 	for _, sessionName := range action.Session.MultiJobAttachments {
-		session, _ := s.sessionRegistry.GetSession(sessionName)
-		if session.VolumeRequest.MultiJob {
-			s.fsProvider.Mount(session,
-				datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
+		multiJobSession, _ := s.sessionRegistry.GetSession(sessionName)
+		attachments := multiJobSession.CurrentAttachments[action.Session.Name]
+		if err := s.fsProvider.Unmount(multiJobSession, attachments); err != nil {
+			return err
 		}
+		// TODO: delete attachments to prevent double unmount on teardown?
 	}
-	// TODO error handling!!!
 	return nil
 }
 
