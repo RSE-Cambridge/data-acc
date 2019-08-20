@@ -34,6 +34,21 @@ func (m *MockAllocationRegistry) EXPECT() *MockAllocationRegistryMockRecorder {
 	return m.recorder
 }
 
+// GetAllocationMutex mocks base method
+func (m *MockAllocationRegistry) GetAllocationMutex() (store.Mutex, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllocationMutex")
+	ret0, _ := ret[0].(store.Mutex)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllocationMutex indicates an expected call of GetAllocationMutex
+func (mr *MockAllocationRegistryMockRecorder) GetAllocationMutex() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllocationMutex", reflect.TypeOf((*MockAllocationRegistry)(nil).GetAllocationMutex))
+}
+
 // GetPool mocks base method
 func (m *MockAllocationRegistry) GetPool(name datamodel.PoolName) (datamodel.Pool, error) {
 	m.ctrl.T.Helper()
@@ -92,48 +107,4 @@ func (m *MockAllocationRegistry) GetPoolInfo(poolName datamodel.PoolName) (datam
 func (mr *MockAllocationRegistryMockRecorder) GetPoolInfo(poolName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPoolInfo", reflect.TypeOf((*MockAllocationRegistry)(nil).GetPoolInfo), poolName)
-}
-
-// GetAllocationMutex mocks base method
-func (m *MockAllocationRegistry) GetAllocationMutex() (store.Mutex, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllocationMutex")
-	ret0, _ := ret[0].(store.Mutex)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllocationMutex indicates an expected call of GetAllocationMutex
-func (mr *MockAllocationRegistryMockRecorder) GetAllocationMutex() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllocationMutex", reflect.TypeOf((*MockAllocationRegistry)(nil).GetAllocationMutex))
-}
-
-// CreateAllocations mocks base method
-func (m *MockAllocationRegistry) CreateAllocations(sessionName datamodel.SessionName, allocations []datamodel.Brick) ([]datamodel.BrickAllocation, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateAllocations", sessionName, allocations)
-	ret0, _ := ret[0].([]datamodel.BrickAllocation)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateAllocations indicates an expected call of CreateAllocations
-func (mr *MockAllocationRegistryMockRecorder) CreateAllocations(sessionName, allocations interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAllocations", reflect.TypeOf((*MockAllocationRegistry)(nil).CreateAllocations), sessionName, allocations)
-}
-
-// DeleteAllocations mocks base method
-func (m *MockAllocationRegistry) DeleteAllocations(allocations []datamodel.BrickAllocation) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteAllocations", allocations)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteAllocations indicates an expected call of DeleteAllocations
-func (mr *MockAllocationRegistryMockRecorder) DeleteAllocations(allocations interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAllocations", reflect.TypeOf((*MockAllocationRegistry)(nil).DeleteAllocations), allocations)
 }

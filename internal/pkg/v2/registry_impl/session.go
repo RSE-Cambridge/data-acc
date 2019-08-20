@@ -41,11 +41,11 @@ func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Se
 		log.Panicf("PrimaryBrickHost must be set before creating session: %s", session.Name)
 	}
 	if session.ActualSizeBytes > 0 {
-		if len(session.Allocations) == 0 {
+		if len(session.AllocatedBricks) == 0 {
 			log.Panicf("session must have allocations before being created: %s", session.Name)
 		}
 	} else {
-		if len(session.Allocations) != 0 {
+		if len(session.AllocatedBricks) != 0 {
 			log.Panicf("allocations out of sync with ActualSizeBytes: %s", session.Name)
 		}
 	}

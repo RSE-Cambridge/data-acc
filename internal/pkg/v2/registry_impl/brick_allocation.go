@@ -88,11 +88,3 @@ func (a *allocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
 func (a *allocationRegistry) GetPoolInfo(poolName datamodel.PoolName) (datamodel.PoolInfo, error) {
 	panic("implement me")
 }
-
-func (a *allocationRegistry) CreateAllocations(sessionName datamodel.SessionName, allocations []datamodel.Brick) ([]datamodel.BrickAllocation, error) {
-	panic("implement me")
-}
-
-func (a *allocationRegistry) DeleteAllocations(allocations []datamodel.BrickAllocation) error {
-	panic("implement me")
-}

@@ -96,14 +96,9 @@ func (s sessionFacade) doAllocationAndWriteSession(session datamodel.Session) (d
 			return session, fmt.Errorf("can't allocate for session: %s due to %s", session.Name, err)
 		}
 
-		allocations, err := s.allocations.CreateAllocations(session.Name, chosenBricks)
-		if err != nil {
-			return session, err
-		}
-
 		session.ActualSizeBytes = actualSizeBytes
-		session.Allocations = allocations
-		session.PrimaryBrickHost = allocations[0].Brick.BrickHostName
+		session.AllocatedBricks = chosenBricks
+		session.PrimaryBrickHost = chosenBricks[0].BrickHostName
 	} else {
 		// Pick a random alive host to be the PrimaryBrickHost anyway
 		pools, err := s.allocations.GetAllPoolInfos()
@@ -121,16 +116,7 @@ func (s sessionFacade) doAllocationAndWriteSession(session datamodel.Session) (d
 
 	// Store initial version of session
 	// returned session will have updated revision info
-	session, err := s.session.CreateSession(session)
-	if err != nil {
-		if session.Allocations != nil {
-			deleteErr := s.allocations.DeleteAllocations(session.Allocations)
-			if deleteErr != nil {
-				log.Println("Failed to clean up allocations due to:", deleteErr)
-			}
-		}
-	}
-	return session, err
+	return s.session.CreateSession(session)
 }
 
 func (s sessionFacade) getBricks(poolName datamodel.PoolName, bytes int) (int, []datamodel.Brick, error) {

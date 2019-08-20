@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-var exampleSessionString = []byte(`{"Name":"foo","Revision":0,"Owner":0,"Group":0,"CreatedAt":0,"VolumeRequest":{"MultiJob":false,"Caller":"","TotalCapacityBytes":0,"PoolName":"","Access":0,"Type":0,"SwapBytes":0},"Status":{"Error":null,"FileSystemCreated":false,"CopyDataInComplete":false,"CopyDataOutComplete":false,"DeleteRequested":false,"DeleteSkipCopyDataOut":false},"StageInRequests":null,"StageOutRequests":null,"MultiJobAttachments":null,"Paths":null,"ActualSizeBytes":0,"Allocations":null,"PrimaryBrickHost":"host1","RequestedAttachHosts":null,"FilesystemStatus":{"Error":null,"InternalName":"","InternalData":""},"CurrentAttachments":null}`)
+var exampleSessionString = []byte(`{"Name":"foo","Revision":0,"Owner":0,"Group":0,"CreatedAt":0,"VolumeRequest":{"MultiJob":false,"Caller":"","TotalCapacityBytes":0,"PoolName":"","Access":0,"Type":0,"SwapBytes":0},"Status":{"Error":null,"FileSystemCreated":false,"CopyDataInComplete":false,"CopyDataOutComplete":false,"DeleteRequested":false,"DeleteSkipCopyDataOut":false},"StageInRequests":null,"StageOutRequests":null,"MultiJobAttachments":null,"Paths":null,"ActualSizeBytes":0,"AllocatedBricks":null,"PrimaryBrickHost":"host1","RequestedAttachHosts":null,"FilesystemStatus":{"Error":null,"InternalName":"","InternalData":""},"CurrentAttachments":null}`)
 var exampleSession = datamodel.Session{Name: "foo", PrimaryBrickHost: "host1"}
 
 func TestSessionRegistry_GetSessionMutex(t *testing.T) {
@@ -50,7 +50,7 @@ func TestSessionRegistry_CreateSession(t *testing.T) {
 	assert.PanicsWithValue(t, "allocations out of sync with ActualSizeBytes: foo", func() {
 		registry.CreateSession(datamodel.Session{
 			Name:             "foo",
-			Allocations:      []datamodel.BrickAllocation{{}},
+			AllocatedBricks:  []datamodel.Brick{{}},
 			PrimaryBrickHost: "host1",
 		})
 	})

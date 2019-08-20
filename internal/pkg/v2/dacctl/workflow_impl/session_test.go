@@ -111,8 +111,6 @@ func TestSessionFacade_CreateSession_WithBricks_CreateSessionError(t *testing.T)
 		},
 		AvailableBricks: brickList,
 	}, nil)
-	allocationList := []datamodel.BrickAllocation{{Brick: brickList[0]}}
-	allocations.EXPECT().CreateAllocations(initialSession.Name, brickList).Return(allocationList, nil)
 	updatedSession := datamodel.Session{
 		Name: "foo",
 		VolumeRequest: datamodel.VolumeRequest{
@@ -120,8 +118,8 @@ func TestSessionFacade_CreateSession_WithBricks_CreateSessionError(t *testing.T)
 			TotalCapacityBytes: 1024,
 		},
 		ActualSizeBytes:  1024,
-		Allocations:      allocationList,
-		PrimaryBrickHost: allocationList[0].Brick.BrickHostName,
+		AllocatedBricks:  brickList,
+		PrimaryBrickHost: brickList[0].BrickHostName,
 	}
 	returnedSession := datamodel.Session{
 		Name:            "foo",

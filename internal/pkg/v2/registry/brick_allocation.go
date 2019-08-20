@@ -22,14 +22,4 @@ type AllocationRegistry interface {
 	// Get brick availability for one pool
 	// bricks are only available if corresponding host currently alive
 	GetPoolInfo(poolName datamodel.PoolName) (datamodel.PoolInfo, error)
-
-	// Allocations written (by the client), while holding above mutex
-	//
-	// Error if any bricks already have an allocation
-	CreateAllocations(sessionName datamodel.SessionName, allocations []datamodel.Brick) ([]datamodel.BrickAllocation, error)
-
-	// Allocations deleted by server when bricks no being used
-	//
-	// Does not error if given allocation has already been dropped
-	DeleteAllocations(allocations []datamodel.BrickAllocation) error
 }

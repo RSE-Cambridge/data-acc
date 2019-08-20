@@ -47,7 +47,7 @@ type Session struct {
 
 	// List of the bricks allocated to implement the JobVolume
 	// One is the primary brick that should be watching for all actions
-	Allocations []BrickAllocation
+	AllocatedBricks []Brick
 
 	// Where session requests should be sent
 	PrimaryBrickHost BrickHostName
