@@ -21,24 +21,6 @@ func TestSessionActionHandler_ProcessSessionAction_Unknown(t *testing.T) {
 		func() { handler.ProcessSessionAction(action) })
 }
 
-func TestSessionActionHandler_ProcessSessionAction_Create(t *testing.T) {
-	action := datamodel.SessionAction{
-		ActionType: datamodel.SessionCreateFilesystem,
-	}
-	handler := sessionActionHandler{skipActions: true}
-
-	handler.ProcessSessionAction(action)
-}
-
-func TestSessionActionHandler_ProcessSessionAction_Delete(t *testing.T) {
-	action := datamodel.SessionAction{
-		ActionType: datamodel.SessionDelete,
-	}
-	handler := sessionActionHandler{skipActions: true}
-
-	handler.ProcessSessionAction(action)
-}
-
 func TestSessionActionHandler_handleCreate(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()

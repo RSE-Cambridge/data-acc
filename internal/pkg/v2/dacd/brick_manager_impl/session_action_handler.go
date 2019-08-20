@@ -31,26 +31,19 @@ type sessionActionHandler struct {
 }
 
 func (s *sessionActionHandler) ProcessSessionAction(action datamodel.SessionAction) {
-	log.Printf("Started to process: %+v\n", action)
 	switch action.ActionType {
 	case datamodel.SessionDelete:
-		// TODO... must test this better!
-		if !s.skipActions {
-			s.handleDelete(action)
-		}
+		go s.handleDelete(action)
 	case datamodel.SessionCreateFilesystem:
-		if !s.skipActions {
-			// TODO: really should all happen in a goroutine
-			s.handleCreate(action)
-		}
+		go s.handleCreate(action)
 	case datamodel.SessionCopyDataIn:
-		s.handleCopyIn(action)
+		go s.handleCopyIn(action)
 	case datamodel.SessionMount:
-		s.handleMount(action)
+		go s.handleMount(action)
 	case datamodel.SessionUnmount:
-		s.handleUnmount(action)
+		go s.handleUnmount(action)
 	case datamodel.SessionCopyDataOut:
-		s.handleCopyOut(action)
+		go s.handleCopyOut(action)
 	default:
 		log.Panicf("not yet implemented action for %+v", action)
 	}
@@ -120,8 +113,10 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 
 func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
-		if err := s.doUnmount(action); err != nil {
-			log.Println("failed unmount during delete", action.Session.Name)
+		if !action.Session.Status.UnmountComplete {
+			if err := s.doUnmount(action); err != nil {
+				log.Println("failed unmount during delete", action.Session.Name)
+			}
 		}
 		if !action.Session.Status.DeleteSkipCopyDataOut && !action.Session.Status.CopyDataOutComplete {
 			if err := s.fsProvider.DataCopyOut(action.Session); err != nil {
@@ -169,7 +164,7 @@ func (s *sessionActionHandler) handleCopyOut(action datamodel.SessionAction) {
 	})
 }
 
-func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
+func (s *sessionActionHandler) doMount(action datamodel.SessionAction) error {
 	if action.Session.ActualSizeBytes > 0 {
 		s.fsProvider.Mount(action.Session,
 			datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
@@ -181,11 +176,11 @@ func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
 				datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
 		}
 	}
-	s.actions.CompleteSessionAction(action)
+	// TODO: error handling!!!
+	return nil
 }
 
 func (s *sessionActionHandler) doUnmount(action datamodel.SessionAction) error {
-	var lastError error
 	if action.Session.ActualSizeBytes > 0 {
 		s.fsProvider.Unmount(action.Session,
 			datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
@@ -197,10 +192,38 @@ func (s *sessionActionHandler) doUnmount(action datamodel.SessionAction) error {
 				datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
 		}
 	}
-	return lastError
+	// TODO error handling!!!
+	return nil
+}
+
+func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
+	s.processWithMutex(action, func() (datamodel.Session, error) {
+		err := s.doMount(action)
+		if err != nil {
+			return action.Session, err
+		}
+
+		session, err := s.sessionRegistry.GetSession(action.Session.Name)
+		if err != nil {
+			session = action.Session
+		}
+		session.Status.MountComplete = true
+		return s.sessionRegistry.UpdateSession(session)
+	})
 }
 
 func (s *sessionActionHandler) handleUnmount(action datamodel.SessionAction) {
-	s.doUnmount(action)
-	s.actions.CompleteSessionAction(action)
+	s.processWithMutex(action, func() (datamodel.Session, error) {
+		err := s.doUnmount(action)
+		if err != nil {
+			return action.Session, err
+		}
+
+		session, err := s.sessionRegistry.GetSession(action.Session.Name)
+		if err != nil {
+			session = action.Session
+		}
+		session.Status.UnmountComplete = true
+		return s.sessionRegistry.UpdateSession(session)
+	})
 }

@@ -105,6 +105,10 @@ type SessionStatus struct {
 
 	// Records if we should skip copy data out on delete
 	DeleteSkipCopyDataOut bool
+
+	// Mount status
+	UnmountComplete bool
+	MountComplete   bool
 }
 
 type VolumeRequest struct {

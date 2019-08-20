@@ -1,6 +1,7 @@
 package registry_impl
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_store"
@@ -10,8 +11,15 @@ import (
 	"testing"
 )
 
-var exampleSessionString = []byte(`{"Name":"foo","Revision":0,"Owner":0,"Group":0,"CreatedAt":0,"VolumeRequest":{"MultiJob":false,"Caller":"","TotalCapacityBytes":0,"PoolName":"","Access":0,"Type":0,"SwapBytes":0},"Status":{"Error":null,"FileSystemCreated":false,"CopyDataInComplete":false,"CopyDataOutComplete":false,"DeleteRequested":false,"DeleteSkipCopyDataOut":false},"StageInRequests":null,"StageOutRequests":null,"MultiJobAttachments":null,"Paths":null,"ActualSizeBytes":0,"AllocatedBricks":null,"PrimaryBrickHost":"host1","RequestedAttachHosts":null,"FilesystemStatus":{"Error":null,"InternalName":"","InternalData":""},"CurrentAttachments":null}`)
+var exampleSessionString = []byte(`{"Name":"foo","Revision":0,"Owner":0,"Group":0,"CreatedAt":0,"VolumeRequest":{"MultiJob":false,"Caller":"","TotalCapacityBytes":0,"PoolName":"","Access":0,"Type":0,"SwapBytes":0},"Status":{"Error":null,"FileSystemCreated":false,"CopyDataInComplete":false,"CopyDataOutComplete":false,"DeleteRequested":false,"DeleteSkipCopyDataOut":false,"UnmountComplete":false,"MountComplete":false},"StageInRequests":null,"StageOutRequests":null,"MultiJobAttachments":null,"Paths":null,"ActualSizeBytes":0,"AllocatedBricks":null,"PrimaryBrickHost":"host1","RequestedAttachHosts":null,"FilesystemStatus":{"Error":null,"InternalName":"","InternalData":""},"CurrentAttachments":null}`)
 var exampleSession = datamodel.Session{Name: "foo", PrimaryBrickHost: "host1"}
+
+func TestExampleString(t *testing.T) {
+	exampleStr, err := json.Marshal(exampleSession)
+	assert.Nil(t, err)
+	// mostly here to make it easy to update the example string
+	assert.Equal(t, string(exampleSessionString), string(exampleStr))
+}
 
 func TestSessionRegistry_GetSessionMutex(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
