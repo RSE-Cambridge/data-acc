@@ -3,13 +3,14 @@ package parsers
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math"
 	"strconv"
 	"strings"
 )
 
 // TODO: missing a few?
-var sizeSuffixMultiplier = map[string]int{
+var sizeSuffixMultiplier = map[string]uint{
 	"TiB": 1099511627776,
 	"TB":  1000000000000,
 	"GiB": 1073741824,
@@ -18,6 +19,16 @@ var sizeSuffixMultiplier = map[string]int{
 	"MB":  1000000,
 }
 
+// TODO: test me!!
+func GetBytes(value uint, unit string) uint {
+	multiplier, ok := sizeSuffixMultiplier[unit]
+	if !ok {
+		log.Panicf("unrecognised unit")
+	}
+	return value * multiplier
+}
+
+// TODO: why not uint?
 func ParseSize(raw string) (int, error) {
 	intVal, err := strconv.Atoi(raw)
 	if err == nil {

@@ -25,7 +25,6 @@ const brickHostPrefix = "/BrickHostStore/"
 const keepAlivePrefix = "/BrickHostAlive/"
 
 func (b *brickHostRegistry) UpdateBrickHost(brickHostInfo datamodel.BrickHost) error {
-
 	// find out granularity for each reported pool
 	if len(brickHostInfo.Bricks) == 0 {
 		log.Panicf("brick host must have some bricks: %s", brickHostInfo.Name)
@@ -50,7 +49,7 @@ func (b *brickHostRegistry) UpdateBrickHost(brickHostInfo datamodel.BrickHost) e
 
 	// Check existing pools match what this brick host is reporting
 	for poolName, granularityGiB := range poolGranularityGiBMap {
-		_, err := b.allocation.EnsurePoolCreated(poolName, granularityGiB)
+		_, err := b.allocation.EnsurePoolCreated(poolName, parsers.GetBytes(granularityGiB, "GiB"))
 		if err != nil {
 			return fmt.Errorf("unable to create pool due to: %s", err)
 		}

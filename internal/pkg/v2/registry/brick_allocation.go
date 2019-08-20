@@ -11,7 +11,7 @@ type AllocationRegistry interface {
 
 	// Creates the pool if it doesn't exist
 	// error if the granularity doesn't match and existing pool
-	EnsurePoolCreated(poolName datamodel.PoolName, granularityGiB uint) (datamodel.Pool, error)
+	EnsurePoolCreated(poolName datamodel.PoolName, granularityBytes uint) (datamodel.Pool, error)
 
 	// Get brick availability by pool
 	GetAllPoolInfos() ([]datamodel.PoolInfo, error)

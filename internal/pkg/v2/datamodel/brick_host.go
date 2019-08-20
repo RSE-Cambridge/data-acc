@@ -32,6 +32,7 @@ type Brick struct {
 	// It must only contain the characters A-Za-z0-9
 	PoolName PoolName
 
+	// TODO: move this to bytes, and make bytes a special type?
 	// Size of the brick, defines the pool granularity
 	CapacityGiB uint
 }

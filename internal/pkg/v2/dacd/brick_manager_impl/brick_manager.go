@@ -31,6 +31,8 @@ func (bm *brickManager) Hostname() string {
 }
 
 func (bm *brickManager) Startup(drainSessions bool) error {
+	// TODO: should we get the allocation mutex until we are started the keep alive?
+
 	err := bm.brickRegistry.UpdateBrickHost(getBrickHost(bm.config))
 	if err != nil {
 		return err
