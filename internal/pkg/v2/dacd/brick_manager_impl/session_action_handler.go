@@ -114,11 +114,11 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
 		if !action.Session.Status.UnmountComplete {
-			if err := s.doUnmount(action); err != nil {
+			if err := s.doAllUnmounts(action); err != nil {
 				log.Println("failed unmount during delete", action.Session.Name)
 			}
 		}
-		if !action.Session.Status.DeleteSkipCopyDataOut && !action.Session.Status.CopyDataOutComplete {
+		if !action.Session.Status.CopyDataOutComplete && !action.Session.Status.DeleteSkipCopyDataOut {
 			if err := s.fsProvider.DataCopyOut(action.Session); err != nil {
 				log.Println("failed DataCopyOut during delete", action.Session.Name)
 			}
@@ -164,7 +164,7 @@ func (s *sessionActionHandler) handleCopyOut(action datamodel.SessionAction) {
 	})
 }
 
-func (s *sessionActionHandler) doMount(action datamodel.SessionAction) error {
+func (s *sessionActionHandler) doAllMounts(action datamodel.SessionAction) error {
 	if action.Session.ActualSizeBytes > 0 {
 		s.fsProvider.Mount(action.Session,
 			datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
@@ -180,7 +180,7 @@ func (s *sessionActionHandler) doMount(action datamodel.SessionAction) error {
 	return nil
 }
 
-func (s *sessionActionHandler) doUnmount(action datamodel.SessionAction) error {
+func (s *sessionActionHandler) doAllUnmounts(action datamodel.SessionAction) error {
 	if action.Session.ActualSizeBytes > 0 {
 		s.fsProvider.Unmount(action.Session,
 			datamodel.AttachmentSession{Hosts: action.Session.RequestedAttachHosts})
@@ -198,8 +198,11 @@ func (s *sessionActionHandler) doUnmount(action datamodel.SessionAction) error {
 
 func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
-		err := s.doMount(action)
+		err := s.doAllMounts(action)
 		if err != nil {
+			if err := s.doAllUnmounts(action); err != nil {
+				log.Println("error while rolling back possible partial mount", action.Session.Name, err)
+			}
 			return action.Session, err
 		}
 
@@ -214,7 +217,7 @@ func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
 
 func (s *sessionActionHandler) handleUnmount(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
-		err := s.doUnmount(action)
+		err := s.doAllUnmounts(action)
 		if err != nil {
 			return action.Session, err
 		}
