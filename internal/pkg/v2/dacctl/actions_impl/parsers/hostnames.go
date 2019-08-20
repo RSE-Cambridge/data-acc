@@ -6,7 +6,8 @@ import (
 	"regexp"
 )
 
-var nameRegex = regexp.MustCompile("^[a-zA-Z0-9.]+$")
+// TODO: allowed "-" so uuid passes validation
+var nameRegex = regexp.MustCompile("^[a-zA-Z0-9.-]+$")
 
 func IsValidName(name string) bool {
 	return nameRegex.Match([]byte(name))

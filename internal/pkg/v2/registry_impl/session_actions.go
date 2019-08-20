@@ -50,7 +50,7 @@ func getSessionActionResponseHostPrefix(brickHost datamodel.BrickHostName) strin
 func getSessionActionResponseKey(action datamodel.SessionAction) string {
 	hostPrefix := getSessionActionResponseHostPrefix(action.Session.PrimaryBrickHost)
 	if !parsers.IsValidName(action.Uuid) {
-		log.Panicf("invalid session action uuid")
+		log.Panicf("invalid session action uuid %s", action.Uuid)
 	}
 	return fmt.Sprintf("%s%s", hostPrefix, action.Uuid)
 }
@@ -119,6 +119,7 @@ func (s *sessionActions) SendSessionAction(
 			log.Printf("completed waiting for action response %+v\n", sessionAction)
 			return
 		}
+		// TODO: don't we need to stop the watch above?
 	}()
 	return responseChan, nil
 }
