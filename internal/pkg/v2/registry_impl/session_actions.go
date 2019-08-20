@@ -13,7 +13,6 @@ import (
 )
 
 func NewSessionActionsRegistry(store store.Keystore) registry.SessionActions {
-	// TODO: create brickHostRegistry
 	return &sessionActions{store, NewBrickHostRegistry(store)}
 }
 

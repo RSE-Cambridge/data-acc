@@ -3,6 +3,7 @@ package filesystem_impl
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/filesystem"
+	"log"
 )
 
 func NewFileSystemProvider(ansible filesystem.Ansible) filesystem.Provider {
@@ -14,11 +15,13 @@ type fileSystemProvider struct {
 }
 
 func (f *fileSystemProvider) Create(session datamodel.Session) (datamodel.FilesystemStatus, error) {
-	panic("implement me")
+	log.Println("FAKE Create")
+	return datamodel.FilesystemStatus{}, nil
 }
 
 func (f *fileSystemProvider) Delete(session datamodel.Session) error {
-	panic("implement me")
+	log.Println("FAKE Delete")
+	return nil
 }
 
 func (f *fileSystemProvider) DataCopyIn(session datamodel.Session) error {

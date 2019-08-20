@@ -6,17 +6,17 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/facade"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry_impl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
 	"log"
 )
 
 func NewBrickManager(keystore store.Keystore) dacd.BrickManager {
-	// TODO: call concrete options
 	return &brickManager{
 		config:               config.GetBrickManagerConfig(config.DefaultEnv),
-		brickRegistry:        nil,
-		sessionActions:       nil,
-		sessionActionHandler: nil,
+		brickRegistry:        registry_impl.NewBrickHostRegistry(keystore),
+		sessionActions:       registry_impl.NewSessionActionsRegistry(keystore),
+		sessionActionHandler: NewSessionActionHandler(keystore),
 	}
 }
 

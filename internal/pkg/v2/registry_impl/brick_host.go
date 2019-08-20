@@ -11,14 +11,12 @@ import (
 	"log"
 )
 
-func NewBrickHostRegistry(store store.Keystore) registry.BrickHostRegistry {
-	// TODO: create AllocationRegistry
-	return &brickHostRegistry{store, nil}
+func NewBrickHostRegistry(keystore store.Keystore) registry.BrickHostRegistry {
+	return &brickHostRegistry{keystore}
 }
 
 type brickHostRegistry struct {
-	store      store.Keystore
-	allocation registry.AllocationRegistry
+	store store.Keystore
 }
 
 const brickHostPrefix = "/BrickHostStore/"
@@ -47,9 +45,12 @@ func (b *brickHostRegistry) UpdateBrickHost(brickHostInfo datamodel.BrickHost) e
 		}
 	}
 
+	// TODO: odd dependencies here!!
+	allocationRegistry := NewAllocationRegistry(b.store)
+
 	// Check existing pools match what this brick host is reporting
 	for poolName, granularityGiB := range poolGranularityGiBMap {
-		_, err := b.allocation.EnsurePoolCreated(poolName, parsers.GetBytes(granularityGiB, "GiB"))
+		_, err := allocationRegistry.EnsurePoolCreated(poolName, parsers.GetBytes(granularityGiB, "GiB"))
 		if err != nil {
 			return fmt.Errorf("unable to create pool due to: %s", err)
 		}

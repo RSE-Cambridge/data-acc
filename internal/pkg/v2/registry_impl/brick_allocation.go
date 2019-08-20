@@ -10,9 +10,10 @@ import (
 	"log"
 )
 
-func NewAllocationRegistry(store store.Keystore) registry.AllocationRegistry {
-	// TODO: create brickHostRegistry
-	return &allocationRegistry{store, nil, nil}
+func NewAllocationRegistry(keystore store.Keystore) registry.AllocationRegistry {
+	return &allocationRegistry{
+		keystore, NewBrickHostRegistry(keystore), NewSessionRegistry(keystore),
+	}
 }
 
 type allocationRegistry struct {

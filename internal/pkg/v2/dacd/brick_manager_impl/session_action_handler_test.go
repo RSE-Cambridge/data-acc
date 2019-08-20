@@ -28,8 +28,6 @@ func TestSessionActionHandler_ProcessSessionAction_Create(t *testing.T) {
 	handler := sessionActionHandler{skipActions: true}
 
 	handler.ProcessSessionAction(action)
-
-	assert.Equal(t, datamodel.SessionCreateFilesystem, handler.actionCalled)
 }
 
 func TestSessionActionHandler_ProcessSessionAction_Delete(t *testing.T) {
@@ -39,8 +37,6 @@ func TestSessionActionHandler_ProcessSessionAction_Delete(t *testing.T) {
 	handler := sessionActionHandler{skipActions: true}
 
 	handler.ProcessSessionAction(action)
-
-	assert.Equal(t, datamodel.SessionDelete, handler.actionCalled)
 }
 
 func TestSessionActionHandler_handleCreate(t *testing.T) {
@@ -50,7 +46,7 @@ func TestSessionActionHandler_handleCreate(t *testing.T) {
 	actions := mock_registry.NewMockSessionActions(mockCtrl)
 	fsProvider := mock_filesystem.NewMockProvider(mockCtrl)
 	handler := sessionActionHandler{
-		registry: registry, actions: actions, fsProvider: fsProvider,
+		sessionRegistry: registry, actions: actions, fsProvider: fsProvider,
 	}
 	action := datamodel.SessionAction{
 		ActionType: datamodel.SessionCreateFilesystem,
@@ -81,7 +77,7 @@ func TestSessionActionHandler_handleDelete(t *testing.T) {
 	defer mockCtrl.Finish()
 	actions := mock_registry.NewMockSessionActions(mockCtrl)
 	registry := mock_registry.NewMockSessionRegistry(mockCtrl)
-	handler := sessionActionHandler{actions: actions, registry: registry}
+	handler := sessionActionHandler{actions: actions, sessionRegistry: registry}
 	action := datamodel.SessionAction{
 		ActionType: datamodel.SessionDelete,
 	}
