@@ -93,11 +93,12 @@ func (mr *MockKeystoreMockRecorder) Delete(key, modRevision interface{}) *gomock
 }
 
 // DeleteAllKeysWithPrefix mocks base method
-func (m *MockKeystore) DeleteAllKeysWithPrefix(keyPrefix string) error {
+func (m *MockKeystore) DeleteAllKeysWithPrefix(keyPrefix string) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteAllKeysWithPrefix", keyPrefix)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // DeleteAllKeysWithPrefix indicates an expected call of DeleteAllKeysWithPrefix

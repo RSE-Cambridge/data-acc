@@ -32,7 +32,7 @@ type Keystore interface {
 	Delete(key string, modRevision int64) error
 
 	// Removes all keys with given prefix
-	DeleteAllKeysWithPrefix(keyPrefix string) error
+	DeleteAllKeysWithPrefix(keyPrefix string) (int64, error)
 
 	// Get all key values for a given prefix.
 	GetAll(keyPrefix string) ([]KeyValueVersion, error)
