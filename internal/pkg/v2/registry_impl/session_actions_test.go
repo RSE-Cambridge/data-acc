@@ -19,7 +19,7 @@ func TestSessionActions_SendSessionAction(t *testing.T) {
 	brickHost := mock_registry.NewMockBrickHostRegistry(mockCtrl)
 	keystore := mock_store.NewMockKeystore(mockCtrl)
 	actions := sessionActions{brickHostRegistry: brickHost, store: keystore}
-	session := datamodel.Session{Name:"foo", PrimaryBrickHost:"host1"}
+	session := datamodel.Session{Name: "foo", PrimaryBrickHost: "host1"}
 	brickHost.EXPECT().IsBrickHostAlive(session.PrimaryBrickHost).Return(true, nil)
 	keystore.EXPECT().Watch(context.TODO(), gomock.Any(), false).Return(nil)
 	fakeErr := errors.New("fake")
