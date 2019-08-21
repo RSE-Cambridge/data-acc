@@ -8,10 +8,10 @@ import (
 
 func Test_GenerateDataCopy(t *testing.T) {
 	session := datamodel.Session{
-		Name:  "asdf",
-		Owner: 1001,
-		Group: 1002,
-		FilesystemStatus: datamodel.FilesystemStatus{InternalName:"fsuuid"},
+		Name:             "asdf",
+		Owner:            1001,
+		Group:            1002,
+		FilesystemStatus: datamodel.FilesystemStatus{InternalName: "fsuuid"},
 	}
 	request := datamodel.DataCopyRequest{}
 

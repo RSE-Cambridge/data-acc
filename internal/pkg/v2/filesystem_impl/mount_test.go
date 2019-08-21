@@ -125,55 +125,44 @@ func Test_Mount(t *testing.T) {
 	log.Println(volume)
 
 	//err := mount(Lustre, volume, bricks, attachments)
-	sessionName := datamodel.SessionName("asdf")
-	internalName := "uuidasdf"
+	sessionName := datamodel.SessionName("job1")
+	internalName := "fsuuid"
 	primaryBrickHost := datamodel.BrickHostName("host1")
 	owner := uint(1001)
 	group := uint(1002)
 	attachment := datamodel.AttachmentSessionStatus{
 		AttachmentSession: datamodel.AttachmentSession{
-			SessionName: "job1",
+			SessionName: "job2", // changed to prove this is not used
 			Hosts:       []string{"client1", "client2"},
 		},
-		GlobalMount: true,
+		GlobalMount:  true,
 		PrivateMount: true,
-		SwapBytes: 1024 * 1024, // 1 MiB
+		SwapBytes:    1024 * 1024, // 1 MiB
 	}
 	err := mount(Lustre, sessionName, false,
 		internalName, primaryBrickHost, attachment,
 		owner, group)
 	assert.Nil(t, err)
-	assert.Equal(t, 53, fake.calls)
+	assert.Equal(t, 20, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
 	assert.Equal(t, "mkdir -p /dac/job1_job", fake.cmdStrs[0])
 	assert.Equal(t, "grep /dac/job1_job /etc/mtab", fake.cmdStrs[1])
-	assert.Equal(t, "mount -t lustre -o flock,nodev,nosuid host1:/ /dac/job1_job", fake.cmdStrs[2])
+	assert.Equal(t, "mount -t lustre -o flock,nodev,nosuid host1:/fsuuid /dac/job1_job", fake.cmdStrs[2])
 
-	assert.Equal(t, "mkdir -p /dac/job1_job/swap", fake.cmdStrs[3])
-	assert.Equal(t, "chown 0:0 /dac/job1_job/swap", fake.cmdStrs[4])
-	assert.Equal(t, "chmod 770 /dac/job1_job/swap", fake.cmdStrs[5])
-	assert.Equal(t, "dd if=/dev/zero of=/dac/job1_job/swap/client1 bs=1024 count=1024", fake.cmdStrs[6])
-	assert.Equal(t, "chmod 0600 /dac/job1_job/swap/client1", fake.cmdStrs[7])
-	assert.Equal(t, "losetup /dev/loop42 /dac/job1_job/swap/client1", fake.cmdStrs[8])
-	assert.Equal(t, "mkswap /dev/loop42", fake.cmdStrs[9])
-	assert.Equal(t, "swapon /dev/loop42", fake.cmdStrs[10])
-	assert.Equal(t, "mkdir -p /dac/job1_job/private/client1", fake.cmdStrs[11])
-	assert.Equal(t, "chown 1001:1001 /dac/job1_job/private/client1", fake.cmdStrs[12])
-	assert.Equal(t, "chmod 770 /dac/job1_job/private/client1", fake.cmdStrs[13])
-	assert.Equal(t, "ln -s /dac/job1_job/private/client1 /dac/job1_job_private", fake.cmdStrs[14])
+	assert.Equal(t, "mkdir -p /dac/job1_job/private/client1", fake.cmdStrs[3])
+	assert.Equal(t, "chown 1001:1002 /dac/job1_job/private/client1", fake.cmdStrs[4])
+	assert.Equal(t, "chmod 770 /dac/job1_job/private/client1", fake.cmdStrs[5])
+	assert.Equal(t, "ln -s /dac/job1_job/private/client1 /dac/job1_job_private", fake.cmdStrs[6])
 
-	assert.Equal(t, "mkdir -p /dac/job1_job/global", fake.cmdStrs[15])
-	assert.Equal(t, "chown 1001:1001 /dac/job1_job/global", fake.cmdStrs[16])
-	assert.Equal(t, "chmod 770 /dac/job1_job/global", fake.cmdStrs[17])
+	assert.Equal(t, "mkdir -p /dac/job1_job/global", fake.cmdStrs[7])
+	assert.Equal(t, "chown 1001:1002 /dac/job1_job/global", fake.cmdStrs[8])
+	assert.Equal(t, "chmod 770 /dac/job1_job/global", fake.cmdStrs[9])
 
-	assert.Equal(t, "client2", fake.hostnames[18])
-	assert.Equal(t, "mkdir -p /dac/job1_job", fake.cmdStrs[18])
-
-	assert.Equal(t, "client2", fake.hostnames[36])
-	assert.Equal(t, "mkdir -p /dac/job2_job", fake.cmdStrs[36])
-	assert.Equal(t, "client2", fake.hostnames[52])
-	assert.Equal(t, "chmod 770 /dac/job2_job/global", fake.cmdStrs[52])
+	assert.Equal(t, "client2", fake.hostnames[10])
+	assert.Equal(t, "mkdir -p /dac/job1_job", fake.cmdStrs[10])
+	assert.Equal(t, "client2", fake.hostnames[19])
+	assert.Equal(t, "chmod 770 /dac/job1_job/global", fake.cmdStrs[19])
 }
 
 func Test_Umount(t *testing.T) {
@@ -205,37 +194,31 @@ func Test_Umount(t *testing.T) {
 	log.Println(bricks)
 	log.Println(volume)
 
-	sessionName := datamodel.SessionName("asdf")
+	sessionName := datamodel.SessionName("job1")
 	internalName := "uuidasdf"
 	primaryBrickHost := datamodel.BrickHostName("host1")
 	attachment := datamodel.AttachmentSessionStatus{
 		AttachmentSession: datamodel.AttachmentSession{
-			SessionName: "job1",
+			SessionName: "job2",
 			Hosts:       []string{"client1", "client2"},
 		},
-		GlobalMount: true,
+		GlobalMount:  true,
 		PrivateMount: true,
-		SwapBytes: 1024 * 1024, // 1 MiB
+		SwapBytes:    1024 * 1024, // 1 MiB
 	}
 	err := unmount(Lustre, sessionName, false,
 		internalName, primaryBrickHost, attachment)
 	assert.Nil(t, err)
-	assert.Equal(t, 20, fake.calls)
+	assert.Equal(t, 6, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
-	assert.Equal(t, "swapoff /dev/loop42", fake.cmdStrs[0])
-	assert.Equal(t, "losetup -d /dev/loop42", fake.cmdStrs[1])
-	assert.Equal(t, "rm -rf /dac/job4_job/swap/client1", fake.cmdStrs[2])
-	assert.Equal(t, "rm -rf /dac/job4_job_private", fake.cmdStrs[3])
-	assert.Equal(t, "grep /dac/job4_job /etc/mtab", fake.cmdStrs[4])
-	assert.Equal(t, "umount /dac/job4_job", fake.cmdStrs[5])
-	assert.Equal(t, "rm -rf /dac/job4_job", fake.cmdStrs[6])
+	assert.Equal(t, "rm -rf /dac/job1_job_private", fake.cmdStrs[1])
+	assert.Equal(t, "grep /dac/job1_job /etc/mtab", fake.cmdStrs[2])
+	assert.Equal(t, "umount /dac/job1_job", fake.cmdStrs[3])
+	assert.Equal(t, "rm -rf /dac/job1_job", fake.cmdStrs[4])
 
-	assert.Equal(t, "client2", fake.hostnames[7])
-	assert.Equal(t, "swapoff /dev/loop42", fake.cmdStrs[7])
-
-	assert.Equal(t, "client2", fake.hostnames[19])
-	assert.Equal(t, "rm -rf /dac/job1_job", fake.cmdStrs[19])
+	assert.Equal(t, "client2", fake.hostnames[5])
+	assert.Equal(t, "rm -rf /dac/job1_job", fake.cmdStrs[5])
 }
 
 func Test_Umount_multi(t *testing.T) {
@@ -271,9 +254,9 @@ func Test_Umount_multi(t *testing.T) {
 			SessionName: "job1",
 			Hosts:       []string{"client1", "client2"},
 		},
-		GlobalMount: true,
+		GlobalMount:  true,
 		PrivateMount: false,
-		SwapBytes: 0,
+		SwapBytes:    0,
 	}
 	err := unmount(Lustre, sessionName, true,
 		internalName, primaryBrickHost, attachment)
@@ -323,9 +306,9 @@ func Test_Mount_multi(t *testing.T) {
 			SessionName: "job1",
 			Hosts:       []string{"client1", "client2"},
 		},
-		GlobalMount: true,
+		GlobalMount:  true,
 		PrivateMount: false,
-		SwapBytes: 0,
+		SwapBytes:    0,
 	}
 	err := mount(Lustre, sessionName, true,
 		internalName, primaryBrickHost, attachment,
