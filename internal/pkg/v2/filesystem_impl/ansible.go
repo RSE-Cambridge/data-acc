@@ -53,7 +53,7 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 	allocationByHost := make(map[datamodel.BrickHostName][]datamodel.BrickAllocation)
 	for i, brick := range allBricks {
 		allocationByHost[brick.BrickHostName] = append(allocationByHost[brick.BrickHostName], datamodel.BrickAllocation{
-			Brick:brick,
+			Brick:          brick,
 			AllocatedIndex: uint(i),
 		})
 	}
@@ -99,7 +99,7 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 
 	fsinfo := FSInfo{
 		Vars: map[string]string{
-			"mgsnode":     mgsnode,
+			"mgsnode": mgsnode,
 			//"client_port": fmt.Sprintf("%d", volume.ClientPort),
 			"lnet_suffix": getLnetSuffix(),
 			"mdt_size":    fmt.Sprintf("%dm", getMdtSizeMB()),
