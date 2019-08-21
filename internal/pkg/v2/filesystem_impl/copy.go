@@ -43,7 +43,7 @@ func generateDataCopyCmd(session datamodel.Session, request datamodel.DataCopyRe
 	}
 
 	cmd := fmt.Sprintf("sudo -g '#%d' -u '#%d' %s", session.Group, session.Owner, rsync)
-	dacHostBufferPath := fmt.Sprintf("/mnt/lustre/%s/global", session.FilesystemStatus.InternalData)
+	dacHostBufferPath := fmt.Sprintf("/mnt/lustre/%s/global", session.FilesystemStatus.InternalName)
 	cmd = fmt.Sprintf("bash -c \"export DW_JOB_STRIPED='%s' && %s\"", dacHostBufferPath, cmd)
 	return cmd, nil
 }

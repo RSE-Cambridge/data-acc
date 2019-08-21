@@ -2,33 +2,25 @@ package filesystem_impl
 
 import (
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestPlugin_GetInventory(t *testing.T) {
-	volume := registry.Volume{
-		Name: "1", UUID: "abcdefgh", ClientPort: 10002,
-		Attachments: []registry.Attachment{
-			{Hostname: "cpu1"},
-			{Hostname: "cpu2"},
-		},
+	brickAllocations := []datamodel.Brick{
+		{BrickHostName: "dac1", Device: "nvme1n1"},
+		{BrickHostName: "dac1", Device: "nvme2n1"},
+		{BrickHostName: "dac1", Device: "nvme3n1"},
+		{BrickHostName: "dac2", Device: "nvme2n1"},
+		{BrickHostName: "dac2", Device: "nvme3n1"},
 	}
-	brickAllocations := []registry.BrickAllocation{
-		{Hostname: "dac1", Device: "nvme1n1", AllocatedIndex: 0},
-		{Hostname: "dac1", Device: "nvme2n1", AllocatedIndex: 1},
-		{Hostname: "dac1", Device: "nvme3n1", AllocatedIndex: 2},
-		{Hostname: "dac2", Device: "nvme2n1", AllocatedIndex: 3},
-		{Hostname: "dac2", Device: "nvme3n1", AllocatedIndex: 4},
-	}
-	result := getInventory(BeegFS, volume, brickAllocations)
+	fsUuid := "abcdefgh"
+	result := getInventory(BeegFS, fsUuid, brickAllocations)
 	expected := `dac-prod:
   children:
     abcdefgh:
       hosts:
-        cpu1: {}
-        cpu2: {}
         dac1:
           abcdefgh_mgs: nvme1n1
           abcdefgh_mdts: {nvme1n1: 0, nvme2n1: 1, nvme3n1: 2}
@@ -37,7 +29,6 @@ func TestPlugin_GetInventory(t *testing.T) {
           abcdefgh_mdts: {nvme2n1: 3, nvme3n1: 4}
           abcdefgh_osts: {nvme2n1: 3, nvme3n1: 4}
       vars:
-        abcdefgh_client_port: "10002"
         lnet_suffix: ""
         abcdefgh_mdt_size: 20480m
         abcdefgh_mgsnode: dac1
@@ -46,13 +37,13 @@ func TestPlugin_GetInventory(t *testing.T) {
 }
 
 func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
-	volume := registry.Volume{Name: "1", UUID: "abcdefgh", ClientPort: 10002}
-	brickAllocations := []registry.BrickAllocation{
-		{Hostname: "dac1", Device: "nvme1n1", AllocatedIndex: 0},
-		{Hostname: "dac2", Device: "nvme2n1", AllocatedIndex: 1},
-		{Hostname: "dac2", Device: "nvme3n1", AllocatedIndex: 2},
+	brickAllocations := []datamodel.Brick{
+		{BrickHostName: "dac1", Device: "nvme1n1"},
+		{BrickHostName: "dac2", Device: "nvme2n1"},
+		{BrickHostName: "dac2", Device: "nvme3n1"},
 	}
-	result := getInventory(Lustre, volume, brickAllocations)
+	fsUuid := "abcdefgh"
+	result := getInventory(Lustre, fsUuid, brickAllocations)
 	expected := `dac-prod:
   children:
     abcdefgh:
@@ -65,7 +56,6 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
           abcdefgh_mdts: {nvme2n1: 1, nvme3n1: 2}
           abcdefgh_osts: {nvme2n1: 1, nvme3n1: 2}
       vars:
-        abcdefgh_client_port: "10002"
         lnet_suffix: ""
         abcdefgh_mdt_size: 20480m
         abcdefgh_mgsnode: dac1
@@ -74,8 +64,8 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
 }
 
 func TestPlugin_GetPlaybook_beegfs(t *testing.T) {
-	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
-	result := getPlaybook(BeegFS, volume)
+	fsUuid := "abcdefgh"
+	result := getPlaybook(BeegFS, fsUuid)
 	assert.Equal(t, `---
 - name: Setup FS
   hosts: abcdefgh
@@ -88,8 +78,8 @@ func TestPlugin_GetPlaybook_beegfs(t *testing.T) {
 }
 
 func TestPlugin_GetPlaybook_lustre(t *testing.T) {
-	volume := registry.Volume{Name: "1", UUID: "abcdefgh"}
-	result := getPlaybook(Lustre, volume)
+	fsUuid := "abcdefgh"
+	result := getPlaybook(Lustre, fsUuid)
 	assert.Equal(t, `---
 - name: Setup FS
   hosts: abcdefgh
@@ -102,37 +92,26 @@ func TestPlugin_GetPlaybook_lustre(t *testing.T) {
 }
 
 func TestPlugin_GetInventory_MaxMDT(t *testing.T) {
-	volume := registry.Volume{
-		Name: "1", UUID: "abcdefgh", ClientPort: 10002,
-		Attachments: []registry.Attachment{
-			{Hostname: "cpu1"},
-			{Hostname: "cpu2"},
-		},
-	}
-
-	var brickAllocations []registry.BrickAllocation
+	var brickAllocations []datamodel.Brick
 	for i := 1; i <= 26; i = i + 2 {
-		brickAllocations = append(brickAllocations, registry.BrickAllocation{
-			Hostname:       fmt.Sprintf("dac%d", i),
-			Device:         "nvme1n1",
-			AllocatedIndex: uint(i - 1),
+		brickAllocations = append(brickAllocations, datamodel.Brick{
+			BrickHostName: datamodel.BrickHostName(fmt.Sprintf("dac%d", i)),
+			Device:        "nvme1n1",
 		})
-		brickAllocations = append(brickAllocations, registry.BrickAllocation{
-			Hostname:       fmt.Sprintf("dac%d", i),
-			Device:         "nvme2n1",
-			AllocatedIndex: uint(i),
+		brickAllocations = append(brickAllocations, datamodel.Brick{
+			BrickHostName: datamodel.BrickHostName(fmt.Sprintf("dac%d", i)),
+			Device:        "nvme2n1",
 		})
 	}
 
-	result := getInventory(BeegFS, volume, brickAllocations)
+	fsUuid := "abcdefgh"
+	result := getInventory(Lustre, fsUuid, brickAllocations)
 	expected := `dac-prod:
   children:
     abcdefgh:
       hosts:
-        cpu1: {}
-        cpu2: {}
         dac1:
-          abcdefgh_mgs: nvme1n1
+          abcdefgh_mgs: sdb
           abcdefgh_mdts: {nvme1n1: 0}
           abcdefgh_osts: {nvme1n1: 0, nvme2n1: 1}
         dac3:
@@ -172,7 +151,6 @@ func TestPlugin_GetInventory_MaxMDT(t *testing.T) {
           abcdefgh_mdts: {nvme1n1: 24}
           abcdefgh_osts: {nvme1n1: 24, nvme2n1: 25}
       vars:
-        abcdefgh_client_port: "10002"
         lnet_suffix: ""
         abcdefgh_mdt_size: 20480m
         abcdefgh_mgsnode: dac1

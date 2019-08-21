@@ -3,7 +3,9 @@ package filesystem_impl
 import (
 	"errors"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"testing"
 )
 
@@ -115,16 +117,31 @@ func Test_Mount(t *testing.T) {
 		Owner:                  1001,
 		Group:                  1001,
 	}
-
-	assert.PanicsWithValue(t,
-		"failed to find primary brick for volume: asdf",
-		func() { mount(Lustre, volume, nil, nil) })
-
 	bricks := []registry.BrickAllocation{
 		{Hostname: "host1"},
 		{Hostname: "host2"},
 	}
-	err := mount(Lustre, volume, bricks, attachments)
+	log.Println(bricks)
+	log.Println(volume)
+
+	//err := mount(Lustre, volume, bricks, attachments)
+	sessionName := datamodel.SessionName("asdf")
+	internalName := "uuidasdf"
+	primaryBrickHost := datamodel.BrickHostName("host1")
+	owner := uint(1001)
+	group := uint(1002)
+	attachment := datamodel.AttachmentSessionStatus{
+		AttachmentSession: datamodel.AttachmentSession{
+			SessionName: "job1",
+			Hosts:       []string{"client1", "client2"},
+		},
+		GlobalMount: true,
+		PrivateMount: true,
+		SwapBytes: 1024 * 1024, // 1 MiB
+	}
+	err := mount(Lustre, sessionName, false,
+		internalName, primaryBrickHost, attachment,
+		owner, group)
 	assert.Nil(t, err)
 	assert.Equal(t, 53, fake.calls)
 
@@ -185,7 +202,23 @@ func Test_Umount(t *testing.T) {
 		{Hostname: "host1"},
 		{Hostname: "host2"},
 	}
-	err := umount(Lustre, volume, bricks, attachments)
+	log.Println(bricks)
+	log.Println(volume)
+
+	sessionName := datamodel.SessionName("asdf")
+	internalName := "uuidasdf"
+	primaryBrickHost := datamodel.BrickHostName("host1")
+	attachment := datamodel.AttachmentSessionStatus{
+		AttachmentSession: datamodel.AttachmentSession{
+			SessionName: "job1",
+			Hosts:       []string{"client1", "client2"},
+		},
+		GlobalMount: true,
+		PrivateMount: true,
+		SwapBytes: 1024 * 1024, // 1 MiB
+	}
+	err := unmount(Lustre, sessionName, false,
+		internalName, primaryBrickHost, attachment)
 	assert.Nil(t, err)
 	assert.Equal(t, 20, fake.calls)
 
@@ -227,7 +260,24 @@ func Test_Umount_multi(t *testing.T) {
 		{Hostname: "host1"},
 		{Hostname: "host2"},
 	}
-	err := umount(Lustre, volume, bricks, attachments)
+	log.Println(bricks)
+	log.Println(volume)
+
+	sessionName := datamodel.SessionName("asdf")
+	internalName := "uuidasdf"
+	primaryBrickHost := datamodel.BrickHostName("host1")
+	attachment := datamodel.AttachmentSessionStatus{
+		AttachmentSession: datamodel.AttachmentSession{
+			SessionName: "job1",
+			Hosts:       []string{"client1", "client2"},
+		},
+		GlobalMount: true,
+		PrivateMount: false,
+		SwapBytes: 0,
+	}
+	err := unmount(Lustre, sessionName, true,
+		internalName, primaryBrickHost, attachment)
+
 	assert.Nil(t, err)
 	assert.Equal(t, 3, fake.calls)
 
@@ -260,7 +310,27 @@ func Test_Mount_multi(t *testing.T) {
 		{Hostname: "host1"},
 		{Hostname: "host2"},
 	}
-	err := mount(Lustre, volume, bricks, attachments)
+	log.Println(bricks)
+	log.Println(volume)
+
+	sessionName := datamodel.SessionName("asdf")
+	internalName := "uuidasdf"
+	primaryBrickHost := datamodel.BrickHostName("host1")
+	owner := uint(1001)
+	group := uint(1002)
+	attachment := datamodel.AttachmentSessionStatus{
+		AttachmentSession: datamodel.AttachmentSession{
+			SessionName: "job1",
+			Hosts:       []string{"client1", "client2"},
+		},
+		GlobalMount: true,
+		PrivateMount: false,
+		SwapBytes: 0,
+	}
+	err := mount(Lustre, sessionName, true,
+		internalName, primaryBrickHost, attachment,
+		owner, group)
+
 	assert.Nil(t, err)
 	assert.Equal(t, 5, fake.calls)
 
