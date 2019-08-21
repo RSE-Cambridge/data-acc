@@ -3,7 +3,6 @@ package filesystem_impl
 import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/filesystem"
-	"log"
 	"math/rand"
 )
 
@@ -41,7 +40,7 @@ func (f *fileSystemProvider) Delete(session datamodel.Session) error {
 
 func (f *fileSystemProvider) DataCopyIn(session datamodel.Session) error {
 	for _, dataCopy := range session.StageInRequests {
-		err := processDataCopy(dataCopy)
+		err := processDataCopy(session, dataCopy)
 		if err != nil {
 			return err
 		}
@@ -52,7 +51,7 @@ func (f *fileSystemProvider) DataCopyIn(session datamodel.Session) error {
 
 func (f *fileSystemProvider) DataCopyOut(session datamodel.Session) error {
 	for _, dataCopy := range session.StageOutRequests {
-		err := processDataCopy(dataCopy)
+		err := processDataCopy(session, dataCopy)
 		if err != nil {
 			return err
 		}
@@ -67,5 +66,6 @@ func (f *fileSystemProvider) Mount(session datamodel.Session, attachments datamo
 }
 
 func (f *fileSystemProvider) Unmount(session datamodel.Session, attachments datamodel.AttachmentSessionStatus) error {
-	return mount(Lustre, session, attachments)
+	return unmount(Lustre, session.Name, session.VolumeRequest.MultiJob, session.FilesystemStatus.InternalName,
+		session.PrimaryBrickHost, attachments)
 }

@@ -2,7 +2,6 @@ package filesystem_impl
 
 import (
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"log"
 	"os"
@@ -37,7 +36,7 @@ func getMdtSizeMB() uint {
 }
 
 func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, internalName string,
-	primaryBrickHost datamodel.BrickHostName, attachments datamodel.AttachmentSessionStatus,
+	primaryBrickHost datamodel.BrickHostName, attachment datamodel.AttachmentSessionStatus,
 	owner uint, group uint) error {
 	log.Println("Mount for:", sessionName)
 
@@ -53,10 +52,11 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 		//executeAnsibleMount(fsType, volume, brickAllocations)
 	}
 
-	for _, attachHost := range attachments.AttachmentSession.Hosts {
-		log.Printf("Session %s attaching to: %+v", sessionName, attachHost)
+	for _, attachHost := range attachment.AttachmentSession.Hosts {
+		log.Printf("Mounting %s on host: %s for session: %s", sessionName, attachHost,
+			attachment.AttachmentSession.SessionName)
 
-		var mountDir = getMountDir(sessionName, isMultiJob, attachments.AttachmentSession.SessionName)
+		var mountDir = getMountDir(sessionName, isMultiJob, attachment.AttachmentSession.SessionName)
 		if err := mkdir(attachHost, mountDir); err != nil {
 			return err
 		}
@@ -84,7 +84,7 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 		//	}
 		//}
 
-		if attachments.PrivateMount {
+		if attachment.PrivateMount {
 			privateDir := path.Join(mountDir, fmt.Sprintf("/private/%s", attachHost))
 			if err := mkdir(attachHost, privateDir); err != nil {
 				return err
@@ -113,46 +113,43 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 	return nil
 }
 
-func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
-	log.Println("Umount for:", volume.Name)
+func unmount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, internalName string,
+	primaryBrickHost datamodel.BrickHostName, attachment datamodel.AttachmentSessionStatus) error {
+	log.Println("Umount for:", sessionName)
 
-	for _, attachment := range attachments {
-		if attachment.State != registry.RequestDetach {
-			log.Printf("Skipping volume %s detach for: %+v", volume.Name, attachment)
-			continue
-		}
-		log.Printf("Volume %s dettaching: %+v", volume.Name, attachment)
+	for _, attachHost := range attachment.AttachmentSession.Hosts {
+		log.Printf("Unmounting %s on host: %s for session: %s", sessionName, attachHost,
+			attachment.AttachmentSession.SessionName)
 
-		var mountDir = getMountDir(volume, attachment.Job)
-		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
-			swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?
-			loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)                     // TODO share?
-			if err := swapOff(attachment.Hostname, loopback); err != nil {
-				log.Printf("Warn: failed to swap off %+v", attachment)
-			}
-			if err := detachLoopback(attachment.Hostname, loopback); err != nil {
-				log.Printf("Warn: failed to detach loopback %+v", attachment)
-			}
-			if err := removeSubtree(attachment.Hostname, swapFile); err != nil {
-				return err
-			}
-		}
-
-		if !volume.MultiJob && volume.AttachPrivateNamespace {
-			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", attachment.Job)
-			if err := removeSubtree(attachment.Hostname, privateSymLinkDir); err != nil {
+		var mountDir = getMountDir(sessionName, isMultiJob, attachment.AttachmentSession.SessionName)
+		// TODO: swap!
+		//if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
+		//	swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?
+		//	loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)                     // TODO share?
+		//	if err := swapOff(attachment.Hostname, loopback); err != nil {
+		//		log.Printf("Warn: failed to swap off %+v", attachment)
+		//	}
+		//	if err := detachLoopback(attachment.Hostname, loopback); err != nil {
+		//		log.Printf("Warn: failed to detach loopback %+v", attachment)
+		//	}
+		//	if err := removeSubtree(attachment.Hostname, swapFile); err != nil {
+		//		return err
+		//	}
+		//}
+		if attachment.PrivateMount {
+			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", sessionName)
+			if err := removeSubtree(attachHost, privateSymLinkDir); err != nil {
 				return err
 			}
 		}
 
 		if fsType == Lustre {
-			if err := umountLustre(attachment.Hostname, mountDir); err != nil {
+			if err := umountLustre(attachHost, mountDir); err != nil {
 				return err
 			}
-			if err := removeSubtree(attachment.Hostname, mountDir); err != nil {
+			if err := removeSubtree(attachHost, mountDir); err != nil {
 				return err
 			}
-
 		}
 	}
 
@@ -161,7 +158,6 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 		// executeAnsibleUnmount(fsType, volume, brickAllocations)
 		// TODO: this makes copy out much harder in its current form :(
 	}
-
 	return nil
 }
 

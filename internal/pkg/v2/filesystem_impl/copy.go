@@ -2,19 +2,19 @@ package filesystem_impl
 
 import (
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"log"
 	"path"
 	"strings"
 )
 
-func processDataCopy(volume registry.Volume, request registry.DataCopyRequest) error {
-	cmd, err := generateDataCopyCmd(volume, request)
+func processDataCopy(session datamodel.Session, request datamodel.DataCopyRequest) error {
+	cmd, err := generateDataCopyCmd(session, request)
 	if err != nil {
 		return err
 	}
 	if cmd == "" {
-		log.Println("No files to copy for:", volume.Name)
+		log.Println("No files to copy for:", session.Name)
 		return nil
 	}
 
@@ -23,12 +23,12 @@ func processDataCopy(volume registry.Volume, request registry.DataCopyRequest) e
 	// Make sure global dir is setup correctly
 	// TODO: share code with mount better
 	// TODO: Probably should all get setup in fs-ansible really!!
-	mountDir := fmt.Sprintf("/mnt/lustre/%s", volume.UUID)
+	mountDir := fmt.Sprintf("/mnt/lustre/%s", session.FilesystemStatus.InternalName)
 	sharedDir := path.Join(mountDir, "/global")
 	if err := mkdir("localhost", sharedDir); err != nil {
 		return err
 	}
-	if err := fixUpOwnership("localhost", volume.Owner, volume.Group, sharedDir); err != nil {
+	if err := fixUpOwnership("localhost", session.Owner, session.Group, sharedDir); err != nil {
 		return err
 	}
 
@@ -36,30 +36,30 @@ func processDataCopy(volume registry.Volume, request registry.DataCopyRequest) e
 	return runner.Execute("localhost", cmd)
 }
 
-func generateDataCopyCmd(volume registry.Volume, request registry.DataCopyRequest) (string, error) {
-	rsync, err := generateRsyncCmd(volume, request)
+func generateDataCopyCmd(session datamodel.Session, request datamodel.DataCopyRequest) (string, error) {
+	rsync, err := generateRsyncCmd(session, request)
 	if err != nil || rsync == "" {
 		return "", err
 	}
 
-	cmd := fmt.Sprintf("sudo -g '#%d' -u '#%d' %s", volume.Group, volume.Owner, rsync)
-	dacHostBufferPath := fmt.Sprintf("/mnt/lustre/%s/global", volume.UUID)
+	cmd := fmt.Sprintf("sudo -g '#%d' -u '#%d' %s", session.Group, session.Owner, rsync)
+	dacHostBufferPath := fmt.Sprintf("/mnt/lustre/%s/global", session.FilesystemStatus.InternalData)
 	cmd = fmt.Sprintf("bash -c \"export DW_JOB_STRIPED='%s' && %s\"", dacHostBufferPath, cmd)
 	return cmd, nil
 }
 
-func generateRsyncCmd(volume registry.Volume, request registry.DataCopyRequest) (string, error) {
+func generateRsyncCmd(session datamodel.Session, request datamodel.DataCopyRequest) (string, error) {
 	if request.Source == "" && request.Destination == "" {
 		return "", nil
 	}
 
 	var flags string
-	if request.SourceType == registry.Directory {
+	if request.SourceType == datamodel.Directory {
 		flags = "-r -ospgu --stats"
-	} else if request.SourceType == registry.File {
+	} else if request.SourceType == datamodel.File {
 		flags = "-ospgu --stats"
 	} else {
-		return "", fmt.Errorf("unsupported source type %s for volume: %s", request.SourceType, volume.Name)
+		return "", fmt.Errorf("unsupported source type %s for volume: %s", request.SourceType, session.Name)
 	}
 
 	return fmt.Sprintf("rsync %s %s %s", flags,
