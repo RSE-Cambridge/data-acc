@@ -161,6 +161,7 @@ func Test_Mount(t *testing.T) {
 
 	assert.Equal(t, "client2", fake.hostnames[10])
 	assert.Equal(t, "mkdir -p /dac/job1_job", fake.cmdStrs[10])
+
 	assert.Equal(t, "client2", fake.hostnames[19])
 	assert.Equal(t, "chmod 770 /dac/job1_job/global", fake.cmdStrs[19])
 }
@@ -194,8 +195,8 @@ func Test_Umount(t *testing.T) {
 	log.Println(bricks)
 	log.Println(volume)
 
-	sessionName := datamodel.SessionName("job1")
-	internalName := "uuidasdf"
+	sessionName := datamodel.SessionName("job4")
+	internalName := "fsuuid"
 	primaryBrickHost := datamodel.BrickHostName("host1")
 	attachment := datamodel.AttachmentSessionStatus{
 		AttachmentSession: datamodel.AttachmentSession{
@@ -209,16 +210,16 @@ func Test_Umount(t *testing.T) {
 	err := unmount(Lustre, sessionName, false,
 		internalName, primaryBrickHost, attachment)
 	assert.Nil(t, err)
-	assert.Equal(t, 6, fake.calls)
+	assert.Equal(t, 8, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
-	assert.Equal(t, "rm -rf /dac/job1_job_private", fake.cmdStrs[1])
-	assert.Equal(t, "grep /dac/job1_job /etc/mtab", fake.cmdStrs[2])
-	assert.Equal(t, "umount /dac/job1_job", fake.cmdStrs[3])
-	assert.Equal(t, "rm -rf /dac/job1_job", fake.cmdStrs[4])
+	assert.Equal(t, "rm -rf /dac/job4_job_private", fake.cmdStrs[0])
+	assert.Equal(t, "grep /dac/job4_job /etc/mtab", fake.cmdStrs[1])
+	assert.Equal(t, "umount /dac/job4_job", fake.cmdStrs[2])
+	assert.Equal(t, "rm -rf /dac/job4_job", fake.cmdStrs[3])
 
-	assert.Equal(t, "client2", fake.hostnames[5])
-	assert.Equal(t, "rm -rf /dac/job1_job", fake.cmdStrs[5])
+	assert.Equal(t, "client2", fake.hostnames[7])
+	assert.Equal(t, "rm -rf /dac/job4_job", fake.cmdStrs[7])
 }
 
 func Test_Umount_multi(t *testing.T) {
@@ -252,7 +253,7 @@ func Test_Umount_multi(t *testing.T) {
 	attachment := datamodel.AttachmentSessionStatus{
 		AttachmentSession: datamodel.AttachmentSession{
 			SessionName: "job1",
-			Hosts:       []string{"client1", "client2"},
+			Hosts:       []string{"client1"},
 		},
 		GlobalMount:  true,
 		PrivateMount: false,
@@ -304,7 +305,7 @@ func Test_Mount_multi(t *testing.T) {
 	attachment := datamodel.AttachmentSessionStatus{
 		AttachmentSession: datamodel.AttachmentSession{
 			SessionName: "job1",
-			Hosts:       []string{"client1", "client2"},
+			Hosts:       []string{"client1"},
 		},
 		GlobalMount:  true,
 		PrivateMount: false,
@@ -321,6 +322,6 @@ func Test_Mount_multi(t *testing.T) {
 	assert.Equal(t, "mkdir -p /dac/job1_persistent_asdf", fake.cmdStrs[0])
 	assert.Equal(t, "grep /dac/job1_persistent_asdf /etc/mtab", fake.cmdStrs[1])
 	assert.Equal(t, "mkdir -p /dac/job1_persistent_asdf/global", fake.cmdStrs[2])
-	assert.Equal(t, "chown 1001:1001 /dac/job1_persistent_asdf/global", fake.cmdStrs[3])
+	assert.Equal(t, "chown 1001:1002 /dac/job1_persistent_asdf/global", fake.cmdStrs[3])
 	assert.Equal(t, "chmod 770 /dac/job1_persistent_asdf/global", fake.cmdStrs[4])
 }

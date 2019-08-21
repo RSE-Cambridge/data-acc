@@ -14,7 +14,7 @@ import (
 func getMountDir(sourceName datamodel.SessionName, isMultiJob bool, attachingForSession datamodel.SessionName) string {
 	// TODO: what about the environment variables that are being set? should share logic with here
 	if isMultiJob {
-		return fmt.Sprintf("/dac/%s_persistent_%s", sourceName, attachingForSession)
+		return fmt.Sprintf("/dac/%s_persistent_%s", attachingForSession, sourceName)
 	}
 	return fmt.Sprintf("/dac/%s_job", sourceName)
 }
