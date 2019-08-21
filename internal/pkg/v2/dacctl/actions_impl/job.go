@@ -100,7 +100,7 @@ func getPaths(session datamodel.Session) map[string]string {
 	}
 	for _, multiJobVolume := range session.MultiJobAttachments {
 		paths[fmt.Sprintf("DW_PERSISTENT_STRIPED_%s", multiJobVolume)] = fmt.Sprintf(
-			"/dac/%s_persistent_%s", session.Name, multiJobVolume)
+			"/dac/%s_persistent_%s/global", session.Name, multiJobVolume)
 	}
 	return paths
 }
