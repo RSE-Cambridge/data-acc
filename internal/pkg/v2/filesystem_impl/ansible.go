@@ -3,7 +3,7 @@ package filesystem_impl
 import (
 	"bytes"
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -38,7 +38,7 @@ type Wrapper struct {
 var DefaultHostGroup = "dac-prod"
 var DefaultMaxMDTs uint = 24
 
-func getInventory(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) string {
+func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) string {
 	// NOTE: only used by lustre
 	mgsDevice := os.Getenv("DAC_MGS_DEV")
 	if mgsDevice == "" {
@@ -50,32 +50,35 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 		maxMDTs = uint(maxMDTsConf)
 	}
 
-	allocationsByHost := make(map[string][]registry.BrickAllocation)
-	for _, allocation := range brickAllocations {
-		allocationsByHost[allocation.Hostname] = append(allocationsByHost[allocation.Hostname], allocation)
+	allocationByHost := make(map[datamodel.BrickHostName][]datamodel.BrickAllocation)
+	for i, brick := range allBricks {
+		allocationByHost[brick.BrickHostName] = append(allocationByHost[brick.BrickHostName], datamodel.BrickAllocation{
+			Brick:brick,
+			AllocatedIndex: uint(i),
+		})
 	}
 
 	// If we have more brick allocations than maxMDTs
 	// assign at most one mdt per host.
 	// While this may give us less MDTs than max MDTs,
 	// but it helps spread MDTs across network connections
-	oneMdtPerHost := len(brickAllocations) > int(maxMDTs)
+	oneMdtPerHost := len(allBricks) > int(maxMDTs)
 
 	hosts := make(map[string]HostInfo)
 	mgsnode := ""
-	for host, allocations := range allocationsByHost {
+	for host, allocations := range allocationByHost {
 		osts := make(map[string]int)
 		for _, allocation := range allocations {
-			osts[allocation.Device] = int(allocation.AllocatedIndex)
+			osts[allocation.Brick.Device] = int(allocation.AllocatedIndex)
 		}
 
 		mdts := make(map[string]int)
 		if oneMdtPerHost {
 			allocation := allocations[0]
-			mdts[allocation.Device] = int(allocation.AllocatedIndex)
+			mdts[allocation.Brick.Device] = int(allocation.AllocatedIndex)
 		} else {
 			for _, allocation := range allocations {
-				mdts[allocation.Device] = int(allocation.AllocatedIndex)
+				mdts[allocation.Brick.Device] = int(allocation.AllocatedIndex)
 			}
 		}
 
@@ -85,31 +88,25 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 			if fsType == Lustre {
 				hostInfo.MGS = mgsDevice
 			} else {
-				hostInfo.MGS = allocations[0].Device
+				hostInfo.MGS = allocations[0].Brick.Device
 			}
-			mgsnode = host
+			mgsnode = string(host)
 		}
-		hosts[host] = hostInfo
+		hosts[string(host)] = hostInfo
 	}
 
-	// for beegfs, mount clients via ansible
-	if fsType == BeegFS {
-		// TODO: this can't work now, as we need to also pass the job name
-		for _, attachment := range volume.Attachments {
-			hosts[attachment.Hostname] = HostInfo{}
-		}
-	}
+	// TODO: add attachments?
 
 	fsinfo := FSInfo{
 		Vars: map[string]string{
 			"mgsnode":     mgsnode,
-			"client_port": fmt.Sprintf("%d", volume.ClientPort),
+			//"client_port": fmt.Sprintf("%d", volume.ClientPort),
 			"lnet_suffix": getLnetSuffix(),
 			"mdt_size":    fmt.Sprintf("%dm", getMdtSizeMB()),
 		},
 		Hosts: hosts,
 	}
-	fsname := fmt.Sprintf("%s", volume.UUID)
+	fsname := fmt.Sprintf("%s", fsUuid)
 	data := Wrapper{All: FileSystems{Children: map[string]FSInfo{fsname: fsinfo}}}
 
 	output, err := yaml.Marshal(data)
@@ -132,7 +129,7 @@ func getInventory(fsType FSType, volume registry.Volume, brickAllocations []regi
 	return strOut
 }
 
-func getPlaybook(fsType FSType, volume registry.Volume) string {
+func getPlaybook(fsType FSType, fsUuid string) string {
 	role := "lustre"
 	if fsType == BeegFS {
 		role = "beegfs"
@@ -145,7 +142,7 @@ func getPlaybook(fsType FSType, volume registry.Volume) string {
   roles:
     - role: %s
       vars:
-        fs_name: %s`, volume.UUID, role, volume.UUID)
+        fs_name: %s`, fsUuid, role, fsUuid)
 }
 
 func getAnsibleDir(suffix string) string {
@@ -156,21 +153,21 @@ func getAnsibleDir(suffix string) string {
 	return path.Join(ansibleDir, suffix)
 }
 
-func setupAnsible(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) (string, error) {
-	dir, err := ioutil.TempDir("", fmt.Sprintf("fs%s_", volume.Name))
+func setupAnsible(fsType FSType, internalName string, bricks []datamodel.Brick) (string, error) {
+	dir, err := ioutil.TempDir("", fmt.Sprintf("fs%s_", internalName))
 	if err != nil {
 		return dir, err
 	}
 	log.Println("Using ansible tempdir:", dir)
 
-	playbook := getPlaybook(fsType, volume)
+	playbook := getPlaybook(fsType, internalName)
 	tmpPlaybook := filepath.Join(dir, "dac.yml")
 	if err := ioutil.WriteFile(tmpPlaybook, bytes.NewBufferString(playbook).Bytes(), 0666); err != nil {
 		return dir, err
 	}
 	log.Println(playbook)
 
-	inventory := getInventory(fsType, volume, brickAllocations)
+	inventory := getInventory(fsType, internalName, bricks)
 	tmpInventory := filepath.Join(dir, "inventory")
 	if err := ioutil.WriteFile(tmpInventory, bytes.NewBufferString(inventory).Bytes(), 0666); err != nil {
 		return dir, err
@@ -195,11 +192,13 @@ func setupAnsible(fsType FSType, volume registry.Volume, brickAllocations []regi
 	return dir, err
 }
 
-func executeAnsibleSetup(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	dir, err := setupAnsible(fsType, volume, brickAllocations)
+func executeAnsibleSetup(internalName string, bricks []datamodel.Brick) error {
+	// TODO: restore beegfs support
+	dir, err := setupAnsible(Lustre, internalName, bricks)
 	if err != nil {
 		return err
 	}
+	defer os.RemoveAll(dir)
 
 	formatArgs := "dac.yml -i inventory --tag format"
 	err = executeAnsiblePlaybook(dir, formatArgs)
@@ -208,18 +207,11 @@ func executeAnsibleSetup(fsType FSType, volume registry.Volume, brickAllocations
 	}
 
 	startupArgs := "dac.yml -i inventory --tag mount,create_mdt,create_mgs,create_osts,client_mount"
-	err = executeAnsiblePlaybook(dir, startupArgs)
-	if err != nil {
-		return err
-	}
-
-	// only delete if everything worked, to aid debugging
-	os.RemoveAll(dir)
-	return nil
+	return executeAnsiblePlaybook(dir, startupArgs)
 }
 
-func executeAnsibleTeardown(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	dir, err := setupAnsible(fsType, volume, brickAllocations)
+func executeAnsibleTeardown(internalName string, bricks []datamodel.Brick) error {
+	dir, err := setupAnsible(Lustre, internalName, bricks)
 	if err != nil {
 		return err
 	}
@@ -241,8 +233,8 @@ func executeAnsibleTeardown(fsType FSType, volume registry.Volume, brickAllocati
 	return nil
 }
 
-func executeAnsibleMount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	dir, err := setupAnsible(fsType, volume, brickAllocations)
+func executeAnsibleMount(internalName string, bricks []datamodel.Brick) error {
+	dir, err := setupAnsible(Lustre, internalName, bricks)
 	if err != nil {
 		return err
 	}
@@ -257,8 +249,8 @@ func executeAnsibleMount(fsType FSType, volume registry.Volume, brickAllocations
 	return nil
 }
 
-func executeAnsibleUnmount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation) error {
-	dir, err := setupAnsible(fsType, volume, brickAllocations)
+func executeAnsibleUnmount(internalName string, bricks []datamodel.Brick) error {
+	dir, err := setupAnsible(Lustre, internalName, bricks)
 	if err != nil {
 		return err
 	}

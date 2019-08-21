@@ -3,6 +3,7 @@ package filesystem_impl
 import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"log"
 	"os"
 	"os/exec"
@@ -11,12 +12,12 @@ import (
 	"time"
 )
 
-func getMountDir(volume registry.Volume, jobName string) string {
+func getMountDir(sourceName datamodel.SessionName, isMultiJob bool, attachingForSession datamodel.SessionName) string {
 	// TODO: what about the environment variables that are being set? should share logic with here
-	if volume.MultiJob {
-		return fmt.Sprintf("/dac/%s_persistent_%s", jobName, volume.Name)
+	if isMultiJob {
+		return fmt.Sprintf("/dac/%s_persistent_%s", sourceName, attachingForSession)
 	}
-	return fmt.Sprintf("/dac/%s_job", jobName)
+	return fmt.Sprintf("/dac/%s_job", sourceName)
 }
 
 func getLnetSuffix() string {
@@ -35,18 +36,13 @@ func getMdtSizeMB() uint {
 	return uint(20 * 1024)
 }
 
-func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.BrickAllocation, attachments []registry.Attachment) error {
-	log.Println("Mount for:", volume.Name)
-	var primaryBrickHost string
-	for _, allocation := range brickAllocations {
-		if allocation.AllocatedIndex == 0 {
-			primaryBrickHost = allocation.Hostname
-			break
-		}
-	}
+func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, internalName string,
+	primaryBrickHost datamodel.BrickHostName, attachments datamodel.AttachmentSessionStatus,
+	owner uint, group uint) error {
+	log.Println("Mount for:", sessionName)
 
 	if primaryBrickHost == "" {
-		log.Panicf("failed to find primary brick for volume: %s", volume.Name)
+		log.Panicf("failed to find primary brick for volume: %s", sessionName)
 	}
 
 	lnetSuffix := getLnetSuffix()
@@ -54,67 +50,61 @@ func mount(fsType FSType, volume registry.Volume, brickAllocations []registry.Br
 	if fsType == BeegFS {
 		// Write out the config needed, and do the mount using ansible
 		// TODO: Move Lustre mount here that is done below
-		executeAnsibleMount(fsType, volume, brickAllocations)
+		//executeAnsibleMount(fsType, volume, brickAllocations)
 	}
 
-	for _, attachment := range attachments {
-		if attachment.State != registry.RequestAttach {
-			log.Printf("Skipping volume %s attach: %+v", volume.Name, attachment)
-			continue
-		}
-		log.Printf("Volume %s attaching with: %+v", volume.Name, attachment)
+	for _, attachHost := range attachments.AttachmentSession.Hosts {
+		log.Printf("Session %s attaching to: %+v", sessionName, attachHost)
 
-		var mountDir = getMountDir(volume, attachment.Job)
-		if err := mkdir(attachment.Hostname, mountDir); err != nil {
+		var mountDir = getMountDir(sessionName, isMultiJob, attachments.AttachmentSession.SessionName)
+		if err := mkdir(attachHost, mountDir); err != nil {
 			return err
 		}
-		if err := mountRemoteFilesystem(fsType, attachment.Hostname, lnetSuffix,
-			primaryBrickHost, volume.UUID, mountDir); err != nil {
+		if err := mountRemoteFilesystem(fsType, attachHost, lnetSuffix,
+			string(primaryBrickHost), internalName, mountDir); err != nil {
 			return err
 		}
+		// TODO: swap!
+		//if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
+		//	swapDir := path.Join(mountDir, "/swap")
+		//	if err := mkdir(attachment.Hostname, swapDir); err != nil {
+		//		return err
+		//	}
+		//	if err := fixUpOwnership(attachment.Hostname, 0, 0, swapDir); err != nil {
+		//		return err
+		//	}
+		//	swapSizeMB := int(volume.AttachAsSwapBytes / (1024 * 1024))
+		//	swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
+		//	loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)
+		//	if err := createSwap(attachment.Hostname, swapSizeMB, swapFile, loopback); err != nil {
+		//		return err
+		//	}
+		//	if err := swapOn(attachment.Hostname, loopback); err != nil {
+		//		return err
+		//	}
+		//}
 
-		if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
-			swapDir := path.Join(mountDir, "/swap")
-			if err := mkdir(attachment.Hostname, swapDir); err != nil {
+		if attachments.PrivateMount {
+			privateDir := path.Join(mountDir, fmt.Sprintf("/private/%s", attachHost))
+			if err := mkdir(attachHost, privateDir); err != nil {
 				return err
 			}
-			if err := fixUpOwnership(attachment.Hostname, 0, 0, swapDir); err != nil {
-				return err
-			}
-
-			swapSizeMB := int(volume.AttachAsSwapBytes / (1024 * 1024))
-			swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
-			loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)
-			if err := createSwap(attachment.Hostname, swapSizeMB, swapFile, loopback); err != nil {
-				return err
-			}
-
-			if err := swapOn(attachment.Hostname, loopback); err != nil {
-				return err
-			}
-		}
-
-		if !volume.MultiJob && volume.AttachPrivateNamespace {
-			privateDir := path.Join(mountDir, fmt.Sprintf("/private/%s", attachment.Hostname))
-			if err := mkdir(attachment.Hostname, privateDir); err != nil {
-				return err
-			}
-			if err := fixUpOwnership(attachment.Hostname, volume.Owner, volume.Group, privateDir); err != nil {
+			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
 				return err
 			}
 
 			// need a consistent symlink for shared environment variables across all hosts
-			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", attachment.Job)
-			if err := createSymbolicLink(attachment.Hostname, privateDir, privateSymLinkDir); err != nil {
+			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", sessionName)
+			if err := createSymbolicLink(attachHost, privateDir, privateSymLinkDir); err != nil {
 				return err
 			}
 		}
 
 		sharedDir := path.Join(mountDir, "/global")
-		if err := mkdir(attachment.Hostname, sharedDir); err != nil {
+		if err := mkdir(attachHost, sharedDir); err != nil {
 			return err
 		}
-		if err := fixUpOwnership(attachment.Hostname, volume.Owner, volume.Group, sharedDir); err != nil {
+		if err := fixUpOwnership(attachHost, owner, group, sharedDir); err != nil {
 			return err
 		}
 	}
@@ -168,7 +158,7 @@ func umount(fsType FSType, volume registry.Volume, brickAllocations []registry.B
 
 	if fsType == BeegFS {
 		// TODO: Move Lustre unmount here that is done below
-		executeAnsibleUnmount(fsType, volume, brickAllocations)
+		// executeAnsibleUnmount(fsType, volume, brickAllocations)
 		// TODO: this makes copy out much harder in its current form :(
 	}
 

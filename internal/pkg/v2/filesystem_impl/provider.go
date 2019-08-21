@@ -4,6 +4,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/filesystem"
 	"log"
+	"math/rand"
 )
 
 func NewFileSystemProvider(ansible filesystem.Ansible) filesystem.Provider {
@@ -12,37 +13,59 @@ func NewFileSystemProvider(ansible filesystem.Ansible) filesystem.Provider {
 
 type fileSystemProvider struct {
 	ansible filesystem.Ansible
+	// TODO: proper config object
+}
+
+const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func GetNewUUID() string {
+	b := make([]byte, 8)
+	for i := range b {
+		b[i] = letters[rand.Int63()%int64(len(letters))]
+	}
+	return string(b)
 }
 
 func (f *fileSystemProvider) Create(session datamodel.Session) (datamodel.FilesystemStatus, error) {
-	log.Println("FAKE Create")
-	return datamodel.FilesystemStatus{InternalName: "foo", InternalData: "bar"}, nil
+	session.FilesystemStatus = datamodel.FilesystemStatus{
+		InternalName: GetNewUUID(),
+		InternalData: "",
+	}
+	err := executeAnsibleSetup(session.FilesystemStatus.InternalName, session.AllocatedBricks)
+	return session.FilesystemStatus, err
 }
 
 func (f *fileSystemProvider) Delete(session datamodel.Session) error {
-	log.Println("FAKE Delete")
-	return nil
+	return executeAnsibleTeardown(session.FilesystemStatus.InternalName, session.AllocatedBricks)
 }
 
 func (f *fileSystemProvider) DataCopyIn(session datamodel.Session) error {
-	log.Println("FAKE DataCopyIn")
+	for _, dataCopy := range session.StageInRequests {
+		err := processDataCopy(dataCopy)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 
 }
 
 func (f *fileSystemProvider) DataCopyOut(session datamodel.Session) error {
-	log.Println("FAKE DataCopyOut")
+	for _, dataCopy := range session.StageOutRequests {
+		err := processDataCopy(dataCopy)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
-
 }
 
 func (f *fileSystemProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSessionStatus) error {
-	log.Println("FAKE Mount")
-	return nil
+	return mount(Lustre, session.Name, session.VolumeRequest.MultiJob, session.FilesystemStatus.InternalName,
+		session.PrimaryBrickHost, attachments, session.Owner, session.Group)
 
 }
 
 func (f *fileSystemProvider) Unmount(session datamodel.Session, attachments datamodel.AttachmentSessionStatus) error {
-	log.Println("FAKE Unmount")
-	return nil
+	return mount(Lustre, session, attachments)
 }
