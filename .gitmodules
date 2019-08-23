@@ -1,0 +1,24 @@
+[submodule "dac-ansible/roles/andrewrothstein.pki"]
+	path = dac-ansible/roles/andrewrothstein.pki
+	url = https://github.com/andrewrothstein/ansible-pki.git
+[submodule "dac-ansible/roles/andrewrothstein.cfssl"]
+	path = dac-ansible/roles/andrewrothstein.cfssl
+	url = https://github.com/andrewrothstein/ansible-cfssl.git
+[submodule "dac-ansible/roles/andrewrothstein.etcd-cluster"]
+	path = dac-ansible/roles/andrewrothstein.etcd-cluster
+	url = https://github.com/andrewrothstein/ansible-etcd-cluster.git
+[submodule "dac-ansible/roles/andrewrothstein.etcd"]
+	path = dac-ansible/roles/andrewrothstein.etcd
+	url = https://github.com/andrewrothstein/ansible-etcd.git
+[submodule "dac-ansible/roles/andrewrothstein.unarchive-deps"]
+	path = dac-ansible/roles/andrewrothstein.unarchive-deps
+	url = https://github.com/andrewrothstein/ansible-unarchive-deps.git
+[submodule "dac-ansible/roles/geerlingguy.repo-epel"]
+	path = dac-ansible/roles/geerlingguy.repo-epel
+	url = https://github.com/geerlingguy/ansible-role-repo-epel.git
+[submodule "dac-ansible/roles/geerlingguy.pip"]
+	path = dac-ansible/roles/geerlingguy.pip
+	url = https://github.com/geerlingguy/ansible-role-pip.git
+[submodule "dac-ansible/roles/geerlingguy.docker"]
+	path = dac-ansible/roles/geerlingguy.docker
+	url = https://github.com/geerlingguy/ansible-role-docker.git
