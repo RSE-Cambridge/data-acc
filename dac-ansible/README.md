@@ -2,6 +2,11 @@
 
 Install data-acc demo with ansible. It creates a bunch of OpenStack VMs, then uses ansible to install a development data-acc enviroment.
 
+Get the required git submodules:
+
+    git submodule init
+    git submodule update
+
 To run this set of playbooks, first we create some VMs in OpenStack:
 
     . openrc
