@@ -19,9 +19,9 @@ Source your OpenStack RC, eg:
 
     . openrc
 
-Edit create-servers.py to set your NETWORK_NAME and KEYPAIR_NAME and then run:
+Create OpenStack VMs:
 
-    ./create-servers.py > hosts
+    ./create-servers.py -k KEYPAIR_NAME -n NETWORK_NAME > hosts
     
 Once the VMs are created, you can now use ansible to deploy the dev environment:
 
