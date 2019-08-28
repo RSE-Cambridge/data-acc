@@ -2,13 +2,17 @@
 
 Install data-acc demo with ansible. It creates a bunch of OpenStack VMs, then uses ansible to install a development data-acc enviroment.
 
-To run this set of playbooks, first we create some VMs in OpenStack:
+To run this set of playbooks, first we create some VMs in OpenStack.
+
+Source your OpenStack RC, eg:
 
     . openrc
+
+Edit create-servers.py to set your NETWORK_NAME and KEYPAIR_NAME and then run:
+
     ./create-servers.py > hosts
     
-You will likely need to directly modify the above script to match your environment,
-but once the VMs are created, you can now use ansible to deploy the dev environment:
+Once the VMs are created, you can now use ansible to deploy the dev environment:
 
     ansible-playbook master.yml -i hosts
 
