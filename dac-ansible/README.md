@@ -2,7 +2,18 @@
 
 Install data-acc demo with ansible. It creates a bunch of OpenStack VMs, then uses ansible to install a development data-acc enviroment.
 
-To run this set of playbooks, first we create some VMs in OpenStack.
+## Setup
+
+Install Ansible and the OpenStack SDK, eg in a Python virtual environment:
+
+    virtualenv .venv
+    . .venv/bin/activate
+    pip install -U pip
+    pip install -U ansible openstacksdk
+
+Pull in Ansible role dependencies:
+
+    ansible-galaxy install -r requirements.yml
 
 Source your OpenStack RC, eg:
 
@@ -32,16 +43,6 @@ Once the ansible has finished, you can login and try a slurm test:
     . slurm-test.sh
     squeue
     scontrol show burstbuffer
-
-## Install notes
-
-You may find this useful to run the above ansible-playbook command:
-
-    virtualenv .venv
-    . .venv/bin/activate
-    pip install -U pip
-    pip install -U ansible openstacksdk
-    ansible-galaxy install -r requirements.yml
 
 ## Debugging Guide
 
