@@ -19,6 +19,9 @@ func (fw fakeWatcher) Watch(ctx context.Context, key string, opts ...clientv3.Op
 	assert.EqualValues(fw.t, len(fw.opts), len(opts)) // TODO: how to assert this properly?
 	return fw.ch
 }
+func (fw fakeWatcher) RequestProgress(ctx context.Context) error {
+	panic("implement me")
+}
 func (fakeWatcher) Close() error {
 	panic("implement me")
 }
