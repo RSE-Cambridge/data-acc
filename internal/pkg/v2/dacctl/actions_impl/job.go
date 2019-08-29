@@ -76,7 +76,7 @@ func (d *dacctlActions) CreatePerJobBuffer(c dacctl.CliContext) error {
 	}
 	// TODO: must be a better way!
 	// ensure multi job volumes are sorted, to avoid deadlocks (*cough*)
-	sort.Slice(multiJobVolumes, func (i, j int) bool {
+	sort.Slice(multiJobVolumes, func(i, j int) bool {
 		return multiJobVolumes[i] < multiJobVolumes[j]
 	})
 	session := datamodel.Session{
