@@ -66,7 +66,7 @@ type Session struct {
 }
 
 type FilesystemStatus struct {
-	Error        error
+	Error           string
 	InternalName string
 	InternalData string
 }
@@ -84,14 +84,14 @@ type AttachmentSessionStatus struct {
 	SwapBytes    int
 
 	DetachRequested bool // TODO: delete this bit?
-	Error           error
+	Error           string
 }
 
 type SessionStatus struct {
 	// If not nil, the session has an unresolved error
 	// and can't be mounted by any new sessions
 	// but it can be deleted
-	Error error
+	Error string
 
 	// CreateVolume has succeeded, so other actions can now happen
 	FileSystemCreated bool
@@ -152,7 +152,7 @@ type DataCopyRequest struct {
 	// Report if the copy has completed
 	CopyCompleted bool
 	// if there was problem, record it
-	Error error
+	Error string
 }
 
 type SourceType string

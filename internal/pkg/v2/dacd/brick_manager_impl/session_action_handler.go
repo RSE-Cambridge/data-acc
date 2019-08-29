@@ -98,7 +98,9 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 		fsStatus, err := s.fsProvider.Create(action.Session)
 		session.FilesystemStatus = fsStatus
 		session.Status.FileSystemCreated = err == nil
-		session.Status.Error = err
+		if err != nil {
+			session.Status.Error = err.Error()
+		}
 
 		session, updateErr := s.sessionRegistry.UpdateSession(session)
 		if updateErr != nil {
