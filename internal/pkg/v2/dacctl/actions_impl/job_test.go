@@ -38,8 +38,8 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 
 	lines := []string{
 		`#DW jobdw capacity=4MiB access_mode=striped,private type=scratch`,
-		`#DW persistentdw name=myBBname1`,
 		`#DW persistentdw name=myBBname2`,
+		`#DW persistentdw name=myBBname1`,
 		`#DW swap 4MiB`,
 		`#DW stage_in source=/global/cscratch1/filename1 destination=$DW_JOB_STRIPED/filename1 type=file`,
 		`#DW stage_in source=/global/cscratch1/filelist type=list`,

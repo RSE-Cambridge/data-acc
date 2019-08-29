@@ -168,8 +168,11 @@ func (s *sessionActions) CompleteSessionAction(sessionAction datamodel.SessionAc
 
 	// Delete the request, not it is processed
 	requestKey := getSessionActionRequestKey(sessionAction)
-	err = s.store.Delete(requestKey, 0)
+	count, err := s.store.DeleteAllKeysWithPrefix(requestKey)
 	if err != nil {
+		return fmt.Errorf("unable to delete stale request message due to: %s", err)
+	}
+	if count != 1 {
 		return fmt.Errorf("unable to delete stale request message due to: %s", err)
 	}
 	return nil

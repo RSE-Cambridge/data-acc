@@ -6,6 +6,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"log"
+	"sort"
 )
 
 func (d *dacctlActions) ValidateJob(c dacctl.CliContext) error {
@@ -73,6 +74,11 @@ func (d *dacctlActions) CreatePerJobBuffer(c dacctl.CliContext) error {
 		Type:               bufferType,
 		SwapBytes:          swapBytes,
 	}
+	// TODO: must be a better way!
+	// ensure multi job volumes are sorted, to avoid deadlocks (*cough*)
+	sort.Slice(multiJobVolumes, func (i, j int) bool {
+		return multiJobVolumes[i] < multiJobVolumes[j]
+	})
 	session := datamodel.Session{
 		Name:                datamodel.SessionName(c.String("token")),
 		Owner:               uint(c.Int("user")),
@@ -84,7 +90,6 @@ func (d *dacctlActions) CreatePerJobBuffer(c dacctl.CliContext) error {
 		StageOutRequests:    summary.DataOut,
 	}
 	session.Paths = getPaths(session)
-
 	return d.session.CreateSession(session)
 }
 
