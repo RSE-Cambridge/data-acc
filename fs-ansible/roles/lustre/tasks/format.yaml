@@ -4,7 +4,6 @@
     mgsnode: "{{ vars[fs_name + '_mgsnode']}}"
     mdts: "{{ vars[fs_name + '_mdts'] | default({}) }}"
     osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
-    client_port: "{{ vars[fs_name + '_client_port'] }}"
     mdt_size: "{{ vars[fs_name + '_mdt_size'] | default('10%') }}"
   tags: [ 'never', 'format_mgs', 'reformat_mgs', 'format', 'clean']
 
