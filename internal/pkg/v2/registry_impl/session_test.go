@@ -26,7 +26,7 @@ func TestExampleString(t *testing.T) {
 
 	sessionWithError := datamodel.Session{
 		Name: "foo", PrimaryBrickHost: "host1",
-		Status:datamodel.SessionStatus{Error:"fake_error"},
+		Status: datamodel.SessionStatus{Error: "fake_error"},
 	}
 	sessionWithErrorStr, err := json.Marshal(sessionWithError)
 	assert.Nil(t, err)

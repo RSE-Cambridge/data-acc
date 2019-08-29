@@ -66,7 +66,7 @@ type Session struct {
 }
 
 type FilesystemStatus struct {
-	Error           string
+	Error        string
 	InternalName string
 	InternalData string
 }

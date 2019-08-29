@@ -2,6 +2,7 @@ package workflow_impl
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/facade"
@@ -64,7 +65,7 @@ func (s sessionFacade) submitJob(sessionName datamodel.SessionName, actionType d
 
 	// wait for server to complete, or timeout
 	result := <-sessionAction
-	return result.Error
+	return errors.New(result.Error)
 }
 
 func (s sessionFacade) CreateSession(session datamodel.Session) error {

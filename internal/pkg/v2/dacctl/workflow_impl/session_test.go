@@ -132,7 +132,7 @@ func TestSessionFacade_CreateSession_WithBricks_CreateSessionError(t *testing.T)
 	actions.EXPECT().SendSessionAction(context.TODO(), datamodel.SessionCreateFilesystem, returnedSession).Return(actionChan, nil)
 	sessionMutex.EXPECT().Unlock(context.TODO())
 	go func() {
-		actionChan <- datamodel.SessionAction{Error: fakeErr}
+		actionChan <- datamodel.SessionAction{Error: fakeErr.Error()}
 		close(actionChan)
 	}()
 
@@ -166,7 +166,7 @@ func TestSessionFacade_DeleteSession(t *testing.T) {
 	sessionMutex.EXPECT().Unlock(context.TODO())
 	fakeErr := errors.New("fake")
 	go func() {
-		actionChan <- datamodel.SessionAction{Error: fakeErr}
+		actionChan <- datamodel.SessionAction{Error: fakeErr.Error()}
 		close(actionChan)
 	}()
 

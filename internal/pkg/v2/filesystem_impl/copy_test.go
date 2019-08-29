@@ -13,7 +13,7 @@ func Test_GenerateDataCopy(t *testing.T) {
 		Group:            1002,
 		FilesystemStatus: datamodel.FilesystemStatus{InternalName: "fsuuid"},
 		Paths: map[string]string{
-			"DW_JOB_STRIPED": "/mnt/lustre/fsuuid/global",
+			"DW_JOB_STRIPED":      "/mnt/lustre/fsuuid/global",
 			"DW_PERSISTENT_other": "/mnt/lustre/other/global",
 		},
 	}

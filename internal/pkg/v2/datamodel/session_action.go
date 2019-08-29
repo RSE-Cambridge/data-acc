@@ -4,7 +4,7 @@ type SessionAction struct {
 	Uuid       string
 	Session    Session
 	ActionType SessionActionType
-	Error      error
+	Error      string
 }
 
 type SessionActionType int

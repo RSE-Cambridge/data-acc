@@ -55,13 +55,13 @@ func (s *sessionActionHandler) processWithMutex(action datamodel.SessionAction, 
 	sessionMutex, err := s.sessionRegistry.GetSessionMutex(sessionName)
 	if err != nil {
 		log.Printf("unable to get session mutex: %s due to: %s\n", sessionName, err)
-		action.Error = err
+		action.Error = err.Error()
 		return
 	}
 	err = sessionMutex.Lock(context.TODO())
 	if err != nil {
 		log.Printf("unable to lock session mutex: %s due to: %s\n", sessionName, err)
-		action.Error = err
+		action.Error = err.Error()
 		return
 	}
 
@@ -79,7 +79,7 @@ func (s *sessionActionHandler) processWithMutex(action datamodel.SessionAction, 
 
 	session, err := process()
 	if err != nil {
-		action.Error = err
+		action.Error = err.Error()
 		log.Printf("error during action %+v\n", action)
 	} else {
 		action.Session = session
