@@ -148,11 +148,11 @@ func (*stubKeystore) Close() error {
 	return nil
 }
 
-func (*stubKeystore) Create(key string, value []byte) (store.KeyValueVersion, error) {
+func (*stubKeystore) Create(key string, value []byte) (int64, error) {
 	panic("implement me")
 }
 
-func (*stubKeystore) Update(key string, value []byte, modRevision int64) (store.KeyValueVersion, error) {
+func (*stubKeystore) Update(key string, value []byte, modRevision int64) (int64, error) {
 	panic("implement me")
 }
 

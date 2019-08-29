@@ -108,30 +108,30 @@ func (client *etcKeystore) Close() error {
 	return client.Client.Close()
 }
 
-func (client *etcKeystore) runTransaction(ifOps []clientv3.Cmp, thenOps []clientv3.Op) error {
+func (client *etcKeystore) runTransaction(ifOps []clientv3.Cmp, thenOps []clientv3.Op) (int64, error) {
 	response, err := client.Client.Txn(context.Background()).If(ifOps...).Then(thenOps...).Commit()
 	handleError(err)
 
 	if !response.Succeeded {
 		log.Println(ifOps)
-		return fmt.Errorf("transaction failed, as condition not met")
+		return 0, fmt.Errorf("transaction failed, as condition not met")
 	}
-	return nil
+	return response.Header.Revision, nil
 }
 
-func (client *etcKeystore) Create(key string, value []byte) (store.KeyValueVersion, error) {
+func (client *etcKeystore) Create(key string, value []byte) (int64, error) {
 	var ifOps []clientv3.Cmp
 	var thenOps []clientv3.Op
 	ifOps = append(ifOps, clientv3util.KeyMissing(key))
 	thenOps = append(thenOps, clientv3.OpPut(key, string(value)))
-	err := client.runTransaction(ifOps, thenOps)
+	revision, err := client.runTransaction(ifOps, thenOps)
 	if err != nil {
-		return store.KeyValueVersion{}, fmt.Errorf("unable to create key: %s due to: %s", key, err)
+		return 0, fmt.Errorf("unable to create key: %s due to: %s", key, err)
 	}
-	return client.Get(key)
+	return revision, nil
 }
 
-func (client *etcKeystore) Update(key string, value []byte, modRevision int64) (store.KeyValueVersion, error) {
+func (client *etcKeystore) Update(key string, value []byte, modRevision int64) (int64, error) {
 
 	var ifOps []clientv3.Cmp
 	var thenOps []clientv3.Op
@@ -143,15 +143,14 @@ func (client *etcKeystore) Update(key string, value []byte, modRevision int64) (
 	}
 	thenOps = append(thenOps, clientv3.OpPut(key, string(value)))
 
-	err := client.runTransaction(ifOps, thenOps)
+	newRevision, err := client.runTransaction(ifOps, thenOps)
 	if err != nil {
-		return store.KeyValueVersion{}, fmt.Errorf("unable to update ke: %s", err)
+		return 0, fmt.Errorf("unable to update ke: %s", err)
 	}
-	return client.Get(key)
+	return newRevision, nil
 }
 
 func (client *etcKeystore) Delete(key string, modRevision int64) error {
-
 	var ifOps []clientv3.Cmp
 	var thenOps []clientv3.Op
 
@@ -162,7 +161,8 @@ func (client *etcKeystore) Delete(key string, modRevision int64) error {
 	}
 	thenOps = append(thenOps, clientv3.OpDelete(key))
 
-	return client.runTransaction(ifOps, thenOps)
+	_, err := client.runTransaction(ifOps, thenOps)
+	return err
 }
 
 func getKeyValueVersion(rawKeyValue *mvccpb.KeyValue) *store.KeyValueVersion {

@@ -13,7 +13,7 @@ type Keystore interface {
 	//
 	// If an error occurs no keyvalues are written.
 	// Error is returned if any key already exists.
-	Create(key string, value []byte) (KeyValueVersion, error)
+	Create(key string, value []byte) (int64, error)
 
 	// Update the specified key values, atomically
 	//
@@ -21,7 +21,7 @@ type Keystore interface {
 	// Otherwise if the revisions of any key doesn't
 	// match the current revision of that key, the update fails.
 	// When update fails an error is returned and no keyValues are updated
-	Update(key string, value []byte, modRevision int64) (KeyValueVersion, error)
+	Update(key string, value []byte, modRevision int64) (int64, error)
 
 	// Delete the specified key values, atomically
 	//

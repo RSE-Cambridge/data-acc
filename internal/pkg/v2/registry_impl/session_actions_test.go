@@ -6,7 +6,6 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_store"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -23,7 +22,7 @@ func TestSessionActions_SendSessionAction(t *testing.T) {
 	brickHost.EXPECT().IsBrickHostAlive(session.PrimaryBrickHost).Return(true, nil)
 	keystore.EXPECT().Watch(context.TODO(), gomock.Any(), false).Return(nil)
 	fakeErr := errors.New("fake")
-	keystore.EXPECT().Create(gomock.Any(), gomock.Any()).Return(store.KeyValueVersion{}, fakeErr)
+	keystore.EXPECT().Create(gomock.Any(), gomock.Any()).Return(int64(3), fakeErr)
 
 	channel, err := actions.SendSessionAction(context.TODO(), datamodel.SessionCreateFilesystem, session)
 

@@ -55,7 +55,7 @@ func TestSessionRegistry_CreateSession(t *testing.T) {
 	defer mockCtrl.Finish()
 	keystore := mock_store.NewMockKeystore(mockCtrl)
 	registry := NewSessionRegistry(keystore)
-	keystore.EXPECT().Create("/session/foo", exampleSessionString).Return(store.KeyValueVersion{ModRevision: 42}, nil)
+	keystore.EXPECT().Create("/session/foo", exampleSessionString).Return(int64(42), nil)
 
 	session, err := registry.CreateSession(exampleSession)
 	assert.Nil(t, err)
@@ -149,10 +149,7 @@ func TestSessionRegistry_UpdateSession(t *testing.T) {
 	defer mockCtrl.Finish()
 	keystore := mock_store.NewMockKeystore(mockCtrl)
 	registry := NewSessionRegistry(keystore)
-	keystore.EXPECT().Update("/session/foo", exampleSessionString, int64(0)).Return(store.KeyValueVersion{
-		ModRevision: 44,
-		Value:       exampleSessionString,
-	}, nil)
+	keystore.EXPECT().Update("/session/foo", exampleSessionString, int64(0)).Return(int64(44), nil)
 
 	session, err := registry.UpdateSession(datamodel.Session{Name: "foo", PrimaryBrickHost: "host1", Revision: 0})
 

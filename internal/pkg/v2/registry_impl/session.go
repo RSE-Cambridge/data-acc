@@ -50,13 +50,13 @@ func (s *sessionRegistry) CreateSession(session datamodel.Session) (datamodel.Se
 		// TODO: ensure not allocated to any other session?
 	}
 
-	keyValueVersion, err := s.store.Create(sessionKey, sessionToRaw(session))
+	createRevision, err := s.store.Create(sessionKey, sessionToRaw(session))
 	if err != nil {
 		return session, fmt.Errorf("unable to create session due to: %s", err)
 	}
 
 	// Return the last modification revision
-	session.Revision = keyValueVersion.ModRevision
+	session.Revision = createRevision
 	return session, nil
 }
 
@@ -88,14 +88,13 @@ func (s *sessionRegistry) GetAllSessions() ([]datamodel.Session, error) {
 }
 
 func (s *sessionRegistry) UpdateSession(session datamodel.Session) (datamodel.Session, error) {
-	keyValueVersion, err := s.store.Update(getSessionKey(session.Name), sessionToRaw(session), session.Revision)
+	newRevision, err := s.store.Update(getSessionKey(session.Name), sessionToRaw(session), session.Revision)
 	if err != nil {
 		return session, fmt.Errorf("unable to update session due to: %s", err.Error())
 	}
 
-	newSession := sessionFromRaw(keyValueVersion.Value)
-	newSession.Revision = keyValueVersion.ModRevision
-	return newSession, nil
+	session.Revision = newRevision
+	return session, nil
 }
 
 func (s *sessionRegistry) DeleteSession(session datamodel.Session) error {
