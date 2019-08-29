@@ -65,7 +65,10 @@ func (s sessionFacade) submitJob(sessionName datamodel.SessionName, actionType d
 
 	// wait for server to complete, or timeout
 	result := <-sessionAction
-	return errors.New(result.Error)
+	if result.Error != "" {
+		return errors.New(result.Error)
+	}
+	return nil
 }
 
 func (s sessionFacade) CreateSession(session datamodel.Session) error {
