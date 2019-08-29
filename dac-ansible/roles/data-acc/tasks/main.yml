@@ -59,7 +59,7 @@
       virtualenv .venv
       source .venv/bin/activate
       pip install -U pip
-      pip install -U ansible
+      pip install -U 'ansible<2.8'
   args:
     creates: "{{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible/.venv"
 
