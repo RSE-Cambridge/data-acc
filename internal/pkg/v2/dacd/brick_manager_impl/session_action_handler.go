@@ -199,32 +199,62 @@ func (s *sessionActionHandler) doAllMounts(action datamodel.SessionAction) error
 		}
 	}
 	for _, sessionName := range action.Session.MultiJobAttachments {
-		// TODO: get lock on multiJobSession? do it in order to avoid deadlock?
-		multiJobAttachmentStatus := datamodel.AttachmentSessionStatus{
-			AttachmentSession: attachmentSession,
-			GlobalMount:       true,
-		}
-		multiJobSession, _ := s.sessionRegistry.GetSession(sessionName)
-		if multiJobSession.CurrentAttachments == nil {
-			multiJobSession.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSessionStatus{
-				attachmentSession.SessionName: multiJobAttachmentStatus,
-			}
-		} else {
-			multiJobSession.CurrentAttachments[attachmentSession.SessionName] = multiJobAttachmentStatus
-		}
-		multiJobSession, err := s.sessionRegistry.UpdateSession(multiJobSession)
-		if err != nil {
-			return err
-		}
-
-		if !multiJobSession.VolumeRequest.MultiJob {
-			log.Panicf("trying multi-job attach to non-multi job session %s", multiJobSession.Name)
-		}
-		if err := s.fsProvider.Mount(multiJobSession, multiJobAttachmentStatus); err != nil {
-			return err
+		if err := s.doMutliJobMount(action, sessionName); err != nil {
+			return nil
 		}
 	}
 	return nil
+}
+
+func (s *sessionActionHandler) doMutliJobMount(action datamodel.SessionAction, sessionName datamodel.SessionName) error {
+	sessionMutex, err := s.sessionRegistry.GetSessionMutex(sessionName)
+	if err != nil {
+		log.Printf("unable to get session mutex: %s due to: %s\n", sessionName, err)
+		return err
+	}
+	if err = sessionMutex.Lock(context.TODO()); err != nil {
+		log.Printf("unable to lock session mutex: %s due to: %s\n", sessionName, err)
+		return err
+	}
+	defer func() {
+		if err := sessionMutex.Unlock(context.TODO()); err != nil {
+			log.Println("failed to drop mutex for:", sessionName)
+		}
+	}()
+
+	multiJobSession, err := s.sessionRegistry.GetSession(sessionName)
+	if err != nil {
+		return err
+	}
+	if !multiJobSession.VolumeRequest.MultiJob {
+		log.Panicf("trying multi-job attach to non-multi job session %s", multiJobSession.Name)
+	}
+
+	attachmentSession := datamodel.AttachmentSession{
+		Hosts:       action.Session.RequestedAttachHosts,
+		SessionName: action.Session.Name,
+	}
+	multiJobAttachmentStatus := datamodel.AttachmentSessionStatus{
+		AttachmentSession: attachmentSession,
+		GlobalMount:       true,
+	}
+	if multiJobSession.CurrentAttachments == nil {
+		multiJobSession.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSessionStatus{
+			attachmentSession.SessionName: multiJobAttachmentStatus,
+		}
+	} else {
+		if _, ok := multiJobSession.CurrentAttachments[attachmentSession.SessionName]; ok {
+			return fmt.Errorf("already attached for session %s and multi-job %s",
+				attachmentSession.SessionName, sessionName)
+		}
+		multiJobSession.CurrentAttachments[attachmentSession.SessionName] = multiJobAttachmentStatus
+	}
+
+	multiJobSession, err = s.sessionRegistry.UpdateSession(multiJobSession)
+	if err != nil {
+		return err
+	}
+	return s.fsProvider.Mount(multiJobSession, multiJobAttachmentStatus)
 }
 
 func (s *sessionActionHandler) doAllUnmounts(action datamodel.SessionAction) error {
