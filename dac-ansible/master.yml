@@ -310,13 +310,6 @@
     - docker_service:
         project_src: /var/lib/slurm-docker/slurm-master
       register: output
-    - name: ensure slurm cluster registered in db
-      shell: |
-        sleep 10 && docker exec slurmctld bash -c "/usr/bin/sacctmgr --immediate add cluster name=linux" && docker restart slurmdbd slurmctld
-      register: shell_result
-      changed_when: "shell_result.rc == 0"
-      failed_when: "shell_result.rc != 0 and ('already exists' not in shell_result.stdout)"
-      when: output.changed
 
 - hosts: slurm_workers
   become: true
