@@ -68,10 +68,10 @@ func (s *sessionActionHandler) processWithMutex(action datamodel.SessionAction, 
 	// Always complete action and drop mutex on function exit
 	defer func() {
 		if err := s.actions.CompleteSessionAction(action); err != nil {
-			log.Printf("failed to complete action %+v\n", action)
+			log.Printf("failed to complete action %+v due to: %s\n", action, err.Error())
 		}
 		if err := sessionMutex.Unlock(context.TODO()); err != nil {
-			log.Println("failed to drop mutex for:", sessionName)
+			log.Printf("failed to drop mutex for: %s due to: %s\n", sessionName, err.Error())
 		}
 	}()
 

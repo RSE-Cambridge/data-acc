@@ -175,5 +175,7 @@ func (s *sessionActions) CompleteSessionAction(sessionAction datamodel.SessionAc
 	if count != 1 {
 		return fmt.Errorf("unable to delete stale request message due to: %s", err)
 	}
+
+	log.Printf("Completed session action %s for session %s\n", sessionAction.Uuid, sessionAction.Session.Name)
 	return nil
 }

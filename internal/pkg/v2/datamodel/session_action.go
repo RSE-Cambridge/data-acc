@@ -7,14 +7,15 @@ type SessionAction struct {
 	Error      string
 }
 
-type SessionActionType int
+type SessionActionType string
 
+// TODO: probably should be an int with custom parser?
 const (
-	UnknownSessionAction SessionActionType = iota
-	SessionCreateFilesystem
-	SessionDelete
-	SessionCopyDataIn
-	SessionMount
-	SessionUnmount
-	SessionCopyDataOut
+	UnknownSessionAction    SessionActionType = SessionActionType("")
+	SessionCreateFilesystem                   = SessionActionType("CreateFilesystem")
+	SessionDelete                             = SessionActionType("Delete")
+	SessionCopyDataIn                         = SessionActionType("CopyDataIn")
+	SessionMount                              = SessionActionType("Mount")
+	SessionUnmount                            = SessionActionType("Unmount")
+	SessionCopyDataOut                        = SessionActionType("CopyDataOut")
 )

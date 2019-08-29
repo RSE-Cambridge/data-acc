@@ -109,9 +109,7 @@ func (client *etcKeystore) Close() error {
 }
 
 func (client *etcKeystore) runTransaction(ifOps []clientv3.Cmp, thenOps []clientv3.Op) error {
-	kvc := clientv3.NewKV(client.Client)
-	kvc.Txn(context.Background())
-	response, err := kvc.Txn(context.Background()).If(ifOps...).Then(thenOps...).Commit()
+	response, err := client.Client.Txn(context.Background()).If(ifOps...).Then(thenOps...).Commit()
 	handleError(err)
 
 	if !response.Succeeded {
@@ -128,7 +126,7 @@ func (client *etcKeystore) Create(key string, value []byte) (store.KeyValueVersi
 	thenOps = append(thenOps, clientv3.OpPut(key, string(value)))
 	err := client.runTransaction(ifOps, thenOps)
 	if err != nil {
-		return store.KeyValueVersion{}, fmt.Errorf("unable to update ke: %s", err)
+		return store.KeyValueVersion{}, fmt.Errorf("unable to create key: %s due to: %s", key, err)
 	}
 	return client.Get(key)
 }
@@ -180,15 +178,13 @@ func getKeyValueVersion(rawKeyValue *mvccpb.KeyValue) *store.KeyValueVersion {
 }
 
 func (client *etcKeystore) IsExist(key string) (bool, error) {
-	kvc := clientv3.NewKV(client.Client)
-	response, err := kvc.Get(context.Background(), key)
+	response, err := client.Client.Get(context.Background(), key)
 	handleError(err)
 	return response.Count == 1, nil
 }
 
 func (client *etcKeystore) GetAll(prefix string) ([]store.KeyValueVersion, error) {
-	kvc := clientv3.NewKV(client.Client)
-	response, err := kvc.Get(context.Background(), prefix, clientv3.WithPrefix())
+	response, err := client.Client.Get(context.Background(), prefix, clientv3.WithPrefix())
 	handleError(err)
 
 	var values []store.KeyValueVersion
@@ -199,8 +195,7 @@ func (client *etcKeystore) GetAll(prefix string) ([]store.KeyValueVersion, error
 }
 
 func (client *etcKeystore) Get(key string) (store.KeyValueVersion, error) {
-	kvc := clientv3.NewKV(client.Client)
-	response, err := kvc.Get(context.Background(), key)
+	response, err := client.Client.Get(context.Background(), key)
 	handleError(err)
 
 	value := store.KeyValueVersion{}
@@ -216,9 +211,8 @@ func (client *etcKeystore) Get(key string) (store.KeyValueVersion, error) {
 }
 
 func (client *etcKeystore) KeepAliveKey(ctxt context.Context, key string) error {
-	kvc := clientv3.NewKV(client.Client)
 
-	getResponse, err := kvc.Get(context.Background(), key)
+	getResponse, err := client.Client.Get(context.Background(), key)
 	if getResponse.Count == 1 {
 		// if another host seems to exist, back off for 10 seconds incase we just did a quick restart
 		time.Sleep(time.Second * 10)
@@ -232,7 +226,7 @@ func (client *etcKeystore) KeepAliveKey(ctxt context.Context, key string) error 
 	}
 	leaseID := grantResponse.ID
 
-	txnResponse, err := kvc.Txn(ctxt).
+	txnResponse, err := client.Client.Txn(ctxt).
 		If(clientv3util.KeyMissing(key)).
 		Then(clientv3.OpPut(key, "keep-alive", clientv3.WithLease(leaseID), clientv3.WithPrevKV())).
 		Commit()
@@ -263,11 +257,8 @@ func (client *etcKeystore) KeepAliveKey(ctxt context.Context, key string) error 
 }
 
 func (client *etcKeystore) DeleteAllKeysWithPrefix(prefix string) (int64, error) {
-	kvc := clientv3.NewKV(client.Client)
-	response, err := kvc.Delete(context.Background(), prefix, clientv3.WithPrefix())
+	response, err := client.Client.Delete(context.Background(), prefix, clientv3.WithPrefix())
 	handleError(err)
-
-	log.Printf("Cleaned %d keys with prefix: '%s'.\n", response.Deleted, prefix)
 	return response.Deleted, nil
 }
 
