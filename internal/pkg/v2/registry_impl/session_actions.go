@@ -109,12 +109,19 @@ func (s *sessionActions) SendSessionAction(
 			log.Printf("found action response %+v\n", responseSessionAction)
 
 			responseChan <- responseSessionAction
-			close(responseChan)
+
+			// delete response now it has been delivered, but only if it was not an error response
+			if responseSessionAction.Error == "" {
+				if count, err := s.store.DeleteAllKeysWithPrefix(responseKey); err != nil || count != 1 {
+					log.Panicf("failed to clean up response key: %s", responseKey)
+				}
+			}
 
 			log.Printf("completed waiting for action response %+v\n", sessionAction)
+			close(responseChan)
 			return
 		}
-		// TODO: don't we need to stop the watch above?
+		// TODO: don't we need to stop the watch above? will we see the delete event?
 	}()
 	return responseChan, nil
 }

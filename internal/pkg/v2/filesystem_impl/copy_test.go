@@ -13,8 +13,7 @@ func Test_GenerateDataCopy(t *testing.T) {
 		Group:            1002,
 		FilesystemStatus: datamodel.FilesystemStatus{InternalName: "fsuuid"},
 		Paths: map[string]string{
-			"DW_JOB_STRIPED":      "/mnt/lustre/fsuuid/global",
-			"DW_PERSISTENT_other": "/mnt/lustre/other/global",
+			"DW_JOB_STRIPED": "/mnt/lustre/fsuuid/global",
 		},
 	}
 	request := datamodel.DataCopyRequest{}
@@ -28,11 +27,11 @@ func Test_GenerateDataCopy(t *testing.T) {
 	request.Destination = "dest"
 	cmd, err = generateDataCopyCmd(session, request)
 	assert.Nil(t, err)
-	assert.Equal(t, "bash -c \"export DW_JOB_STRIPED='/mnt/lustre/fsuuid/global' && export DW_PERSISTENT_other='/mnt/lustre/other/global' && sudo -g '#1002' -u '#1001' rsync -ospgu --stats \\$DW_JOB_STRIPED/source dest\"", cmd)
+	assert.Equal(t, "bash -c \"export DW_JOB_STRIPED='/mnt/lustre/fsuuid/global' && sudo -g '#1002' -u '#1001' rsync -ospgu --stats \\$DW_JOB_STRIPED/source dest\"", cmd)
 
 	cmd, err = generateDataCopyCmd(session, request)
 	assert.Nil(t, err)
-	assert.Equal(t, "bash -c \"export DW_JOB_STRIPED='/mnt/lustre/fsuuid/global' && export DW_PERSISTENT_other='/mnt/lustre/other/global' && sudo -g '#1002' -u '#1001' rsync -ospgu --stats \\$DW_JOB_STRIPED/source dest\"", cmd)
+	assert.Equal(t, "bash -c \"export DW_JOB_STRIPED='/mnt/lustre/fsuuid/global' && sudo -g '#1002' -u '#1001' rsync -ospgu --stats \\$DW_JOB_STRIPED/source dest\"", cmd)
 
 	request.SourceType = datamodel.List
 	request.Source = "list_filename"

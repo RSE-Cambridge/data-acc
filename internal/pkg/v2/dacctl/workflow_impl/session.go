@@ -54,7 +54,7 @@ func (s sessionFacade) submitJob(sessionName datamodel.SessionName, actionType d
 	}
 
 	// This will error out if the host is not currently up
-	sessionAction, err := s.actions.SendSessionAction(context.TODO(), actionType, session)
+	sessionActions, err := s.actions.SendSessionAction(context.TODO(), actionType, session)
 	mutexErr := sessionMutex.Unlock(context.TODO())
 	if err != nil {
 		return err
@@ -63,10 +63,21 @@ func (s sessionFacade) submitJob(sessionName datamodel.SessionName, actionType d
 		return mutexErr
 	}
 
-	// wait for server to complete, or timeout
-	result := <-sessionAction
-	if result.Error != "" {
-		return errors.New(result.Error)
+	// ensure we get one value, and the channel is closed
+	var finalResult *datamodel.SessionAction
+	for action := range sessionActions {
+		if finalResult != nil {
+			log.Panicf("unexpected mulitple actions")
+		}
+		finalResult = &action
+	}
+	if finalResult == nil {
+		log.Panicf("failed to get reponse")
+	}
+
+	// report and errors in the server response
+	if finalResult.Error != "" {
+		return errors.New(finalResult.Error)
 	}
 	return nil
 }
