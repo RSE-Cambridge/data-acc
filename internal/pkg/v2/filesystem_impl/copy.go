@@ -42,9 +42,17 @@ func generateDataCopyCmd(session datamodel.Session, request datamodel.DataCopyRe
 		return "", err
 	}
 
+	if len(session.Paths) < 1 {
+		log.Panicf("trying to do data copy in for session with no paths %+v", session)
+	}
+	var exports []string
+	for name, value := range session.Paths {
+		exports = append(exports, fmt.Sprintf("export %s='%s'", name, value))
+	}
+	exportString := strings.Join(exports, " && ")
+
 	cmd := fmt.Sprintf("sudo -g '#%d' -u '#%d' %s", session.Group, session.Owner, rsync)
-	dacHostBufferPath := fmt.Sprintf("/mnt/lustre/%s/global", session.FilesystemStatus.InternalName)
-	cmd = fmt.Sprintf("bash -c \"export DW_JOB_STRIPED='%s' && %s\"", dacHostBufferPath, cmd)
+	cmd = fmt.Sprintf("bash -c \"%s && %s\"", exportString, cmd)
 	return cmd, nil
 }
 
