@@ -2,10 +2,8 @@ package filesystem_impl
 
 import (
 	"errors"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/stretchr/testify/assert"
-	"log"
 	"testing"
 )
 
@@ -99,32 +97,7 @@ func Test_Mount(t *testing.T) {
 	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
-	attachments := []registry.Attachment{
-		{Hostname: "client1", Job: "job1", State: registry.RequestAttach},
-		{Hostname: "client2", Job: "job1", State: registry.RequestAttach},
-		{Hostname: "client3", Job: "job3", State: registry.Attached},
-		{Hostname: "client3", Job: "job3", State: registry.RequestDetach},
-		{Hostname: "client3", Job: "job3", State: registry.Detached},
-		{Hostname: "client2", Job: "job2", State: registry.RequestAttach},
-	}
-	volume := registry.Volume{
-		Name: "asdf", JobName: "asdf",
-		AttachGlobalNamespace:  true,
-		AttachPrivateNamespace: true,
-		AttachAsSwapBytes:      1024 * 1024, // 1 MiB
-		Attachments:            attachments,
-		ClientPort:             42,
-		Owner:                  1001,
-		Group:                  1001,
-	}
-	bricks := []registry.BrickAllocation{
-		{Hostname: "host1"},
-		{Hostname: "host2"},
-	}
-	log.Println(bricks)
-	log.Println(volume)
 
-	//err := mount(Lustre, volume, bricks, attachments)
 	sessionName := datamodel.SessionName("job1")
 	internalName := "fsuuid"
 	primaryBrickHost := datamodel.BrickHostName("host1")
@@ -170,30 +143,6 @@ func Test_Umount(t *testing.T) {
 	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
-	attachments := []registry.Attachment{
-		{Hostname: "client1", Job: "job4", State: registry.RequestDetach},
-		{Hostname: "client2", Job: "job4", State: registry.RequestDetach},
-		{Hostname: "client3", Job: "job3", State: registry.Attached},
-		{Hostname: "client3", Job: "job3", State: registry.RequestAttach},
-		{Hostname: "client3", Job: "job3", State: registry.Detached},
-		{Hostname: "client2", Job: "job1", State: registry.RequestDetach},
-	}
-	volume := registry.Volume{
-		Name: "asdf", JobName: "asdf",
-		AttachGlobalNamespace:  true,
-		AttachPrivateNamespace: true,
-		AttachAsSwapBytes:      10000,
-		Attachments:            attachments,
-		ClientPort:             42,
-		Owner:                  1001,
-		Group:                  1001,
-	}
-	bricks := []registry.BrickAllocation{
-		{Hostname: "host1"},
-		{Hostname: "host2"},
-	}
-	log.Println(bricks)
-	log.Println(volume)
 
 	sessionName := datamodel.SessionName("job4")
 	internalName := "fsuuid"
@@ -226,26 +175,6 @@ func Test_Umount_multi(t *testing.T) {
 	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
-	attachments := []registry.Attachment{
-		{Hostname: "client1", Job: "job1", State: registry.RequestDetach},
-	}
-	volume := registry.Volume{
-		MultiJob: true,
-		Name:     "asdf", JobName: "asdf",
-		AttachGlobalNamespace:  true,
-		AttachPrivateNamespace: true,
-		AttachAsSwapBytes:      10000,
-		Attachments:            attachments,
-		ClientPort:             42,
-		Owner:                  1001,
-		Group:                  1001,
-	}
-	bricks := []registry.BrickAllocation{
-		{Hostname: "host1"},
-		{Hostname: "host2"},
-	}
-	log.Println(bricks)
-	log.Println(volume)
 
 	sessionName := datamodel.SessionName("asdf")
 	internalName := "uuidasdf"
@@ -275,27 +204,6 @@ func Test_Mount_multi(t *testing.T) {
 	defer func() { runner = &run{} }()
 	fake := &fakeRunner{}
 	runner = fake
-	attachments := []registry.Attachment{
-		{Hostname: "client1", Job: "job1", State: registry.RequestAttach},
-	}
-	volume := registry.Volume{
-		MultiJob: true,
-		Name:     "asdf", JobName: "asdf",
-		AttachGlobalNamespace:  true,
-		AttachPrivateNamespace: true,
-		AttachAsSwapBytes:      10000,
-		Attachments:            attachments,
-		ClientPort:             42,
-		Owner:                  1001,
-		Group:                  1001,
-		UUID:                   "medkDfdg",
-	}
-	bricks := []registry.BrickAllocation{
-		{Hostname: "host1"},
-		{Hostname: "host2"},
-	}
-	log.Println(bricks)
-	log.Println(volume)
 
 	sessionName := datamodel.SessionName("asdf")
 	internalName := "uuidasdf"
