@@ -266,7 +266,6 @@ func (s *sessionActionHandler) doMutliJobMount(action datamodel.SessionAction, s
 	return s.fsProvider.Mount(multiJobSession, multiJobAttachmentStatus)
 }
 
-
 func (s *sessionActionHandler) doMutliJobUnmount(action datamodel.SessionAction, sessionName datamodel.SessionName) error {
 	sessionMutex, err := s.sessionRegistry.GetSessionMutex(sessionName)
 	if err != nil {
