@@ -2,7 +2,7 @@ package brick_manager_impl
 
 import (
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacd/config"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 )
 
