@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/clientv3util"
@@ -13,15 +14,13 @@ import (
 	"github.com/coreos/etcd/mvcc/mvccpb"
 	"github.com/coreos/etcd/pkg/transport"
 	"log"
-	"os"
-	"strings"
 	"time"
 )
 
-func getTLSConfig() *tls.Config {
-	certFile := os.Getenv("ETCDCTL_CERT_FILE")
-	keyFile := os.Getenv("ETCDCTL_KEY_FILE")
-	caFile := os.Getenv("ETCDCTL_CA_FILE")
+func getTLSConfig(keystoreConfig config.KeystoreConfig) *tls.Config {
+	certFile := keystoreConfig.CertFile
+	keyFile := keystoreConfig.KeyFile
+	caFile := keystoreConfig.CAFile
 
 	if certFile == "" || keyFile == "" || caFile == "" {
 		return nil
@@ -39,22 +38,12 @@ func getTLSConfig() *tls.Config {
 	return tlsConfig
 }
 
-func getEndpoints() []string {
-	endpoints := os.Getenv("ETCDCTL_ENDPOINTS")
-	if endpoints == "" {
-		endpoints = os.Getenv("ETCD_ENDPOINTS")
-	}
-	if endpoints == "" {
-		log.Fatalf("Must set ETCDCTL_ENDPOINTS environemnt variable, e.g. export ETCDCTL_ENDPOINTS=127.0.0.1:2379")
-	}
-	return strings.Split(endpoints, ",")
-}
-
 func newEtcdClient() *clientv3.Client {
+	conf := config.GetKeystoreConfig(config.DefaultEnv)
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   getEndpoints(),
+		Endpoints:   conf.Endpoints,
 		DialTimeout: 10 * time.Second,
-		TLS:         getTLSConfig(),
+		TLS:         getTLSConfig(conf),
 	})
 	if err != nil {
 		fmt.Println("failed to create client")
