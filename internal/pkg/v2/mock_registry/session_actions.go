@@ -34,7 +34,7 @@ func (m *MockSessionActions) EXPECT() *MockSessionActionsMockRecorder {
 	return m.recorder
 }
 
-// SendSessionAction mocks base method
+// SendSessionAction mock_fileio base method
 func (m *MockSessionActions) SendSessionAction(ctxt context.Context, actionType datamodel.SessionActionType, session datamodel.Session) (<-chan datamodel.SessionAction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendSessionAction", ctxt, actionType, session)
@@ -49,7 +49,7 @@ func (mr *MockSessionActionsMockRecorder) SendSessionAction(ctxt, actionType, se
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendSessionAction", reflect.TypeOf((*MockSessionActions)(nil).SendSessionAction), ctxt, actionType, session)
 }
 
-// GetSessionActionRequests mocks base method
+// GetSessionActionRequests mock_fileio base method
 func (m *MockSessionActions) GetSessionActionRequests(ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSessionActionRequests", ctxt, brickHostName)
@@ -64,7 +64,7 @@ func (mr *MockSessionActionsMockRecorder) GetSessionActionRequests(ctxt, brickHo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionActionRequests", reflect.TypeOf((*MockSessionActions)(nil).GetSessionActionRequests), ctxt, brickHostName)
 }
 
-// CompleteSessionAction mocks base method
+// CompleteSessionAction mock_fileio base method
 func (m *MockSessionActions) CompleteSessionAction(action datamodel.SessionAction) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CompleteSessionAction", action)

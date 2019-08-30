@@ -1,7 +1,7 @@
 package actions_impl
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_facade"
 	"github.com/golang/mock/gomock"
@@ -13,7 +13,7 @@ func TestDacctlActions_ValidateJob_BadInput(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	session := mock_facade.NewMockSession(mockCtrl)
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	lines := []string{`#DW bad cmd`}
 	disk.EXPECT().Lines("jobfile").Return(lines, nil)
@@ -34,7 +34,7 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	session := mock_facade.NewMockSession(mockCtrl)
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	lines := []string{
 		`#DW jobdw capacity=4MiB access_mode=striped,private type=scratch`,

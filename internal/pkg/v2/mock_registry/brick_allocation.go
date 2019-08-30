@@ -34,7 +34,7 @@ func (m *MockAllocationRegistry) EXPECT() *MockAllocationRegistryMockRecorder {
 	return m.recorder
 }
 
-// GetAllocationMutex mocks base method
+// GetAllocationMutex mock_fileio base method
 func (m *MockAllocationRegistry) GetAllocationMutex() (store.Mutex, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllocationMutex")
@@ -49,7 +49,7 @@ func (mr *MockAllocationRegistryMockRecorder) GetAllocationMutex() *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllocationMutex", reflect.TypeOf((*MockAllocationRegistry)(nil).GetAllocationMutex))
 }
 
-// GetPool mocks base method
+// GetPool mock_fileio base method
 func (m *MockAllocationRegistry) GetPool(name datamodel.PoolName) (datamodel.Pool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPool", name)
@@ -64,7 +64,7 @@ func (mr *MockAllocationRegistryMockRecorder) GetPool(name interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPool", reflect.TypeOf((*MockAllocationRegistry)(nil).GetPool), name)
 }
 
-// EnsurePoolCreated mocks base method
+// EnsurePoolCreated mock_fileio base method
 func (m *MockAllocationRegistry) EnsurePoolCreated(poolName datamodel.PoolName, granularityBytes uint) (datamodel.Pool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EnsurePoolCreated", poolName, granularityBytes)
@@ -79,7 +79,7 @@ func (mr *MockAllocationRegistryMockRecorder) EnsurePoolCreated(poolName, granul
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnsurePoolCreated", reflect.TypeOf((*MockAllocationRegistry)(nil).EnsurePoolCreated), poolName, granularityBytes)
 }
 
-// GetAllPoolInfos mocks base method
+// GetAllPoolInfos mock_fileio base method
 func (m *MockAllocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllPoolInfos")
@@ -94,7 +94,7 @@ func (mr *MockAllocationRegistryMockRecorder) GetAllPoolInfos() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllPoolInfos", reflect.TypeOf((*MockAllocationRegistry)(nil).GetAllPoolInfos))
 }
 
-// GetPoolInfo mocks base method
+// GetPoolInfo mock_fileio base method
 func (m *MockAllocationRegistry) GetPoolInfo(poolName datamodel.PoolName) (datamodel.PoolInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPoolInfo", poolName)

@@ -2,7 +2,7 @@ package parsers
 
 import (
 	"errors"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -14,14 +14,14 @@ func TestParseJobFile(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	mockFileIO := mocks.NewMockDisk(mockCtrl)
+	mockFileIO := mock_fileio.NewMockDisk(mockCtrl)
 	mockFileIO.EXPECT().Lines("testfile").Return(nil, errors.New("asdf"))
 
 	lines, err := ParseJobFile(mockFileIO, "testfile")
 	assert.Equal(t, jobSummary{}, lines)
 	assert.Equal(t, "asdf", err.Error())
 
-	mockFileIO = mocks.NewMockDisk(mockCtrl)
+	mockFileIO = mock_fileio.NewMockDisk(mockCtrl)
 	mockFileIO.EXPECT().Lines("testfile").Return([]string{`#DW swap asdf`}, nil)
 
 	lines, err = ParseJobFile(mockFileIO, "testfile")

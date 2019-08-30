@@ -2,7 +2,7 @@ package parsers
 
 import (
 	"errors"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_fileio"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -11,7 +11,7 @@ import (
 func TestGetHostnamesFromFile(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	fakeHosts := []string{"test1", "test2"}
 	disk.EXPECT().Lines("file").Return(fakeHosts, nil)
@@ -24,7 +24,7 @@ func TestGetHostnamesFromFile(t *testing.T) {
 func TestGetHostnamesFromFile_Empty(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	disk.EXPECT().Lines("file").Return(nil, nil)
 
@@ -43,7 +43,7 @@ func TestGetHostnamesFromFile_Empty(t *testing.T) {
 func TestGetHostnamesFromFile_ErrorOnBadHostname(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	fakeHosts := []string{"Test", "test", "test1", "test2.com", "bad hostname", "foo/bar", ""}
 	disk.EXPECT().Lines("file").Return(fakeHosts, nil)

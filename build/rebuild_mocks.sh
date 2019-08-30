@@ -9,7 +9,7 @@ mkdir -p internal/pkg/mocks
 items="disk"
 for i in $items; do
     mockgen -source=internal/pkg/fileio/${i}.go \
-        -package mocks >internal/pkg/mocks/${i}_mock.go
+        >internal/pkg/mock_fileio/${i}_mock.go
 done
 
 items="session session_action_handler"

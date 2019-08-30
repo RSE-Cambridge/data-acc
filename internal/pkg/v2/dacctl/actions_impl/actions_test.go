@@ -3,7 +3,7 @@ package actions_impl
 import (
 	"errors"
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_facade"
 	"github.com/golang/mock/gomock"
@@ -115,7 +115,7 @@ func TestDacctlActions_PreRun(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	session := mock_facade.NewMockSession(mockCtrl)
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	computeHosts := []string{"host1", "host2"}
 	loginHosts := []string{"login"}
@@ -146,7 +146,7 @@ func TestDacctlActions_PreRun_NoLoginHosts(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	session := mock_facade.NewMockSession(mockCtrl)
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	computeHosts := []string{"host1", "host2"}
 	disk.EXPECT().Lines("computehostfile").Return(computeHosts, nil)
@@ -167,7 +167,7 @@ func TestDacctlActions_PreRun_NoLoginHosts(t *testing.T) {
 func TestDacctlActions_PreRun_BadHosts(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	computeHosts := []string{"host1", "host/2"}
 	disk.EXPECT().Lines("computehostfile").Return(computeHosts, nil)
@@ -187,7 +187,7 @@ func TestDacctlActions_PreRun_BadLoginHosts(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	session := mock_facade.NewMockSession(mockCtrl)
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	computeHosts := []string{"host1", "host2"}
 	loginHosts := []string{"login/asdf"}
@@ -209,7 +209,7 @@ func TestDacctlActions_PreRun_BadLoginHosts(t *testing.T) {
 func TestDacctlActions_PreRun_NoHosts(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	disk.EXPECT().Lines("computehostfile").Return(nil, nil)
 

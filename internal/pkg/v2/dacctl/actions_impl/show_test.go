@@ -2,7 +2,7 @@ package actions_impl
 
 import (
 	"errors"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/mocks"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_facade"
 	"github.com/golang/mock/gomock"
@@ -35,7 +35,7 @@ func TestDacctlActions_Paths(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	session := mock_facade.NewMockSession(mockCtrl)
-	disk := mocks.NewMockDisk(mockCtrl)
+	disk := mock_fileio.NewMockDisk(mockCtrl)
 
 	session.EXPECT().GetSession(datamodel.SessionName("bar")).Return(datamodel.Session{
 		Name: datamodel.SessionName("bar"),

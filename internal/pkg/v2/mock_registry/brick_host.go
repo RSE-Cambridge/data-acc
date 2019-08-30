@@ -34,7 +34,7 @@ func (m *MockBrickHostRegistry) EXPECT() *MockBrickHostRegistryMockRecorder {
 	return m.recorder
 }
 
-// UpdateBrickHost mocks base method
+// UpdateBrickHost mock_fileio base method
 func (m *MockBrickHostRegistry) UpdateBrickHost(brickHostInfo datamodel.BrickHost) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateBrickHost", brickHostInfo)
@@ -48,7 +48,7 @@ func (mr *MockBrickHostRegistryMockRecorder) UpdateBrickHost(brickHostInfo inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBrickHost", reflect.TypeOf((*MockBrickHostRegistry)(nil).UpdateBrickHost), brickHostInfo)
 }
 
-// GetAllBrickHosts mocks base method
+// GetAllBrickHosts mock_fileio base method
 func (m *MockBrickHostRegistry) GetAllBrickHosts() ([]datamodel.BrickHost, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllBrickHosts")
@@ -63,7 +63,7 @@ func (mr *MockBrickHostRegistryMockRecorder) GetAllBrickHosts() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllBrickHosts", reflect.TypeOf((*MockBrickHostRegistry)(nil).GetAllBrickHosts))
 }
 
-// KeepAliveHost mocks base method
+// KeepAliveHost mock_fileio base method
 func (m *MockBrickHostRegistry) KeepAliveHost(ctxt context.Context, brickHostName datamodel.BrickHostName) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "KeepAliveHost", ctxt, brickHostName)
@@ -77,7 +77,7 @@ func (mr *MockBrickHostRegistryMockRecorder) KeepAliveHost(ctxt, brickHostName i
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KeepAliveHost", reflect.TypeOf((*MockBrickHostRegistry)(nil).KeepAliveHost), ctxt, brickHostName)
 }
 
-// IsBrickHostAlive mocks base method
+// IsBrickHostAlive mock_fileio base method
 func (m *MockBrickHostRegistry) IsBrickHostAlive(brickHostName datamodel.BrickHostName) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsBrickHostAlive", brickHostName)

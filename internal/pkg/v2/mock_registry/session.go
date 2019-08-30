@@ -34,7 +34,7 @@ func (m *MockSessionRegistry) EXPECT() *MockSessionRegistryMockRecorder {
 	return m.recorder
 }
 
-// GetSessionMutex mocks base method
+// GetSessionMutex mock_fileio base method
 func (m *MockSessionRegistry) GetSessionMutex(sessionName datamodel.SessionName) (store.Mutex, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSessionMutex", sessionName)
@@ -49,7 +49,7 @@ func (mr *MockSessionRegistryMockRecorder) GetSessionMutex(sessionName interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionMutex", reflect.TypeOf((*MockSessionRegistry)(nil).GetSessionMutex), sessionName)
 }
 
-// CreateSession mocks base method
+// CreateSession mock_fileio base method
 func (m *MockSessionRegistry) CreateSession(session datamodel.Session) (datamodel.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSession", session)
@@ -64,7 +64,7 @@ func (mr *MockSessionRegistryMockRecorder) CreateSession(session interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockSessionRegistry)(nil).CreateSession), session)
 }
 
-// GetSession mocks base method
+// GetSession mock_fileio base method
 func (m *MockSessionRegistry) GetSession(sessionName datamodel.SessionName) (datamodel.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSession", sessionName)
@@ -79,7 +79,7 @@ func (mr *MockSessionRegistryMockRecorder) GetSession(sessionName interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSession", reflect.TypeOf((*MockSessionRegistry)(nil).GetSession), sessionName)
 }
 
-// GetAllSessions mocks base method
+// GetAllSessions mock_fileio base method
 func (m *MockSessionRegistry) GetAllSessions() ([]datamodel.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllSessions")
@@ -94,7 +94,7 @@ func (mr *MockSessionRegistryMockRecorder) GetAllSessions() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSessions", reflect.TypeOf((*MockSessionRegistry)(nil).GetAllSessions))
 }
 
-// UpdateSession mocks base method
+// UpdateSession mock_fileio base method
 func (m *MockSessionRegistry) UpdateSession(session datamodel.Session) (datamodel.Session, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateSession", session)
@@ -109,7 +109,7 @@ func (mr *MockSessionRegistryMockRecorder) UpdateSession(session interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSession", reflect.TypeOf((*MockSessionRegistry)(nil).UpdateSession), session)
 }
 
-// DeleteSession mocks base method
+// DeleteSession mock_fileio base method
 func (m *MockSessionRegistry) DeleteSession(session datamodel.Session) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteSession", session)
