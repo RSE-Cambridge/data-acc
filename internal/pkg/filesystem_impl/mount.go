@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"log"
-	"os"
 	"os/exec"
 	"path"
-	"strconv"
 	"time"
 )
 
@@ -19,22 +17,6 @@ func getMountDir(sourceName datamodel.SessionName, isMultiJob bool, attachingFor
 	return fmt.Sprintf("/dac/%s_job", sourceName)
 }
 
-func getLnetSuffix() string {
-	return os.Getenv("DAC_LNET_SUFFIX")
-}
-
-func getMdtSizeMB() uint {
-	mdtSizeGB, err := strconv.ParseUint(os.Getenv("DAC_MDT_SIZE_GB"), 10, 32)
-	if err == nil && mdtSizeGB > 0 {
-		return uint(mdtSizeGB * 1024)
-	}
-	mdtSizeMB, err := strconv.ParseUint(os.Getenv("DAC_MDT_SIZE_MB"), 10, 32)
-	if err == nil && mdtSizeMB > 0 {
-		return uint(mdtSizeMB)
-	}
-	return uint(20 * 1024)
-}
-
 func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, internalName string,
 	primaryBrickHost datamodel.BrickHostName, attachment datamodel.AttachmentSessionStatus,
 	owner uint, group uint) error {
@@ -43,8 +25,6 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 	if primaryBrickHost == "" {
 		log.Panicf("failed to find primary brick for volume: %s", sessionName)
 	}
-
-	lnetSuffix := getLnetSuffix()
 
 	if fsType == BeegFS {
 		// Write out the config needed, and do the mount using ansible
@@ -60,7 +40,7 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 		if err := mkdir(attachHost, mountDir); err != nil {
 			return err
 		}
-		if err := mountRemoteFilesystem(fsType, attachHost, lnetSuffix,
+		if err := mountRemoteFilesystem(fsType, attachHost, conf.LnetSuffix,
 			string(primaryBrickHost), internalName, mountDir); err != nil {
 			return err
 		}
@@ -260,11 +240,11 @@ type Run interface {
 type run struct {
 }
 
+// TODO: need some code sharing here!!!
 func (*run) Execute(hostname string, cmdStr string) error {
 	log.Println("SSH to:", hostname, "with command:", cmdStr)
 
-	skipAnsible := os.Getenv("DAC_SKIP_ANSIBLE")
-	if skipAnsible == "True" {
+	if conf.SkipAnsible {
 		log.Println("Skip as DAC_SKIP_ANSIBLE=True")
 		time.Sleep(time.Millisecond * 200)
 		return nil
@@ -275,7 +255,9 @@ func (*run) Execute(hostname string, cmdStr string) error {
 
 	timer := time.AfterFunc(time.Minute, func() {
 		log.Println("Time up, waited more than 5 mins to complete.")
-		cmd.Process.Kill()
+		if err := cmd.Process.Kill(); err != nil {
+			log.Panicf("error trying to kill process: %s", err.Error())
+		}
 	})
 
 	output, err := cmd.CombinedOutput()

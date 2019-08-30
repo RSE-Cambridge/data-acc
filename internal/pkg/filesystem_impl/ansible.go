@@ -3,6 +3,7 @@ package filesystem_impl
 import (
 	"bytes"
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -11,7 +12,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -35,21 +35,9 @@ type Wrapper struct {
 	All FileSystems
 }
 
-var DefaultHostGroup = "dac-prod"
-var DefaultMaxMDTs uint = 24
+var conf = config.GetFilesystemConfig()
 
 func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) string {
-	// NOTE: only used by lustre
-	mgsDevice := os.Getenv("DAC_MGS_DEV")
-	if mgsDevice == "" {
-		mgsDevice = "sdb"
-	}
-	maxMDTs := DefaultMaxMDTs
-	maxMDTsConf, err := strconv.ParseUint(os.Getenv("DAC_MAX_MDT_COUNT"), 10, 32)
-	if err == nil && maxMDTsConf > 0 {
-		maxMDTs = uint(maxMDTsConf)
-	}
-
 	allocationByHost := make(map[datamodel.BrickHostName][]datamodel.BrickAllocation)
 	for i, brick := range allBricks {
 		allocationByHost[brick.BrickHostName] = append(allocationByHost[brick.BrickHostName], datamodel.BrickAllocation{
@@ -62,7 +50,7 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 	// assign at most one mdt per host.
 	// While this may give us less MDTs than max MDTs,
 	// but it helps spread MDTs across network connections
-	oneMdtPerHost := len(allBricks) > int(maxMDTs)
+	oneMdtPerHost := len(allBricks) > int(conf.MaxMDTs)
 
 	hosts := make(map[string]HostInfo)
 	mgsnode := ""
@@ -86,7 +74,7 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 
 		if allocations[0].AllocatedIndex == 0 {
 			if fsType == Lustre {
-				hostInfo.MGS = mgsDevice
+				hostInfo.MGS = conf.MGSDevice
 			} else {
 				hostInfo.MGS = allocations[0].Brick.Device
 			}
@@ -101,8 +89,8 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 		Vars: map[string]string{
 			"mgsnode": mgsnode,
 			//"client_port": fmt.Sprintf("%d", volume.ClientPort),
-			"lnet_suffix": getLnetSuffix(),
-			"mdt_size":    fmt.Sprintf("%dm", getMdtSizeMB()),
+			"lnet_suffix": conf.LnetSuffix,
+			"mdt_size":    fmt.Sprintf("%dm", conf.MDTSizeMB),
 		},
 		Hosts: hosts,
 	}
@@ -121,11 +109,7 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 	strOut = strings.Replace(strOut, " client_port:", fmt.Sprintf(" %s_client_port:", fsname), -1)
 	strOut = strings.Replace(strOut, " mdt_size:", fmt.Sprintf(" %s_mdt_size:", fsname), -1)
 
-	hostGroup := os.Getenv("DAC_HOST_GROUP")
-	if hostGroup == "" {
-		hostGroup = DefaultHostGroup
-	}
-	strOut = strings.Replace(strOut, "all:", hostGroup+":", -1)
+	strOut = strings.Replace(strOut, "all:", conf.HostGroup+":", -1)
 	return strOut
 }
 
@@ -146,11 +130,7 @@ func getPlaybook(fsType FSType, fsUuid string) string {
 }
 
 func getAnsibleDir(suffix string) string {
-	ansibleDir := os.Getenv("DAC_ANSIBLE_DIR")
-	if ansibleDir == "" {
-		ansibleDir = "/var/lib/data-acc/fs-ansible/"
-	}
-	return path.Join(ansibleDir, suffix)
+	return path.Join(conf.AnsibleDir, suffix)
 }
 
 func setupAnsible(fsType FSType, internalName string, bricks []datamodel.Brick) (string, error) {
@@ -244,8 +224,7 @@ func executeAnsiblePlaybook(dir string, args string) error {
 	cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook %s;`, dir, args)
 	log.Println("Requested ansible:", cmdStr)
 
-	skipAnsible := os.Getenv("DAC_SKIP_ANSIBLE")
-	if skipAnsible == "True" {
+	if conf.SkipAnsible {
 		log.Println("Skip as DAC_SKIP_ANSIBLE=True")
 		time.Sleep(time.Millisecond * 200)
 		return nil
