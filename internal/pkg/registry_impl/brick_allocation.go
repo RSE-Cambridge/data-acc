@@ -134,6 +134,17 @@ func (a *allocationRegistry) GetAllPoolInfos() ([]datamodel.PoolInfo, error) {
 		}
 
 		for _, brickHost := range brickHosts {
+			// skip disabled hosts
+			if !brickHost.Enabled {
+				continue
+			}
+			// skip dead hosts
+			hostAlive, _ := a.brickHostRegistry.IsBrickHostAlive(brickHost.Name)
+			if !hostAlive {
+				continue
+			}
+
+			// look for any unallocated bricks
 			for _, brick := range brickHost.Bricks {
 				allocated := false
 				for _, allocatedDevice := range allocatedDevicesByBrickHost[brick.BrickHostName] {
