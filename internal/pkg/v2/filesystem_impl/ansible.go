@@ -154,6 +154,10 @@ func getAnsibleDir(suffix string) string {
 }
 
 func setupAnsible(fsType FSType, internalName string, bricks []datamodel.Brick) (string, error) {
+	if len(bricks) == 0 {
+		log.Panicf("can't create filesystem with no bricks: %s", internalName)
+	}
+
 	dir, err := ioutil.TempDir("", fmt.Sprintf("fs%s_", internalName))
 	if err != nil {
 		return dir, err
