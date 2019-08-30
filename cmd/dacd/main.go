@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/store_impl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/brick_manager_impl"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store_impl"
 	"log"
 	"os"
 	"os/signal"

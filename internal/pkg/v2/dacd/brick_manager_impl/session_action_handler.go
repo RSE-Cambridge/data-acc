@@ -6,10 +6,10 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/facade"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/filesystem"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/filesystem_impl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry_impl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/filesystem_impl"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry_impl"
 	"log"
 )
 
