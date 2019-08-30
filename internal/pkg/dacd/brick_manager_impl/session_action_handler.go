@@ -266,20 +266,56 @@ func (s *sessionActionHandler) doMutliJobMount(action datamodel.SessionAction, s
 	return s.fsProvider.Mount(multiJobSession, multiJobAttachmentStatus)
 }
 
+
+func (s *sessionActionHandler) doMutliJobUnmount(action datamodel.SessionAction, sessionName datamodel.SessionName) error {
+	sessionMutex, err := s.sessionRegistry.GetSessionMutex(sessionName)
+	if err != nil {
+		log.Printf("unable to get session mutex: %s due to: %s\n", sessionName, err)
+		return err
+	}
+	if err = sessionMutex.Lock(context.TODO()); err != nil {
+		log.Printf("unable to lock session mutex: %s due to: %s\n", sessionName, err)
+		return err
+	}
+	defer func() {
+		if err := sessionMutex.Unlock(context.TODO()); err != nil {
+			log.Println("failed to drop mutex for:", sessionName)
+		}
+	}()
+
+	multiJobSession, err := s.sessionRegistry.GetSession(sessionName)
+	if err != nil {
+		return err
+	}
+	if !multiJobSession.VolumeRequest.MultiJob {
+		log.Panicf("trying multi-job attach to non-multi job session %s", multiJobSession.Name)
+	}
+
+	attachments, ok := multiJobSession.CurrentAttachments[action.Session.Name]
+	if !ok {
+		log.Println("skip detach, already seems to be detached")
+		return nil
+	}
+	if err := s.fsProvider.Unmount(multiJobSession, attachments); err != nil {
+		return err
+	}
+
+	// update multi job session to note our attachments have now gone
+	delete(multiJobSession.CurrentAttachments, action.Session.Name)
+	_, err = s.sessionRegistry.UpdateSession(multiJobSession)
+	return err
+}
+
 func (s *sessionActionHandler) doAllUnmounts(action datamodel.SessionAction) error {
 	if action.Session.ActualSizeBytes > 0 {
 		if err := s.fsProvider.Unmount(action.Session, action.Session.CurrentAttachments[action.Session.Name]); err != nil {
 			return err
 		}
-		// TODO: delete attachments?
 	}
 	for _, sessionName := range action.Session.MultiJobAttachments {
-		multiJobSession, _ := s.sessionRegistry.GetSession(sessionName)
-		attachments := multiJobSession.CurrentAttachments[action.Session.Name]
-		if err := s.fsProvider.Unmount(multiJobSession, attachments); err != nil {
+		if err := s.doMutliJobUnmount(action, sessionName); err != nil {
 			return err
 		}
-		// TODO: delete attachments to prevent double unmount on teardown?
 	}
 	return nil
 }
