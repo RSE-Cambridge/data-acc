@@ -89,6 +89,12 @@ func (s *sessionActionHandler) processWithMutex(action datamodel.SessionAction, 
 
 func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
+		// Nothing to create, just complete the action
+		// TODO: why do we send the action?
+		if action.Session.ActualSizeBytes == 0 {
+			return action.Session, nil
+		}
+
 		// Get latest session now we have the mutex
 		session, err := s.sessionRegistry.GetSession(action.Session.Name)
 		if err != nil {
@@ -126,8 +132,11 @@ func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
 			}
 		}
 
-		if err := s.fsProvider.Delete(action.Session); err != nil {
-			return action.Session, err
+		// Only try delete if we have bricks to delete
+		if action.Session.ActualSizeBytes > 0 {
+			if err := s.fsProvider.Delete(action.Session); err != nil {
+				return action.Session, err
+			}
 		}
 
 		return action.Session, s.sessionRegistry.DeleteSession(action.Session)
