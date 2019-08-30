@@ -207,11 +207,15 @@ func executeAnsibleSetup(internalName string, bricks []datamodel.Brick) error {
 	formatArgs := "dac.yml -i inventory --tag format"
 	err = executeAnsiblePlaybook(dir, formatArgs)
 	if err != nil {
-		return err
+		return fmt.Errorf("error during server format: %s", err.Error())
 	}
 
 	startupArgs := "dac.yml -i inventory --tag mount,create_mdt,create_mgs,create_osts,client_mount"
-	return executeAnsiblePlaybook(dir, startupArgs)
+	err = executeAnsiblePlaybook(dir, startupArgs)
+	if err != nil {
+		return fmt.Errorf("error during create fs: %s", err.Error())
+	}
+	return nil
 }
 
 func executeAnsibleTeardown(internalName string, bricks []datamodel.Brick) error {
@@ -219,53 +223,19 @@ func executeAnsibleTeardown(internalName string, bricks []datamodel.Brick) error
 	if err != nil {
 		return err
 	}
+	defer os.RemoveAll(dir)
 
 	stopArgs := "dac.yml -i inventory --tag stop_all,unmount,client_unmount"
 	err = executeAnsiblePlaybook(dir, stopArgs)
 	if err != nil {
-		return err
+		return fmt.Errorf("error during server umount: %s", err.Error())
 	}
 
 	formatArgs := "dac.yml -i inventory --tag clean"
 	err = executeAnsiblePlaybook(dir, formatArgs)
 	if err != nil {
-		return err
+		return fmt.Errorf("error during server clean: %s", err.Error())
 	}
-
-	// only delete if everything worked, to aid debugging
-	os.RemoveAll(dir)
-	return nil
-}
-
-func executeAnsibleMount(internalName string, bricks []datamodel.Brick) error {
-	dir, err := setupAnsible(Lustre, internalName, bricks)
-	if err != nil {
-		return err
-	}
-
-	startupArgs := "dac.yml -i inventory --tag client_mount"
-	err = executeAnsiblePlaybook(dir, startupArgs)
-	if err != nil {
-		return err
-	}
-
-	os.RemoveAll(dir)
-	return nil
-}
-
-func executeAnsibleUnmount(internalName string, bricks []datamodel.Brick) error {
-	dir, err := setupAnsible(Lustre, internalName, bricks)
-	if err != nil {
-		return err
-	}
-
-	stopArgs := "dac.yml -i inventory --tag client_unmount"
-	err = executeAnsiblePlaybook(dir, stopArgs)
-	if err != nil {
-		return err
-	}
-
-	os.RemoveAll(dir)
 	return nil
 }
 
