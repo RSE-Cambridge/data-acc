@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/config"
 	"github.com/RSE-Cambridge/data-acc/pkg/version"
 	"github.com/urfave/cli"
 	"log"
@@ -166,10 +167,7 @@ func runCli(args []string) error {
 }
 
 func main() {
-	logFilename := os.Getenv("DACCTL_LOG")
-	if logFilename == "" {
-		logFilename = "/var/log/dacctl.log"
-	}
+	logFilename := config.GetDacctlLog()
 	f, err := os.OpenFile(logFilename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("please use DACCTL_LOG to configure an alternative, as error opening file: %v ", err)
