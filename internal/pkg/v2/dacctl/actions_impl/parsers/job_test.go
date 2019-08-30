@@ -2,8 +2,8 @@ package parsers
 
 import (
 	"errors"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_fileio"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"log"

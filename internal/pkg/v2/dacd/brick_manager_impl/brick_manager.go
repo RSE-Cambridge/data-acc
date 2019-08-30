@@ -2,12 +2,12 @@ package brick_manager_impl
 
 import (
 	"context"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/facade"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/config"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/facade"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry_impl"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
 	"log"
 )
 

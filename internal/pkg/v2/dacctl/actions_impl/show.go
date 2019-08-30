@@ -2,8 +2,8 @@ package actions_impl
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 )
 
 func (d *dacctlActions) getSession(c dacctl.CliContext) (datamodel.Session, error) {

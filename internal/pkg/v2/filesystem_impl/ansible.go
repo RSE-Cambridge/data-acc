@@ -3,7 +3,7 @@ package filesystem_impl
 import (
 	"bytes"
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"

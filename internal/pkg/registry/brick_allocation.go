@@ -1,8 +1,8 @@
 package registry
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
 )
 
 type AllocationRegistry interface {

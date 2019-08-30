@@ -1,8 +1,8 @@
 package filesystem_impl
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/filesystem"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/filesystem"
 	"math/rand"
 )
 

@@ -2,9 +2,9 @@ package actions_impl
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"log"
 	"sort"
 )

@@ -1,6 +1,6 @@
 package filesystem
 
-import "github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+import "github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 
 type Provider interface {
 	Create(session datamodel.Session) (datamodel.FilesystemStatus, error)

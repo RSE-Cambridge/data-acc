@@ -2,10 +2,10 @@ package brick_manager_impl
 
 import (
 	"context"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_facade"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/config"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_facade"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_registry"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"os"

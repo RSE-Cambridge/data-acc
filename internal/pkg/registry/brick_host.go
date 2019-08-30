@@ -2,7 +2,7 @@ package registry
 
 import (
 	"context"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 )
 
 type BrickHostRegistry interface {

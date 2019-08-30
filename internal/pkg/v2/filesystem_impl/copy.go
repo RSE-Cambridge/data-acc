@@ -2,7 +2,7 @@ package filesystem_impl
 
 import (
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"log"
 	"path"
 	"strings"

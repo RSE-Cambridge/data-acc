@@ -3,9 +3,9 @@ package registry_impl
 import (
 	"encoding/json"
 	"errors"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/mock_store"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/mock_store"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"

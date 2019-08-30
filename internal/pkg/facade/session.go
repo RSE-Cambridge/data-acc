@@ -1,6 +1,6 @@
 package facade
 
-import "github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+import "github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 
 // Each volume has an associated primary brick
 // that is responsible for responding to any actions

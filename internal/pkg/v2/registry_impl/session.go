@@ -3,10 +3,10 @@ package registry_impl
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/registry"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/store"
 	"log"
 )
 

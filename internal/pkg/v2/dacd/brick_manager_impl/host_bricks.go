@@ -2,8 +2,8 @@ package brick_manager_impl
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacd/config"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 )
 
 func getDevices(brickManagerConfig config.BrickManagerConfig) []string {

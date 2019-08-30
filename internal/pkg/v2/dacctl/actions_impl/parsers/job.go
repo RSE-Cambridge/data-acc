@@ -2,8 +2,8 @@ package parsers
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
 	"log"
 	"strings"
 )

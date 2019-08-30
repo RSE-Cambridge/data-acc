@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"log"
 	"os"
 	"strconv"
