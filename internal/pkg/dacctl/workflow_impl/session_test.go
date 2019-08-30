@@ -31,7 +31,7 @@ func TestSessionFacade_CreateSession_NoBricks(t *testing.T) {
 	allocations.EXPECT().GetPool(datamodel.PoolName("pool1")).Return(datamodel.Pool{Name: "pool1"}, nil)
 	sessionMutex := mock_store.NewMockMutex(mockCtrl)
 	sessionRegistry.EXPECT().GetSessionMutex(initialSession.Name).Return(sessionMutex, nil)
-	sessionMutex.EXPECT().Lock(context.TODO())
+	sessionMutex.EXPECT().Lock(gomock.Any())
 	brickList := []datamodel.Brick{{Device: "sda", BrickHostName: datamodel.BrickHostName("host1")}}
 	allocations.EXPECT().GetAllPoolInfos().Return([]datamodel.PoolInfo{{AvailableBricks: brickList}}, nil)
 	initialSession.PrimaryBrickHost = "host1"
@@ -63,7 +63,7 @@ func TestSessionFacade_CreateSession_WithBricks_AllocationError(t *testing.T) {
 	allocations.EXPECT().GetPool(datamodel.PoolName("pool1")).Return(datamodel.Pool{Name: "pool1"}, nil)
 	sessionMutex := mock_store.NewMockMutex(mockCtrl)
 	sessionRegistry.EXPECT().GetSessionMutex(initialSession.Name).Return(sessionMutex, nil)
-	sessionMutex.EXPECT().Lock(context.TODO())
+	sessionMutex.EXPECT().Lock(gomock.Any())
 	allocationMutex := mock_store.NewMockMutex(mockCtrl)
 	allocations.EXPECT().GetAllocationMutex().Return(allocationMutex, nil)
 	allocationMutex.EXPECT().Lock(context.TODO())
@@ -100,7 +100,7 @@ func TestSessionFacade_CreateSession_WithBricks_CreateSessionError(t *testing.T)
 	allocations.EXPECT().GetPool(datamodel.PoolName("pool1")).Return(datamodel.Pool{Name: "pool1"}, nil)
 	sessionMutex := mock_store.NewMockMutex(mockCtrl)
 	sessionRegistry.EXPECT().GetSessionMutex(initialSession.Name).Return(sessionMutex, nil)
-	sessionMutex.EXPECT().Lock(context.TODO())
+	sessionMutex.EXPECT().Lock(gomock.Any())
 	allocationMutex := mock_store.NewMockMutex(mockCtrl)
 	allocations.EXPECT().GetAllocationMutex().Return(allocationMutex, nil)
 	allocationMutex.EXPECT().Lock(context.TODO())
@@ -129,7 +129,7 @@ func TestSessionFacade_CreateSession_WithBricks_CreateSessionError(t *testing.T)
 	allocationMutex.EXPECT().Unlock(context.TODO())
 	fakeErr := errors.New("fake")
 	actionChan := make(chan datamodel.SessionAction)
-	actions.EXPECT().SendSessionAction(context.TODO(), datamodel.SessionCreateFilesystem, returnedSession).Return(actionChan, nil)
+	actions.EXPECT().SendSessionAction(gomock.Any(), datamodel.SessionCreateFilesystem, returnedSession).Return(actionChan, nil)
 	sessionMutex.EXPECT().Unlock(context.TODO())
 	go func() {
 		actionChan <- datamodel.SessionAction{Error: fakeErr.Error()}
@@ -150,7 +150,7 @@ func TestSessionFacade_DeleteSession(t *testing.T) {
 	facade := sessionFacade{session: sessionRegistry, actions: actions}
 	sessionMutex := mock_store.NewMockMutex(mockCtrl)
 	sessionRegistry.EXPECT().GetSessionMutex(sessionName).Return(sessionMutex, nil)
-	sessionMutex.EXPECT().Lock(context.TODO())
+	sessionMutex.EXPECT().Lock(gomock.Any())
 	initialSession := datamodel.Session{Name: "foo"}
 	sessionRegistry.EXPECT().GetSession(sessionName).Return(initialSession, nil)
 	updatedSession := datamodel.Session{
@@ -162,7 +162,7 @@ func TestSessionFacade_DeleteSession(t *testing.T) {
 	}
 	sessionRegistry.EXPECT().UpdateSession(updatedSession).Return(initialSession, nil)
 	actionChan := make(chan datamodel.SessionAction)
-	actions.EXPECT().SendSessionAction(context.TODO(), datamodel.SessionDelete, initialSession).Return(actionChan, nil)
+	actions.EXPECT().SendSessionAction(gomock.Any(), datamodel.SessionDelete, initialSession).Return(actionChan, nil)
 	sessionMutex.EXPECT().Unlock(context.TODO())
 	fakeErr := errors.New("fake")
 	go func() {

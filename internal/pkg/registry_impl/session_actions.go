@@ -121,7 +121,8 @@ func (s *sessionActions) SendSessionAction(
 			close(responseChan)
 			return
 		}
-		// TODO: don't we need to stop the watch above? will we see the delete event?
+		log.Println("stopped waiting for action response, likely the context timed out")
+		// TODO: double check watch gets stopped somehow? assume context has been cancelled externally?
 	}()
 	return responseChan, nil
 }

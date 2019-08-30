@@ -31,30 +31,42 @@ type sessionFacade struct {
 
 func (s sessionFacade) submitJob(sessionName datamodel.SessionName, actionType datamodel.SessionActionType,
 	getSession func() (datamodel.Session, error)) error {
+	// 30 min timeout to aquire lock and send action
+	ctxt, cancelFunc := context.WithTimeout(context.Background(), time.Minute*30)
+	defer func() {
+		cancelFunc()
+	}()
 
 	sessionMutex, err := s.session.GetSessionMutex(sessionName)
 	if err != nil {
 		return fmt.Errorf("unable to get session mutex: %s due to: %s", sessionName, err)
 	}
-	err = sessionMutex.Lock(context.TODO())
+	err = sessionMutex.Lock(ctxt)
 	if err != nil {
 		return fmt.Errorf("unable to lock session mutex: %s due to: %s", sessionName, err)
 	}
 
 	session, err := getSession()
 	if err != nil {
-		sessionMutex.Unlock(context.TODO())
+		unlockErr := sessionMutex.Unlock(context.TODO())
+		if unlockErr != nil {
+			log.Println("failed to drop mutex", unlockErr)
+		}
 		return err
 	}
-	if session.Name == "" && err == nil {
+	if session.Name == "" {
 		// skip processing for this session
 		// e.g. its a delete and we have already been deleted
-		sessionMutex.Unlock(context.TODO())
+		unlockErr := sessionMutex.Unlock(context.TODO())
+		if unlockErr != nil {
+			log.Println("failed to drop mutex", unlockErr)
+		}
 		return nil
 	}
 
 	// This will error out if the host is not currently up
-	sessionActions, err := s.actions.SendSessionAction(context.TODO(), actionType, session)
+	sessionActions, err := s.actions.SendSessionAction(ctxt, actionType, session)
+	// Drop mutex regardless of if we had an error or not
 	mutexErr := sessionMutex.Unlock(context.TODO())
 	if err != nil {
 		return err
