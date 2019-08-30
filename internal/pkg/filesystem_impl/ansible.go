@@ -231,7 +231,7 @@ func executeAnsibleTeardown(internalName string, bricks []datamodel.Brick) error
 		return fmt.Errorf("error during server umount: %s", err.Error())
 	}
 
-	formatArgs := "dac.yml -i inventory --tag clean"
+	formatArgs := "dac.yml -i inventory --tag format"
 	err = executeAnsiblePlaybook(dir, formatArgs)
 	if err != nil {
 		return fmt.Errorf("error during server clean: %s", err.Error())
