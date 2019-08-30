@@ -32,7 +32,7 @@ func TestSessionActionHandler_handleCreate(t *testing.T) {
 	}
 	action := datamodel.SessionAction{
 		ActionType: datamodel.SessionCreateFilesystem,
-		Session:    datamodel.Session{Name: "test"},
+		Session:    datamodel.Session{Name: "test", ActualSizeBytes: 42},
 	}
 	sessionMutex := mock_store.NewMockMutex(mockCtrl)
 	registry.EXPECT().GetSessionMutex(action.Session.Name).Return(sessionMutex, nil)
@@ -41,8 +41,9 @@ func TestSessionActionHandler_handleCreate(t *testing.T) {
 	registry.EXPECT().GetSession(action.Session.Name).Return(action.Session, nil)
 	fsProvider.EXPECT().Create(action.Session)
 	updatedSession := datamodel.Session{
-		Name:   action.Session.Name,
-		Status: datamodel.SessionStatus{FileSystemCreated: true},
+		Name:            action.Session.Name,
+		Status:          datamodel.SessionStatus{FileSystemCreated: true},
+		ActualSizeBytes: 42,
 	}
 	registry.EXPECT().UpdateSession(updatedSession).Return(updatedSession, nil)
 	updatedAction := datamodel.SessionAction{

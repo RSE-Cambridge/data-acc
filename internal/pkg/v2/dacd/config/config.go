@@ -26,8 +26,8 @@ func GetBrickManagerConfig(env ReadEnvironemnt) BrickManagerConfig {
 	config := BrickManagerConfig{
 		datamodel.BrickHostName(getHostname(env)),
 		datamodel.PoolName(getString(env, "DAC_POOL_NAME", "default")),
-		getUint(env, "DAC_BRICK_CAPACITY_GB", 1400), // TODO: DAC_DEVICE_CAPACITY_GB
-		getUint(env, "DAC_BRICK_COUNT", 12), // TODO: DEVICE_COUNT
+		getUint(env, "DAC_BRICK_CAPACITY_GB", 1400),             // TODO: DAC_DEVICE_CAPACITY_GB
+		getUint(env, "DAC_BRICK_COUNT", 12),                     // TODO: DEVICE_COUNT
 		getString(env, "DAC_BRICK_ADDRESS_PATTERN", "nvme%dn1"), // TODO: DEVICE_TYPE
 		getBool(env, "DAC_HOST_ENABLED", true),
 	}
