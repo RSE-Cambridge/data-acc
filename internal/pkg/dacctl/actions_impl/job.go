@@ -2,9 +2,9 @@ package actions_impl
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl"
+	parsers2 "github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl/actions_impl/parsers"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
 	"log"
 	"sort"
 )
@@ -16,7 +16,7 @@ func (d *dacctlActions) ValidateJob(c dacctl.CliContext) error {
 	}
 
 	jobFile := c.String("job")
-	summary, err := parsers.ParseJobFile(d.disk, jobFile)
+	summary, err := parsers2.ParseJobFile(d.disk, jobFile)
 	if err != nil {
 		return err
 	} else {
@@ -31,7 +31,7 @@ func (d *dacctlActions) CreatePerJobBuffer(c dacctl.CliContext) error {
 	// TODO: need to specify user and group too
 
 	jobFile := c.String("job")
-	summary, err := parsers.ParseJobFile(d.disk, jobFile)
+	summary, err := parsers2.ParseJobFile(d.disk, jobFile)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func (d *dacctlActions) CreatePerJobBuffer(c dacctl.CliContext) error {
 		log.Printf("Ignoring nodeFile in setup: %s", nodeFile)
 	}
 
-	pool, capacityBytes, err := parsers.ParseCapacityBytes(c.String("capacity"))
+	pool, capacityBytes, err := parsers2.ParseCapacityBytes(c.String("capacity"))
 	if err != nil {
 		return err
 	}

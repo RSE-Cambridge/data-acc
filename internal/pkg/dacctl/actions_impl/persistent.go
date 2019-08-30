@@ -1,9 +1,9 @@
 package actions_impl
 
 import (
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl"
+	parsers2 "github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl/actions_impl/parsers"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
 	"strings"
 	"time"
 )
@@ -44,7 +44,7 @@ func (d *dacctlActions) CreatePersistentBuffer(c dacctl.CliContext) error {
 	if err != nil {
 		return err
 	}
-	pool, capacityBytes, err := parsers.ParseCapacityBytes(c.String("capacity"))
+	pool, capacityBytes, err := parsers2.ParseCapacityBytes(c.String("capacity"))
 	if err != nil {
 		return err
 	}

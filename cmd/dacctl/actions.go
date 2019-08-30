@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl/actions_impl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/store_impl"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl"
 	"github.com/urfave/cli"
 )
 

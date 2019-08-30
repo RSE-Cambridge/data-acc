@@ -3,13 +3,13 @@ package actions_impl
 import (
 	"errors"
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl"
+	parsers2 "github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl/actions_impl/parsers"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl/workflow_impl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/facade"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/fileio"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/actions_impl/parsers"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/v2/dacctl/workflow_impl"
 	"log"
 	"strings"
 )
@@ -48,7 +48,7 @@ func (d *dacctlActions) getSessionName(c dacctl.CliContext) (datamodel.SessionNa
 	}
 
 	token := c.String("token")
-	if !parsers.IsValidName(token) {
+	if !parsers2.IsValidName(token) {
 		return "", fmt.Errorf("badly formatted session name: %s", token)
 	}
 
@@ -82,7 +82,7 @@ func (d *dacctlActions) PreRun(c dacctl.CliContext) error {
 		return err
 	}
 
-	computeHosts, err := parsers.GetHostnamesFromFile(d.disk, c.String("nodehostnamefile"))
+	computeHosts, err := parsers2.GetHostnamesFromFile(d.disk, c.String("nodehostnamefile"))
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func (d *dacctlActions) PreRun(c dacctl.CliContext) error {
 	loginNodeFilename := c.String("jobexecutionnodefile")
 	var loginNodeHosts []string
 	if loginNodeFilename != "" {
-		loginNodeHosts, err = parsers.GetHostnamesFromFile(d.disk, loginNodeFilename)
+		loginNodeHosts, err = parsers2.GetHostnamesFromFile(d.disk, loginNodeFilename)
 		if err != nil {
 			return err
 		}
