@@ -45,7 +45,8 @@ func (bm *brickManager) Startup() {
 
 	go func() {
 		for event := range events {
-			bm.sessionActionHandler.ProcessSessionAction(event)
+			// TODO: we could limit the number of workers
+			go bm.sessionActionHandler.ProcessSessionAction(event)
 		}
 		log.Println("ERROR: stopped waiting for new Session Actions")
 	}()

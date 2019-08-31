@@ -34,17 +34,17 @@ type sessionActionHandler struct {
 func (s *sessionActionHandler) ProcessSessionAction(action datamodel.SessionAction) {
 	switch action.ActionType {
 	case datamodel.SessionDelete:
-		go s.handleDelete(action)
+		s.handleDelete(action)
 	case datamodel.SessionCreateFilesystem:
-		go s.handleCreate(action)
+		s.handleCreate(action)
 	case datamodel.SessionCopyDataIn:
-		go s.handleCopyIn(action)
+		s.handleCopyIn(action)
 	case datamodel.SessionMount:
-		go s.handleMount(action)
+		s.handleMount(action)
 	case datamodel.SessionUnmount:
-		go s.handleUnmount(action)
+		s.handleUnmount(action)
 	case datamodel.SessionCopyDataOut:
-		go s.handleCopyOut(action)
+		s.handleCopyOut(action)
 	default:
 		log.Panicf("not yet implemented action for %+v", action)
 	}

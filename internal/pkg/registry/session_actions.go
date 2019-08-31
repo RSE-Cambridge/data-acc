@@ -17,6 +17,9 @@ type SessionActions interface {
 	// Gets all actions for the given host
 	GetSessionActionRequests(ctxt context.Context, brickHostName datamodel.BrickHostName) (<-chan datamodel.SessionAction, error)
 
+	// Get any actions that have not been completed
+	GetOutstandingSessionActionRequests(brickHostName datamodel.BrickHostName) ([]datamodel.SessionAction, error)
+
 	// Server reports given action is complete
 	// Includes callbacks for Create Session Volume
 	//
