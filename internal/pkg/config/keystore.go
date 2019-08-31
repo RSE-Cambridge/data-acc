@@ -20,7 +20,6 @@ func GetKeystoreConfig(env ReadEnvironemnt) KeystoreConfig {
 	}
 	endpointsStr := getString(env, "ETCDCTL_ENDPOINTS", "")
 	if endpointsStr == "" {
-		log.Println("ETCD_ENDPOINTS is deprecated please use ETCDCTL_ENDPOINTS")
 		endpointsStr = getString(env, "ETCD_ENDPOINTS", "")
 	}
 	if endpointsStr == "" {

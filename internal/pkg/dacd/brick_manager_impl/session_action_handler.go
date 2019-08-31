@@ -2,6 +2,7 @@ package brick_manager_impl
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/facade"
@@ -100,6 +101,9 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 		if err != nil {
 			return action.Session, fmt.Errorf("error getting session: %s", err)
 		}
+		if session.Status.DeleteRequested {
+			return session, fmt.Errorf("can't do action once delete has been requested for")
+		}
 
 		fsStatus, err := s.fsProvider.Create(action.Session)
 		session.FilesystemStatus = fsStatus
@@ -121,39 +125,49 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 
 func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
-		if !action.Session.Status.UnmountComplete {
-			if err := s.doAllUnmounts(action); err != nil {
-				log.Println("failed unmount during delete", action.Session.Name)
+		session, err := s.sessionRegistry.GetSession(action.Session.Name)
+		if err != nil {
+			// TODO: deal with already being deleted? add check if exists call?
+			return action.Session, fmt.Errorf("error getting session: %s", err)
+		}
+
+		if !session.Status.UnmountComplete {
+			if err := s.doAllUnmounts(session); err != nil {
+				log.Println("failed unmount during delete", session.Name)
 			}
 		}
-		if !action.Session.Status.CopyDataOutComplete && !action.Session.Status.DeleteSkipCopyDataOut {
+		if !session.Status.CopyDataOutComplete && !session.Status.DeleteSkipCopyDataOut {
 			if err := s.fsProvider.DataCopyOut(action.Session); err != nil {
 				log.Println("failed DataCopyOut during delete", action.Session.Name)
 			}
 		}
 
 		// Only try delete if we have bricks to delete
-		if action.Session.ActualSizeBytes > 0 {
-			if err := s.fsProvider.Delete(action.Session); err != nil {
-				return action.Session, err
+		if session.ActualSizeBytes > 0 {
+			if err := s.fsProvider.Delete(session); err != nil {
+				return session, err
 			}
 		}
 
-		return action.Session, s.sessionRegistry.DeleteSession(action.Session)
+		return session, s.sessionRegistry.DeleteSession(session)
 	})
 }
 
 func (s *sessionActionHandler) handleCopyIn(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
-		err := s.fsProvider.DataCopyIn(action.Session)
-		if err != nil {
-			return action.Session, err
-		}
-
+		// Get latest session now we have the mutex
 		session, err := s.sessionRegistry.GetSession(action.Session.Name)
 		if err != nil {
-			session = action.Session
+			return action.Session, fmt.Errorf("error getting session: %s", err)
 		}
+		if session.Status.DeleteRequested {
+			return session, fmt.Errorf("can't do action once delete has been requested for")
+		}
+
+		if err := s.fsProvider.DataCopyIn(session); err != nil {
+			return session, err
+		}
+
 		session.Status.CopyDataInComplete = true
 		return s.sessionRegistry.UpdateSession(session)
 	})
@@ -161,61 +175,62 @@ func (s *sessionActionHandler) handleCopyIn(action datamodel.SessionAction) {
 
 func (s *sessionActionHandler) handleCopyOut(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
-		err := s.fsProvider.DataCopyOut(action.Session)
-		if err != nil {
-			return action.Session, err
-		}
-
+		// Get latest session now we have the mutex
 		session, err := s.sessionRegistry.GetSession(action.Session.Name)
 		if err != nil {
-			session = action.Session
+			return action.Session, fmt.Errorf("error getting session: %s", err)
 		}
+		if session.Status.DeleteRequested {
+			return session, fmt.Errorf("can't do action once delete has been requested for")
+		}
+
+		if err := s.fsProvider.DataCopyOut(session); err != nil {
+			return session, err
+		}
+
 		session.Status.CopyDataOutComplete = true
 		return s.sessionRegistry.UpdateSession(session)
 	})
 }
 
-func (s *sessionActionHandler) doAllMounts(action datamodel.SessionAction) error {
+func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session) error {
 	attachmentSession := datamodel.AttachmentSession{
-		Hosts:       action.Session.RequestedAttachHosts,
-		SessionName: action.Session.Name,
+		Hosts:       actionSession.RequestedAttachHosts,
+		SessionName: actionSession.Name,
 	}
-	if action.Session.ActualSizeBytes > 0 {
-		session, err := s.sessionRegistry.GetSession(action.Session.Name)
-		if err != nil {
-			return err
-		}
+	if actionSession.ActualSizeBytes > 0 {
 		jobAttachmentStatus := datamodel.AttachmentSessionStatus{
 			AttachmentSession: attachmentSession,
-			GlobalMount:       session.VolumeRequest.Access == datamodel.Striped || session.VolumeRequest.Access == datamodel.PrivateAndStriped,
-			PrivateMount:      session.VolumeRequest.Access == datamodel.Private || session.VolumeRequest.Access == datamodel.PrivateAndStriped,
-			SwapBytes:         session.VolumeRequest.SwapBytes,
+			GlobalMount:       actionSession.VolumeRequest.Access == datamodel.Striped || actionSession.VolumeRequest.Access == datamodel.PrivateAndStriped,
+			PrivateMount:      actionSession.VolumeRequest.Access == datamodel.Private || actionSession.VolumeRequest.Access == datamodel.PrivateAndStriped,
+			SwapBytes:         actionSession.VolumeRequest.SwapBytes,
 		}
-		if session.CurrentAttachments == nil {
-			session.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSessionStatus{
-				session.Name: jobAttachmentStatus,
-			}
-		} else {
-			session.CurrentAttachments[session.Name] = jobAttachmentStatus
-		}
-		session, err = s.sessionRegistry.UpdateSession(session)
-		if err != nil {
-			return err
-		}
+		//if actionSession.CurrentAttachments == nil {
+		//	session.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSessionStatus{
+		//		session.Name: jobAttachmentStatus,
+		//	}
+		//} else {
+		//	session.CurrentAttachments[session.Name] = jobAttachmentStatus
+		//}
+		//session, err = s.sessionRegistry.UpdateSession(session)
+		//if err != nil {
+		//	return err
+		//}
 
-		if err := s.fsProvider.Mount(action.Session, jobAttachmentStatus); err != nil {
+		if err := s.fsProvider.Mount(actionSession, jobAttachmentStatus); err != nil {
 			return err
 		}
+		// TODO: should we update the session? and delete attachments later?
 	}
-	for _, sessionName := range action.Session.MultiJobAttachments {
-		if err := s.doMutliJobMount(action, sessionName); err != nil {
+	for _, sessionName := range actionSession.MultiJobAttachments {
+		if err := s.doMultiJobMount(actionSession, sessionName); err != nil {
 			return nil
 		}
 	}
 	return nil
 }
 
-func (s *sessionActionHandler) doMutliJobMount(action datamodel.SessionAction, sessionName datamodel.SessionName) error {
+func (s *sessionActionHandler) doMultiJobMount(actionSession datamodel.Session, sessionName datamodel.SessionName) error {
 	sessionMutex, err := s.sessionRegistry.GetSessionMutex(sessionName)
 	if err != nil {
 		log.Printf("unable to get session mutex: %s due to: %s\n", sessionName, err)
@@ -240,8 +255,8 @@ func (s *sessionActionHandler) doMutliJobMount(action datamodel.SessionAction, s
 	}
 
 	attachmentSession := datamodel.AttachmentSession{
-		Hosts:       action.Session.RequestedAttachHosts,
-		SessionName: action.Session.Name,
+		Hosts:       actionSession.RequestedAttachHosts,
+		SessionName: actionSession.Name,
 	}
 	multiJobAttachmentStatus := datamodel.AttachmentSessionStatus{
 		AttachmentSession: attachmentSession,
@@ -266,7 +281,7 @@ func (s *sessionActionHandler) doMutliJobMount(action datamodel.SessionAction, s
 	return s.fsProvider.Mount(multiJobSession, multiJobAttachmentStatus)
 }
 
-func (s *sessionActionHandler) doMutliJobUnmount(action datamodel.SessionAction, sessionName datamodel.SessionName) error {
+func (s *sessionActionHandler) doMultiJobUnmount(actionSession datamodel.Session, sessionName datamodel.SessionName) error {
 	sessionMutex, err := s.sessionRegistry.GetSessionMutex(sessionName)
 	if err != nil {
 		log.Printf("unable to get session mutex: %s due to: %s\n", sessionName, err)
@@ -290,7 +305,7 @@ func (s *sessionActionHandler) doMutliJobUnmount(action datamodel.SessionAction,
 		log.Panicf("trying multi-job attach to non-multi job session %s", multiJobSession.Name)
 	}
 
-	attachments, ok := multiJobSession.CurrentAttachments[action.Session.Name]
+	attachments, ok := multiJobSession.CurrentAttachments[actionSession.Name]
 	if !ok {
 		log.Println("skip detach, already seems to be detached")
 		return nil
@@ -300,19 +315,19 @@ func (s *sessionActionHandler) doMutliJobUnmount(action datamodel.SessionAction,
 	}
 
 	// update multi job session to note our attachments have now gone
-	delete(multiJobSession.CurrentAttachments, action.Session.Name)
+	delete(multiJobSession.CurrentAttachments, actionSession.Name)
 	_, err = s.sessionRegistry.UpdateSession(multiJobSession)
 	return err
 }
 
-func (s *sessionActionHandler) doAllUnmounts(action datamodel.SessionAction) error {
-	if action.Session.ActualSizeBytes > 0 {
-		if err := s.fsProvider.Unmount(action.Session, action.Session.CurrentAttachments[action.Session.Name]); err != nil {
+func (s *sessionActionHandler) doAllUnmounts(actionSession datamodel.Session) error {
+	if actionSession.ActualSizeBytes > 0 {
+		if err := s.fsProvider.Unmount(actionSession, actionSession.CurrentAttachments[actionSession.Name]); err != nil {
 			return err
 		}
 	}
-	for _, sessionName := range action.Session.MultiJobAttachments {
-		if err := s.doMutliJobUnmount(action, sessionName); err != nil {
+	for _, sessionName := range actionSession.MultiJobAttachments {
+		if err := s.doMultiJobUnmount(actionSession, sessionName); err != nil {
 			return err
 		}
 	}
@@ -321,18 +336,24 @@ func (s *sessionActionHandler) doAllUnmounts(action datamodel.SessionAction) err
 
 func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
-		err := s.doAllMounts(action)
+		session, err := s.sessionRegistry.GetSession(action.Session.Name)
 		if err != nil {
-			if err := s.doAllUnmounts(action); err != nil {
+			return action.Session, fmt.Errorf("error getting session: %s", err)
+		}
+		if session.Status.DeleteRequested {
+			return session, fmt.Errorf("can't do action once delete has been requested for")
+		}
+		if session.Status.MountComplete {
+			return session, errors.New("already mounted, can't mount again")
+		}
+
+		if err := s.doAllMounts(session); err != nil {
+			if err := s.doAllUnmounts(session); err != nil {
 				log.Println("error while rolling back possible partial mount", action.Session.Name, err)
 			}
 			return action.Session, err
 		}
 
-		session, err := s.sessionRegistry.GetSession(action.Session.Name)
-		if err != nil {
-			session = action.Session
-		}
 		session.Status.MountComplete = true
 		return s.sessionRegistry.UpdateSession(session)
 	})
@@ -340,15 +361,21 @@ func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
 
 func (s *sessionActionHandler) handleUnmount(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
-		err := s.doAllUnmounts(action)
+		session, err := s.sessionRegistry.GetSession(action.Session.Name)
 		if err != nil {
+			return action.Session, fmt.Errorf("error getting session: %s", err)
+		}
+		if session.Status.DeleteRequested {
+			return session, fmt.Errorf("can't do action once delete has been requested for")
+		}
+		if session.Status.UnmountComplete {
+			return session, errors.New("already unmounted, can't umount again")
+		}
+
+		if err := s.doAllUnmounts(session); err != nil {
 			return action.Session, err
 		}
 
-		session, err := s.sessionRegistry.GetSession(action.Session.Name)
-		if err != nil {
-			session = action.Session
-		}
 		session.Status.UnmountComplete = true
 		return s.sessionRegistry.UpdateSession(session)
 	})

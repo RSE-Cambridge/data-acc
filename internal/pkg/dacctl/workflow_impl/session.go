@@ -222,6 +222,11 @@ func (s sessionFacade) DeleteSession(sessionName datamodel.SessionName, hurry bo
 				return session, nil
 			}
 
+			if session.Status.DeleteRequested {
+				// TODO: is there anything we can do about this?
+				log.Println("Warning, delete already called")
+			}
+
 			// Record we want this deleted, in case host is not alive
 			// can be deleted when it is next stated
 			session.Status.DeleteRequested = true
@@ -242,8 +247,8 @@ func (s sessionFacade) Mount(sessionName datamodel.SessionName, computeNodes []s
 		func() (datamodel.Session, error) {
 			session, err := s.session.GetSession(sessionName)
 			if err != nil {
-				log.Println("Unable to find session, skipping delete:", sessionName)
-				return session, nil
+				log.Println("Unable to find session we want to mount:", sessionName)
+				return session, err
 			}
 
 			// TODO: what about the login nodes? what do we want to do there?
