@@ -25,6 +25,7 @@ func GetBrickManagerConfig(env ReadEnvironemnt) BrickManagerConfig {
 			getUint(env, "DEVICE_COUNT", 12)),
 		getString(env, "DAC_BRICK_ADDRESS_PATTERN",
 			getString(env, "DEVICE_TYPE", "nvme%dn1")),
+		// Disabled means don't accept new Sessions, but allow Actions on existing Sessions
 		getBool(env, "DAC_HOST_ENABLED", true),
 	}
 	log.Println("Got brick manager config:", config)

@@ -15,6 +15,7 @@ func NewBrickManager(keystore store.Keystore) dacd.BrickManager {
 	return &brickManager{
 		config:               config.GetBrickManagerConfig(config.DefaultEnv),
 		brickRegistry:        registry_impl.NewBrickHostRegistry(keystore),
+		sessionRegistry:      registry_impl.NewSessionRegistry(keystore),
 		sessionActions:       registry_impl.NewSessionActionsRegistry(keystore),
 		sessionActionHandler: NewSessionActionHandler(keystore),
 	}
@@ -23,6 +24,7 @@ func NewBrickManager(keystore store.Keystore) dacd.BrickManager {
 type brickManager struct {
 	config               config.BrickManagerConfig
 	brickRegistry        registry.BrickHostRegistry
+	sessionRegistry      registry.SessionRegistry
 	sessionActions       registry.SessionActions
 	sessionActionHandler facade.SessionActionHandler
 }
@@ -43,6 +45,20 @@ func (bm *brickManager) Startup() {
 	// If we are are enabled, this includes new create session requests
 	events, err := bm.sessionActions.GetSessionActionRequests(context.TODO(), bm.config.BrickHostName)
 
+	// Assume we got restarted, first try to finish all pending actions
+	bm.completePendingActions()
+
+	// If we were restarted, likely no one is listening for pending actions any more
+	// so don'y worry the above pending actions may have failed due to not restoring sessions first
+	bm.restoreSessions()
+
+	// Tell everyone we are listening
+	err = bm.brickRegistry.KeepAliveHost(context.TODO(), bm.config.BrickHostName)
+	if err != nil {
+		log.Panicf("failed to start keep alive host: %s", err)
+	}
+
+	// Process any events, given others know we are alive
 	go func() {
 		for event := range events {
 			// TODO: we could limit the number of workers
@@ -50,14 +66,50 @@ func (bm *brickManager) Startup() {
 		}
 		log.Println("ERROR: stopped waiting for new Session Actions")
 	}()
+}
 
-	// TODO: try to recover all existing filesystems on restart
-	//   including a check to make sure all related brick hosts are alive
-
-	// Tell everyone we are listening
-	err = bm.brickRegistry.KeepAliveHost(context.TODO(), bm.config.BrickHostName)
+func (bm *brickManager) completePendingActions() {
+	// Assume the service has been restarted, lets
+	// retry any actions that haven't been completed
+	// making the assumption that actions are idempotent
+	actions, err := bm.sessionActions.GetOutstandingSessionActionRequests(bm.config.BrickHostName)
 	if err != nil {
-		log.Panicf("failed to start keep alive host: %s", err)
+		log.Fatalf("unable to get outstanding session action requests due to: %s", err.Error())
+	}
+
+	for _, action := range actions {
+		// TODO: what about the extra response if no one is listening any more?
+		bm.sessionActionHandler.ProcessSessionAction(action)
+	}
+}
+
+func (bm *brickManager) restoreSessions() {
+	// In case the server was restarted, double check everything is up
+	// If marked deleted, and not already deleted, delete it
+	sessions, err := bm.sessionRegistry.GetAllSessions()
+	if err != nil {
+		log.Panicf("unable to fetch all sessions due to: %s", err)
+	}
+	for _, session := range sessions {
+		hasLocalBrick := false
+		for _, brick := range session.AllocatedBricks {
+			if brick.BrickHostName == bm.config.BrickHostName {
+				hasLocalBrick = true
+			}
+		}
+		if !hasLocalBrick {
+			continue
+		}
+
+		if session.Status.FileSystemCreated && !session.Status.DeleteRequested {
+			// If we have previously finished creating the session,
+			// and we don't have a pending delete, try to restore the session
+			log.Println("Restoring session with local brick", session.Name)
+			go bm.sessionActionHandler.RestoreSession(session)
+		} else {
+			// TODO: should we just do the delete here?
+			log.Printf("WARNING session in strange state: %+v\n", session)
+		}
 	}
 }
 

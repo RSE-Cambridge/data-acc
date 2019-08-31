@@ -50,6 +50,38 @@ func (s *sessionActionHandler) ProcessSessionAction(action datamodel.SessionActi
 	}
 }
 
+func (s *sessionActionHandler) RestoreSession(session datamodel.Session) {
+	// Get session lock before attempting the restore
+	sessionMutex, err := s.sessionRegistry.GetSessionMutex(session.Name)
+	if err != nil {
+		log.Printf("unable to get session mutex: %s due to: %s\n", session.Name, err)
+		return
+	}
+	err = sessionMutex.Lock(context.TODO())
+	if err != nil {
+		log.Printf("unable to lock session mutex: %s due to: %s\n", session.Name, err)
+		return
+	}
+	// Always drop mutex on function exit
+	defer func() {
+		if err := sessionMutex.Unlock(context.TODO()); err != nil {
+			log.Printf("failed to drop mutex for: %s due to: %s\n", session.Name, err.Error())
+		}
+	}()
+
+	// TODO: need a way that doesn't try to do format!!
+	_, err = s.doCreate(session)
+	if err != nil {
+		log.Printf("unable to restore session: %+v\n", session)
+		session.Status.Error = err.Error()
+		if _, err := s.sessionRegistry.UpdateSession(session); err != nil {
+			log.Panicf("unable to report that session restore failed for session: %s", session.Name)
+		}
+	}
+
+	// TODO: do we just assume any pending mounts will resume in their own time? or should we retry mounts too?
+}
+
 func (s *sessionActionHandler) processWithMutex(action datamodel.SessionAction, process func() (datamodel.Session, error)) {
 
 	sessionName := action.Session.Name
@@ -90,37 +122,41 @@ func (s *sessionActionHandler) processWithMutex(action datamodel.SessionAction, 
 
 func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 	s.processWithMutex(action, func() (datamodel.Session, error) {
-		// Nothing to create, just complete the action
-		// TODO: why do we send the action?
-		if action.Session.ActualSizeBytes == 0 {
-			return action.Session, nil
-		}
-
-		// Get latest session now we have the mutex
-		session, err := s.sessionRegistry.GetSession(action.Session.Name)
-		if err != nil {
-			return action.Session, fmt.Errorf("error getting session: %s", err)
-		}
-		if session.Status.DeleteRequested {
-			return session, fmt.Errorf("can't do action once delete has been requested for")
-		}
-
-		fsStatus, err := s.fsProvider.Create(action.Session)
-		session.FilesystemStatus = fsStatus
-		session.Status.FileSystemCreated = err == nil
-		if err != nil {
-			session.Status.Error = err.Error()
-		}
-
-		session, updateErr := s.sessionRegistry.UpdateSession(session)
-		if updateErr != nil {
-			log.Println("Failed to update session:", updateErr)
-			if err == nil {
-				err = updateErr
-			}
-		}
-		return session, err
+		return s.doCreate(action.Session)
 	})
+}
+
+func (s *sessionActionHandler) doCreate(session datamodel.Session) (datamodel.Session, error) {
+	// Nothing to create, just complete the action
+	// TODO: why do we send the action?
+	if session.ActualSizeBytes == 0 {
+		return session, nil
+	}
+
+	// Get latest session now we have the mutex
+	session, err := s.sessionRegistry.GetSession(session.Name)
+	if err != nil {
+		return session, fmt.Errorf("error getting session: %s", err)
+	}
+	if session.Status.DeleteRequested {
+		return session, fmt.Errorf("can't do action once delete has been requested for")
+	}
+
+	fsStatus, err := s.fsProvider.Create(session)
+	session.FilesystemStatus = fsStatus
+	session.Status.FileSystemCreated = err == nil
+	if err != nil {
+		session.Status.Error = err.Error()
+	}
+
+	session, updateErr := s.sessionRegistry.UpdateSession(session)
+	if updateErr != nil {
+		log.Println("Failed to update session:", updateErr)
+		if err == nil {
+			err = updateErr
+		}
+	}
+	return session, err
 }
 
 func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {

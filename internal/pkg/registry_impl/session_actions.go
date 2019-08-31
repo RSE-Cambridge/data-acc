@@ -10,6 +10,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
 	"github.com/google/uuid"
 	"log"
+	"sort"
 )
 
 func NewSessionActionsRegistry(store store.Keystore) registry.SessionActions {
@@ -155,6 +156,22 @@ func (s *sessionActions) GetSessionActionRequests(ctxt context.Context,
 		close(sessionActionChan)
 	}()
 	return sessionActionChan, nil
+}
+
+func (s *sessionActions) GetOutstandingSessionActionRequests(brickHostName datamodel.BrickHostName) ([]datamodel.SessionAction, error) {
+	rawRequests, err := s.store.GetAll(getSessionActionRequestHostPrefix(brickHostName))
+	if err != nil {
+		return nil, err
+	}
+	// Return actions in order they were sent, i.e. create revision order
+	sort.Slice(rawRequests, func(i, j int) bool {
+		return rawRequests[i].CreateRevision < rawRequests[j].CreateRevision
+	})
+	var actions []datamodel.SessionAction
+	for _, request := range rawRequests {
+		actions = append(actions, sessionActionFromRaw(request.Value))
+	}
+	return actions, nil
 }
 
 func (s *sessionActions) CompleteSessionAction(sessionAction datamodel.SessionAction) error {

@@ -64,6 +64,21 @@ func (mr *MockSessionActionsMockRecorder) GetSessionActionRequests(ctxt, brickHo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSessionActionRequests", reflect.TypeOf((*MockSessionActions)(nil).GetSessionActionRequests), ctxt, brickHostName)
 }
 
+// GetOutstandingSessionActionRequests mocks base method
+func (m *MockSessionActions) GetOutstandingSessionActionRequests(brickHostName datamodel.BrickHostName) ([]datamodel.SessionAction, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOutstandingSessionActionRequests", brickHostName)
+	ret0, _ := ret[0].([]datamodel.SessionAction)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOutstandingSessionActionRequests indicates an expected call of GetOutstandingSessionActionRequests
+func (mr *MockSessionActionsMockRecorder) GetOutstandingSessionActionRequests(brickHostName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOutstandingSessionActionRequests", reflect.TypeOf((*MockSessionActions)(nil).GetOutstandingSessionActionRequests), brickHostName)
+}
+
 // CompleteSessionAction mocks base method
 func (m *MockSessionActions) CompleteSessionAction(action datamodel.SessionAction) error {
 	m.ctrl.T.Helper()

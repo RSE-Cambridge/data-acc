@@ -44,3 +44,15 @@ func (mr *MockSessionActionHandlerMockRecorder) ProcessSessionAction(action inte
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProcessSessionAction", reflect.TypeOf((*MockSessionActionHandler)(nil).ProcessSessionAction), action)
 }
+
+// RestoreSession mocks base method
+func (m *MockSessionActionHandler) RestoreSession(session datamodel.Session) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "RestoreSession", session)
+}
+
+// RestoreSession indicates an expected call of RestoreSession
+func (mr *MockSessionActionHandlerMockRecorder) RestoreSession(session interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RestoreSession", reflect.TypeOf((*MockSessionActionHandler)(nil).RestoreSession), session)
+}
