@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/filesystem"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -33,6 +34,17 @@ type FileSystems struct {
 
 type Wrapper struct {
 	All FileSystems
+}
+
+func NewAnsible() filesystem.Ansible {
+	return &ansibleImpl{}
+}
+
+type ansibleImpl struct {
+}
+
+func (*ansibleImpl) CreateEnvironment(session datamodel.Session) (string, error) {
+	return setupAnsible(Lustre, session.FilesystemStatus.InternalName, session.AllocatedBricks)
 }
 
 var conf = config.GetFilesystemConfig()

@@ -6,7 +6,6 @@ package mock_filesystem
 
 import (
 	datamodel "github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
-	filesystem "github.com/RSE-Cambridge/data-acc/internal/pkg/filesystem"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -35,42 +34,16 @@ func (m *MockAnsible) EXPECT() *MockAnsibleMockRecorder {
 }
 
 // CreateEnvironment mocks base method
-func (m *MockAnsible) CreateEnvironment(session datamodel.Session, createAllPlaybooks bool, groupAllVars map[string]string) (filesystem.AnsibleEnv, error) {
+func (m *MockAnsible) CreateEnvironment(session datamodel.Session) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateEnvironment", session, createAllPlaybooks, groupAllVars)
-	ret0, _ := ret[0].(filesystem.AnsibleEnv)
+	ret := m.ctrl.Call(m, "CreateEnvironment", session)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateEnvironment indicates an expected call of CreateEnvironment
-func (mr *MockAnsibleMockRecorder) CreateEnvironment(session, createAllPlaybooks, groupAllVars interface{}) *gomock.Call {
+func (mr *MockAnsibleMockRecorder) CreateEnvironment(session interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEnvironment", reflect.TypeOf((*MockAnsible)(nil).CreateEnvironment), session, createAllPlaybooks, groupAllVars)
-}
-
-// DestroyEnvironment mocks base method
-func (m *MockAnsible) DestroyEnvironment(env filesystem.AnsibleEnv) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DestroyEnvironment", env)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DestroyEnvironment indicates an expected call of DestroyEnvironment
-func (mr *MockAnsibleMockRecorder) DestroyEnvironment(env interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DestroyEnvironment", reflect.TypeOf((*MockAnsible)(nil).DestroyEnvironment), env)
-}
-
-// RunPlaybook mocks base method
-func (m *MockAnsible) RunPlaybook(env filesystem.AnsibleEnv, playbook filesystem.AnsiblePlaybook, extraVars map[string]string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "RunPlaybook", env, playbook, extraVars)
-}
-
-// RunPlaybook indicates an expected call of RunPlaybook
-func (mr *MockAnsibleMockRecorder) RunPlaybook(env, playbook, extraVars interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunPlaybook", reflect.TypeOf((*MockAnsible)(nil).RunPlaybook), env, playbook, extraVars)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEnvironment", reflect.TypeOf((*MockAnsible)(nil).CreateEnvironment), session)
 }

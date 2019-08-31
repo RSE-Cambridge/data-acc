@@ -161,8 +161,12 @@ func runCli(args []string) error {
 			Usage:  "Returns fake data to keep burst buffer plugin happy.",
 			Action: showConfigurations,
 		},
+		{
+			Name:   "generate_ansible",
+			Usage:  "Creates debug ansible in debug ansible.",
+			Action: generateAnsible,
+		},
 	}
-
 	return app.Run(stripFunctionArg(args))
 }
 

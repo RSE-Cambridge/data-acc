@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/facade"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/filesystem"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/registry_impl"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
@@ -27,6 +28,7 @@ type sessionFacade struct {
 	session     registry.SessionRegistry
 	actions     registry.SessionActions
 	allocations registry.AllocationRegistry
+	ansible     filesystem.Ansible
 }
 
 func (s sessionFacade) submitJob(sessionName datamodel.SessionName, actionType datamodel.SessionActionType,
@@ -281,4 +283,19 @@ func (s sessionFacade) GetSession(sessionName datamodel.SessionName) (datamodel.
 
 func (s sessionFacade) GetAllSessions() ([]datamodel.Session, error) {
 	return s.session.GetAllSessions()
+}
+
+func (s sessionFacade) GenerateAnsible(sessionName datamodel.SessionName) error {
+	session, err := s.session.GetSession(sessionName)
+	if err != nil {
+		log.Println("Unable to find session we want to mount:", sessionName)
+		return err
+	}
+	directory, err := s.ansible.CreateEnvironment(session)
+	if err != nil {
+		return err
+	}
+	log.Println("Created ansible in directory:", directory)
+	log.Println("Please delete directory when your work is done.")
+	return nil
 }

@@ -21,4 +21,5 @@ type DacctlActions interface {
 	PreRun(c CliContext) error
 	PostRun(c CliContext) error
 	DataOut(c CliContext) error
+	GenerateAnsible(c CliContext) error
 }

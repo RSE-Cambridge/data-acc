@@ -245,3 +245,7 @@ func (*stubDacctlActions) PostRun(c dacctl.CliContext) error {
 func (*stubDacctlActions) DataOut(c dacctl.CliContext) error {
 	return errors.New("DataOut")
 }
+
+func (*stubDacctlActions) GenerateAnsible(c dacctl.CliContext) error {
+	return errors.New("DataOut")
+}

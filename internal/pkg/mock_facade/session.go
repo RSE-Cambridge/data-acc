@@ -161,3 +161,17 @@ func (mr *MockSessionMockRecorder) GetAllSessions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSessions", reflect.TypeOf((*MockSession)(nil).GetAllSessions))
 }
+
+// GenerateAnsible mocks base method
+func (m *MockSession) GenerateAnsible(sessionName datamodel.SessionName) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenerateAnsible", sessionName)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// GenerateAnsible indicates an expected call of GenerateAnsible
+func (mr *MockSessionMockRecorder) GenerateAnsible(sessionName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateAnsible", reflect.TypeOf((*MockSession)(nil).GenerateAnsible), sessionName)
+}

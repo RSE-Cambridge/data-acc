@@ -36,4 +36,7 @@ type Session interface {
 
 	// Get all sessions
 	GetAllSessions() ([]datamodel.Session, error)
+
+	// Generate ansible test dir
+	GenerateAnsible(sessionName datamodel.SessionName) error
 }
