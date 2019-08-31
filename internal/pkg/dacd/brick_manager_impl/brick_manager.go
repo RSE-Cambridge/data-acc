@@ -77,6 +77,7 @@ func (bm *brickManager) completePendingActions() {
 		log.Fatalf("unable to get outstanding session action requests due to: %s", err.Error())
 	}
 
+	// We wait for these to finish before starting keepalive
 	for _, action := range actions {
 		// TODO: what about the extra response if no one is listening any more?
 		bm.sessionActionHandler.ProcessSessionAction(action)

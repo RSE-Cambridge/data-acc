@@ -176,7 +176,7 @@ func setupAnsible(fsType FSType, internalName string, bricks []datamodel.Brick) 
 	return dir, err
 }
 
-func executeAnsibleSetup(internalName string, bricks []datamodel.Brick) error {
+func executeAnsibleSetup(internalName string, bricks []datamodel.Brick, doFormat bool) error {
 	// TODO: restore beegfs support
 	dir, err := setupAnsible(Lustre, internalName, bricks)
 	if err != nil {
@@ -184,10 +184,13 @@ func executeAnsibleSetup(internalName string, bricks []datamodel.Brick) error {
 	}
 	defer os.RemoveAll(dir)
 
-	formatArgs := "dac.yml -i inventory --tag format"
-	err = executeAnsiblePlaybook(dir, formatArgs)
-	if err != nil {
-		return fmt.Errorf("error during server format: %s", err.Error())
+	// allow skip format when trying to rebuild
+	if doFormat {
+		formatArgs := "dac.yml -i inventory --tag format"
+		err = executeAnsiblePlaybook(dir, formatArgs)
+		if err != nil {
+			return fmt.Errorf("error during server format: %s", err.Error())
+		}
 	}
 
 	startupArgs := "dac.yml -i inventory --tag mount,create_mdt,create_mgs,create_osts,client_mount"

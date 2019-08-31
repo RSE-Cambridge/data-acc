@@ -30,8 +30,12 @@ func (f *fileSystemProvider) Create(session datamodel.Session) (datamodel.Filesy
 		InternalName: GetNewUUID(),
 		InternalData: "",
 	}
-	err := executeAnsibleSetup(session.FilesystemStatus.InternalName, session.AllocatedBricks)
+	err := executeAnsibleSetup(session.FilesystemStatus.InternalName, session.AllocatedBricks, true)
 	return session.FilesystemStatus, err
+}
+
+func (f *fileSystemProvider) Restore(session datamodel.Session) error {
+	return executeAnsibleSetup(session.FilesystemStatus.InternalName, session.AllocatedBricks, false)
 }
 
 func (f *fileSystemProvider) Delete(session datamodel.Session) error {

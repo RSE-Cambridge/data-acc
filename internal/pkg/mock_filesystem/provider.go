@@ -48,6 +48,20 @@ func (mr *MockProviderMockRecorder) Create(session interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProvider)(nil).Create), session)
 }
 
+// Restore mocks base method
+func (m *MockProvider) Restore(session datamodel.Session) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Restore", session)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Restore indicates an expected call of Restore
+func (mr *MockProviderMockRecorder) Restore(session interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Restore", reflect.TypeOf((*MockProvider)(nil).Restore), session)
+}
+
 // Delete mocks base method
 func (m *MockProvider) Delete(session datamodel.Session) error {
 	m.ctrl.T.Helper()
