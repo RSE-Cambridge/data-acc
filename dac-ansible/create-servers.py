@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 
 import openstack
+from optparse import OptionParser
 
+parser = OptionParser()
+parser.add_option("-k", "--key", dest="key",
+                  help="SSH key pair name", metavar="KEYPAIR_NAME")
+parser.add_option("-n", "--network", dest="network",
+                  help="Network name", metavar="NETWORK_NAME")
+(options, args) = parser.parse_args()
 
 IMAGE_NAME = "CentOS-7-x86_64-GenericCloud"
 FLAVOR_NAME = "C1.vss.tiny"
-NETWORK_NAME = "WCDC-Data43"
-KEYPAIR_NAME = "usual"
-
+NETWORK_NAME = options.network
+KEYPAIR_NAME = options.key
 
 def get_connection():
     # openstack.enable_logging(debug=True)
