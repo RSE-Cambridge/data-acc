@@ -1,7 +1,6 @@
 package filesystem_impl
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
@@ -13,7 +12,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -33,7 +31,7 @@ type FileSystems struct {
 }
 
 type Wrapper struct {
-	All FileSystems
+	Dacs FileSystems
 }
 
 func NewAnsible() filesystem.Ansible {
@@ -103,25 +101,18 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 			//"client_port": fmt.Sprintf("%d", volume.ClientPort),
 			"lnet_suffix": conf.LnetSuffix,
 			"mdt_size":    fmt.Sprintf("%dm", conf.MDTSizeMB),
+			"fs_name": fsUuid,
 		},
 		Hosts: hosts,
 	}
 	fsname := fmt.Sprintf("%s", fsUuid)
-	data := Wrapper{All: FileSystems{Children: map[string]FSInfo{fsname: fsinfo}}}
+	data := Wrapper{Dacs: FileSystems{Children: map[string]FSInfo{fsname: fsinfo}}}
 
 	output, err := yaml.Marshal(data)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	strOut := string(output)
-	strOut = strings.Replace(strOut, " mgs:", fmt.Sprintf(" %s_mgs:", fsname), -1)
-	strOut = strings.Replace(strOut, " mdts:", fmt.Sprintf(" %s_mdts:", fsname), -1)
-	strOut = strings.Replace(strOut, " osts:", fmt.Sprintf(" %s_osts:", fsname), -1)
-	strOut = strings.Replace(strOut, " mgsnode:", fmt.Sprintf(" %s_mgsnode:", fsname), -1)
-	strOut = strings.Replace(strOut, " client_port:", fmt.Sprintf(" %s_client_port:", fsname), -1)
-	strOut = strings.Replace(strOut, " mdt_size:", fmt.Sprintf(" %s_mdt_size:", fsname), -1)
-
-	strOut = strings.Replace(strOut, "all:", conf.HostGroup+":", -1)
 	return strOut
 }
 
@@ -156,16 +147,9 @@ func setupAnsible(fsType FSType, internalName string, bricks []datamodel.Brick) 
 	}
 	log.Println("Using ansible tempdir:", dir)
 
-	playbook := getPlaybook(fsType, internalName)
-	tmpPlaybook := filepath.Join(dir, "dac.yml")
-	if err := ioutil.WriteFile(tmpPlaybook, bytes.NewBufferString(playbook).Bytes(), 0666); err != nil {
-		return dir, err
-	}
-	log.Println(playbook)
-
 	inventory := getInventory(fsType, internalName, bricks)
 	tmpInventory := filepath.Join(dir, "inventory")
-	if err := ioutil.WriteFile(tmpInventory, bytes.NewBufferString(inventory).Bytes(), 0666); err != nil {
+	if err := ioutil.WriteFile(tmpInventory, []byte(tmpInventory), 0666); err != nil {
 		return dir, err
 	}
 	log.Println(inventory)
@@ -179,12 +163,6 @@ func setupAnsible(fsType FSType, internalName string, bricks []datamodel.Brick) 
 	cmd = exec.Command("cp", "-r", getAnsibleDir(".venv"), dir)
 	output, err = cmd.CombinedOutput()
 	log.Println("copy venv", string(output))
-	if err != nil {
-		return dir, err
-	}
-	cmd = exec.Command("cp", "-r", getAnsibleDir("group_vars"), dir)
-	output, err = cmd.CombinedOutput()
-	log.Println("copy group vars", string(output))
 	return dir, err
 }
 
@@ -194,21 +172,25 @@ func executeAnsibleSetup(internalName string, bricks []datamodel.Brick, doFormat
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(dir)
+	defer func() {
+		if err := os.RemoveAll(dir); err != nil {
+			log.Printf("error removing %s due to %s\n", dir, err)
+		}
+	}()
 
 	// allow skip format when trying to rebuild
 	if doFormat {
-		formatArgs := "dac.yml -i inventory --tag format"
+		formatArgs := "create.yml -i inventory"
 		err = executeAnsiblePlaybook(dir, formatArgs)
 		if err != nil {
-			return fmt.Errorf("error during server format: %s", err.Error())
+			return fmt.Errorf("error during ansible create: %s", err.Error())
 		}
-	}
-
-	startupArgs := "dac.yml -i inventory --tag mount,create_mdt,create_mgs,create_osts,client_mount"
-	err = executeAnsiblePlaybook(dir, startupArgs)
-	if err != nil {
-		return fmt.Errorf("error during create fs: %s", err.Error())
+	} else {
+		formatArgs := "restore.yml -i inventory"
+		err = executeAnsiblePlaybook(dir, formatArgs)
+		if err != nil {
+			return fmt.Errorf("error during ansible create: %s", err.Error())
+		}
 	}
 	return nil
 }
@@ -218,15 +200,13 @@ func executeAnsibleTeardown(internalName string, bricks []datamodel.Brick) error
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(dir)
+	defer func() {
+		if err := os.RemoveAll(dir); err != nil {
+			log.Printf("error removing %s due to %s\n", dir, err)
+		}
+	}()
 
-	stopArgs := "dac.yml -i inventory --tag stop_all,unmount,client_unmount"
-	err = executeAnsiblePlaybook(dir, stopArgs)
-	if err != nil {
-		return fmt.Errorf("error during server umount: %s", err.Error())
-	}
-
-	formatArgs := "dac.yml -i inventory --tag format"
+	formatArgs := "delete.yml -i inventory"
 	err = executeAnsiblePlaybook(dir, formatArgs)
 	if err != nil {
 		return fmt.Errorf("error during server clean: %s", err.Error())

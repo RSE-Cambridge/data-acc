@@ -1,0 +1,8 @@
+---
+- name: Restore Lustre filesystem
+  hosts: all
+  any_errors_fatal: true
+  become: yes
+  roles:
+    - role: lustre
+      tags: [ mount, create_mdt, create_mgs, create_osts, client_mount ]

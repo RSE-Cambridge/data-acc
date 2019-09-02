@@ -1,0 +1,16 @@
+---
+- name: Create Lustre filesystem (format)
+  hosts: all
+  any_errors_fatal: true
+  become: yes
+  roles:
+    - role: lustre
+      tags: [ format ]
+
+- name: Create Lustre filesystem (format)
+  hosts: all
+  any_errors_fatal: true
+  become: yes
+  roles:
+    - role: lustre
+      tags: [ mount, create_mdt, create_mgs, create_osts, client_mount ]

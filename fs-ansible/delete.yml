@@ -1,0 +1,16 @@
+---
+- name: Delete Lustre filesystem (unmount)
+  hosts: all
+  any_errors_fatal: true
+  become: yes
+  roles:
+    - role: lustre
+      tags: [ stop_all, unmount, client_unmount ]
+
+- name: Delete Lustre filesystem (format)
+  hosts: all
+  any_errors_fatal: true
+  become: yes
+  roles:
+    - role: lustre
+      tags: [ format ]
