@@ -109,6 +109,9 @@ func TestShow(t *testing.T) {
 
 	err = runCli([]string{"--function", "show_configurations"})
 	assert.Equal(t, "ShowConfigurations", err.Error())
+
+	err = runCli([]string{"--function", "generate_ansible", "--token", "foo"})
+	assert.Equal(t, "GenerateAnsible", err.Error())
 }
 
 func TestFlow(t *testing.T) {
@@ -247,5 +250,5 @@ func (*stubDacctlActions) DataOut(c dacctl.CliContext) error {
 }
 
 func (*stubDacctlActions) GenerateAnsible(c dacctl.CliContext) error {
-	return errors.New("DataOut")
+	return errors.New("GenerateAnsible")
 }

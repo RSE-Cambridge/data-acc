@@ -165,6 +165,7 @@ func runCli(args []string) error {
 			Name:   "generate_ansible",
 			Usage:  "Creates debug ansible in debug ansible.",
 			Action: generateAnsible,
+			Flags:  []cli.Flag{token},
 		},
 	}
 	return app.Run(stripFunctionArg(args))
