@@ -1,10 +1,8 @@
 ---
 - set_fact:
-    mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
-    mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
-    mdts: "{{ vars[fs_name + '_mdts'] | default({}) }}"
-    osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
-    mdt_size: "{{ vars[fs_name + '_mdt_size'] | default('10%') }}"
+    mdts: "{{ mdts | default({}) }}"
+    osts: "{{ osts | default({}) }}"
+    mdt_size: "{{ mdt_size | default('10%') }}"
   tags: [ 'never', 'format_mgs', 'reformat_mgs', 'format']
 
 - name: Ensure MGS has been formatted

@@ -1,9 +1,7 @@
 ---
 - set_fact:
-    mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
-    mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
-    mdts: "{{ vars[fs_name + '_mdts'] | default({}) }}"
-    osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
+    mdts: "{{ mdts | default({}) }}"
+    osts: "{{ osts | default({}) }}"
   tags: [ 'never', 'start_mgs', 'start_mdts', 'start_osts', 'create_mgs', 'create_mdt', 'create_osts', 'stop_all', 'client_mount','client_unmount', 'stop_mgs']
 
 - name: load lustre module
