@@ -1,7 +1,7 @@
 ---
 - set_fact:
     mgs: "{{ vars[fs_name + '_mgs'] | default(omit) }}"
-    mgsnode: "{{ vars[fs_name + '_mgsnode']}}"
+    mgsnode: "{{ vars[fs_name + '_mgsnode'] }}"
     mdts: "{{ vars[fs_name + '_mdts'] | default({}) }}"
     osts: "{{ vars[fs_name + '_osts'] | default({}) }}"
     mdt_size: "{{ vars[fs_name + '_mdt_size'] | default('10%') }}"
@@ -22,115 +22,63 @@
     - mgs is defined
   tags: [ 'never', 'reformat_mgs']
 
-- name: Clean LVM
-  block:
-    - name: Remove LV for MDT
-      lvol:
-        lv: "mdt"
-        vg: "dac-{{ item }}"
-        state: absent
-        force: yes
-      loop: "{{ mdts.keys() | list }}"
-
-    - name: Remove VG
-      lvg:
-        vg: "dac-{{ item }}"
-        pvs: "/dev/{{ item }}"
-        force: yes
-        state: absent
-      loop: "{{ mdts.keys() | list }}"
-
-    - name: dmsetup remove lvm
-      command: "dmsetup remove dac--{{ item }}-mdt"
-      register: command_result
-      failed_when: "command_result.rc != 0 and ('device' not in command_result.stderr)"
-      loop: "{{ mdts.keys() | list }}"
-
+- name: Remove old MDT Partition
+  parted:
+     device: "/dev/{{ item }}"
+     number: 1
+     state: absent
+  loop: "{{ mdts.keys() }}"
   when:
     - mdts is defined
   tags: [ 'never', 'reformat_mdts', 'format']
 
-- name: Add VG
-  lvg:
-    vg: "dac-{{ item }}"
-    pvs: "/dev/{{ item }}"
-    state: present
-  loop: "{{ mdts.keys() | list }}"
-  when:
-    - mdts is defined
-  tags: [ 'never', 'reformat_mdts', 'format']
 
-- name: Add LV for MDT
-  lvol:
-    lv: "mdt"
-    vg: "dac-{{ item }}"
-    size: "{{ mdt_size }}"
-    state: present
-  loop: "{{ mdts.keys() | list }}"
+- name: Add MDT Partition
+  parted:
+     device: "/dev/{{ item }}"
+     number: 1
+     part_start: "0%"
+     part_end: "{{ mdt_size }}"
+     label: gpt
+     state: present
+  loop: "{{ mdts.keys() }}"
   when:
     - mdts is defined
   tags: [ 'never', 'reformat_mdts', 'format']
 
 - name: Reformat MDTs
-  command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} --mkfsoptions=\"-O large_dir\" /dev/mapper/dac--{{ item.key }}-mdt"
+  command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p1"
   loop: "{{ mdts|dict2items }}"
   when:
     - mdts is defined
   tags: [ 'never', 'reformat_mdts', 'format']
 
 
-- name: Clean LVM
-  block:
-    - name: Remove LV for OST
-      lvol:
-        lv: "ost"
-        vg: "dac-{{ item }}"
-        state: absent
-        force: yes
-      loop: "{{ osts.keys() | list }}"
-      when:
-        - mdts is defined
-
-    - name: Remove VG OST
-      lvg:
-        vg: "dac-{{ item }}"
-        pvs: "/dev/{{ item }}"
-        state: absent
-      loop: "{{ osts.keys() | list }}"
-      when:
-        - osts is defined
-        - mdts is not defined
-
-    - name: dmsetup remove lvm
-      command: "dmsetup remove dac--{{ item }}-ost"
-      register: command_result
-      failed_when: "command_result.rc != 0 and ('device' not in command_result.stderr)"
-      loop: "{{ mdts.keys() | list }}"
-  tags: [ 'never', 'reformat_osts', 'format']
-
-- name: Add VG
-  lvg:
-    vg: "dac-{{ item }}"
-    pvs: "/dev/{{ item }}"
-    state: present
-  loop: "{{ osts.keys() | list }}"
+- name: Remove old OST Partition
+  parted:
+     device: "/dev/{{ item }}"
+     number: 2
+     state: absent
+  loop: "{{ osts.keys() }}"
   when:
     - osts is defined
-  tags: [ 'never', 'reformat_osts', 'format']
+  tags: [ 'never', 'reformat_mdts', 'format']
 
-- name: Add LV for OST
-  lvol:
-    lv: "ost"
-    vg: "dac-{{ item }}"
-    size: +100%FREE
-    state: present
-  loop: "{{ osts.keys() | list }}"
+- name: Add OST Partition
+  parted:
+     device: "/dev/{{ item }}"
+     number: 2
+     part_start: "{{ mdt_size }}"
+     part_end: "100%"
+     label: gpt
+     state: present
+  loop: "{{ osts.keys() }}"
   when:
     - osts is defined
-  tags: [ 'never', 'reformat_osts', 'format']
+  tags: [ 'never', 'reformat_mdts', 'format']
 
 - name: Reformat OSTs
-  command: "/usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/mapper/dac--{{ item.key }}-ost"
+  command: "/usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p2"
   loop: "{{ osts|dict2items }}"
   when:
     - osts is defined
