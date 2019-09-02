@@ -21,7 +21,7 @@
         device: "/dev/{{ item }}"
         number: 1
         part_start: "0%"
-        part_end: "{{ mdt_size_mb }}mb"
+        part_end: "{{ mdt_size_mb }}MB"
         label: gpt
         state: present
       loop: "{{ mdts.keys() }}"
@@ -43,7 +43,7 @@
       parted:
          device: "/dev/{{ item }}"
          number: 2
-         part_start: "{{ mdt_size_mb }}mb"
+         part_start: "{{ mdt_size_mb }}MB"
          part_end: "100%"
          label: gpt
          state: present
