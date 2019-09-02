@@ -1,4 +1,7 @@
 ---
+- import_tasks: wipe.yaml
+  when: lustre_format_disks|bool and lustre_state == "present"
+
 - import_tasks: format.yaml
   when: lustre_format_disks|bool and lustre_state == "present"
 

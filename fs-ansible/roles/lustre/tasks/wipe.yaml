@@ -10,11 +10,11 @@
     device: "/dev/{{ item }}"
     number: 1
     state: absent
-  loop: "{{ mdts.keys() }}"
+  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
 
 - name: Remove old OST Partition
   parted:
     device: "/dev/{{ item }}"
     number: 2
     state: absent
-  loop: "{{ osts.keys() }}"
+  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
