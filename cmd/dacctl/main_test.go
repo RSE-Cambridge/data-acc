@@ -249,6 +249,6 @@ func (*stubDacctlActions) DataOut(c dacctl.CliContext) error {
 	return errors.New("DataOut")
 }
 
-func (*stubDacctlActions) GenerateAnsible(c dacctl.CliContext) error {
-	return errors.New("GenerateAnsible")
+func (*stubDacctlActions) GenerateAnsible(c dacctl.CliContext) (string, error) {
+	return "", errors.New("GenerateAnsible")
 }

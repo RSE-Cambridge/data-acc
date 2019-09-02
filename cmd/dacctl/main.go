@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/config"
 	"github.com/RSE-Cambridge/data-acc/pkg/version"
 	"github.com/urfave/cli"
@@ -191,6 +192,7 @@ func main() {
 	log.Println("dacctl start, called with:", strings.Join(os.Args, " "))
 
 	if err := runCli(os.Args); err != nil {
+		fmt.Println(err)
 		log.Println("dacctl error, called with:", strings.Join(os.Args, " "))
 		log.Fatal(err)
 	} else {

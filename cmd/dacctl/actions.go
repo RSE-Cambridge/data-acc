@@ -133,5 +133,7 @@ func dataOut(c *cli.Context) error {
 func generateAnsible(c *cli.Context) error {
 	keystore := getKeystore()
 	defer keystore.Close()
-	return getActions(keystore).GenerateAnsible(c)
+	return printOutput(func() (s string, e error) {
+		return getActions(keystore).GenerateAnsible(c)
+	})
 }

@@ -38,5 +38,5 @@ type Session interface {
 	GetAllSessions() ([]datamodel.Session, error)
 
 	// Generate ansible test dir
-	GenerateAnsible(sessionName datamodel.SessionName) error
+	GenerateAnsible(sessionName datamodel.SessionName) (string, error)
 }

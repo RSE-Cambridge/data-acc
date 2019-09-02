@@ -118,10 +118,10 @@ func (d *dacctlActions) DataOut(c dacctl.CliContext) error {
 	return d.session.CopyDataOut(sessionName)
 }
 
-func (d *dacctlActions) GenerateAnsible(c dacctl.CliContext) error {
+func (d *dacctlActions) GenerateAnsible(c dacctl.CliContext) (string, error) {
 	sessionName, err := d.getSessionName(c)
 	if err != nil {
-		return err
+		return "", err
 	}
 	return d.session.GenerateAnsible(sessionName)
 }

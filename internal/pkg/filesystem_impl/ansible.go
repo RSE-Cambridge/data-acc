@@ -100,8 +100,8 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 			"mgsnode": mgsnode,
 			//"client_port": fmt.Sprintf("%d", volume.ClientPort),
 			"lnet_suffix": conf.LnetSuffix,
-			"mdt_size_mb":    fmt.Sprintf("%d", conf.MDTSizeMB),
-			"fs_name": fsUuid,
+			"mdt_size_mb": fmt.Sprintf("%d", conf.MDTSizeMB),
+			"fs_name":     fsUuid,
 		},
 		Hosts: hosts,
 	}
@@ -149,7 +149,7 @@ func setupAnsible(fsType FSType, internalName string, bricks []datamodel.Brick) 
 
 	inventory := getInventory(fsType, internalName, bricks)
 	tmpInventory := filepath.Join(dir, "inventory")
-	if err := ioutil.WriteFile(tmpInventory, []byte(tmpInventory), 0666); err != nil {
+	if err := ioutil.WriteFile(tmpInventory, []byte(inventory), 0666); err != nil {
 		return dir, err
 	}
 	log.Println(inventory)
