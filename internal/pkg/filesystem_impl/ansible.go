@@ -160,6 +160,14 @@ func setupAnsible(fsType FSType, internalName string, bricks []datamodel.Brick) 
 	if err != nil {
 		return dir, err
 	}
+
+	cmd = exec.Command("cp", getAnsibleDir("*.yml"), dir)
+	output, err = cmd.CombinedOutput()
+	log.Println("copy playbooks", string(output))
+	if err != nil {
+		return dir, err
+	}
+
 	cmd = exec.Command("cp", "-r", getAnsibleDir(".venv"), dir)
 	output, err = cmd.CombinedOutput()
 	log.Println("copy venv", string(output))
