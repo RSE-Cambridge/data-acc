@@ -27,18 +27,6 @@
   when:
     - mgs is defined
 
-- name: Enable multiple mdt target support (DNE2)
-  block:
-    - name: Enable DNE2 remote dir
-      command: "lctl set_param mdt.*.enable_remote_dir=1"
-      register: command_result
-      failed_when: "command_result.rc != 0 and ('lctl' not in command_result.stderr)"
-
-    - name: Enable DNE2 all users
-      command: "lctl set_param mdt.*.enable_remote_dir_gid=-1"
-  when:
-    - mgs is defined
-
 - name: Start MDTs
   block:
     - name: Create MDT mount dir
