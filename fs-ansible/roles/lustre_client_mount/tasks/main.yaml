@@ -1,0 +1,28 @@
+---
+- name: mount lustre FS
+  block:
+    - name: ensure mount dir exists
+      file:
+        path: "/mnt/lustre/{{ fs_name }}"
+        state: directory
+        recurse: yes
+    - name: mount lustre fs
+      command: "mount -t lustre {{ mgsnode }}{{ lnet_suffix }}:/{{ fs_name }} /mnt/lustre/{{ fs_name }}"
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+  when: "lustre_client_mount_present|bool"
+
+- name: umount lustre FS
+  block:
+    - name: umount lustre fs
+      command: "umount -l /mnt/lustre/{{ fs_name }}"
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+
+    - name: ensure mount dir deleted
+      file:
+        path: "/mnt/lustre/{{ fs_name }}"
+        state: absent
+  when: "not (lustre_client_mount_present|bool)"
