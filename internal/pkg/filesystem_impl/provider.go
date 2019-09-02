@@ -4,6 +4,7 @@ import (
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/filesystem"
 	"math/rand"
+	"time"
 )
 
 func NewFileSystemProvider(ansible filesystem.Ansible) filesystem.Provider {
@@ -17,10 +18,13 @@ type fileSystemProvider struct {
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+var source = rand.NewSource(time.Now().UnixNano())
+var randGenerator = rand.New(source)
+
 func GetNewUUID() string {
 	b := make([]byte, 8)
 	for i := range b {
-		b[i] = letters[rand.Int63()%int64(len(letters))]
+		b[i] = letters[randGenerator.Int63()%int64(len(letters))]
 	}
 	return string(b)
 }
