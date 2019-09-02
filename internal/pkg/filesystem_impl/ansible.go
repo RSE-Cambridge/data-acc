@@ -100,7 +100,7 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 			"mgsnode": mgsnode,
 			//"client_port": fmt.Sprintf("%d", volume.ClientPort),
 			"lnet_suffix": conf.LnetSuffix,
-			"mdt_size":    fmt.Sprintf("%dm", conf.MDTSizeMB),
+			"mdt_size_mb":    fmt.Sprintf("%d", conf.MDTSizeMB),
 			"fs_name": fsUuid,
 		},
 		Hosts: hosts,

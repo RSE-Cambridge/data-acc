@@ -54,8 +54,6 @@
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
       with_items: "{{ mdts.keys() | list }}"
-  when:
-    - mdts is defined
 
 - name: Start OSTs
   block:
@@ -72,5 +70,3 @@
       failed_when: "command_result.rc != 0 and ('is already mounted' not in command_result.stderr)"
       changed_when: "command_result.rc == 0"
       with_items: "{{ osts.keys() | list }}"
-  when:
-    - osts is defined

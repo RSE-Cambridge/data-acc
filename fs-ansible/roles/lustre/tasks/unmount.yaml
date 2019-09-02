@@ -15,8 +15,6 @@
       file:
         path: /lustre/{{ fs_name }}/MDT
         state: absent
-  when:
-    - mdts is defined
 
 - name: Stop OST
   block:
@@ -31,9 +29,6 @@
       file:
         path: /lustre/{{ fs_name }}/OST
         state: absent
-  when:
-    - osts is defined
-
 
 - name: Stop MGS
   block:
@@ -47,5 +42,4 @@
       file:
         path: /lustre/MGS
         state: absent
-  when:
-    - mgs is defined and lustre_stop_mgs
+  when: mgs is defined and lustre_stop_mgs

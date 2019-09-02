@@ -1,9 +1,4 @@
 ---
-- set_fact:
-    mdts: "{{ mdts | default({}) }}"
-    osts: "{{ osts | default({}) }}"
-    mdt_size: "{{ mdt_size | default('10%') }}"
-
 - name: Ensure MGS has been formatted
   command: /usr/sbin/mkfs.lustre --mgs /dev/{{ mgs }}
   register: command_result
@@ -26,7 +21,7 @@
         device: "/dev/{{ item }}"
         number: 1
         part_start: "0%"
-        part_end: "{{ mdt_size }}"
+        part_end: "{{ mdt_size_mb }}mb"
         label: gpt
         state: present
       loop: "{{ mdts.keys() }}"
@@ -34,8 +29,6 @@
     - name: Reformat MDTs
       command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p1"
       loop: "{{ mdts|dict2items }}"
-  when:
-    - mdts is defined
 
 - name: Format OST
   block:
@@ -50,7 +43,7 @@
       parted:
          device: "/dev/{{ item }}"
          number: 2
-         part_start: "{{ mdt_size }}"
+         part_start: "{{ mdt_size_mb }}mb"
          part_end: "100%"
          label: gpt
          state: present
@@ -59,5 +52,3 @@
     - name: Reformat OSTs
       command: "/usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p2"
       loop: "{{ osts|dict2items }}"
-  when:
-    - osts is defined

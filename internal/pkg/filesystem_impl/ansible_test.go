@@ -31,7 +31,7 @@ func TestPlugin_GetInventory(t *testing.T) {
       vars:
         fs_name: abcdefgh
         lnet_suffix: ""
-        mdt_size: 20480m
+        mdt_size_mb: "20480"
         mgsnode: dac1
 `
 	assert.Equal(t, expected, result)
@@ -59,7 +59,7 @@ func TestPlugin_GetInventory_withNoOstOnOneHost(t *testing.T) {
       vars:
         fs_name: abcdefgh
         lnet_suffix: ""
-        mdt_size: 20480m
+        mdt_size_mb: "20480"
         mgsnode: dac1
 `
 	assert.Equal(t, expected, result)
@@ -155,7 +155,7 @@ func TestPlugin_GetInventory_MaxMDT(t *testing.T) {
       vars:
         fs_name: abcdefgh
         lnet_suffix: ""
-        mdt_size: 20480m
+        mdt_size_mb: "20480"
         mgsnode: dac1
 `
 	assert.Equal(t, expected, result)
