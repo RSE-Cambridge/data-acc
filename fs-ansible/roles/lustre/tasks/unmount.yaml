@@ -30,6 +30,11 @@
         path: /lustre/{{ fs_name }}/OST
         state: absent
 
+- name: Remove OST mount dir
+  file:
+    path: /lustre/{{ fs_name }}
+    state: absent
+
 - name: Stop MGS
   block:
     - name: umount MGS
