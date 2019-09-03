@@ -54,7 +54,7 @@ scontrol show burstbuffer
 squeue
 
 echo "***Use persistent buffer***"
-adduser centos
+id centos &>/dev/null || adduser centos
 cat use-persistent.sh
 su centos -c 'sbatch --array=1-10 use-persistent.sh'
 su centos -c 'sbatch use-persistent.sh'
