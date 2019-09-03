@@ -40,8 +40,7 @@ Once the Ansible has finished, you can login and try a Slurm test:
     ssh centos@<ip-of-slurm-master>
     docker exec -it slurmctld bash
     scontrol show burstbuffer
-    cd /usr/local/bin/data-acc/tools/
-    . slurm-test.sh
+    /usr/local/bin/data-acc/tools/slurm-test.sh
     squeue
     scontrol show burstbuffer
 
