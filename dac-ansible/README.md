@@ -1,6 +1,7 @@
 # Install data-acc Development Environment with Ansible
 
-Install data-acc demo with ansible. It creates a bunch of OpenStack VMs, then uses ansible to install a development data-acc enviroment.
+Install data-acc demo with Ansible. It creates a bunch of OpenStack VMs, then
+uses Ansible to install a development data-acc environment.
 
 ## Setup
 
@@ -23,18 +24,18 @@ Create OpenStack VMs:
 
     ./create-servers.py -k KEYPAIR_NAME -n NETWORK_NAME > hosts
     
-Once the VMs are created, you can now use ansible to deploy the dev environment:
+Once the VMs are created, you can now use Ansible to deploy the dev environment:
 
     ansible-playbook master.yml -i hosts
 
-Note the above pulls the docker image johngarbutt/data-acc which can be
+Note the above pulls the Docker image johngarbutt/data-acc which can be
 pushed by doing something like this:
 
     cd ../docker-slurm
     ./build.sh
     docker-compose push
 
-Once the ansible has finished, you can login and try a slurm test:
+Once the Ansible has finished, you can login and try a Slurm test:
 
     ssh centos@<ip-of-slurm-master>
     docker exec -it slurmctld bash
@@ -78,7 +79,7 @@ manually via "umount -l <directory>" on slurm-cpu[1-2].
 ### dac[1-3]
 
 The dacd processes are listening to etcd waiting for commands from
-dacctl via etcd. If they have the 0th brick, then they run ansible
+dacctl via etcd. If they have the 0th brick, then they run Ansible
 over all the dacd nodes to create the filesystem, then they run ssh
 to each of the compute nodes to mount the filesystem.
 
