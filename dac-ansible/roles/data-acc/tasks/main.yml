@@ -54,14 +54,9 @@
 - name: Add ansible venv
   become: yes
   become_user: root
-  shell: |
-      cd {{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible
-      virtualenv .venv
-      source .venv/bin/activate
-      pip install -U pip
-      pip install -U ansible
-  args:
-    creates: "{{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible/.venv"
+  pip:
+    name: ansible
+    virtualenv:  "{{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible/.venv"
 
 - include_tasks: systemd.yml
   when: data_acc_install_dacd
