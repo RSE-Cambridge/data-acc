@@ -18,7 +18,7 @@ func getMountDir(sourceName datamodel.SessionName, isMultiJob bool, attachingFor
 }
 
 func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, internalName string,
-	primaryBrickHost datamodel.BrickHostName, attachment datamodel.AttachmentSessionStatus,
+	primaryBrickHost datamodel.BrickHostName, attachment datamodel.AttachmentSession,
 	owner uint, group uint) error {
 	log.Println("Mount for:", sessionName)
 
@@ -94,7 +94,7 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 }
 
 func unmount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, internalName string,
-	primaryBrickHost datamodel.BrickHostName, attachment datamodel.AttachmentSessionStatus) error {
+	primaryBrickHost datamodel.BrickHostName, attachment datamodel.AttachmentSession) error {
 	log.Println("Umount for:", sessionName)
 
 	for _, attachHost := range attachment.Hosts {

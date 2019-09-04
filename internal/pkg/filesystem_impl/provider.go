@@ -67,13 +67,13 @@ func (f *fileSystemProvider) DataCopyOut(session datamodel.Session) error {
 	return nil
 }
 
-func (f *fileSystemProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSessionStatus) error {
+func (f *fileSystemProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSession) error {
 	return mount(Lustre, session.Name, session.VolumeRequest.MultiJob, session.FilesystemStatus.InternalName,
 		session.PrimaryBrickHost, attachments, session.Owner, session.Group)
 
 }
 
-func (f *fileSystemProvider) Unmount(session datamodel.Session, attachments datamodel.AttachmentSessionStatus) error {
+func (f *fileSystemProvider) Unmount(session datamodel.Session, attachments datamodel.AttachmentSession) error {
 	return unmount(Lustre, session.Name, session.VolumeRequest.MultiJob, session.FilesystemStatus.InternalName,
 		session.PrimaryBrickHost, attachments)
 }

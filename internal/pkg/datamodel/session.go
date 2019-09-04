@@ -62,7 +62,7 @@ type Session struct {
 
 	// For multi-job volumes these are always other sessions
 	// for job volumes this is always for just this session
-	CurrentAttachments map[SessionName]AttachmentSessionStatus
+	CurrentAttachments map[SessionName]AttachmentSession
 }
 
 type FilesystemStatus struct {
@@ -71,7 +71,7 @@ type FilesystemStatus struct {
 	InternalData string
 }
 
-type AttachmentSessionStatus struct {
+type AttachmentSession struct {
 	SessionName SessionName
 	Hosts       []string
 

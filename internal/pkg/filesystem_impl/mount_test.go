@@ -103,7 +103,7 @@ func Test_Mount(t *testing.T) {
 	primaryBrickHost := datamodel.BrickHostName("host1")
 	owner := uint(1001)
 	group := uint(1002)
-	attachment := datamodel.AttachmentSessionStatus{
+	attachment := datamodel.AttachmentSession{
 
 		SessionName: "job2", // changed to prove this is not used
 		Hosts:       []string{"client1", "client2"},
@@ -147,7 +147,7 @@ func Test_Umount(t *testing.T) {
 	sessionName := datamodel.SessionName("job4")
 	internalName := "fsuuid"
 	primaryBrickHost := datamodel.BrickHostName("host1")
-	attachment := datamodel.AttachmentSessionStatus{
+	attachment := datamodel.AttachmentSession{
 
 		SessionName: "job2",
 		Hosts:       []string{"client1", "client2"},
@@ -179,7 +179,7 @@ func Test_Umount_multi(t *testing.T) {
 	sessionName := datamodel.SessionName("asdf")
 	internalName := "uuidasdf"
 	primaryBrickHost := datamodel.BrickHostName("host1")
-	attachment := datamodel.AttachmentSessionStatus{
+	attachment := datamodel.AttachmentSession{
 		SessionName:  "job1",
 		Hosts:        []string{"client1"},
 		GlobalMount:  true,
@@ -208,7 +208,7 @@ func Test_Mount_multi(t *testing.T) {
 	primaryBrickHost := datamodel.BrickHostName("host1")
 	owner := uint(1001)
 	group := uint(1002)
-	attachment := datamodel.AttachmentSessionStatus{
+	attachment := datamodel.AttachmentSession{
 		SessionName:  "job1",
 		Hosts:        []string{"client1"},
 		GlobalMount:  true,
