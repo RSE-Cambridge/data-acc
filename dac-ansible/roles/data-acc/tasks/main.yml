@@ -25,13 +25,6 @@
         remote_src: yes
         src: /tmp/{{data_acc_tgz}}
         dest: '{{data_acc_install_dir}}/{{data_acc_name}}'
-  always:
-    - name: delete archive
-      become: yes
-      become_user: root
-      file:
-        path: /tmp/{{data_acc_tgz}}
-        state: absent
 
 - name: link data_acc
   become: yes
