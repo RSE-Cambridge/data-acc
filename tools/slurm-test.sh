@@ -11,11 +11,9 @@ echo "#!/bin/bash
 echo "#!/bin/bash
 #DW jobdw capacity=2TB access_mode=striped,private type=scratch
 #DW persistentdw name=mytestbuffer
-#DW swap 5MB
 
 env
 df -h
-swapon
 
 mkdir \$DW_JOB_STRIPED/outdir
 df -h > \$DW_JOB_STRIPED/outdir/dfoutput
