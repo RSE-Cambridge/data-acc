@@ -194,7 +194,7 @@ func (s *sessionActionHandler) handleCopyOut(action datamodel.SessionAction) {
 	})
 }
 
-func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session) error {
+func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session) (datamodel.Session, error) {
 	attachmentSession := datamodel.AttachmentSession{
 		Hosts:       actionSession.RequestedAttachHosts,
 		SessionName: actionSession.Name,
@@ -206,29 +206,30 @@ func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session) erro
 			PrivateMount:      actionSession.VolumeRequest.Access == datamodel.Private || actionSession.VolumeRequest.Access == datamodel.PrivateAndStriped,
 			SwapBytes:         actionSession.VolumeRequest.SwapBytes,
 		}
-		//if actionSession.CurrentAttachments == nil {
-		//	session.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSessionStatus{
-		//		session.Name: jobAttachmentStatus,
-		//	}
-		//} else {
-		//	session.CurrentAttachments[session.Name] = jobAttachmentStatus
-		//}
-		//session, err = s.sessionRegistry.UpdateSession(session)
-		//if err != nil {
-		//	return err
-		//}
+		if actionSession.CurrentAttachments == nil {
+			actionSession.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSessionStatus{
+				actionSession.Name: jobAttachmentStatus,
+			}
+		} else {
+			actionSession.CurrentAttachments[actionSession.Name] = jobAttachmentStatus
+		}
+		session, err := s.sessionRegistry.UpdateSession(actionSession)
+		if err != nil {
+			return actionSession, err
+		}
+		actionSession = session
 
 		if err := s.fsProvider.Mount(actionSession, jobAttachmentStatus); err != nil {
-			return err
+			return actionSession, err
 		}
 		// TODO: should we update the session? and delete attachments later?
 	}
 	for _, sessionName := range actionSession.MultiJobAttachments {
 		if err := s.doMultiJobMount(actionSession, sessionName); err != nil {
-			return nil
+			return actionSession, nil
 		}
 	}
-	return nil
+	return actionSession, nil
 }
 
 func (s *sessionActionHandler) doMultiJobMount(actionSession datamodel.Session, sessionName datamodel.SessionName) error {
@@ -348,7 +349,8 @@ func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
 			return session, errors.New("already mounted, can't mount again")
 		}
 
-		if err := s.doAllMounts(session); err != nil {
+		session, err = s.doAllMounts(session);
+		if err != nil {
 			if err := s.doAllUnmounts(session); err != nil {
 				log.Println("error while rolling back possible partial mount", action.Session.Name, err)
 			}
