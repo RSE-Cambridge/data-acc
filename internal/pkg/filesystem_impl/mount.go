@@ -32,11 +32,11 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 		//executeAnsibleMount(fsType, volume, brickAllocations)
 	}
 
-	for _, attachHost := range attachment.AttachmentSession.Hosts {
+	for _, attachHost := range attachment.Hosts {
 		log.Printf("Mounting %s on host: %s for session: %s", sessionName, attachHost,
-			attachment.AttachmentSession.SessionName)
+			attachment.SessionName)
 
-		var mountDir = getMountDir(sessionName, isMultiJob, attachment.AttachmentSession.SessionName)
+		var mountDir = getMountDir(sessionName, isMultiJob, attachment.SessionName)
 		if err := mkdir(attachHost, mountDir); err != nil {
 			return err
 		}
@@ -97,11 +97,11 @@ func unmount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, 
 	primaryBrickHost datamodel.BrickHostName, attachment datamodel.AttachmentSessionStatus) error {
 	log.Println("Umount for:", sessionName)
 
-	for _, attachHost := range attachment.AttachmentSession.Hosts {
+	for _, attachHost := range attachment.Hosts {
 		log.Printf("Unmounting %s on host: %s for session: %s", sessionName, attachHost,
-			attachment.AttachmentSession.SessionName)
+			attachment.SessionName)
 
-		var mountDir = getMountDir(sessionName, isMultiJob, attachment.AttachmentSession.SessionName)
+		var mountDir = getMountDir(sessionName, isMultiJob, attachment.SessionName)
 		// TODO: swap!
 		//if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
 		//	swapFile := path.Join(mountDir, fmt.Sprintf("/swap/%s", attachment.Hostname)) // TODO share?

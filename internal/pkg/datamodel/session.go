@@ -71,20 +71,13 @@ type FilesystemStatus struct {
 	InternalData string
 }
 
-type AttachmentSession struct {
+type AttachmentSessionStatus struct {
 	SessionName SessionName
 	Hosts       []string
-}
-
-type AttachmentSessionStatus struct {
-	AttachmentSession AttachmentSession
 
 	GlobalMount  bool
 	PrivateMount bool
 	SwapBytes    int
-
-	DetachRequested bool // TODO: delete this bit?
-	Error           string
 }
 
 type SessionStatus struct {

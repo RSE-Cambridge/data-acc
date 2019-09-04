@@ -214,16 +214,13 @@ func (s *sessionActionHandler) handleCopyOut(action datamodel.SessionAction) {
 }
 
 func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session) (datamodel.Session, error) {
-	attachmentSession := datamodel.AttachmentSession{
-		Hosts:       actionSession.RequestedAttachHosts,
-		SessionName: actionSession.Name,
-	}
 	if actionSession.ActualSizeBytes > 0 {
 		jobAttachmentStatus := datamodel.AttachmentSessionStatus{
-			AttachmentSession: attachmentSession,
-			GlobalMount:       actionSession.VolumeRequest.Access == datamodel.Striped || actionSession.VolumeRequest.Access == datamodel.PrivateAndStriped,
-			PrivateMount:      actionSession.VolumeRequest.Access == datamodel.Private || actionSession.VolumeRequest.Access == datamodel.PrivateAndStriped,
-			SwapBytes:         actionSession.VolumeRequest.SwapBytes,
+			Hosts:        actionSession.RequestedAttachHosts,
+			SessionName:  actionSession.Name,
+			GlobalMount:  actionSession.VolumeRequest.Access == datamodel.Striped || actionSession.VolumeRequest.Access == datamodel.PrivateAndStriped,
+			PrivateMount: actionSession.VolumeRequest.Access == datamodel.Private || actionSession.VolumeRequest.Access == datamodel.PrivateAndStriped,
+			SwapBytes:    actionSession.VolumeRequest.SwapBytes,
 		}
 		if actionSession.CurrentAttachments == nil {
 			actionSession.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSessionStatus{
@@ -274,25 +271,21 @@ func (s *sessionActionHandler) doMultiJobMount(actionSession datamodel.Session, 
 	if !multiJobSession.VolumeRequest.MultiJob {
 		log.Panicf("trying multi-job attach to non-multi job session %s", multiJobSession.Name)
 	}
-
-	attachmentSession := datamodel.AttachmentSession{
+	multiJobAttachmentStatus := datamodel.AttachmentSessionStatus{
 		Hosts:       actionSession.RequestedAttachHosts,
 		SessionName: actionSession.Name,
-	}
-	multiJobAttachmentStatus := datamodel.AttachmentSessionStatus{
-		AttachmentSession: attachmentSession,
-		GlobalMount:       true,
+		GlobalMount: true,
 	}
 	if multiJobSession.CurrentAttachments == nil {
 		multiJobSession.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSessionStatus{
-			attachmentSession.SessionName: multiJobAttachmentStatus,
+			multiJobAttachmentStatus.SessionName: multiJobAttachmentStatus,
 		}
 	} else {
-		if _, ok := multiJobSession.CurrentAttachments[attachmentSession.SessionName]; ok {
+		if _, ok := multiJobSession.CurrentAttachments[multiJobAttachmentStatus.SessionName]; ok {
 			return fmt.Errorf("already attached for session %s and multi-job %s",
-				attachmentSession.SessionName, sessionName)
+				multiJobAttachmentStatus.SessionName, sessionName)
 		}
-		multiJobSession.CurrentAttachments[attachmentSession.SessionName] = multiJobAttachmentStatus
+		multiJobSession.CurrentAttachments[multiJobAttachmentStatus.SessionName] = multiJobAttachmentStatus
 	}
 
 	multiJobSession, err = s.sessionRegistry.UpdateSession(multiJobSession)
