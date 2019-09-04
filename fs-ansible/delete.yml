@@ -1,0 +1,13 @@
+---
+- name: Create Lustre filesystem (format)
+  hosts: all
+  any_errors_fatal: true
+  become: yes
+  roles:
+    - role: lustre_client_mount
+      vars:
+        lustre_client_mount_present: false
+
+    - role: lustre
+      vars:
+        lustre_state: "absent"

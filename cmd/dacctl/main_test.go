@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl/actions"
-	"github.com/RSE-Cambridge/data-acc/internal/pkg/keystoreregistry"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/store"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"strings"
 	"testing"
 )
@@ -108,6 +109,9 @@ func TestShow(t *testing.T) {
 
 	err = runCli([]string{"--function", "show_configurations"})
 	assert.Equal(t, "ShowConfigurations", err.Error())
+
+	err = runCli([]string{"--function", "generate_ansible", "--token", "foo"})
+	assert.Equal(t, "GenerateAnsible", err.Error())
 }
 
 func TestFlow(t *testing.T) {
@@ -143,83 +147,108 @@ func TestFlow(t *testing.T) {
 type stubKeystore struct{}
 
 func (*stubKeystore) Close() error {
+	log.Println("closed")
 	return nil
 }
-func (*stubKeystore) CleanPrefix(prefix string) error {
+
+func (*stubKeystore) Create(key string, value []byte) (int64, error) {
 	panic("implement me")
 }
-func (*stubKeystore) Add(keyValues []keystoreregistry.KeyValue) error {
+
+func (*stubKeystore) Update(key string, value []byte, modRevision int64) (int64, error) {
 	panic("implement me")
 }
-func (*stubKeystore) Update(keyValues []keystoreregistry.KeyValueVersion) error {
+
+func (*stubKeystore) Delete(key string, modRevision int64) error {
 	panic("implement me")
 }
-func (*stubKeystore) DeleteAll(keyValues []keystoreregistry.KeyValueVersion) error {
+
+func (*stubKeystore) DeleteAllKeysWithPrefix(keyPrefix string) (int64, error) {
 	panic("implement me")
 }
-func (*stubKeystore) GetAll(prefix string) ([]keystoreregistry.KeyValueVersion, error) {
+
+func (*stubKeystore) GetAll(keyPrefix string) ([]store.KeyValueVersion, error) {
 	panic("implement me")
 }
-func (*stubKeystore) Get(key string) (keystoreregistry.KeyValueVersion, error) {
+
+func (*stubKeystore) Get(key string) (store.KeyValueVersion, error) {
 	panic("implement me")
 }
-func (*stubKeystore) WatchPrefix(prefix string, onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
+
+func (*stubKeystore) IsExist(key string) (bool, error) {
 	panic("implement me")
 }
-func (*stubKeystore) WatchKey(ctxt context.Context, key string, onUpdate func(old *keystoreregistry.KeyValueVersion, new *keystoreregistry.KeyValueVersion)) {
+
+func (*stubKeystore) Watch(ctxt context.Context, key string, withPrefix bool) store.KeyValueUpdateChan {
 	panic("implement me")
 }
-func (*stubKeystore) KeepAliveKey(key string) error {
+
+func (*stubKeystore) KeepAliveKey(ctxt context.Context, key string) error {
 	panic("implement me")
 }
-func (*stubKeystore) NewMutex(lockKey string) (keystoreregistry.Mutex, error) {
-	panic("implement me")
-}
-func (*stubKeystore) Watch(ctxt context.Context, key string, withPrefix bool) keystoreregistry.KeyValueUpdateChan {
+
+func (*stubKeystore) NewMutex(lockKey string) (store.Mutex, error) {
 	panic("implement me")
 }
 
 type stubDacctlActions struct{}
 
-func (*stubDacctlActions) CreatePersistentBuffer(c actions.CliContext) error {
+func (*stubDacctlActions) CreatePersistentBuffer(c dacctl.CliContext) error {
 	return fmt.Errorf("CreatePersistentBuffer %s", c.String("token"))
 }
-func (*stubDacctlActions) DeleteBuffer(c actions.CliContext) error {
+
+func (*stubDacctlActions) DeleteBuffer(c dacctl.CliContext) error {
 	return fmt.Errorf("DeleteBuffer %s", c.String("token"))
 }
-func (*stubDacctlActions) CreatePerJobBuffer(c actions.CliContext) error {
+
+func (*stubDacctlActions) CreatePerJobBuffer(c dacctl.CliContext) error {
 	return errors.New("CreatePerJobBuffer")
 }
-func (*stubDacctlActions) ShowInstances() error {
-	return errors.New("ShowInstances")
+
+func (*stubDacctlActions) ShowInstances() (string, error) {
+	return "", errors.New("ShowInstances")
 }
-func (*stubDacctlActions) ShowSessions() error {
-	return errors.New("ShowSessions")
+
+func (*stubDacctlActions) ShowSessions() (string, error) {
+	return "", errors.New("ShowSessions")
 }
-func (*stubDacctlActions) ListPools() error {
-	return errors.New("ListPools")
+
+func (*stubDacctlActions) ListPools() (string, error) {
+	return "", errors.New("ListPools")
 }
-func (*stubDacctlActions) ShowConfigurations() error {
-	return errors.New("ShowConfigurations")
+
+func (*stubDacctlActions) ShowConfigurations() (string, error) {
+	return "", errors.New("ShowConfigurations")
 }
-func (*stubDacctlActions) ValidateJob(c actions.CliContext) error {
+
+func (*stubDacctlActions) ValidateJob(c dacctl.CliContext) error {
 	return errors.New("ValidateJob")
 }
-func (*stubDacctlActions) RealSize(c actions.CliContext) error {
-	return errors.New("RealSize")
+
+func (*stubDacctlActions) RealSize(c dacctl.CliContext) (string, error) {
+	return "", errors.New("RealSize")
 }
-func (*stubDacctlActions) DataIn(c actions.CliContext) error {
+
+func (*stubDacctlActions) DataIn(c dacctl.CliContext) error {
 	return errors.New("DataIn")
 }
-func (*stubDacctlActions) Paths(c actions.CliContext) error {
+
+func (*stubDacctlActions) Paths(c dacctl.CliContext) error {
 	return errors.New("Paths")
 }
-func (*stubDacctlActions) PreRun(c actions.CliContext) error {
+
+func (*stubDacctlActions) PreRun(c dacctl.CliContext) error {
 	return errors.New("PreRun")
 }
-func (*stubDacctlActions) PostRun(c actions.CliContext) error {
+
+func (*stubDacctlActions) PostRun(c dacctl.CliContext) error {
 	return errors.New("PostRun")
 }
-func (*stubDacctlActions) DataOut(c actions.CliContext) error {
+
+func (*stubDacctlActions) DataOut(c dacctl.CliContext) error {
 	return errors.New("DataOut")
+}
+
+func (*stubDacctlActions) GenerateAnsible(c dacctl.CliContext) (string, error) {
+	return "", errors.New("GenerateAnsible")
 }

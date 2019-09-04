@@ -1,5 +1,15 @@
 ---
-- include: repo.yaml
-- include: lnet.yaml
-- include: format.yaml
-- include: mount.yaml
+- import_tasks: wipe.yaml
+  when: lustre_format_disks|bool and lustre_state == "present"
+
+- import_tasks: format.yaml
+  when: lustre_format_disks|bool and lustre_state == "present"
+
+- import_tasks: mount.yaml
+  when: lustre_state == "present"
+
+- import_tasks: unmount.yaml
+  when: lustre_state == "absent"
+
+- import_tasks: wipe.yaml
+  when: lustre_state == "absent"

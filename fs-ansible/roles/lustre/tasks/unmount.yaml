@@ -1,0 +1,50 @@
+---
+# Using ordering specified in here:
+# http://wiki.lustre.org/Starting_and_Stopping_Lustre_Services
+
+- name: Stop MDTs
+  block:
+    - name: umount mdts
+      command: umount /lustre/{{ fs_name }}/MDT/{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+      with_items: "{{ mdts.keys() | list }}"
+
+    - name: remove mdt mount dir
+      file:
+        path: /lustre/{{ fs_name }}/MDT
+        state: absent
+
+- name: Stop OST
+  block:
+    - name: umount OSTs
+      command: umount /lustre/{{ fs_name }}/OST/{{ item }}
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+      with_items: "{{ osts.keys() | list }}"
+
+    - name: Remove OST mount dir
+      file:
+        path: /lustre/{{ fs_name }}/OST
+        state: absent
+
+- name: Remove OST mount dir
+  file:
+    path: /lustre/{{ fs_name }}
+    state: absent
+
+- name: Stop MGS
+  block:
+    - name: umount MGS
+      command: umount /lustre/MGS
+      register: command_result
+      failed_when: "command_result.rc != 0 and ('not mounted' not in command_result.stderr) and ('mountpoint not found' not in command_result.stderr)"
+      changed_when: "command_result.rc == 0"
+
+    - name: Remove MGSDT mount dir
+      file:
+        path: /lustre/MGS
+        state: absent
+  when: mgs is defined and lustre_stop_mgs

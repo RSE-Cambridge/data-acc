@@ -4,14 +4,17 @@ ETCDCTL_ENDPOINTS=https://{{ hostvars[groups['etcd_master'][0]].ansible_host }}:
 ETCDCTL_CERT_FILE=/etc/data-acc/pki/{{ inventory_hostname }}.pem
 ETCDCTL_KEY_FILE=/etc/data-acc/pki/{{ inventory_hostname }}-key.pem
 ETCDCTL_CA_FILE=/etc/data-acc/pki/ca.pem
-DAC_ANSIBLE_DIR={{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible/
-#DAC_SKIP_ANSIBLE=True
-DAC_HOST_GROUP=dac-fake
-DEVICE_COUNT=5
+
+# dacd config settings
 DAC_POOL_NAME=default
-DAC_DEVICE_CAPACITY_GB=1600
+DAC_BRICK_CAPACITY_GB=1600
+DAC_BRICK_COUNT=5
+DAC_BRICK_ADDRESS_PATTERN="loop%d"
+
+#DAC_SKIP_ANSIBLE=True
+DAC_ANSIBLE_DIR={{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible/
+DAC_HOST_GROUP=dac-fake
 DACCTL_LOG=/var/log/dacctl.log
 #DAC_LNET_SUFFIX="-opa@o2ib1"
-DEVICE_TYPE="loop%d"
 DAC_MDT_SIZE_MB="50"
 DAC_MAX_MDT_COUNT=2

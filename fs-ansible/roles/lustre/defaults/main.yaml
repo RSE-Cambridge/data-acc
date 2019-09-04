@@ -1,0 +1,11 @@
+---
+# state is either present or absent
+lustre_state: "present"
+lustre_format_disks: true
+lustre_stop_mgs: false
+
+mdt_size_mb: "50"
+
+# following are usually overwritten by host vars
+mdts: {}
+osts: {}

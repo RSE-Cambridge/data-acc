@@ -1,0 +1,20 @@
+---
+- set_fact:
+    mdts: "{{ mdts | default({}) }}"
+    osts: "{{ osts | default({}) }}"
+
+# TODO: maybe call wipefs or ss out the block device headers
+
+- name: Remove old MDT Partition
+  parted:
+    device: "/dev/{{ item }}"
+    number: 1
+    state: absent
+  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
+
+- name: Remove old OST Partition
+  parted:
+    device: "/dev/{{ item }}"
+    number: 2
+    state: absent
+  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
