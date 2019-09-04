@@ -93,7 +93,7 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 		session := action.Session
 		// Nothing to create, just complete the action
 		// TODO: why do we send the action?
-		if session.ActualSizeBytes == 0 {
+		if session.ActualSizeBytes == 0 && len(session.MultiJobAttachments) == 0 {
 			return session, nil
 		}
 
@@ -104,6 +104,20 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 		}
 		if session.Status.DeleteRequested {
 			return session, fmt.Errorf("can't do action once delete has been requested for")
+		}
+
+		// attach to any additional multi job attachments first
+		for _, multiJob := range session.MultiJobAttachments {
+			//if err := s.doMultiJobMount(session, multiJob); err != nil {
+			//	return session, fmt.Errorf("failed to mount multijob for %s due to %s", session.Name, err)
+			//}
+			// TODO: mount multi job here on primary brick host
+			log.Println(multiJob)
+		}
+
+		// nothing more to do if there are no bricks in this session
+		if session.ActualSizeBytes == 0 {
+			return session, nil
 		}
 
 		fsStatus, err := s.fsProvider.Create(session)
@@ -120,7 +134,12 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 				err = updateErr
 			}
 		}
-		return session, err
+		if err != nil {
+			return session, err
+		}
+
+		// TODO: mount primary brick host here
+		return session, nil
 	})
 }
 
