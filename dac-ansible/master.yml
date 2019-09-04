@@ -2,11 +2,6 @@
 - hosts: all
   become: true
   tasks:
-  - name: configure default gateway
-    command: route add default gw 10.43.255.1
-    register: command_result
-    failed_when: "command_result.rc != 0 and ('SIOCADDRT: File exists' not in command_result.stderr)"
-    changed_when: "command_result.rc == 0"
   - name: Create entries in /etc/hosts for all nodes
     lineinfile:
       path: /etc/hosts
@@ -302,12 +297,12 @@
       args:
         chdir: '/var/lib/slurm-docker/slurm-master'
       changed_when: False
-    - docker_service:
+    - docker_compose:
         project_src: /var/lib/slurm-docker/slurm-master
         state: absent
         remove_volumes: yes
       when: recreate|bool
-    - docker_service:
+    - docker_compose:
         project_src: /var/lib/slurm-docker/slurm-master
       register: output
 
@@ -349,10 +344,10 @@
       args:
         chdir: '/var/lib/slurm-docker/slurm-worker'
       changed_when: False
-    - docker_service:
+    - docker_compose:
         project_src: /var/lib/slurm-docker/slurm-worker
         state: absent
         remove_volumes: yes
       when: recreate|bool
-    - docker_service:
+    - docker_compose:
         project_src: /var/lib/slurm-docker/slurm-worker
