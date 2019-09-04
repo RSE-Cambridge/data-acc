@@ -297,12 +297,12 @@
       args:
         chdir: '/var/lib/slurm-docker/slurm-master'
       changed_when: False
-    - docker_service:
+    - docker_compose:
         project_src: /var/lib/slurm-docker/slurm-master
         state: absent
         remove_volumes: yes
       when: recreate|bool
-    - docker_service:
+    - docker_compose:
         project_src: /var/lib/slurm-docker/slurm-master
       register: output
     - name: ensure slurm cluster registered in db
@@ -351,10 +351,10 @@
       args:
         chdir: '/var/lib/slurm-docker/slurm-worker'
       changed_when: False
-    - docker_service:
+    - docker_compose:
         project_src: /var/lib/slurm-docker/slurm-worker
         state: absent
         remove_volumes: yes
       when: recreate|bool
-    - docker_service:
+    - docker_compose:
         project_src: /var/lib/slurm-docker/slurm-worker
