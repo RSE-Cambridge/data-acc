@@ -349,7 +349,7 @@ func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
 			return session, errors.New("already mounted, can't mount again")
 		}
 
-		session, err = s.doAllMounts(session);
+		session, err = s.doAllMounts(session)
 		if err != nil {
 			if err := s.doAllUnmounts(session); err != nil {
 				log.Println("error while rolling back possible partial mount", action.Session.Name, err)
