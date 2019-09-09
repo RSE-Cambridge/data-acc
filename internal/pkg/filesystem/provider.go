@@ -10,6 +10,6 @@ type Provider interface {
 	DataCopyIn(session datamodel.Session) error
 	DataCopyOut(session datamodel.Session) error
 
-	Mount(session datamodel.Session, attachments datamodel.AttachmentSession) error
+	Mount(session datamodel.Session, attachments datamodel.AttachmentSession, setInitialPermissions bool) error
 	Unmount(session datamodel.Session, attachments datamodel.AttachmentSession) error
 }
