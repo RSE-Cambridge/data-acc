@@ -151,15 +151,22 @@ func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
 			return action.Session, fmt.Errorf("error getting session: %s", err)
 		}
 
+		//if err := s.doAllUnmounts(session, getAttachmentKey(session.Name, true)); err != nil {
+		//	return session, fmt.Errorf("failed primary brick host unmount, due to: %s", err.Error())
+		//}
+		//log.Println("did umount primary brick host during delete")
+
 		if !session.Status.UnmountComplete {
-			if err := s.doAllUnmounts(session); err != nil {
-				log.Println("failed unmount during delete", session.Name)
+			if err := s.doAllUnmounts(session, getAttachmentKey(session.Name, false)); err != nil {
+				return session, fmt.Errorf("failed retry unmount during delete, due to: %s", err.Error())
 			}
+			log.Println("did unmount during delete")
 		}
 		if !session.Status.CopyDataOutComplete && !session.Status.DeleteSkipCopyDataOut {
 			if err := s.fsProvider.DataCopyOut(action.Session); err != nil {
-				log.Println("failed DataCopyOut during delete", action.Session.Name)
+				return session, fmt.Errorf("failed DataCopyOut during delete, due to: %s", err.Error())
 			}
+			log.Println("did data copy out during delete")
 		}
 
 		// Only try delete if we have bricks to delete
@@ -308,7 +315,7 @@ func (s *sessionActionHandler) doMultiJobMount(actionSession datamodel.Session, 
 	return s.fsProvider.Mount(multiJobSession, multiJobAttachment)
 }
 
-func (s *sessionActionHandler) doMultiJobUnmount(actionSession datamodel.Session, sessionName datamodel.SessionName) error {
+func (s *sessionActionHandler) doMultiJobUnmount(actionSession datamodel.Session, sessionName datamodel.SessionName, attachmentKey datamodel.SessionName) error {
 	sessionMutex, err := s.sessionRegistry.GetSessionMutex(sessionName)
 	if err != nil {
 		log.Printf("unable to get session mutex: %s due to: %s\n", sessionName, err)
@@ -332,9 +339,9 @@ func (s *sessionActionHandler) doMultiJobUnmount(actionSession datamodel.Session
 		log.Panicf("trying multi-job attach to non-multi job session %s", multiJobSession.Name)
 	}
 
-	attachments, ok := multiJobSession.CurrentAttachments[actionSession.Name]
+	attachments, ok := multiJobSession.CurrentAttachments[attachmentKey]
 	if !ok {
-		log.Println("skip detach, already seems to be detached")
+		log.Println("skip multi-job detach, already seems to be detached")
 		return nil
 	}
 	if err := s.fsProvider.Unmount(multiJobSession, attachments); err != nil {
@@ -342,19 +349,19 @@ func (s *sessionActionHandler) doMultiJobUnmount(actionSession datamodel.Session
 	}
 
 	// update multi job session to note our attachments have now gone
-	delete(multiJobSession.CurrentAttachments, actionSession.Name)
+	delete(multiJobSession.CurrentAttachments, attachmentKey)
 	_, err = s.sessionRegistry.UpdateSession(multiJobSession)
 	return err
 }
 
-func (s *sessionActionHandler) doAllUnmounts(actionSession datamodel.Session) error {
+func (s *sessionActionHandler) doAllUnmounts(actionSession datamodel.Session, attachmentKey datamodel.SessionName) error {
 	if actionSession.ActualSizeBytes > 0 {
-		if err := s.fsProvider.Unmount(actionSession, actionSession.CurrentAttachments[actionSession.Name]); err != nil {
+		if err := s.fsProvider.Unmount(actionSession, actionSession.CurrentAttachments[attachmentKey]); err != nil {
 			return err
 		}
 	}
 	for _, sessionName := range actionSession.MultiJobAttachments {
-		if err := s.doMultiJobUnmount(actionSession, sessionName); err != nil {
+		if err := s.doMultiJobUnmount(actionSession, sessionName, attachmentKey); err != nil {
 			return err
 		}
 	}
@@ -376,7 +383,7 @@ func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
 
 		session, err = s.doAllMounts(session)
 		if err != nil {
-			if err := s.doAllUnmounts(session); err != nil {
+			if err := s.doAllUnmounts(session, getAttachmentKey(session.Name, false)); err != nil {
 				log.Println("error while rolling back possible partial mount", action.Session.Name, err)
 			}
 			return action.Session, err
@@ -400,7 +407,7 @@ func (s *sessionActionHandler) handleUnmount(action datamodel.SessionAction) {
 			return session, errors.New("already unmounted, can't umount again")
 		}
 
-		if err := s.doAllUnmounts(session); err != nil {
+		if err := s.doAllUnmounts(session, getAttachmentKey(session.Name, false)); err != nil {
 			return action.Session, err
 		}
 
