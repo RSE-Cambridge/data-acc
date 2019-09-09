@@ -10,23 +10,55 @@ echo "#!/bin/bash
 
 echo "#!/bin/bash
 #DW jobdw capacity=2TB access_mode=striped,private type=scratch
-#DW persistentdw name=mytestbuffer
-#DW swap 5MB
+#DW stage_in source=/usr/local/bin/dacd destination=\$DW_JOB_STRIPED/filename1 type=file
+#DW stage_out source=\$DW_JOB_STRIPED/outdir destination=/tmp/perjob type=directory
 
 env
 df -h
-swapon
 
 mkdir \$DW_JOB_STRIPED/outdir
 df -h > \$DW_JOB_STRIPED/outdir/dfoutput
 ls -al \$DW_JOB_STRIPED > \$DW_JOB_STRIPED/outdir/lsoutput
+file \$DW_JOB_STRIPED/filename1 > \$DW_JOB_STRIPED/outdir/stageinfile
+
+echo \$HOSTNAME
+" > use-perjob.sh
+
+echo "#!/bin/bash
+#DW persistentdw name=mytestbuffer
+#DW stage_in source=/usr/local/bin/dacd destination=\$DW_PERSISTENT_STRIPED_mytestbuffer/filename1 type=file
+#DW stage_out source=\$DW_PERSISTENT_STRIPED_mytestbuffer/outdir destination=/tmp/persistent type=directory
+
+env
+df -h
+
+mkdir -p \$DW_PERSISTENT_STRIPED_mytestbuffer/outdir
+echo \$SLURM_JOBID >> \$DW_PERSISTENT_STRIPED_mytestbuffer/outdir/jobids
+ls -al \$DW_PERSISTENT_STRIPED_mytestbuffer >> \$DW_PERSISTENT_STRIPED_mytestbuffer/outdir/lsoutput
+file \$DW_PERSISTENT_STRIPED_mytestbuffer/filename1 >> \$DW_PERSISTENT_STRIPED_mytestbuffer/outdir/stageinfile
 
 echo \$HOSTNAME
 " > use-persistent.sh
 
-# TODO: test stage_in and stage_out
-#DW stage_in source=/usr/local/bin/dacd destination=\$DW_JOB_STRIPED/filename1 type=file
-#DW stage_out source=\$DW_JOB_STRIPED/outdir destination=/tmp type=directory
+echo "#!/bin/bash
+#DW jobdw capacity=2TB access_mode=striped,private type=scratch
+#DW persistentdw name=mytestbuffer
+#DW stage_in source=/usr/local/bin/dacd destination=\$DW_PERSISTENT_STRIPED_mytestbuffer/filename1 type=file
+#DW stage_out source=\$DW_PERSISTENT_STRIPED_mytestbuffer/outdir destination=/tmp/persistent type=directory
+
+env
+df -h
+
+touch \$DW_JOB_STRIPED/\$( date +%F )
+ls -al \$DW_JOB_STRIPED
+
+mkdir -p \$DW_PERSISTENT_STRIPED_mytestbuffer/outdir
+echo \$SLURM_JOBID >> \$DW_PERSISTENT_STRIPED_mytestbuffer/outdir/jobids
+ls -al \$DW_PERSISTENT_STRIPED_mytestbuffer >> \$DW_PERSISTENT_STRIPED_mytestbuffer/outdir/lsoutput
+file \$DW_PERSISTENT_STRIPED_mytestbuffer/filename1 >> \$DW_PERSISTENT_STRIPED_mytestbuffer/outdir/stageinfile
+
+echo \$HOSTNAME
+" > use-multiple.sh
 
 # Ensure Slurm is setup with the cluster name
 /usr/bin/sacctmgr --immediate add cluster name=linux || true
@@ -54,13 +86,17 @@ scontrol show burstbuffer
 squeue
 
 echo "***Use persistent buffer***"
-adduser centos
+id centos &>/dev/null || adduser centos
+cat use-multiple.sh
+su centos -c 'sbatch --array=1-10 use-multiple.sh'
+su centos -c 'sbatch use-multiple.sh'
+su centos -c 'sbatch use-multiple.sh'
+su centos -c 'sbatch use-multiple.sh'
+su centos -c 'sbatch use-multiple.sh'
 cat use-persistent.sh
-su centos -c 'sbatch --array=1-10 use-persistent.sh'
 su centos -c 'sbatch use-persistent.sh'
-su centos -c 'sbatch use-persistent.sh'
-su centos -c 'sbatch use-persistent.sh'
-su centos -c 'sbatch use-persistent.sh'
+cat use-perjob.sh
+su centos -c 'sbatch use-perjob.sh'
 
 squeue
 
