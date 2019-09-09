@@ -19,24 +19,27 @@ func getMountDir(sourceName datamodel.SessionName, isMultiJob bool, attachingFor
 
 func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, internalName string,
 	primaryBrickHost datamodel.BrickHostName, attachment datamodel.AttachmentSession,
-	owner uint, group uint) error {
+	owner uint, group uint, setInitialPermissions bool) error {
 	log.Println("Mount for:", sessionName)
 
 	if primaryBrickHost == "" {
 		log.Panicf("failed to find primary brick for volume: %s", sessionName)
 	}
-
+	if len(attachment.Hosts) < 1 {
+		log.Println("Skip mount as no hosts given")
+		return nil
+	}
 	if fsType == BeegFS {
 		// Write out the config needed, and do the mount using ansible
 		// TODO: Move Lustre mount here that is done below
 		//executeAnsibleMount(fsType, volume, brickAllocations)
 	}
+	var mountDir= getMountDir(sessionName, isMultiJob, attachment.SessionName)
 
 	for _, attachHost := range attachment.Hosts {
 		log.Printf("Mounting %s on host: %s for session: %s", sessionName, attachHost,
 			attachment.SessionName)
 
-		var mountDir = getMountDir(sessionName, isMultiJob, attachment.SessionName)
 		if err := mkdir(attachHost, mountDir); err != nil {
 			return err
 		}
@@ -63,29 +66,51 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 		//		return err
 		//	}
 		//}
+	}
 
-		if attachment.PrivateMount {
-			privateDir := path.Join(mountDir, fmt.Sprintf("/private/%s", attachHost))
-			if err := mkdir(attachHost, privateDir); err != nil {
-				return err
-			}
-			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
-				return err
-			}
+	// Create global and private directories, with correct permissions
+	if setInitialPermissions {
+		// use first mounted host
+		attachHost := attachment.Hosts[0]
 
-			// need a consistent symlink for shared environment variables across all hosts
-			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", sessionName)
-			if err := createSymbolicLink(attachHost, privateDir, privateSymLinkDir); err != nil {
-				return err
-			}
-		}
-
+		// make a directory users can write into
 		sharedDir := path.Join(mountDir, "/global")
 		if err := mkdir(attachHost, sharedDir); err != nil {
 			return err
 		}
 		if err := fixUpOwnership(attachHost, owner, group, sharedDir); err != nil {
 			return err
+		}
+
+		// base private dir similar to global dir
+		if !isMultiJob && attachment.PrivateMount {
+			privateDir := path.Join(mountDir, "/private")
+			if err := mkdir(attachHost, privateDir); err != nil {
+				return err
+			}
+			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
+				return err
+			}
+		}
+
+		// Swap is owned by root
+		swapDir := path.Join(mountDir, "/swap")
+		if err := mkdir(attachHost, swapDir); err != nil {
+			return err
+		}
+	}
+
+	if attachment.PrivateMount {
+		for _, attachHost := range attachment.Hosts {
+			privateDir := path.Join(mountDir, fmt.Sprintf("/private/%s", attachHost))
+			if err := mkdir(attachHost, privateDir); err != nil {
+				return err
+			}
+			// need a consistent symlink for shared environment variables across all hosts
+			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", sessionName)
+			if err := createSymbolicLink(attachHost, privateDir, privateSymLinkDir); err != nil {
+				return err
+			}
 		}
 	}
 	// TODO on error should we always call umount? maybe?
@@ -173,7 +198,7 @@ func fixUpOwnership(hostname string, owner uint, group uint, directory string) e
 	if err := runner.Execute(hostname, fmt.Sprintf("chown %d:%d %s", owner, group, directory)); err != nil {
 		return err
 	}
-	return runner.Execute(hostname, fmt.Sprintf("chmod 770 %s", directory))
+	return runner.Execute(hostname, fmt.Sprintf("chmod 700 %s", directory))
 }
 
 func umountLustre(hostname string, directory string) error {
