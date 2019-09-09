@@ -75,14 +75,14 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 				return err
 			}
 
-			// Swap is owned by root
-			swapDir := path.Join(mountDir, "/swap")
-			if err := mkdir(attachHost, swapDir); err != nil {
-				return err
-			}
-			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
-				return err
-			}
+			// TODO: Swap
+			//swapDir := path.Join(mountDir, "/swap")
+			//if err := mkdir(attachHost, swapDir); err != nil {
+			//	return err
+			//}
+			//if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
+			//	return err
+			//}
 		}
 	}
 
