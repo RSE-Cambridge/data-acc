@@ -106,44 +106,35 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 			return session, fmt.Errorf("can't do action once delete has been requested for")
 		}
 
-		// attach to any additional multi job attachments first
-		for _, multiJob := range session.MultiJobAttachments {
-			//if err := s.doMultiJobMount(session, multiJob); err != nil {
-			//	return session, fmt.Errorf("failed to mount multijob for %s due to %s", session.Name, err)
-			//}
-			// TODO: mount multi job here on primary brick host
-			log.Println(multiJob)
-		}
-
-		// nothing more to do if there are no bricks in this session
-		if session.ActualSizeBytes == 0 {
-			return session, nil
-		}
-
-		fsStatus, err := s.fsProvider.Create(session)
-		session.FilesystemStatus = fsStatus
-		if err != nil {
-			session.Status.Error = err.Error()
-		}
-
-		session, updateErr := s.sessionRegistry.UpdateSession(session)
-		if updateErr != nil {
-			log.Println("Failed to update session:", updateErr)
-			if err == nil {
-				err = updateErr
+		// Only call create if we have a per job buffer to create
+		// Note: we always need to do the mount to enable copy-in/out
+		if session.ActualSizeBytes != 0 {
+			fsStatus, err := s.fsProvider.Create(session)
+			session.FilesystemStatus = fsStatus
+			if err != nil {
+				session.Status.Error = err.Error()
 			}
+
+			var updateErr error
+			session, updateErr = s.sessionRegistry.UpdateSession(session)
+			if updateErr != nil {
+				log.Println("Failed to update session:", updateErr)
+				if err == nil {
+					err = updateErr
+				}
+			}
+			if err != nil {
+				return session, err
+			}
+			log.Println("Filesystem created, now mount on primary brick host")
 		}
-		if err != nil {
-			return session, err
-		}
-		log.Println("Filesystem created, now mount on primary brick host")
 
 		session, err = s.doAllMounts(session, true)
 		session.Status.FileSystemCreated = err == nil
 		if err != nil {
 			session.Status.Error = err.Error()
 		}
-		session, updateErr = s.sessionRegistry.UpdateSession(session)
+		session, updateErr := s.sessionRegistry.UpdateSession(session)
 		if updateErr != nil {
 			log.Println("Failed to update session:", updateErr)
 			if err == nil {
