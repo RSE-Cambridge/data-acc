@@ -105,17 +105,17 @@ func (mr *MockProviderMockRecorder) DataCopyOut(session interface{}) *gomock.Cal
 }
 
 // Mount mocks base method
-func (m *MockProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSession, setInitialPermissions bool) error {
+func (m *MockProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSession) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Mount", session, attachments, setInitialPermissions)
+	ret := m.ctrl.Call(m, "Mount", session, attachments)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Mount indicates an expected call of Mount
-func (mr *MockProviderMockRecorder) Mount(session, attachments, setInitialPermissions interface{}) *gomock.Call {
+func (mr *MockProviderMockRecorder) Mount(session, attachments interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mount", reflect.TypeOf((*MockProvider)(nil).Mount), session, attachments, setInitialPermissions)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mount", reflect.TypeOf((*MockProvider)(nil).Mount), session, attachments)
 }
 
 // Unmount mocks base method

@@ -67,9 +67,7 @@ func (f *fileSystemProvider) DataCopyOut(session datamodel.Session) error {
 	return nil
 }
 
-func (f *fileSystemProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSession,
-		setInitialPermissions bool) error {
-	// TODO: pass setInitialPermissions
+func (f *fileSystemProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSession) error {
 	return mount(Lustre, session.Name, session.VolumeRequest.MultiJob, session.FilesystemStatus.InternalName,
 		session.PrimaryBrickHost, attachments, session.Owner, session.Group)
 

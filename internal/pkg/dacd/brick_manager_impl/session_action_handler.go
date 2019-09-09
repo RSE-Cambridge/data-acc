@@ -252,7 +252,7 @@ func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session, forP
 		}
 		actionSession = session
 
-		if err := s.fsProvider.Mount(actionSession, jobAttachment, forPrimaryBrickHost); err != nil {
+		if err := s.fsProvider.Mount(actionSession, jobAttachment); err != nil {
 			return actionSession, err
 		}
 		// TODO: should we track success of each attachment session?
@@ -326,7 +326,7 @@ func (s *sessionActionHandler) doMultiJobMount(actionSession datamodel.Session, 
 	if err != nil {
 		return err
 	}
-	return s.fsProvider.Mount(multiJobSession, multiJobAttachment, false)
+	return s.fsProvider.Mount(multiJobSession, multiJobAttachment)
 }
 
 func (s *sessionActionHandler) doMultiJobUnmount(actionSession datamodel.Session, sessionName datamodel.SessionName, attachmentKey datamodel.SessionName) error {
