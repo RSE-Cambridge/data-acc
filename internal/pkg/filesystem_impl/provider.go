@@ -71,7 +71,7 @@ func (f *fileSystemProvider) Mount(session datamodel.Session, attachments datamo
 		setInitialPermissions bool) error {
 	// TODO: pass setInitialPermissions
 	return mount(Lustre, session.Name, session.VolumeRequest.MultiJob, session.FilesystemStatus.InternalName,
-		session.PrimaryBrickHost, attachments, session.Owner, session.Group)
+		session.PrimaryBrickHost, attachments, session.Owner, session.Group, setInitialPermissions)
 
 }
 
