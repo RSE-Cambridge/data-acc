@@ -122,7 +122,6 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 
 		fsStatus, err := s.fsProvider.Create(session)
 		session.FilesystemStatus = fsStatus
-		session.Status.FileSystemCreated = err == nil
 		if err != nil {
 			session.Status.Error = err.Error()
 		}
@@ -137,9 +136,21 @@ func (s *sessionActionHandler) handleCreate(action datamodel.SessionAction) {
 		if err != nil {
 			return session, err
 		}
+		log.Println("Filesystem created, now mount on primary brick host")
 
-		// TODO: mount primary brick host here
-		return session, nil
+		session, err = s.doAllMounts(session, true)
+		session.Status.FileSystemCreated = err == nil
+		if err != nil {
+			session.Status.Error = err.Error()
+		}
+		session, updateErr = s.sessionRegistry.UpdateSession(session)
+		if updateErr != nil {
+			log.Println("Failed to update session:", updateErr)
+			if err == nil {
+				err = updateErr
+			}
+		}
+		return session, err
 	})
 }
 
@@ -151,10 +162,10 @@ func (s *sessionActionHandler) handleDelete(action datamodel.SessionAction) {
 			return action.Session, fmt.Errorf("error getting session: %s", err)
 		}
 
-		//if err := s.doAllUnmounts(session, getAttachmentKey(session.Name, true)); err != nil {
-		//	return session, fmt.Errorf("failed primary brick host unmount, due to: %s", err.Error())
-		//}
-		//log.Println("did umount primary brick host during delete")
+		if err := s.doAllUnmounts(session, getAttachmentKey(session.Name, true)); err != nil {
+			return session, fmt.Errorf("failed primary brick host unmount, due to: %s", err.Error())
+		}
+		log.Println("did umount primary brick host during delete")
 
 		if !session.Status.UnmountComplete {
 			if err := s.doAllUnmounts(session, getAttachmentKey(session.Name, false)); err != nil {
@@ -220,16 +231,28 @@ func (s *sessionActionHandler) handleCopyOut(action datamodel.SessionAction) {
 	})
 }
 
-func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session) (datamodel.Session, error) {
+func addHostsFromSession(attachment *datamodel.AttachmentSession, actionSession datamodel.Session, forPrimaryBrickHost bool) {
+	if forPrimaryBrickHost {
+		attachment.Hosts = []string{string(actionSession.PrimaryBrickHost)}
+	} else {
+		attachment.Hosts = actionSession.RequestedAttachHosts
+	}
+}
+
+func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session, forPrimaryBrickHost bool) (datamodel.Session, error) {
 	if actionSession.ActualSizeBytes > 0 {
 		jobAttachment := datamodel.AttachmentSession{
-			Hosts:        actionSession.RequestedAttachHosts,
 			SessionName:  actionSession.Name,
 			GlobalMount:  actionSession.VolumeRequest.Access == datamodel.Striped || actionSession.VolumeRequest.Access == datamodel.PrivateAndStriped,
 			PrivateMount: actionSession.VolumeRequest.Access == datamodel.Private || actionSession.VolumeRequest.Access == datamodel.PrivateAndStriped,
 			SwapBytes:    actionSession.VolumeRequest.SwapBytes,
 		}
-		if err := updateAttachments(&actionSession, jobAttachment, false); err != nil {
+		if forPrimaryBrickHost {
+			// Never deal with private mount, as make no sense for copy in to private dir
+			jobAttachment.PrivateMount = false
+		}
+		addHostsFromSession(&jobAttachment, actionSession, forPrimaryBrickHost)
+		if err := updateAttachments(&actionSession, jobAttachment, forPrimaryBrickHost); err != nil {
 			return actionSession, err
 		}
 		session, err := s.sessionRegistry.UpdateSession(actionSession)
@@ -244,7 +267,7 @@ func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session) (dat
 		// TODO: should we track success of each attachment session?
 	}
 	for _, sessionName := range actionSession.MultiJobAttachments {
-		if err := s.doMultiJobMount(actionSession, sessionName); err != nil {
+		if err := s.doMultiJobMount(actionSession, sessionName, forPrimaryBrickHost); err != nil {
 			return actionSession, nil
 		}
 	}
@@ -267,7 +290,7 @@ func updateAttachments(session *datamodel.Session, attachment datamodel.Attachme
 		}
 	} else {
 		if _, ok := session.CurrentAttachments[attachmentKey]; ok {
-			return fmt.Errorf("already attached for session %s and multi-job %s",
+			return fmt.Errorf("already attached for session %s and target-volume %s",
 				attachment.SessionName, session.Name)
 		}
 		session.CurrentAttachments[attachmentKey] = attachment
@@ -275,7 +298,7 @@ func updateAttachments(session *datamodel.Session, attachment datamodel.Attachme
 	return nil
 }
 
-func (s *sessionActionHandler) doMultiJobMount(actionSession datamodel.Session, sessionName datamodel.SessionName) error {
+func (s *sessionActionHandler) doMultiJobMount(actionSession datamodel.Session, sessionName datamodel.SessionName, forPrimaryBrickHost bool) error {
 	sessionMutex, err := s.sessionRegistry.GetSessionMutex(sessionName)
 	if err != nil {
 		log.Printf("unable to get session mutex: %s due to: %s\n", sessionName, err)
@@ -300,11 +323,11 @@ func (s *sessionActionHandler) doMultiJobMount(actionSession datamodel.Session, 
 	}
 
 	multiJobAttachment := datamodel.AttachmentSession{
-		Hosts:       actionSession.RequestedAttachHosts,
 		SessionName: actionSession.Name,
 		GlobalMount: true,
 	}
-	if err := updateAttachments(&multiJobSession, multiJobAttachment, false); err != nil {
+	addHostsFromSession(&multiJobAttachment, actionSession, forPrimaryBrickHost)
+	if err := updateAttachments(&multiJobSession, multiJobAttachment, forPrimaryBrickHost); err != nil {
 		return err
 	}
 
@@ -381,7 +404,7 @@ func (s *sessionActionHandler) handleMount(action datamodel.SessionAction) {
 			return session, errors.New("already mounted, can't mount again")
 		}
 
-		session, err = s.doAllMounts(session)
+		session, err = s.doAllMounts(session, false)
 		if err != nil {
 			if err := s.doAllUnmounts(session, getAttachmentKey(session.Name, false)); err != nil {
 				log.Println("error while rolling back possible partial mount", action.Session.Name, err)
