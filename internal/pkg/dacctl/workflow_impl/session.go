@@ -186,6 +186,8 @@ func (s sessionFacade) getBricks(poolName datamodel.PoolName, bytes int) (int, [
 			"unable to get number of requested bricks (%d) for given pool (%s)",
 			bricksRequired, pool.Pool.Name)
 	}
+	// TODO: we should add allocation map into the pool status
+	//   so we spot conflicts if the locks failed for some reason
 	return actualSize, bricks, nil
 }
 
