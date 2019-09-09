@@ -47,25 +47,6 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 			string(primaryBrickHost), internalName, mountDir); err != nil {
 			return err
 		}
-		// TODO: swap!
-		//if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
-		//	swapDir := path.Join(mountDir, "/swap")
-		//	if err := mkdir(attachment.Hostname, swapDir); err != nil {
-		//		return err
-		//	}
-		//	if err := fixUpOwnership(attachment.Hostname, 0, 0, swapDir); err != nil {
-		//		return err
-		//	}
-		//	swapSizeMB := int(volume.AttachAsSwapBytes / (1024 * 1024))
-		//	swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
-		//	loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)
-		//	if err := createSwap(attachment.Hostname, swapSizeMB, swapFile, loopback); err != nil {
-		//		return err
-		//	}
-		//	if err := swapOn(attachment.Hostname, loopback); err != nil {
-		//		return err
-		//	}
-		//}
 	}
 
 	// Create global and private directories, with correct permissions
@@ -75,6 +56,7 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 
 		// make a directory users can write into
 		sharedDir := path.Join(mountDir, "/global")
+		// TODO: would install be better here?
 		if err := mkdir(attachHost, sharedDir); err != nil {
 			return err
 		}
@@ -82,24 +64,26 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 			return err
 		}
 
-		// base private dir similar to global dir
-		if !isMultiJob && attachment.PrivateMount {
+		if !isMultiJob {
+			// base private dir similar to global dir
 			privateDir := path.Join(mountDir, "/private")
+			// TODO would install be better here?
 			if err := mkdir(attachHost, privateDir); err != nil {
 				return err
 			}
 			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
 				return err
 			}
-		}
 
-		// Swap is owned by root
-		swapDir := path.Join(mountDir, "/swap")
-		if err := mkdir(attachHost, swapDir); err != nil {
-			return err
+			// Swap is owned by root
+			swapDir := path.Join(mountDir, "/swap")
+			if err := mkdir(attachHost, swapDir); err != nil {
+				return err
+			}
 		}
 	}
 
+	// add sym link to a private directory as needed
 	if attachment.PrivateMount {
 		for _, attachHost := range attachment.Hosts {
 			privateDir := path.Join(mountDir, fmt.Sprintf("/private/%s", attachHost))
@@ -113,6 +97,26 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 			}
 		}
 	}
+
+	// TODO: swap!
+	//if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
+	//	swapDir := path.Join(mountDir, "/swap")
+	//	if err := mkdir(attachment.Hostname, swapDir); err != nil {
+	//		return err
+	//	}
+	//	if err := fixUpOwnership(attachment.Hostname, 0, 0, swapDir); err != nil {
+	//		return err
+	//	}
+	//	swapSizeMB := int(volume.AttachAsSwapBytes / (1024 * 1024))
+	//	swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
+	//	loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)
+	//	if err := createSwap(attachment.Hostname, swapSizeMB, swapFile, loopback); err != nil {
+	//		return err
+	//	}
+	//	if err := swapOn(attachment.Hostname, loopback); err != nil {
+	//		return err
+	//	}
+	//}
 	// TODO on error should we always call umount? maybe?
 	// TODO move to ansible style automation or preamble?
 	return nil
