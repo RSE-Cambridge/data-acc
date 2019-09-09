@@ -162,13 +162,13 @@ func Test_Umount(t *testing.T) {
 	assert.Equal(t, 8, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
-	assert.Equal(t, "rm -rf /dac/job4_job_private", fake.cmdStrs[0])
+	assert.Equal(t, "rm -df /dac/job4_job_private", fake.cmdStrs[0])
 	assert.Equal(t, "grep /dac/job4_job /etc/mtab", fake.cmdStrs[1])
 	assert.Equal(t, "umount /dac/job4_job", fake.cmdStrs[2])
-	assert.Equal(t, "rm -rf /dac/job4_job", fake.cmdStrs[3])
+	assert.Equal(t, "rm -df /dac/job4_job", fake.cmdStrs[3])
 
 	assert.Equal(t, "client2", fake.hostnames[7])
-	assert.Equal(t, "rm -rf /dac/job4_job", fake.cmdStrs[7])
+	assert.Equal(t, "rm -df /dac/job4_job", fake.cmdStrs[7])
 }
 
 func Test_Umount_multi(t *testing.T) {
@@ -197,7 +197,7 @@ func Test_Umount_multi(t *testing.T) {
 	assert.Equal(t, "client1", fake.hostnames[0])
 	assert.Equal(t, "grep /dac/job1_persistent_asdf /etc/mtab", fake.cmdStrs[0])
 	assert.Equal(t, "umount /dac/job1_persistent_asdf", fake.cmdStrs[1])
-	assert.Equal(t, "rm -rf /dac/job1_persistent_asdf", fake.cmdStrs[2])
+	assert.Equal(t, "rm -df /dac/job1_persistent_asdf", fake.cmdStrs[2])
 }
 
 func Test_Mount_multi(t *testing.T) {

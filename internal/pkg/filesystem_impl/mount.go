@@ -191,7 +191,7 @@ func umountLustre(hostname string, directory string) error {
 }
 
 func removeSubtree(hostname string, directory string) error {
-	return runner.Execute(hostname, fmt.Sprintf("rm -rf %s", directory))
+	return runner.Execute(hostname, fmt.Sprintf("rm -df %s", directory))
 }
 
 func createSymbolicLink(hostname string, src string, dest string) error {
