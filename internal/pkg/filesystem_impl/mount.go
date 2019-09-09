@@ -152,7 +152,7 @@ func unmount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, 
 		//	}
 		//}
 		if attachment.PrivateMount {
-			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", sessionName)
+			privateSymLinkDir := fmt.Sprintf(datamodel.MountPrivatePattern, sessionName)
 			if err := removeSubtree(attachHost, privateSymLinkDir); err != nil {
 				return err
 			}

@@ -65,10 +65,10 @@ type Session struct {
 	CurrentAttachments map[SessionName]AttachmentSession
 }
 
-const MountJobBasePattern = "/dac/%s_job"                // /mnt/dac ??
-const MountMultiJobBasePattern = "/dac/%s_persistent_%s" // job_%s_persistent_%s?
+const MountJobBasePattern = "/mnt/dac/%s_job"
+const MountMultiJobBasePattern = "/mnt/dac/%s_persistent_%s"
 const MountGlobalDir = "global"
-const MountPrivatePattern = "/dac/%s_job_private"
+const MountPrivatePattern = "/mnt/dac/%s_job_private"
 
 type FilesystemStatus struct {
 	Error        string
