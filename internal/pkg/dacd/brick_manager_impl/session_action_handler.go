@@ -222,7 +222,7 @@ func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session) (dat
 			PrivateMount: actionSession.VolumeRequest.Access == datamodel.Private || actionSession.VolumeRequest.Access == datamodel.PrivateAndStriped,
 			SwapBytes:    actionSession.VolumeRequest.SwapBytes,
 		}
-		if err := updateAttachments(&actionSession, jobAttachment); err != nil {
+		if err := updateAttachments(&actionSession, jobAttachment, false); err != nil {
 			return actionSession, err
 		}
 		session, err := s.sessionRegistry.UpdateSession(actionSession)
@@ -244,17 +244,26 @@ func (s *sessionActionHandler) doAllMounts(actionSession datamodel.Session) (dat
 	return actionSession, nil
 }
 
-func updateAttachments(session *datamodel.Session, attachment datamodel.AttachmentSession) error {
+func getAttachmentKey(sessionName datamodel.SessionName, forPrimaryBrickHost bool) datamodel.SessionName {
+	if forPrimaryBrickHost {
+		return datamodel.SessionName(fmt.Sprintf("Primary_%s", sessionName))
+	} else {
+		return sessionName
+	}
+}
+
+func updateAttachments(session *datamodel.Session, attachment datamodel.AttachmentSession, forPrimaryBrickHost bool) error {
+	attachmentKey := getAttachmentKey(attachment.SessionName, forPrimaryBrickHost)
 	if session.CurrentAttachments == nil {
 		session.CurrentAttachments = map[datamodel.SessionName]datamodel.AttachmentSession{
-			attachment.SessionName: attachment,
+			attachmentKey: attachment,
 		}
 	} else {
-		if _, ok := session.CurrentAttachments[attachment.SessionName]; ok {
+		if _, ok := session.CurrentAttachments[attachmentKey]; ok {
 			return fmt.Errorf("already attached for session %s and multi-job %s",
 				attachment.SessionName, session.Name)
 		}
-		session.CurrentAttachments[attachment.SessionName] = attachment
+		session.CurrentAttachments[attachmentKey] = attachment
 	}
 	return nil
 }
@@ -288,7 +297,7 @@ func (s *sessionActionHandler) doMultiJobMount(actionSession datamodel.Session, 
 		SessionName: actionSession.Name,
 		GlobalMount: true,
 	}
-	if err := updateAttachments(&multiJobSession, multiJobAttachment); err != nil {
+	if err := updateAttachments(&multiJobSession, multiJobAttachment, false); err != nil {
 		return err
 	}
 
