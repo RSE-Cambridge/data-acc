@@ -50,9 +50,6 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 		//	if err := mkdir(attachment.Hostname, swapDir); err != nil {
 		//		return err
 		//	}
-		//	if err := fixUpOwnership(attachment.Hostname, 0, 0, swapDir); err != nil {
-		//		return err
-		//	}
 		//	swapSizeMB := int(volume.AttachAsSwapBytes / (1024 * 1024))
 		//	swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
 		//	loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)
@@ -69,9 +66,6 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 			if err := mkdir(attachHost, privateDir); err != nil {
 				return err
 			}
-			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
-				return err
-			}
 
 			// need a consistent symlink for shared environment variables across all hosts
 			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", sessionName)
@@ -82,9 +76,6 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 
 		sharedDir := path.Join(mountDir, "/global")
 		if err := mkdir(attachHost, sharedDir); err != nil {
-			return err
-		}
-		if err := fixUpOwnership(attachHost, owner, group, sharedDir); err != nil {
 			return err
 		}
 	}
@@ -169,13 +160,6 @@ func detachLoopback(hostname string, loopback string) error {
 	return runner.Execute(hostname, fmt.Sprintf("losetup -d %s", loopback))
 }
 
-func fixUpOwnership(hostname string, owner uint, group uint, directory string) error {
-	if err := runner.Execute(hostname, fmt.Sprintf("chown %d:%d %s", owner, group, directory)); err != nil {
-		return err
-	}
-	return runner.Execute(hostname, fmt.Sprintf("chmod 770 %s", directory))
-}
-
 func umountLustre(hostname string, directory string) error {
 	// only unmount if already mounted
 	if err := runner.Execute(hostname, fmt.Sprintf("grep %s /etc/mtab", directory)); err == nil {
@@ -229,8 +213,8 @@ func mountBeegFS(hostname string, mgtHost string, fsname string, directory strin
 	return runner.Execute(hostname, fmt.Sprintf("ln -s /mnt/beegfs/%s %s", fsname, directory))
 }
 
-func mkdir(hostname string, directory string) error {
-	return runner.Execute(hostname, fmt.Sprintf("mkdir -p %s", directory))
+func mkdir(hostname string, owner uint, group uint, directory string) error {
+	return runner.Execute(hostname, fmt.Sprintf("install -o%d -g%d -dm770 %s", owner, group, directory))
 }
 
 type Run interface {
