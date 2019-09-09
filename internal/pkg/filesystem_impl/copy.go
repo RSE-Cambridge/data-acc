@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"log"
-	"path"
 	"strings"
 )
 
@@ -19,20 +18,6 @@ func processDataCopy(session datamodel.Session, request datamodel.DataCopyReques
 	}
 
 	log.Printf("Doing copy: %s", cmd)
-
-	// Make sure global dir is setup correctly
-	// TODO: share code with mount better
-	// TODO: Probably should all get setup in fs-ansible really!!
-	mountDir := fmt.Sprintf("/mnt/lustre/%s", session.FilesystemStatus.InternalName)
-	sharedDir := path.Join(mountDir, "/global")
-	if err := mkdir("localhost", sharedDir); err != nil {
-		return err
-	}
-	if err := fixUpOwnership("localhost", session.Owner, session.Group, sharedDir); err != nil {
-		return err
-	}
-
-	// Do the copy
 	return runner.Execute("localhost", cmd)
 }
 
