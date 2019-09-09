@@ -105,7 +105,7 @@ func (mr *MockProviderMockRecorder) DataCopyOut(session interface{}) *gomock.Cal
 }
 
 // Mount mocks base method
-func (m *MockProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSessionStatus) error {
+func (m *MockProvider) Mount(session datamodel.Session, attachments datamodel.AttachmentSession) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Mount", session, attachments)
 	ret0, _ := ret[0].(error)
@@ -119,7 +119,7 @@ func (mr *MockProviderMockRecorder) Mount(session, attachments interface{}) *gom
 }
 
 // Unmount mocks base method
-func (m *MockProvider) Unmount(session datamodel.Session, attachments datamodel.AttachmentSessionStatus) error {
+func (m *MockProvider) Unmount(session datamodel.Session, attachments datamodel.AttachmentSession) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Unmount", session, attachments)
 	ret0, _ := ret[0].(error)

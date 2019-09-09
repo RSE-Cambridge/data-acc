@@ -62,7 +62,7 @@ type Session struct {
 
 	// For multi-job volumes these are always other sessions
 	// for job volumes this is always for just this session
-	CurrentAttachments map[SessionName]AttachmentSessionStatus
+	CurrentAttachments map[SessionName]AttachmentSession
 }
 
 type FilesystemStatus struct {
@@ -74,17 +74,10 @@ type FilesystemStatus struct {
 type AttachmentSession struct {
 	SessionName SessionName
 	Hosts       []string
-}
-
-type AttachmentSessionStatus struct {
-	AttachmentSession AttachmentSession
 
 	GlobalMount  bool
 	PrivateMount bool
 	SwapBytes    int
-
-	DetachRequested bool // TODO: delete this bit?
-	Error           string
 }
 
 type SessionStatus struct {
