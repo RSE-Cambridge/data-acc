@@ -12,9 +12,9 @@ import (
 func getMountDir(sourceName datamodel.SessionName, isMultiJob bool, attachingForSession datamodel.SessionName) string {
 	// TODO: what about the environment variables that are being set? should share logic with here
 	if isMultiJob {
-		return fmt.Sprintf("/dac/%s_persistent_%s", attachingForSession, sourceName)
+		return fmt.Sprintf(datamodel.MountMultiJobBasePattern, attachingForSession, sourceName)
 	}
-	return fmt.Sprintf("/dac/%s_job", sourceName)
+	return fmt.Sprintf(datamodel.MountJobBasePattern, sourceName)
 }
 
 func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, internalName string,
@@ -55,7 +55,7 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 		attachHost := attachment.Hosts[0]
 
 		// make a directory users can write into
-		sharedDir := path.Join(mountDir, "/global")
+		sharedDir := path.Join(mountDir, fmt.Sprintf("/%s", datamodel.MountGlobalDir))
 		// TODO: would install be better here?
 		if err := mkdir(attachHost, sharedDir); err != nil {
 			return err
@@ -97,7 +97,7 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 				return err
 			}
 			// need a consistent symlink for shared environment variables across all hosts
-			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", sessionName)
+			privateSymLinkDir := fmt.Sprintf(datamodel.MountPrivatePattern, sessionName)
 			if err := createSymbolicLink(attachHost, privateDir, privateSymLinkDir); err != nil {
 				return err
 			}

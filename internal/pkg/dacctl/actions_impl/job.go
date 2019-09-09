@@ -97,15 +97,17 @@ func getPaths(session datamodel.Session) map[string]string {
 	paths := make(map[string]string)
 	if session.VolumeRequest.MultiJob == false {
 		if session.VolumeRequest.Access == datamodel.Private || session.VolumeRequest.Access == datamodel.PrivateAndStriped {
-			paths["DW_JOB_PRIVATE"] = fmt.Sprintf("/dac/%s_job_private", session.Name)
+			paths["DW_JOB_PRIVATE"] = fmt.Sprintf(datamodel.MountPrivatePattern, session.Name)
 		}
 		if session.VolumeRequest.Access == datamodel.Striped || session.VolumeRequest.Access == datamodel.PrivateAndStriped {
-			paths["DW_JOB_STRIPED"] = fmt.Sprintf("/dac/%s_job/global", session.Name)
+			jobBase := fmt.Sprintf(datamodel.MountJobBasePattern, session.Name)
+			paths["DW_JOB_STRIPED"] = fmt.Sprintf("%s/%s", jobBase, datamodel.MountGlobalDir)
 		}
 	}
 	for _, multiJobVolume := range session.MultiJobAttachments {
+		multiJobBase := fmt.Sprintf(datamodel.MountMultiJobBasePattern, session.Name, multiJobVolume)
 		paths[fmt.Sprintf("DW_PERSISTENT_STRIPED_%s", multiJobVolume)] = fmt.Sprintf(
-			"/dac/%s_persistent_%s/global", session.Name, multiJobVolume)
+			"%s/%s", multiJobBase, datamodel.MountGlobalDir)
 	}
 	return paths
 }
