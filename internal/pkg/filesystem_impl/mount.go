@@ -80,6 +80,9 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 			if err := mkdir(attachHost, swapDir); err != nil {
 				return err
 			}
+			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -88,6 +91,9 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 		for _, attachHost := range attachment.Hosts {
 			privateDir := path.Join(mountDir, fmt.Sprintf("/private/%s", attachHost))
 			if err := mkdir(attachHost, privateDir); err != nil {
+				return err
+			}
+			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
 				return err
 			}
 			// need a consistent symlink for shared environment variables across all hosts
