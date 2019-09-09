@@ -65,6 +65,11 @@ type Session struct {
 	CurrentAttachments map[SessionName]AttachmentSession
 }
 
+const MountJobBasePattern = "/mnt/dac/%s_job"
+const MountMultiJobBasePattern = "/mnt/dac/%s_persistent_%s"
+const MountGlobalDir = "global"
+const MountPrivatePattern = "/mnt/dac/%s_job_private"
+
 type FilesystemStatus struct {
 	Error        string
 	InternalName string

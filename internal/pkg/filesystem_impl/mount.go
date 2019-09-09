@@ -12,31 +12,34 @@ import (
 func getMountDir(sourceName datamodel.SessionName, isMultiJob bool, attachingForSession datamodel.SessionName) string {
 	// TODO: what about the environment variables that are being set? should share logic with here
 	if isMultiJob {
-		return fmt.Sprintf("/dac/%s_persistent_%s", attachingForSession, sourceName)
+		return fmt.Sprintf(datamodel.MountMultiJobBasePattern, attachingForSession, sourceName)
 	}
-	return fmt.Sprintf("/dac/%s_job", sourceName)
+	return fmt.Sprintf(datamodel.MountJobBasePattern, sourceName)
 }
 
 func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, internalName string,
 	primaryBrickHost datamodel.BrickHostName, attachment datamodel.AttachmentSession,
-	owner uint, group uint) error {
+	owner uint, group uint, setInitialPermissions bool) error {
 	log.Println("Mount for:", sessionName)
 
 	if primaryBrickHost == "" {
 		log.Panicf("failed to find primary brick for volume: %s", sessionName)
 	}
-
+	if len(attachment.Hosts) < 1 {
+		log.Println("Skip mount as no hosts given")
+		return nil
+	}
 	if fsType == BeegFS {
 		// Write out the config needed, and do the mount using ansible
 		// TODO: Move Lustre mount here that is done below
 		//executeAnsibleMount(fsType, volume, brickAllocations)
 	}
+	var mountDir = getMountDir(sessionName, isMultiJob, attachment.SessionName)
 
 	for _, attachHost := range attachment.Hosts {
 		log.Printf("Mounting %s on host: %s for session: %s", sessionName, attachHost,
 			attachment.SessionName)
 
-		var mountDir = getMountDir(sessionName, isMultiJob, attachment.SessionName)
 		if err := mkdir(attachHost, mountDir); err != nil {
 			return err
 		}
@@ -44,43 +47,16 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 			string(primaryBrickHost), internalName, mountDir); err != nil {
 			return err
 		}
-		// TODO: swap!
-		//if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
-		//	swapDir := path.Join(mountDir, "/swap")
-		//	if err := mkdir(attachment.Hostname, swapDir); err != nil {
-		//		return err
-		//	}
-		//	if err := fixUpOwnership(attachment.Hostname, 0, 0, swapDir); err != nil {
-		//		return err
-		//	}
-		//	swapSizeMB := int(volume.AttachAsSwapBytes / (1024 * 1024))
-		//	swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
-		//	loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)
-		//	if err := createSwap(attachment.Hostname, swapSizeMB, swapFile, loopback); err != nil {
-		//		return err
-		//	}
-		//	if err := swapOn(attachment.Hostname, loopback); err != nil {
-		//		return err
-		//	}
-		//}
+	}
 
-		if attachment.PrivateMount {
-			privateDir := path.Join(mountDir, fmt.Sprintf("/private/%s", attachHost))
-			if err := mkdir(attachHost, privateDir); err != nil {
-				return err
-			}
-			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
-				return err
-			}
+	// Create global and private directories, with correct permissions
+	if setInitialPermissions {
+		// use first mounted host
+		attachHost := attachment.Hosts[0]
 
-			// need a consistent symlink for shared environment variables across all hosts
-			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", sessionName)
-			if err := createSymbolicLink(attachHost, privateDir, privateSymLinkDir); err != nil {
-				return err
-			}
-		}
-
-		sharedDir := path.Join(mountDir, "/global")
+		// make a directory users can write into
+		sharedDir := path.Join(mountDir, fmt.Sprintf("/%s", datamodel.MountGlobalDir))
+		// TODO: would install be better here?
 		if err := mkdir(attachHost, sharedDir); err != nil {
 			return err
 		}
@@ -88,6 +64,44 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 			return err
 		}
 	}
+
+	// add sym link to a private directory as needed
+	if attachment.PrivateMount {
+		for _, attachHost := range attachment.Hosts {
+			privateDir := path.Join(mountDir, fmt.Sprintf("/private/%s", attachHost))
+			if err := mkdir(attachHost, privateDir); err != nil {
+				return err
+			}
+			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
+				return err
+			}
+			// need a consistent symlink for shared environment variables across all hosts
+			privateSymLinkDir := fmt.Sprintf(datamodel.MountPrivatePattern, sessionName)
+			if err := createSymbolicLink(attachHost, privateDir, privateSymLinkDir); err != nil {
+				return err
+			}
+		}
+	}
+
+	// TODO: swap!
+	//if !volume.MultiJob && volume.AttachAsSwapBytes > 0 {
+	//	swapDir := path.Join(mountDir, "/swap")
+	//	if err := mkdir(attachment.Hostname, swapDir); err != nil {
+	//		return err
+	//	}
+	//	if err := fixUpOwnership(attachment.Hostname, 0, 0, swapDir); err != nil {
+	//		return err
+	//	}
+	//	swapSizeMB := int(volume.AttachAsSwapBytes / (1024 * 1024))
+	//	swapFile := path.Join(swapDir, fmt.Sprintf("/%s", attachment.Hostname))
+	//	loopback := fmt.Sprintf("/dev/loop%d", volume.ClientPort)
+	//	if err := createSwap(attachment.Hostname, swapSizeMB, swapFile, loopback); err != nil {
+	//		return err
+	//	}
+	//	if err := swapOn(attachment.Hostname, loopback); err != nil {
+	//		return err
+	//	}
+	//}
 	// TODO on error should we always call umount? maybe?
 	// TODO move to ansible style automation or preamble?
 	return nil
@@ -117,7 +131,7 @@ func unmount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, 
 		//	}
 		//}
 		if attachment.PrivateMount {
-			privateSymLinkDir := fmt.Sprintf("/dac/%s_job_private", sessionName)
+			privateSymLinkDir := fmt.Sprintf(datamodel.MountPrivatePattern, sessionName)
 			if err := removeSubtree(attachHost, privateSymLinkDir); err != nil {
 				return err
 			}
@@ -173,7 +187,7 @@ func fixUpOwnership(hostname string, owner uint, group uint, directory string) e
 	if err := runner.Execute(hostname, fmt.Sprintf("chown %d:%d %s", owner, group, directory)); err != nil {
 		return err
 	}
-	return runner.Execute(hostname, fmt.Sprintf("chmod 770 %s", directory))
+	return runner.Execute(hostname, fmt.Sprintf("chmod 700 %s", directory))
 }
 
 func umountLustre(hostname string, directory string) error {

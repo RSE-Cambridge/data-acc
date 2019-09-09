@@ -79,10 +79,10 @@ func TestDacctlActions_CreatePerJobBuffer(t *testing.T) {
 			SwapBytes:          4194304,
 		},
 		Paths: map[string]string{
-			"DW_JOB_PRIVATE":                  "/dac/token_job_private",
-			"DW_JOB_STRIPED":                  "/dac/token_job/global",
-			"DW_PERSISTENT_STRIPED_myBBname1": "/dac/token_persistent_myBBname1/global",
-			"DW_PERSISTENT_STRIPED_myBBname2": "/dac/token_persistent_myBBname2/global",
+			"DW_JOB_PRIVATE":                  "/mnt/dac/token_job_private",
+			"DW_JOB_STRIPED":                  "/mnt/dac/token_job/global",
+			"DW_PERSISTENT_STRIPED_myBBname1": "/mnt/dac/token_persistent_myBBname1/global",
+			"DW_PERSISTENT_STRIPED_myBBname2": "/mnt/dac/token_persistent_myBBname2/global",
 		},
 	}).Return(nil)
 

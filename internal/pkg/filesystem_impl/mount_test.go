@@ -18,7 +18,7 @@ func (f *fakeRunner) Execute(hostname string, cmdStr string) error {
 	f.calls += 1
 	f.hostnames = append(f.hostnames, hostname)
 	f.cmdStrs = append(f.cmdStrs, cmdStr)
-	if cmdStr == "grep /dac/job1_job /etc/mtab" {
+	if cmdStr == "grep /mnt/dac/job1_job /etc/mtab" {
 		return errors.New("trigger mount")
 	}
 	return f.err
@@ -44,13 +44,13 @@ func Test_mountLustre(t *testing.T) {
 	fake := &fakeRunner{}
 	runner = fake
 
-	err := mountLustre("host", "-opa@o2ib1", "mgt", "fs", "/dac/job1_job")
+	err := mountLustre("host", "-opa@o2ib1", "mgt", "fs", "/mnt/dac/job1_job")
 	assert.Nil(t, err)
 	assert.Equal(t, 2, fake.calls)
 	assert.Equal(t, "host", fake.hostnames[0])
 	assert.Equal(t, "host", fake.hostnames[1])
-	assert.Equal(t, "grep /dac/job1_job /etc/mtab", fake.cmdStrs[0])
-	assert.Equal(t, "mount -t lustre -o flock,nodev,nosuid mgt-opa@o2ib1:/fs /dac/job1_job", fake.cmdStrs[1])
+	assert.Equal(t, "grep /mnt/dac/job1_job /etc/mtab", fake.cmdStrs[0])
+	assert.Equal(t, "mount -t lustre -o flock,nodev,nosuid mgt-opa@o2ib1:/fs /mnt/dac/job1_job", fake.cmdStrs[1])
 
 	fake = &fakeRunner{err: errors.New("expected")}
 	runner = fake
@@ -90,7 +90,7 @@ func Test_fixUpOwnership(t *testing.T) {
 	assert.Equal(t, "host", fake.hostnames[0])
 	assert.Equal(t, "chown 10:11 dir", fake.cmdStrs[0])
 	assert.Equal(t, "host", fake.hostnames[1])
-	assert.Equal(t, "chmod 770 dir", fake.cmdStrs[1])
+	assert.Equal(t, "chmod 700 dir", fake.cmdStrs[1])
 }
 
 func Test_Mount(t *testing.T) {
@@ -114,29 +114,36 @@ func Test_Mount(t *testing.T) {
 	}
 	err := mount(Lustre, sessionName, false,
 		internalName, primaryBrickHost, attachment,
-		owner, group)
+		owner, group, true)
 	assert.Nil(t, err)
-	assert.Equal(t, 20, fake.calls)
+	assert.Equal(t, 17, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
-	assert.Equal(t, "mkdir -p /dac/job1_job", fake.cmdStrs[0])
-	assert.Equal(t, "grep /dac/job1_job /etc/mtab", fake.cmdStrs[1])
-	assert.Equal(t, "mount -t lustre -o flock,nodev,nosuid host1:/fsuuid /dac/job1_job", fake.cmdStrs[2])
+	assert.Equal(t, "mkdir -p /mnt/dac/job1_job", fake.cmdStrs[0])
+	assert.Equal(t, "grep /mnt/dac/job1_job /etc/mtab", fake.cmdStrs[1])
+	assert.Equal(t, "mount -t lustre -o flock,nodev,nosuid host1:/fsuuid /mnt/dac/job1_job", fake.cmdStrs[2])
 
-	assert.Equal(t, "mkdir -p /dac/job1_job/private/client1", fake.cmdStrs[3])
-	assert.Equal(t, "chown 1001:1002 /dac/job1_job/private/client1", fake.cmdStrs[4])
-	assert.Equal(t, "chmod 770 /dac/job1_job/private/client1", fake.cmdStrs[5])
-	assert.Equal(t, "ln -s /dac/job1_job/private/client1 /dac/job1_job_private", fake.cmdStrs[6])
+	assert.Equal(t, "client2", fake.hostnames[3])
+	assert.Equal(t, "mkdir -p /mnt/dac/job1_job", fake.cmdStrs[3])
+	assert.Equal(t, "grep /mnt/dac/job1_job /etc/mtab", fake.cmdStrs[4])
+	assert.Equal(t, "mount -t lustre -o flock,nodev,nosuid host1:/fsuuid /mnt/dac/job1_job", fake.cmdStrs[5])
 
-	assert.Equal(t, "mkdir -p /dac/job1_job/global", fake.cmdStrs[7])
-	assert.Equal(t, "chown 1001:1002 /dac/job1_job/global", fake.cmdStrs[8])
-	assert.Equal(t, "chmod 770 /dac/job1_job/global", fake.cmdStrs[9])
+	assert.Equal(t, "client1", fake.hostnames[6])
+	assert.Equal(t, "mkdir -p /mnt/dac/job1_job/global", fake.cmdStrs[6])
+	assert.Equal(t, "chown 1001:1002 /mnt/dac/job1_job/global", fake.cmdStrs[7])
+	assert.Equal(t, "chmod 700 /mnt/dac/job1_job/global", fake.cmdStrs[8])
 
-	assert.Equal(t, "client2", fake.hostnames[10])
-	assert.Equal(t, "mkdir -p /dac/job1_job", fake.cmdStrs[10])
+	assert.Equal(t, "client1", fake.hostnames[9])
+	assert.Equal(t, "mkdir -p /mnt/dac/job1_job/private/client1", fake.cmdStrs[9])
+	assert.Equal(t, "chown 1001:1002 /mnt/dac/job1_job/private/client1", fake.cmdStrs[10])
+	assert.Equal(t, "chmod 700 /mnt/dac/job1_job/private/client1", fake.cmdStrs[11])
+	assert.Equal(t, "ln -s /mnt/dac/job1_job/private/client1 /mnt/dac/job1_job_private", fake.cmdStrs[12])
 
-	assert.Equal(t, "client2", fake.hostnames[19])
-	assert.Equal(t, "chmod 770 /dac/job1_job/global", fake.cmdStrs[19])
+	assert.Equal(t, "client2", fake.hostnames[13])
+	assert.Equal(t, "mkdir -p /mnt/dac/job1_job/private/client2", fake.cmdStrs[13])
+
+	assert.Equal(t, "client2", fake.hostnames[16])
+	assert.Equal(t, "ln -s /mnt/dac/job1_job/private/client2 /mnt/dac/job1_job_private", fake.cmdStrs[16])
 }
 
 func Test_Umount(t *testing.T) {
@@ -162,13 +169,13 @@ func Test_Umount(t *testing.T) {
 	assert.Equal(t, 8, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
-	assert.Equal(t, "rm -df /dac/job4_job_private", fake.cmdStrs[0])
-	assert.Equal(t, "grep /dac/job4_job /etc/mtab", fake.cmdStrs[1])
-	assert.Equal(t, "umount /dac/job4_job", fake.cmdStrs[2])
-	assert.Equal(t, "rm -df /dac/job4_job", fake.cmdStrs[3])
+	assert.Equal(t, "rm -df /mnt/dac/job4_job_private", fake.cmdStrs[0])
+	assert.Equal(t, "grep /mnt/dac/job4_job /etc/mtab", fake.cmdStrs[1])
+	assert.Equal(t, "umount /mnt/dac/job4_job", fake.cmdStrs[2])
+	assert.Equal(t, "rm -df /mnt/dac/job4_job", fake.cmdStrs[3])
 
 	assert.Equal(t, "client2", fake.hostnames[7])
-	assert.Equal(t, "rm -df /dac/job4_job", fake.cmdStrs[7])
+	assert.Equal(t, "rm -df /mnt/dac/job4_job", fake.cmdStrs[7])
 }
 
 func Test_Umount_multi(t *testing.T) {
@@ -193,9 +200,9 @@ func Test_Umount_multi(t *testing.T) {
 	assert.Equal(t, 3, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
-	assert.Equal(t, "grep /dac/job1_persistent_asdf /etc/mtab", fake.cmdStrs[0])
-	assert.Equal(t, "umount /dac/job1_persistent_asdf", fake.cmdStrs[1])
-	assert.Equal(t, "rm -df /dac/job1_persistent_asdf", fake.cmdStrs[2])
+	assert.Equal(t, "grep /mnt/dac/job1_persistent_asdf /etc/mtab", fake.cmdStrs[0])
+	assert.Equal(t, "umount /mnt/dac/job1_persistent_asdf", fake.cmdStrs[1])
+	assert.Equal(t, "rm -df /mnt/dac/job1_persistent_asdf", fake.cmdStrs[2])
 }
 
 func Test_Mount_multi(t *testing.T) {
@@ -217,15 +224,13 @@ func Test_Mount_multi(t *testing.T) {
 	}
 	err := mount(Lustre, sessionName, true,
 		internalName, primaryBrickHost, attachment,
-		owner, group)
+		owner, group, false)
 
 	assert.Nil(t, err)
-	assert.Equal(t, 5, fake.calls)
+	assert.Equal(t, 2, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
-	assert.Equal(t, "mkdir -p /dac/job1_persistent_asdf", fake.cmdStrs[0])
-	assert.Equal(t, "grep /dac/job1_persistent_asdf /etc/mtab", fake.cmdStrs[1])
-	assert.Equal(t, "mkdir -p /dac/job1_persistent_asdf/global", fake.cmdStrs[2])
-	assert.Equal(t, "chown 1001:1002 /dac/job1_persistent_asdf/global", fake.cmdStrs[3])
-	assert.Equal(t, "chmod 770 /dac/job1_persistent_asdf/global", fake.cmdStrs[4])
+	assert.Equal(t, "mkdir -p /mnt/dac/job1_persistent_asdf", fake.cmdStrs[0])
+	assert.Equal(t, "client1", fake.hostnames[1])
+	assert.Equal(t, "grep /mnt/dac/job1_persistent_asdf /etc/mtab", fake.cmdStrs[1])
 }
