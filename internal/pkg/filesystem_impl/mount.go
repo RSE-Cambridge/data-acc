@@ -63,27 +63,6 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 		if err := fixUpOwnership(attachHost, owner, group, sharedDir); err != nil {
 			return err
 		}
-
-		if !isMultiJob {
-			// base private dir similar to global dir
-			privateDir := path.Join(mountDir, "/private")
-			// TODO would install be better here?
-			if err := mkdir(attachHost, privateDir); err != nil {
-				return err
-			}
-			if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
-				return err
-			}
-
-			// TODO: Swap
-			//swapDir := path.Join(mountDir, "/swap")
-			//if err := mkdir(attachHost, swapDir); err != nil {
-			//	return err
-			//}
-			//if err := fixUpOwnership(attachHost, owner, group, privateDir); err != nil {
-			//	return err
-			//}
-		}
 	}
 
 	// add sym link to a private directory as needed

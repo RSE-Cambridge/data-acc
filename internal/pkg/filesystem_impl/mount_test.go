@@ -116,7 +116,7 @@ func Test_Mount(t *testing.T) {
 		internalName, primaryBrickHost, attachment,
 		owner, group, true)
 	assert.Nil(t, err)
-	assert.Equal(t, 20, fake.calls)
+	assert.Equal(t, 17, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
 	assert.Equal(t, "mkdir -p /mnt/dac/job1_job", fake.cmdStrs[0])
@@ -134,25 +134,16 @@ func Test_Mount(t *testing.T) {
 	assert.Equal(t, "chmod 700 /mnt/dac/job1_job/global", fake.cmdStrs[8])
 
 	assert.Equal(t, "client1", fake.hostnames[9])
-	assert.Equal(t, "mkdir -p /mnt/dac/job1_job/private", fake.cmdStrs[9])
-	assert.Equal(t, "chown 1001:1002 /mnt/dac/job1_job/private", fake.cmdStrs[10])
-	assert.Equal(t, "chmod 700 /mnt/dac/job1_job/private", fake.cmdStrs[11])
+	assert.Equal(t, "mkdir -p /mnt/dac/job1_job/private/client1", fake.cmdStrs[9])
+	assert.Equal(t, "chown 1001:1002 /mnt/dac/job1_job/private/client1", fake.cmdStrs[10])
+	assert.Equal(t, "chmod 700 /mnt/dac/job1_job/private/client1", fake.cmdStrs[11])
+	assert.Equal(t, "ln -s /mnt/dac/job1_job/private/client1 /mnt/dac/job1_job_private", fake.cmdStrs[12])
 
-	assert.Equal(t, "mkdir -p /mnt/dac/job1_job/private", fake.cmdStrs[9])
-	assert.Equal(t, "chown 1001:1002 /mnt/dac/job1_job/private", fake.cmdStrs[10])
-	assert.Equal(t, "chmod 700 /mnt/dac/job1_job/private", fake.cmdStrs[11])
-
-	assert.Equal(t, "client1", fake.hostnames[12])
-	assert.Equal(t, "mkdir -p /mnt/dac/job1_job/private/client1", fake.cmdStrs[12])
-	assert.Equal(t, "chown 1001:1002 /mnt/dac/job1_job/private/client1", fake.cmdStrs[13])
-	assert.Equal(t, "chmod 700 /mnt/dac/job1_job/private/client1", fake.cmdStrs[14])
-	assert.Equal(t, "ln -s /mnt/dac/job1_job/private/client1 /mnt/dac/job1_job_private", fake.cmdStrs[15])
+	assert.Equal(t, "client2", fake.hostnames[13])
+	assert.Equal(t, "mkdir -p /mnt/dac/job1_job/private/client2", fake.cmdStrs[13])
 
 	assert.Equal(t, "client2", fake.hostnames[16])
-	assert.Equal(t, "mkdir -p /mnt/dac/job1_job/private/client2", fake.cmdStrs[16])
-
-	assert.Equal(t, "client2", fake.hostnames[19])
-	assert.Equal(t, "ln -s /mnt/dac/job1_job/private/client2 /mnt/dac/job1_job_private", fake.cmdStrs[19])
+	assert.Equal(t, "ln -s /mnt/dac/job1_job/private/client2 /mnt/dac/job1_job_private", fake.cmdStrs[16])
 }
 
 func Test_Umount(t *testing.T) {
