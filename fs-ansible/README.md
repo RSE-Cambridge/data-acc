@@ -1,26 +1,20 @@
-# configure fileystems for data-acc demo
+# Configure fileystems for data-acc
 
-For lustre we have:
+This provides the ansible to configure Lustre file-systems for the
+data accelerator. The BeeGFS scripts are currently not maintained.
 
-    ansible-playbook test-dac-lustre.yml -i test-inventory-lustre --tag format --tag reformat_mgs
-    ansible-playbook test-dac-lustre.yml -i test-inventory-lustre --tag mount,create_mdt,create_mgs,create_osts,client_mount
-    ansible-playbook test-dac-lustre.yml -i test-inventory-lustre --tag mount,create_mdt,create_mgs,create_osts,client_mount
-    ansible-playbook test-dac-beegfs.yml -i test-inventory-lustre --tag stop_all,unmount,client_unmount
-    ansible-playbook test-dac-beegfs.yml -i test-inventory-lustre --tag stop_all,unmount,client_unmount
-    ansible-playbook test-dac-lustre.yml -i test-inventory-lustre --tag format
+The current entry points are the following playbooks:
 
-    ansible-playbook test-dac-lustre.yml -i test-inventory-lustre --tag stop_mgs
-    ansible-playbook test-dac-lustre.yml -i test-inventory-lustre --tag reformat_mgs
+* create.yml - create empty lustre filesystem
+* delete.yml - teardown buffer, deleting partitions, disks not wiped
+* restore.yml - re-mount filesystem (after dac host reboot)
 
+The expected inventory format is best seen in the dac unit tests:
 
-For beegfs we have:
+* https://github.com/RSE-Cambridge/data-acc/blob/master/internal/pkg/filesystem_impl/ansible_test.go
 
-    ansible-playbook test-dac-beegfs.yml -i test-inventory-beegfs --tag format
-    ansible-playbook test-dac-beegfs.yml -i test-inventory-beegfs --tag mount,create_mdt,create_mgs,create_osts,client_mount
-    ansible-playbook test-dac-beegfs.yml -i test-inventory-beegfs --tag mount,create_mdt,create_mgs,create_osts,client_mount
-    ansible-playbook test-dac-beegfs.yml -i test-inventory-beegfs --tag stop_all,unmount,client_unmount
-    ansible-playbook test-dac-beegfs.yml -i test-inventory-beegfs --tag stop_all,unmount,client_unmount
-    ansible-playbook test-dac-beegfs.yml -i test-inventory-beegfs --tag format
+Note that dacctl is able to generate the ansible being used for any
+current buffer via the `generate_ansible` command.
 
 ## Install notes
 
