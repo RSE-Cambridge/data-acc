@@ -111,7 +111,7 @@ func (s sessionFacade) CreateSession(session datamodel.Session) error {
 			if err != nil {
 				return session, err
 			}
-			if session.ActualSizeBytes == 0 {
+			if session.ActualSizeBytes == 0 && len(session.MultiJobAttachments) == 0 {
 				// Skip creating an empty filesystem
 				return datamodel.Session{}, nil
 			}
