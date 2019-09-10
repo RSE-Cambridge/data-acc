@@ -465,4 +465,5 @@ func (s *sessionActionHandler) RestoreSession(session datamodel.Session) {
 	}
 
 	// TODO: do we just assume any pending mounts will resume in their own time? or should we retry mounts too?
+	// TODO: we need to redo at least the primary brick host mount, to allow a later data copy out?
 }
