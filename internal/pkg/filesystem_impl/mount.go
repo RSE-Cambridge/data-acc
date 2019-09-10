@@ -224,7 +224,7 @@ func mountRemoteFilesystem(fsType FSType, hostname string, lnetSuffix string, mg
 func mountLustre(hostname string, lnetSuffix string, mgtHost string, fsname string, directory string) error {
 	// We assume modprobe -v lustre is already done
 	// First check if we are mounted already
-	if err := runner.Execute(hostname, fmt.Sprintf("grep %s /etc/mtab", directory)); err != nil {
+	if err := runner.Execute(hostname, fmt.Sprintf("grep %s /etc/mtab", directory)); err != nil || conf.SkipAnsible {
 		if err := runner.Execute(hostname, fmt.Sprintf(
 			"mount -t lustre -o flock,nodev,nosuid %s%s:/%s %s",
 			mgtHost, lnetSuffix, fsname, directory)); err != nil {
@@ -282,7 +282,8 @@ func (*run) Execute(hostname string, cmdStr string) error {
 		log.Println(string(output))
 		return nil
 	} else {
-		log.Println("Error in remove ssh run:", string(output))
+		log.Printf("Error in remote ssh run: '%s' error: %s\n", cmdStr, err.Error())
+		log.Println(string(output))
 		return err
 	}
 }

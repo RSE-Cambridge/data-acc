@@ -21,6 +21,9 @@ func (f *fakeRunner) Execute(hostname string, cmdStr string) error {
 	if cmdStr == "grep /mnt/dac/job1_job /etc/mtab" {
 		return errors.New("trigger mount")
 	}
+	if cmdStr == "grep /mnt/dac/job1_persistent_asdf /etc/mtab" {
+		return errors.New("trigger mount")
+	}
 	return f.err
 }
 
@@ -183,7 +186,7 @@ func Test_Umount_multi(t *testing.T) {
 	fake := &fakeRunner{}
 	runner = fake
 
-	sessionName := datamodel.SessionName("asdf")
+	sessionName := datamodel.SessionName("asdf2")
 	internalName := "uuidasdf"
 	primaryBrickHost := datamodel.BrickHostName("host1")
 	attachment := datamodel.AttachmentSession{
@@ -200,9 +203,9 @@ func Test_Umount_multi(t *testing.T) {
 	assert.Equal(t, 3, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
-	assert.Equal(t, "grep /mnt/dac/job1_persistent_asdf /etc/mtab", fake.cmdStrs[0])
-	assert.Equal(t, "umount /mnt/dac/job1_persistent_asdf", fake.cmdStrs[1])
-	assert.Equal(t, "rm -df /mnt/dac/job1_persistent_asdf", fake.cmdStrs[2])
+	assert.Equal(t, "grep /mnt/dac/job1_persistent_asdf2 /etc/mtab", fake.cmdStrs[0])
+	assert.Equal(t, "umount /mnt/dac/job1_persistent_asdf2", fake.cmdStrs[1])
+	assert.Equal(t, "rm -df /mnt/dac/job1_persistent_asdf2", fake.cmdStrs[2])
 }
 
 func Test_Mount_multi(t *testing.T) {
@@ -227,10 +230,12 @@ func Test_Mount_multi(t *testing.T) {
 		owner, group, false)
 
 	assert.Nil(t, err)
-	assert.Equal(t, 2, fake.calls)
+	assert.Equal(t, 3, fake.calls)
 
 	assert.Equal(t, "client1", fake.hostnames[0])
 	assert.Equal(t, "mkdir -p /mnt/dac/job1_persistent_asdf", fake.cmdStrs[0])
 	assert.Equal(t, "client1", fake.hostnames[1])
 	assert.Equal(t, "grep /mnt/dac/job1_persistent_asdf /etc/mtab", fake.cmdStrs[1])
+	assert.Equal(t, "client1", fake.hostnames[2])
+	assert.Equal(t, "mount -t lustre -o flock,nodev,nosuid host1:/uuidasdf /mnt/dac/job1_persistent_asdf", fake.cmdStrs[2])
 }
