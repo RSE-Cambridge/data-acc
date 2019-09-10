@@ -61,5 +61,5 @@ func generateRsyncCmd(session datamodel.Session, request datamodel.DataCopyReque
 }
 
 func escapePath(path string) string {
-	return strings.Replace(path, "$DW_JOB_STRIPED", "\\$DW_JOB_STRIPED", 1)
+	return strings.Replace(path, "$DW_", "\\$DW_", 1)
 }
