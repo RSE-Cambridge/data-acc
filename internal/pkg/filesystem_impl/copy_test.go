@@ -70,4 +70,11 @@ func Test_GenerateRsyncCmd(t *testing.T) {
 	cmd, err = generateRsyncCmd(testVolume, request)
 	assert.Equal(t, "", cmd)
 	assert.Equal(t, "unsupported source type list for volume: asdf", err.Error())
+
+	request.SourceType = datamodel.File
+	request.Source = "$DW_test"
+	request.Destination = "dest"
+	cmd, err = generateRsyncCmd(testVolume, request)
+	assert.Nil(t, err)
+	assert.Equal(t, "rsync -ospgu --stats \\$DW_test dest", cmd)
 }
