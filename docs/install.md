@@ -165,5 +165,5 @@ all the nodes running `dacd`.
 On the compute nodes, it seems possible to restrict sudo access to the
 following:
 ```
-dac ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /mnt/dac/*, /usr/bin/chmod 700 /mnt/dac/*, /usr/bin/chmod 0600 /mnt/dac/*, /usr/bin/chown * /mnt/dac/*, /usr/bin/mount -t lustre * /mnt/dac/*, /usr/bin/umount /mnt/dac/*, /usr/sbin/losetup /dev/loop* /mnt/dac/*, /usr/sbin/losetup -d /dev/loop*, /usr/sbin/mkswap /dev/loop*, /usr/sbin/swapon /dev/loop*, /usr/sbin/swapoff /dev/loop*, /usr/bin/ln -s /mnt/dac/* /mnt/dac/*, /usr/bin/dd if=/dev/zero of=/dac/*, /usr/bin/rm -df /mnt/dac/*, /bin/grep /mnt/dac/* /etc/mtab
+dacd ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /mnt/dac/*, /usr/bin/chmod 700 /mnt/dac/*, /usr/bin/chmod 0600 /mnt/dac/*, /usr/bin/chown * /mnt/dac/*, /usr/bin/mount -t lustre * /mnt/dac/*, /usr/bin/umount /mnt/dac/*, /usr/sbin/losetup /dev/loop* /mnt/dac/*, /usr/sbin/losetup -d /dev/loop*, /usr/sbin/mkswap /dev/loop*, /usr/sbin/swapon /dev/loop*, /usr/sbin/swapoff /dev/loop*, /usr/bin/ln -s /mnt/dac/* /mnt/dac/*, /usr/bin/dd if=/dev/zero of=/dac/*, /usr/bin/rm -df /mnt/dac/*, /bin/grep /mnt/dac/* /etc/mtab
 ```
