@@ -47,9 +47,9 @@ WantedBy=multi-user.target
 
 The configuration in `/etc/dacd/dacd.conf` is covered in more detail below.
 
-On the Slurm master node, the `dacctl` binary is used as a command line too.
-Below you can see the Slurm configuration GetSysState can be modified to
-point to the location where you installed the binary.
+On the Slurm master node, the `dacctl` binary needs to be accessible.
+Below you can see the Slurm configuration options GetSysState and GetSysStatus,
+both of which need to be modified to point to the location of the dacctl binary.
 
 ## etcd and TLS config
 
@@ -150,6 +150,7 @@ OtherTimeout=300
 DefaultPool=default
  
 GetSysState=/usr/local/bin/dacctl
+GetSysStatus=/usr/local/bin/dacctl
 ```
 
 ## SSH and Service Accounts
