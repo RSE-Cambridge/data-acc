@@ -156,6 +156,8 @@
         state: present
 
 - hosts: dac_workers
+  become: true
+  become_user: root
   roles:
     - role: data-acc
 

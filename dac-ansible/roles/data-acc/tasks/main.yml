@@ -1,11 +1,6 @@
 ---
 - block:
     - name: download data_acc
-      become: yes
-      become_user: root
-#      copy:
-#        src: ~/{{data_acc_tgz}}
-#        dest: /tmp/{{data_acc_tgz}}
       get_url:
         url: '{{data_acc_tgz_url}}'
         dest: /tmp/{{data_acc_tgz}}
@@ -13,22 +8,16 @@
         timeout: '{{data_acc_download_timeout_seconds}}'
         mode: 0644
     - name: create install dir
-      become: yes
-      become_user: root
       file:
         state: directory
         path: '{{data_acc_install_dir}}/{{data_acc_name}}'
     - name: unachive data_acc
-      become: yes
-      become_user: root
       unarchive:
         remote_src: yes
         src: /tmp/{{data_acc_tgz}}
         dest: '{{data_acc_install_dir}}/{{data_acc_name}}'
 
 - name: link data_acc
-  become: yes
-  become_user: root
   file:
     src: '{{data_acc_install_dir}}/{{data_acc_name}}/bin/{{item}}'
     dest: '{{data_acc_install_dir}}/{{item}}'
@@ -38,15 +27,11 @@
     - dacctl
 
 - name: Install python-virtualenv
-  become: yes
-  become_user: root
   package:
     name: python-virtualenv
     state: present
 
 - name: Add ansible venv
-  become: yes
-  become_user: root
   pip:
     name: ansible
     virtualenv:  "{{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible/.venv"
