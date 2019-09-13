@@ -64,58 +64,9 @@
   when: data_acc_launch and data_acc_service_modified is changed
   command: systemctl daemon-reload
 
-- name: create fake backing files of 200MB
-  command: "dd if=/dev/zero of={{item}} bs=1024 count=204800"
-  args:
-    creates: "{{item}}"
-  with_items:
-    - "{{data_acc_data_dir}}/fake_nvme0"
-    - "{{data_acc_data_dir}}/fake_nvme1"
-    - "{{data_acc_data_dir}}/fake_nvme2"
-    - "{{data_acc_data_dir}}/fake_nvme3"
-    - "{{data_acc_data_dir}}/fake_nvme4"
-    - "{{data_acc_data_dir}}/fake_sdb"
-
-- name: create loopback
-  command: "losetup /dev/loop{{item.loop}} {{item.file}}"
-  args:
-    creates: "/dev/loop{{item.loop}}"
-  with_items:
-    - loop: 0
-      file: "{{data_acc_data_dir}}/fake_nvme0"
-    - loop: 1
-      file: "{{data_acc_data_dir}}/fake_nvme1"
-    - loop: 2
-      file: "{{data_acc_data_dir}}/fake_nvme2"
-    - loop: 3
-      file: "{{data_acc_data_dir}}/fake_nvme3"
-    - loop: 4
-      file: "{{data_acc_data_dir}}/fake_nvme4"
-    - loop: 5
-      file: "{{data_acc_data_dir}}/fake_sdb"
-
-- name: create nvme symlinks
-  file:
-    src: "/dev/loop{{ item.loop }}"
-    dest: "/dev/nvme{{ item.loop }}n1"
-    state: link
-  with_items:
-    - loop: 0
-      file: "{{data_acc_data_dir}}/fake_nvme0"
-    - loop: 1
-      file: "{{data_acc_data_dir}}/fake_nvme1"
-    - loop: 2
-      file: "{{data_acc_data_dir}}/fake_nvme2"
-    - loop: 3
-      file: "{{data_acc_data_dir}}/fake_nvme3"
-    - loop: 4
-      file: "{{data_acc_data_dir}}/fake_nvme4"
-
-- name: create nvme symlinks
-  file:
-    src: "/dev/loop5"
-    dest: "/dev/sdb"
-    state: link
+- name: Fake NVMe setup
+  include_tasks: fake_nvme.yml
+  when: "'openstack' in group_names"
 
 - name: launching data_acc...
   when: data_acc_launch
