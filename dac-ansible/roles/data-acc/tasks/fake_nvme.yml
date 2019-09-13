@@ -49,3 +49,5 @@
 - name: create nvme symlinks
   file:
     src: "/dev/loop5"
+    dest: "/dev/sdb"
+    state: link
