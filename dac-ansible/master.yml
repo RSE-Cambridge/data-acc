@@ -249,31 +249,15 @@
 
 - hosts: slurm
   become: true
-  vars:
-    pip_install_packages:
-      - name: docker
-      - name: docker-compose
-    docker_users:
-      - "centos"
-    docker_compose_version: "1.22.0"
   roles:
     - geerlingguy.repo-epel
     - geerlingguy.pip
-    - geerlingguy.docker
 
 - hosts: slurm_master[0]
   become: true
   vars:
       recreate: false
   tasks:
-    - file:
-        path: /var/lib/slurm-docker/slurm-master
-        state: directory
-        mode: 0755
-    - name: docker service description to host
-      template:
-        src: slurm-master.yml.j2
-        dest: /var/lib/slurm-docker/slurm-master/docker-compose.yml
     - file:
         path: /etc/data-acc/pki
         state: directory
@@ -293,34 +277,12 @@
         - '{{ inventory_dir }}/pki-dir/{{inventory_hostname}}.pem'
         - '{{ inventory_dir }}/pki-dir/{{inventory_hostname}}-key.pem'
         - '{{ inventory_dir }}/pki-dir/ca.pem'
-    - name: pull docker images
-      # https://github.com/ansible/ansible/issues/47978
-      command: docker-compose pull
-      args:
-        chdir: '/var/lib/slurm-docker/slurm-master'
-      changed_when: False
-    - docker_compose:
-        project_src: /var/lib/slurm-docker/slurm-master
-        state: absent
-        remove_volumes: yes
-      when: recreate|bool
-    - docker_compose:
-        project_src: /var/lib/slurm-docker/slurm-master
-      register: output
 
 - hosts: slurm_workers
   become: true
   vars:
       recreate: false
   tasks:
-    - file:
-        path: /var/lib/slurm-docker/slurm-worker
-        state: directory
-        mode: 0755
-    - name: docker service description to host
-      template:
-        src: slurm-worker.yml.j2
-        dest: /var/lib/slurm-docker/slurm-worker/docker-compose.yml
     - file:
         path: /etc/data-acc/pki
         state: directory
@@ -340,16 +302,3 @@
         - '{{ inventory_dir }}/pki-dir/{{inventory_hostname}}.pem'
         - '{{ inventory_dir }}/pki-dir/{{inventory_hostname}}-key.pem'
         - '{{ inventory_dir }}/pki-dir/ca.pem'
-    - name: pull docker images
-      # https://github.com/ansible/ansible/issues/47978
-      command: docker-compose pull
-      args:
-        chdir: '/var/lib/slurm-docker/slurm-worker'
-      changed_when: False
-    - docker_compose:
-        project_src: /var/lib/slurm-docker/slurm-worker
-        state: absent
-        remove_volumes: yes
-      when: recreate|bool
-    - docker_compose:
-        project_src: /var/lib/slurm-docker/slurm-worker
