@@ -5,6 +5,12 @@ While there is an work in progress
 this document looks at the manual setup of the data-acc
 components.
 
+## Requirements
+
+* Slurm 18.08.x or newer. 19.05.x is currently being tested
+* etcd 3.3.x or newer
+* Shared home directory between DAC, compute and login nodes
+
 ## DACD and DACCTL
 
 Both software components are built statically.
@@ -56,8 +62,6 @@ both of which need to be modified to point to the location of the dacctl binary.
 You need to install an etcd cluster.
 It can be installed as required via EPEL or from
 [the repository](https://www.github.com/coreos/etcd)
-
-We recommend you run the last 3.3.x release of etcd.
 
 To secure the communication with etcd, TLS certificates should be used.
 
