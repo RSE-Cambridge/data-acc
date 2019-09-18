@@ -3,3 +3,4 @@
 - src: andrewrothstein.pki
 - src: geerlingguy.repo-epel
 - src: geerlingguy.pip
+- src: https://github.com/RSE-Cambridge/slurm-ansible
