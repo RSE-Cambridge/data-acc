@@ -30,11 +30,37 @@
   package:
     name: python-virtualenv
     state: present
+  when: "'slurm' not in group_names"
 
 - name: Add ansible venv
   pip:
     name: ansible
     virtualenv:  "{{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible/.venv"
+  when: "'slurm' not in group_names"
 
 - include_tasks: systemd.yml
-  when: data_acc_install_dacd
+  when: "data_acc_install_dacd and 'slurm' not in group_names"
+
+- name: dacd conf for slurmctld
+  template:
+    src: 'dacd.conf.j2'
+    dest: '/etc/sysconfig/slurmctld'
+    mode: 0644
+  notify: Restart slurmctld
+  when: "'slurm_master' in group_names"
+
+- name: dacd conf for slurmd
+  template:
+    src: 'dacd.conf.j2'
+    dest: '/etc/sysconfig/slurmd'
+    mode: 0644
+  notify: Restart slurmd
+  when: "'slurm_workers' in group_names"
+
+- name: dacctl.log
+  file:
+    path: /var/log/dacctl.log
+    state: touch
+    owner: 8900
+    group: 8900
+  when: "'slurm' in group_names"

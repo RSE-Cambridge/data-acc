@@ -252,6 +252,8 @@
   roles:
     - geerlingguy.repo-epel
     - geerlingguy.pip
+    - data-acc
+    - slurm-ansible
 
 - hosts: slurm_master[0]
   become: true
@@ -262,16 +264,16 @@
         path: /etc/data-acc/pki
         state: directory
         mode: 0700
-        owner: 995
-        group: 995
+        owner: '8900'
+        group: '8900'
     - name: copy etcd keys
       become: yes
       become_user: root
       copy:
         src: '{{item}}'
         dest: /etc/data-acc/pki
-        owner: '995' # TODO...
-        group: '995'
+        owner: '8900' # TODO...
+        group: '8900'
         mode: 0700
       with_items:
         - '{{ inventory_dir }}/pki-dir/{{inventory_hostname}}.pem'
