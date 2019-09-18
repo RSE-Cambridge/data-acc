@@ -5,6 +5,12 @@ While there is an work in progress
 this document looks at the manual setup of the data-acc
 components.
 
+## Requirements
+
+* Slurm 18.08.x or newer. 19.05.x is currently being tested
+* etcd 3.3.x or newer
+* Shared home directory between DAC, compute and login nodes
+
 ## DACD and DACCTL
 
 Both software components are built statically.
@@ -47,17 +53,15 @@ WantedBy=multi-user.target
 
 The configuration in `/etc/dacd/dacd.conf` is covered in more detail below.
 
-On the Slurm master node, the `dacctl` binary is used as a command line too.
-Below you can see the Slurm configuration GetSysState can be modified to
-point to the location where you installed the binary.
+On the Slurm master node, the `dacctl` binary needs to be accessible.
+Below you can see the Slurm configuration options GetSysState and GetSysStatus,
+both of which need to be modified to point to the location of the dacctl binary.
 
 ## etcd and TLS config
 
 You need to install an etcd cluster.
 It can be installed as required via EPEL or from
 [the repository](https://www.github.com/coreos/etcd)
-
-We recommend you run the last 3.3.x release of etcd.
 
 To secure the communication with etcd, TLS certificates should be used.
 
@@ -150,6 +154,7 @@ OtherTimeout=300
 DefaultPool=default
  
 GetSysState=/usr/local/bin/dacctl
+GetSysStatus=/usr/local/bin/dacctl
 ```
 
 ## SSH and Service Accounts

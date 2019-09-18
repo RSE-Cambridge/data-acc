@@ -75,7 +75,7 @@ please see: https://github.com/RSE-Cambridge/data-acc
 
 ### Slurm Integration Testing
 
-Currently we are targeting testing at Slurm 18.08.x
+Currently we are targeting testing at Slurm 19.05.x
 
 The packing is based on:
 https://github.com/giovtorres/slurm-docker-cluster

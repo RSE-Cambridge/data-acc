@@ -1,7 +1,8 @@
 # Install data-acc Development Environment with Ansible
 
-Install data-acc demo with Ansible. It creates a bunch of OpenStack VMs, then
-uses Ansible to install a development data-acc environment.
+Install data-acc demo with Ansible. There is a script to create OpenStack VMs
+but you can skip OpenStack steps and use your own Ansible inventory file if
+preferred.
 
 ## Setup
 
