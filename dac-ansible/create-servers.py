@@ -71,6 +71,9 @@ dac-etcd.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 etcd_master
 dac_workers
 
+[nfs:children]
+slurm_master
+
 [openstack:children]
 etcd
 slurm
