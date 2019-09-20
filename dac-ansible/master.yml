@@ -16,6 +16,40 @@
       name: "*"
       state: latest
 
+- hosts: nfs
+  become: true
+  vars:
+      nfs_exports: ["/home/cluster *(rw,sync,no_root_squash)"]
+  tasks:
+  - name: Create NFS directory
+    file:
+      path: /home/cluster
+      state: directory
+  roles:
+    - geerlingguy.nfs
+
+- hosts: openstack
+  become: true
+  tasks:
+  - name: Create NFS directory
+    file:
+      path: /home/cluster
+      state: directory
+  - name: Mount NFS
+    mount:
+      path: /home/cluster
+      state: "{{ item }}"
+      src: "{{ groups.slurm_master | first }}:/home/cluster"
+      fstype: nfs
+      opts: _netdev
+    when: "'nfs' not in group_names"
+    with_items: [ present, mounted ]
+  - name: Create test users
+    user:
+      name: "test{{ item }}"
+      home: "/home/cluster/test{{ item }}"
+    with_sequence: count=10
+
 - hosts: etcd_master[0]
   roles:
     - role: andrewrothstein.pki
