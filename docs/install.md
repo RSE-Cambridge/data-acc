@@ -1,7 +1,7 @@
 # Manual Installation of Data Accelerator
 
 While there is an work in progress
-[ansible based development setup](../dac-ansible)
+[ansible based development setup](https://github.com/RSE-Cambridge/data-acc/blob/master/dac-ansible)
 this document looks at the manual setup of the data-acc
 components.
 
