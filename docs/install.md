@@ -16,7 +16,7 @@ components.
 Both software components are built statically.
 There is a tagged release with a binary built using the CI system that is
 ready to download from github:
-https://github.com/RSE-Cambridge/data-acc/releases
+[https://github.com/RSE-Cambridge/data-acc/releases](https://github.com/RSE-Cambridge/data-acc/releases)
 
 
 The programs are statically compiled and can be copied around as per required.
