@@ -58,7 +58,7 @@ on [how to use a burst buffer via slurm](http://www.nersc.gov/users/computationa
 There are two key binaries:
 
 * **dacd** - runs on storage nodes, manages each host, watches keys in etcd
-* **daccli** - cli tool used by Slurm burst buffer plugin
+* **dacctl** - cli tool used by Slurm burst buffer plugin
 
 To show what is added to a typical Slurm deployment when
 you add the data accelerator [dac deployment diagram](https://drive.google.com/a/stackhpc.com/file/d/1UUrjlMtoyWETQuwdK1Pg0gyDe85GliGR/view?usp=sharing)
