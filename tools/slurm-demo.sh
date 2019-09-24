@@ -4,8 +4,6 @@
 
 set -eu
 
-DAC_HOME=/mnt/cluster/home/$USER
-
 mkdir -p ~/slurm-jobs
 cd ~/slurm-jobs
 touch perjob.txt persistent.txt
@@ -18,8 +16,8 @@ echo "#!/bin/bash
 
 echo "#!/bin/bash
 #DW jobdw capacity=1TB access_mode=striped type=scratch
-#DW stage_in source=$DAC_HOME/slurm-jobs/perjob.txt destination=\$DW_JOB_STRIPED/perjob.txt type=file
-#DW stage_out source=\$DW_JOB_STRIPED/perjob.txt destination=$DAC_HOME/slurm-jobs/perjob.txt type=file
+#DW stage_in source=$HOME/slurm-jobs/perjob.txt destination=\$DW_JOB_STRIPED/perjob.txt type=file
+#DW stage_out source=\$DW_JOB_STRIPED/perjob.txt destination=$HOME/slurm-jobs/perjob.txt type=file
 
 date >> \$DW_JOB_STRIPED/perjob.txt
 echo \$HOSTNAME >> \$DW_JOB_STRIPED/perjob.txt
@@ -27,8 +25,8 @@ echo \$SLURM_JOBID >> \$DW_JOB_STRIPED/perjob.txt" > use-perjob.sh
 
 echo "#!/bin/bash
 #DW persistentdw name=${USER}buffer
-#DW stage_in source=$DAC_HOME/slurm-jobs/persistent.txt destination=\$DW_PERSISTENT_STRIPED_${USER}buffer/persistent.txt type=file
-#DW stage_out source=\$DW_PERSISTENT_STRIPED_${USER}buffer/persistent.txt destination=$DAC_HOME/slurm-jobs/persistent.txt type=file
+#DW stage_in source=$HOME/slurm-jobs/persistent.txt destination=\$DW_PERSISTENT_STRIPED_${USER}buffer/persistent.txt type=file
+#DW stage_out source=\$DW_PERSISTENT_STRIPED_${USER}buffer/persistent.txt destination=$HOME/slurm-jobs/persistent.txt type=file
 
 date >> \$DW_PERSISTENT_STRIPED_${USER}buffer/persistent.txt
 echo \$HOSTNAME >> \$DW_PERSISTENT_STRIPED_${USER}buffer/persistent.txt
