@@ -1,6 +1,7 @@
 ---
 - src: andrewrothstein.etcd-cluster
 - src: andrewrothstein.pki
+- src: geerlingguy.nfs
 - src: geerlingguy.repo-epel
 - src: geerlingguy.pip
-- src: geerlingguy.docker
+- src: https://github.com/RSE-Cambridge/slurm-ansible

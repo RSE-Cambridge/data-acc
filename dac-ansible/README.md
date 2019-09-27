@@ -29,17 +29,10 @@ Once the VMs are created, you can now use Ansible to deploy the dev environment:
 
     ansible-playbook master.yml -i hosts
 
-Note the above pulls the Docker image johngarbutt/data-acc which can be
-pushed by doing something like this:
-
-    cd ../docker-slurm
-    ./build.sh
-    docker-compose push
-
 Once the Ansible has finished, you can login and try a Slurm test:
 
     ssh centos@<ip-of-slurm-master>
-    docker exec -it slurmctld bash
+    sudo -i
     scontrol show burstbuffer
     /usr/local/bin/data-acc/tools/slurm-test.sh
     squeue
@@ -57,12 +50,11 @@ plugin. This only really talks to etcd.
 For slurmctld you can see the logs here:
 
     ssh centos@<ip-of-slurm-master>
-    docker logs slurmctld
+    journalctld -u slurmctld
 
 You can see the dacctl logs here:
 
     ssh centos@<ip-of-slurm-master>
-    docker exec -it slurmctld bash
     less /var/log/dacctl.log
 
 When you have a buffer that needs to be teared down after fixing
@@ -70,7 +62,6 @@ what may have blocked any previous attempts (such as a bad sudoers files)
 you can try:
 
     ssh centos@<ip-of-slurm-master>
-    docker exec -it slurmctld bash
     /usr/local/bin/dacctl teardown --token <job-id>
 
 Note the above tends to leave client mounts behind, which need to be cleared
