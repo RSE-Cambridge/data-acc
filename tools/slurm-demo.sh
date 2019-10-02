@@ -47,6 +47,14 @@ wait_for_jobs() {
   done
 }
 
+cleanup() {
+  scancel -u $USER
+  sbatch delete-persistent.sh
+  wait_for_jobs
+}
+
+trap cleanup EXIT
+
 echo "***Current buffers visible by $USER***"
 scontrol show burstbuffer
 
@@ -61,8 +69,8 @@ sbatch use-persistent.sh
 wait_for_jobs
 
 echo "***Delete persistent buffer***"
-sbatch delete-persistent.sh
-wait_for_jobs
+cleanup
+trap - EXIT
 
 echo "***Show if all buffers are cleaned up***"
 scontrol show burstbuffer
