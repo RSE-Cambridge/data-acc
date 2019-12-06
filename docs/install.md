@@ -78,7 +78,8 @@ have the correct certs needed to communicate with etcd:
 
 ```
 ETCDCTL_API=3
-ETCDCTL_ENDPOINTS=https://10.43.21.71:2379 ETCD_CLIENT_DEBUG=1
+ETCDCTL_ENDPOINTS=https://10.43.21.71:2379
+ETCD_CLIENT_DEBUG=1
 ETCDCTL_CERT_FILE=/dac/dacd/cert/dac-e-24.data.cluster.pem
 ETCDCTL_KEY_FILE=/dac/dacd/cert/dac-e-24.data.cluster-key.pem
 ETCDCTL_CA_FILE=/dac/dacd/cert/ca.pem
