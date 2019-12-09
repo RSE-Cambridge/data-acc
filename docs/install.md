@@ -53,7 +53,9 @@ WantedBy=multi-user.target
 
 The configuration in `/etc/dacd/dacd.conf` is covered in more detail below.
 
-On the Slurm master node, the `dacctl` binary needs to be accessible.
+On the Slurm master node, the `dacctl` binary needs to be accessible and
+/var/log/dacctl.log needs to be writable by the slurm user.
+
 Below you can see the Slurm configuration options GetSysState and GetSysStatus,
 both of which need to be modified to point to the location of the dacctl binary.
 
