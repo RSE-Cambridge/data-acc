@@ -8,6 +8,7 @@ components.
 ## Requirements
 
 * Slurm 18.08.x or newer. 19.05.x is currently being tested
+* Lustre 2.12.x or newer (package install only)
 * etcd 3.3.x or newer
 * Shared home directory between DAC, compute and login nodes
 
