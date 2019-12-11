@@ -18,7 +18,7 @@ func processDataCopy(session datamodel.Session, request datamodel.DataCopyReques
 	}
 
 	log.Printf("Doing copy: %s", cmd)
-	return runner.Execute("localhost", cmd)
+	return runner.Execute("localhost", false, cmd)
 }
 
 func generateDataCopyCmd(session datamodel.Session, request datamodel.DataCopyRequest) (string, error) {

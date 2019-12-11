@@ -132,7 +132,7 @@ func TestGetJobSummary_AvoidsBadInput(t *testing.T) {
 	}
 	result, err := getJobSummary(lines1)
 	assert.Nil(t, err)
-	assert.Equal(t,"myBBname1;doevil", string(result.Attachments[0]))
+	assert.Equal(t, "myBBname1;doevil", string(result.Attachments[0]))
 
 	lines2 := []string{
 		`#DW jobdw capacity=4MiB access_mode=private type=scratch;asdf`,

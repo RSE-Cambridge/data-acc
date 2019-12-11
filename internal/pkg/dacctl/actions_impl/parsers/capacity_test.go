@@ -62,4 +62,9 @@ func TestParseCapacityBytes(t *testing.T) {
 	assert.Equal(t, "unable to parse size: 1B", err.Error())
 	assert.Equal(t, "", pool)
 	assert.Equal(t, 0, size)
+
+	pool, size, err = ParseCapacityBytes("foo:2.1TiB")
+	assert.Nil(t, err)
+	assert.Equal(t, "foo", pool)
+	assert.Equal(t, 2308974418330, size)
 }
