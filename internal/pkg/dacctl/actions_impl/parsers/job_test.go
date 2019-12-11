@@ -124,3 +124,33 @@ func TestGetJobSummary_Errors(t *testing.T) {
 	assert.Equal(t, "only one per job buffer allowed", err.Error())
 	assert.Nil(t, result.PerJobBuffer)
 }
+
+func TestGetJobSummary_AvoidsBadInput(t *testing.T) {
+	// TODO: all these test should fail!
+	lines1 := []string{
+		`#DW persistentdw name=myBBname1;doevil`,
+	}
+	result, err := getJobSummary(lines1)
+	assert.Nil(t, err)
+	assert.Equal(t,"myBBname1;doevil", string(result.Attachments[0]))
+
+	lines2 := []string{
+		`#DW jobdw capacity=4MiB access_mode=private type=scratch;asdf`,
+		`#DW stage_in source=/global/cscratch1/filename1;doevil destination=$DW_JOB_STRIPED/filename1 type=file`,
+		`#DW stage_in source=/global/cscratch1/filename2 destination=$DW_JOB_STRIPED/filename2&doevil type=file`,
+	}
+	result, err = getJobSummary(lines2)
+	assert.Nil(t, err)
+	assert.Contains(t, result.DataIn[0].Source, "doevil")
+	assert.Contains(t, result.DataIn[1].Destination, "doevil")
+
+	lines3 := []string{
+		`#DW jobdw capacity=4MiB access_mode=private type=scratch`,
+		`#DW stage_out source=$DW_JOB_STRIPED/outdir||doevil destination=$HOME../../scratch1/outdir&&doevil type=directory`,
+		`skipping other lines that we`,
+	}
+	result, err = getJobSummary(lines3)
+	assert.Nil(t, err)
+	assert.Contains(t, result.DataOut[0].Source, "doevil")
+	assert.Contains(t, result.DataOut[0].Destination, "doevil")
+}

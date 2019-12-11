@@ -77,4 +77,12 @@ func Test_GenerateRsyncCmd(t *testing.T) {
 	cmd, err = generateRsyncCmd(testVolume, request)
 	assert.Nil(t, err)
 	assert.Equal(t, "rsync -ospgu --stats \\$DW_test dest", cmd)
+
+	// TODO: all this test should fail!
+	request.SourceType = datamodel.Directory
+	request.Source = "source;doevil"
+	request.Destination = "dest"
+	cmd, err = generateRsyncCmd(testVolume, request)
+	assert.Nil(t, err)
+	assert.Equal(t, "rsync -r -ospgu --stats source;doevil dest", cmd)
 }
