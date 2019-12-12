@@ -134,7 +134,15 @@ func parseArgs(rawArgs []string) (map[string]string, error) {
 		if len(parts) != 2 {
 			return args, fmt.Errorf("unable to parse arg: %s", arg)
 		}
-		args[strings.ToLower(parts[0])] = parts[1]
+		key := parts[0]
+		value := parts[1]
+		if !IsValidKey(key) {
+			return args, fmt.Errorf("invalid key: %s", key)
+		}
+		if !IsValidPath(value) {
+			return args, fmt.Errorf("invalid value: %s", value)
+		}
+		args[strings.ToLower(key)] = value
 	}
 	return args, nil
 }
