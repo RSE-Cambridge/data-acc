@@ -10,6 +10,7 @@ components.
 * Slurm 18.08.x or newer. 19.05.x is currently being tested
 * Lustre 2.12.x or newer with LNET configured
 * etcd 3.3.x or newer
+* Python 2 (Python 3 is not supported)
 * Shared home directory between DAC, compute and login nodes
 
 ## DACD and DACCTL
@@ -106,6 +107,7 @@ You can can create this on each dacd node as follows:
 ```
 virtualenv /var/lib/data-acc/fs-ansible/.venv
 . /var/lib/data-acc/fs-ansible/.venv/bin/activate
+python --version # Ensure this is python 2
 pip install -U pip
 pip install -U ansible
 ```
