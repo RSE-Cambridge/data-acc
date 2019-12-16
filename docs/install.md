@@ -8,7 +8,9 @@ components.
 ## Requirements
 
 * Slurm 18.08.x or newer. 19.05.x is currently being tested
+* Lustre 2.12.x or newer with LNET configured
 * etcd 3.3.x or newer
+* Python 2 (Python 3 is not supported)
 * Shared home directory between DAC, compute and login nodes
 
 ## DACD and DACCTL
@@ -53,7 +55,9 @@ WantedBy=multi-user.target
 
 The configuration in `/etc/dacd/dacd.conf` is covered in more detail below.
 
-On the Slurm master node, the `dacctl` binary needs to be accessible.
+On the Slurm master node, the `dacctl` binary needs to be accessible and
+/var/log/dacctl.log needs to be writable by the slurm user.
+
 Below you can see the Slurm configuration options GetSysState and GetSysStatus,
 both of which need to be modified to point to the location of the dacctl binary.
 
@@ -78,7 +82,8 @@ have the correct certs needed to communicate with etcd:
 
 ```
 ETCDCTL_API=3
-ETCDCTL_ENDPOINTS=https://10.43.21.71:2379 ETCD_CLIENT_DEBUG=1
+ETCDCTL_ENDPOINTS=https://10.43.21.71:2379
+ETCD_CLIENT_DEBUG=1
 ETCDCTL_CERT_FILE=/dac/dacd/cert/dac-e-24.data.cluster.pem
 ETCDCTL_KEY_FILE=/dac/dacd/cert/dac-e-24.data.cluster-key.pem
 ETCDCTL_CA_FILE=/dac/dacd/cert/ca.pem
@@ -102,6 +107,7 @@ You can can create this on each dacd node as follows:
 ```
 virtualenv /var/lib/data-acc/fs-ansible/.venv
 . /var/lib/data-acc/fs-ansible/.venv/bin/activate
+python --version # Ensure this is python 2
 pip install -U pip
 pip install -U ansible
 ```
