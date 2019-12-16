@@ -59,22 +59,43 @@ func Test_GenerateRsyncCmd(t *testing.T) {
 	assert.Equal(t, "rsync -ospgu --stats source dest", cmd)
 
 	request.SourceType = datamodel.Directory
-	request.Source = "source"
-	request.Destination = "dest"
+	request.Source = "source-1_2/asdf"
+	request.Destination = "dest/asdf"
 	cmd, err = generateRsyncCmd(testVolume, request)
 	assert.Nil(t, err)
-	assert.Equal(t, "rsync -r -ospgu --stats source dest", cmd)
+	assert.Equal(t, "rsync -r -ospgu --stats source-1_2/asdf dest/asdf", cmd)
 
 	request.SourceType = datamodel.List
 	request.Source = "list_filename"
 	cmd, err = generateRsyncCmd(testVolume, request)
+	assert.NotNil(t, err)
 	assert.Equal(t, "", cmd)
 	assert.Equal(t, "unsupported source type list for volume: asdf", err.Error())
 
 	request.SourceType = datamodel.File
-	request.Source = "$DW_test"
+	request.Source = "$DW_test/abc"
 	request.Destination = "dest"
 	cmd, err = generateRsyncCmd(testVolume, request)
 	assert.Nil(t, err)
-	assert.Equal(t, "rsync -ospgu --stats \\$DW_test dest", cmd)
+	assert.Equal(t, "rsync -ospgu --stats \\$DW_test/abc dest", cmd)
+
+	request.SourceType = datamodel.Directory
+	request.Source = "source;doevil"
+	request.Destination = "dest"
+	cmd, err = generateRsyncCmd(testVolume, request)
+	assert.NotNil(t, err)
+	assert.Equal(t, "invalid path: "+
+		"{SourceType:directory Source:source;doevil Destination:dest RequestCopyIn:false CopyCompleted:false Error:}",
+		err.Error())
+	assert.Equal(t, "", cmd)
+
+	request.SourceType = datamodel.Directory
+	request.Source = "source\\doevil"
+	request.Destination = "dest"
+	cmd, err = generateRsyncCmd(testVolume, request)
+	assert.NotNil(t, err)
+	assert.Equal(t, "invalid path: "+
+		"{SourceType:directory Source:source\\doevil Destination:dest RequestCopyIn:false CopyCompleted:false Error:}",
+		err.Error())
+	assert.Equal(t, "", cmd)
 }

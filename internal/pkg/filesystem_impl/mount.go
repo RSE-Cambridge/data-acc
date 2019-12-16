@@ -157,44 +157,44 @@ func unmount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, 
 
 func createSwap(hostname string, swapMB int, filename string, loopback string) error {
 	file := fmt.Sprintf("dd if=/dev/zero of=%s bs=1024 count=%d", filename, swapMB*1024)
-	if err := runner.Execute(hostname, file); err != nil {
+	if err := runner.Execute(hostname, true, file); err != nil {
 		return err
 	}
-	if err := runner.Execute(hostname, fmt.Sprintf("chmod 0600 %s", filename)); err != nil {
+	if err := runner.Execute(hostname, true, fmt.Sprintf("chmod 0600 %s", filename)); err != nil {
 		return err
 	}
 	device := fmt.Sprintf("losetup %s %s", loopback, filename)
-	if err := runner.Execute(hostname, device); err != nil {
+	if err := runner.Execute(hostname, true, device); err != nil {
 		return err
 	}
 	swap := fmt.Sprintf("mkswap %s", loopback)
-	return runner.Execute(hostname, swap)
+	return runner.Execute(hostname, true, swap)
 }
 
 func swapOn(hostname string, loopback string) error {
-	return runner.Execute(hostname, fmt.Sprintf("swapon %s", loopback))
+	return runner.Execute(hostname, true, fmt.Sprintf("swapon %s", loopback))
 }
 
 func swapOff(hostname string, loopback string) error {
-	return runner.Execute(hostname, fmt.Sprintf("swapoff %s", loopback))
+	return runner.Execute(hostname, true, fmt.Sprintf("swapoff %s", loopback))
 }
 
 func detachLoopback(hostname string, loopback string) error {
-	return runner.Execute(hostname, fmt.Sprintf("losetup -d %s", loopback))
+	return runner.Execute(hostname, true, fmt.Sprintf("losetup -d %s", loopback))
 }
 
 func fixUpOwnership(hostname string, owner uint, group uint, directory string) error {
-	if err := runner.Execute(hostname, fmt.Sprintf("chown %d:%d %s", owner, group, directory)); err != nil {
+	if err := runner.Execute(hostname, true, fmt.Sprintf("chown %d:%d %s", owner, group, directory)); err != nil {
 		return err
 	}
-	return runner.Execute(hostname, fmt.Sprintf("chmod 700 %s", directory))
+	return runner.Execute(hostname, true, fmt.Sprintf("chmod 700 %s", directory))
 }
 
 func umountLustre(hostname string, directory string) error {
 	// only unmount if already mounted
-	if err := runner.Execute(hostname, fmt.Sprintf("grep %s /etc/mtab", directory)); err == nil {
+	if err := runner.Execute(hostname, true, fmt.Sprintf("grep %s /etc/mtab", directory)); err == nil {
 		// Don't add -l so we can spot when this fails
-		if err := runner.Execute(hostname, fmt.Sprintf("umount %s", directory)); err != nil {
+		if err := runner.Execute(hostname, true, fmt.Sprintf("umount %s", directory)); err != nil {
 			return err
 		}
 	} else {
@@ -205,11 +205,11 @@ func umountLustre(hostname string, directory string) error {
 }
 
 func removeSubtree(hostname string, directory string) error {
-	return runner.Execute(hostname, fmt.Sprintf("rm -df %s", directory))
+	return runner.Execute(hostname, true, fmt.Sprintf("rm -df %s", directory))
 }
 
 func createSymbolicLink(hostname string, src string, dest string) error {
-	return runner.Execute(hostname, fmt.Sprintf("ln -s %s %s", src, dest))
+	return runner.Execute(hostname, true, fmt.Sprintf("ln -s %s %s", src, dest))
 }
 
 func mountRemoteFilesystem(fsType FSType, hostname string, lnetSuffix string, mgtHost string, fsname string, directory string) error {
@@ -224,8 +224,8 @@ func mountRemoteFilesystem(fsType FSType, hostname string, lnetSuffix string, mg
 func mountLustre(hostname string, lnetSuffix string, mgtHost string, fsname string, directory string) error {
 	// We assume modprobe -v lustre is already done
 	// First check if we are mounted already
-	if err := runner.Execute(hostname, fmt.Sprintf("grep %s /etc/mtab", directory)); err != nil || conf.SkipAnsible {
-		if err := runner.Execute(hostname, fmt.Sprintf(
+	if err := runner.Execute(hostname, true, fmt.Sprintf("grep %s /etc/mtab", directory)); err != nil || conf.SkipAnsible {
+		if err := runner.Execute(hostname, true, fmt.Sprintf(
 			"mount -t lustre -o flock,nodev,nosuid %s%s:/%s %s",
 			mgtHost, lnetSuffix, fsname, directory)); err != nil {
 			return err
@@ -240,22 +240,22 @@ func mountBeegFS(hostname string, mgtHost string, fsname string, directory strin
 	if err := removeSubtree(hostname, directory); err != nil {
 		return err
 	}
-	return runner.Execute(hostname, fmt.Sprintf("ln -s /mnt/beegfs/%s %s", fsname, directory))
+	return runner.Execute(hostname, true, fmt.Sprintf("ln -s /mnt/beegfs/%s %s", fsname, directory))
 }
 
 func mkdir(hostname string, directory string) error {
-	return runner.Execute(hostname, fmt.Sprintf("mkdir -p %s", directory))
+	return runner.Execute(hostname, true, fmt.Sprintf("mkdir -p %s", directory))
 }
 
 type Run interface {
-	Execute(name string, cmd string) error
+	Execute(name string, asRoot bool, cmd string) error
 }
 
 type run struct {
 }
 
 // TODO: need some code sharing here!!!
-func (*run) Execute(hostname string, cmdStr string) error {
+func (*run) Execute(hostname string, asRoot bool, cmdStr string) error {
 	log.Println("SSH to:", hostname, "with command:", cmdStr)
 
 	if conf.SkipAnsible {
@@ -265,7 +265,11 @@ func (*run) Execute(hostname string, cmdStr string) error {
 	}
 
 	cmd := exec.Command("ssh", "-o", "StrictHostKeyChecking=no",
-		"-o", "UserKnownHostsFile=/dev/null", hostname, "sudo", cmdStr)
+		"-o", "UserKnownHostsFile=/dev/null", hostname, cmdStr)
+	if asRoot {
+		cmd = exec.Command("ssh", "-o", "StrictHostKeyChecking=no",
+			"-o", "UserKnownHostsFile=/dev/null", hostname, "sudo", cmdStr)
+	}
 
 	timer := time.AfterFunc(time.Minute, func() {
 		log.Println("Time up, waited more than 5 mins to complete.")

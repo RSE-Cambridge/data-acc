@@ -2,6 +2,7 @@ package filesystem_impl
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/dacctl/actions_impl/parsers"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"log"
 	"strings"
@@ -18,7 +19,7 @@ func processDataCopy(session datamodel.Session, request datamodel.DataCopyReques
 	}
 
 	log.Printf("Doing copy: %s", cmd)
-	return runner.Execute("localhost", cmd)
+	return runner.Execute("localhost", false, cmd)
 }
 
 func generateDataCopyCmd(session datamodel.Session, request datamodel.DataCopyRequest) (string, error) {
@@ -44,6 +45,10 @@ func generateDataCopyCmd(session datamodel.Session, request datamodel.DataCopyRe
 func generateRsyncCmd(session datamodel.Session, request datamodel.DataCopyRequest) (string, error) {
 	if request.Source == "" && request.Destination == "" {
 		return "", nil
+	}
+
+	if !parsers.IsValidPath(request.Source) || !parsers.IsValidPath(request.Destination) {
+		return "", fmt.Errorf("invalid path: %+v", request)
 	}
 
 	var flags string

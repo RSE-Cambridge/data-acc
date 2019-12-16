@@ -14,7 +14,7 @@ type fakeRunner struct {
 	cmdStrs   []string
 }
 
-func (f *fakeRunner) Execute(hostname string, cmdStr string) error {
+func (f *fakeRunner) Execute(hostname string, asRoot bool, cmdStr string) error {
 	f.calls += 1
 	f.hostnames = append(f.hostnames, hostname)
 	f.cmdStrs = append(f.cmdStrs, cmdStr)

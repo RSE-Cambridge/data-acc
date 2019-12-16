@@ -13,6 +13,18 @@ func IsValidName(name string) bool {
 	return nameRegex.Match([]byte(name))
 }
 
+var keyRegex = regexp.MustCompile("^[a-zA-Z0-9._-]+$")
+
+func IsValidKey(name string) bool {
+	return keyRegex.Match([]byte(name))
+}
+
+var pathRegex = regexp.MustCompile("^[a-zA-Z0-9.,_/$-]+$")
+
+func IsValidPath(value string) bool {
+	return pathRegex.Match([]byte(value))
+}
+
 func GetHostnamesFromFile(disk fileio.Disk, filename string) ([]string, error) {
 	computeHosts, err := disk.Lines(filename)
 	if err != nil {
