@@ -40,8 +40,15 @@
         state: present
       loop: "{{ mdts.keys() }}"
 
+    - name: Wait for MDT partition to appear in /dev
+      wait_for:
+        path: "/dev/{{ item.key }}p1"
+        timeout: 30
+        sleep: 5
+      loop: "{{ mdts|dict2items }}"
+
     - name: Reformat MDTs
-      command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p1"
+      shell: "test -b /dev/{{ item.key }}p1 && /usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p1"
       loop: "{{ mdts|dict2items }}"
 
 - name: Format OSTs
@@ -56,6 +63,13 @@
          state: present
       loop: "{{ osts.keys() }}"
 
+    - name: Wait for OST partition to appear in /dev
+      wait_for:
+        path: "/dev/{{ item.key }}p2"
+        timeout: 30
+        sleep: 5
+      loop: "{{ osts|dict2items }}"
+
     - name: Reformat OSTs
-      command: "/usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p2"
+      shell: "test -b /dev/{{ item.key }}p2 && /usr/sbin/mkfs.lustre --ost --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p2"
       loop: "{{ osts|dict2items }}"
