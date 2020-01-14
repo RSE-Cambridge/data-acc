@@ -1,0 +1,14 @@
+wait_for_jobs() {
+  set +e
+  timeout $jobtimeout bash -c \
+  'until [ -z "$(squeue -h -n $name)" ]; do
+    sleep 10
+  done'
+  timeoutrc=$?
+  set -e
+  if [ ! $timeoutrc -eq 0 ]; then
+    echo timeout $jobtimeout reached waiting for jobs to complete:
+    squeue -n $name
+    return 1
+  fi
+}
