@@ -25,7 +25,7 @@
     state: absent
     timeout: 120
     sleep: 5
-  loop: "{{ mdts.keys() }}"
+  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
 
 - name: Wait for OST partition to disappear from /dev
   wait_for:
@@ -33,4 +33,4 @@
     state: absent
     timeout: 120
     sleep: 5
-  loop: "{{ osts.keys() }}"
+  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
