@@ -2,6 +2,8 @@
 
 set -eux
 
+go get github.com/golang/mock/mockgen
+
 echo "Regenerate mocks:"
 
 mkdir -p internal/pkg/mocks
