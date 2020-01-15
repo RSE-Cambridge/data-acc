@@ -271,7 +271,7 @@ func (*run) Execute(hostname string, asRoot bool, cmdStr string) error {
 			"-o", "UserKnownHostsFile=/dev/null", hostname, "sudo", cmdStr)
 	}
 
-	timer := time.AfterFunc(time.Minute, func() {
+	timer := time.AfterFunc(time.Minute*5, func() {
 		log.Println("Time up, waited more than 5 mins to complete.")
 		if err := cmd.Process.Kill(); err != nil {
 			log.Panicf("error trying to kill process: %s", err.Error())
