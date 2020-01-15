@@ -40,6 +40,13 @@
         state: present
       loop: "{{ mdts.keys() }}"
 
+    - name: Wait for MDT partition to appear in /dev
+      wait_for:
+        path: "/dev/{{ item }}p1"
+        timeout: 30
+        sleep: 5
+      loop: "{{ mdts.keys() }}"
+
     - name: Reformat MDTs
       command: "/usr/sbin/mkfs.lustre --mdt --reformat --fsname={{ fs_name }} --index={{ item.value }} --mgsnode={{ mgsnode }}{{ lnet_suffix }} /dev/{{ item.key }}p1"
       loop: "{{ mdts|dict2items }}"
@@ -54,6 +61,13 @@
          part_end: "100%"
          label: gpt
          state: present
+      loop: "{{ osts.keys() }}"
+
+    - name: Wait for OST partition to appear in /dev
+      wait_for:
+        path: "/dev/{{ item }}p2"
+        timeout: 30
+        sleep: 5
       loop: "{{ osts.keys() }}"
 
     - name: Reformat OSTs

@@ -18,3 +18,19 @@
     number: 2
     state: absent
   loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
+
+- name: Wait for MDT partition to disappear from /dev
+  wait_for:
+    path: "/dev/{{ item }}p1"
+    state: absent
+    timeout: 120
+    sleep: 5
+  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
+
+- name: Wait for OST partition to disappear from /dev
+  wait_for:
+    path: "/dev/{{ item }}p2"
+    state: absent
+    timeout: 120
+    sleep: 5
+  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
