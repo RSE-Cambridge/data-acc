@@ -1,6 +1,6 @@
 ---
-data_acc_version: 'v2.0-beta.4'
-data_acc_checksum: 'sha256:fbe549ebb6e6b8b63224074d59b551b25575f8fd268f92e1a6d064bb24788397'
+data_acc_version: 'v2.3'
+data_acc_checksum: 'sha256:bb2f83ae92747b56adbf246fd626f1c73b5f66c5c18bc7c56dee4d9f5ccf07c8'
 data_acc_platform: linux-amd64
 data_acc_mirror: https://github.com/RSE-Cambridge/data-acc/releases/download
 data_acc_install_dir: /usr/local/bin
