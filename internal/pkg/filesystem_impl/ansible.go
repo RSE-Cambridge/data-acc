@@ -16,9 +16,10 @@ import (
 )
 
 type HostInfo struct {
-	MGS  string         `yaml:"mgs,omitempty"`
-	MDTS map[string]int `yaml:"mdts,omitempty,flow"`
-	OSTS map[string]int `yaml:"osts,omitempty,flow"`
+	hostName string
+	MGS      string         `yaml:"mgs,omitempty"`
+	MDTS     map[string]int `yaml:"mdts,omitempty,flow"`
+	OSTS     map[string]int `yaml:"osts,omitempty,flow"`
 }
 
 type FSInfo struct {
@@ -47,42 +48,60 @@ func (*ansibleImpl) CreateEnvironment(session datamodel.Session) (string, error)
 
 var conf = config.GetFilesystemConfig()
 
-func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) string {
-	allocationByHost := make(map[datamodel.BrickHostName][]datamodel.BrickAllocation)
+func getFSInfo(fsType FSType, fsUuid string, allBricks []datamodel.Brick) FSInfo {
+	// give all bricks an index, using the random ordering of allBricks
+	var allAllocations []datamodel.BrickAllocation
 	for i, brick := range allBricks {
-		allocationByHost[brick.BrickHostName] = append(allocationByHost[brick.BrickHostName], datamodel.BrickAllocation{
+		allAllocations = append(allAllocations, datamodel.BrickAllocation{
 			Brick:          brick,
 			AllocatedIndex: uint(i),
 		})
 	}
 
-	// If we have more brick allocations than maxMDTs
-	// assign at most one mdt per host.
-	// While this may give us less MDTs than max MDTs,
-	// but it helps spread MDTs across network connections
-	oneMdtPerHost := len(allBricks) > int(conf.MaxMDTs)
+	// group allocations by host
+	allocationByHost := make(map[datamodel.BrickHostName][]datamodel.BrickAllocation)
+	var orderedHostNames []datamodel.BrickHostName
+	for _, allocation := range allAllocations {
+		brickHostName := allocation.Brick.BrickHostName
+		if _, ok := allocationByHost[brickHostName]; !ok {
+			orderedHostNames = append(orderedHostNames, brickHostName)
+		}
+		allocationByHost[brickHostName] = append(allocationByHost[brickHostName], allocation)
+	}
 
+	// If we have more brick allocations than maxMDTs,
+	// spread out the mdts between the hosts,
+	// and go for the same number of mdts on each host
+	maxMdtsPerHost := len(allBricks)
+	if len(allBricks) > int(conf.MaxMDTs) {
+		maxMdtsPerHost = int(conf.MaxMDTs) / len(orderedHostNames)
+	}
+
+	// create the HostInfo object for each host, with correct OSTS and MDTS
 	hosts := make(map[string]HostInfo)
 	mgsnode := ""
-	for host, allocations := range allocationByHost {
+	mdtIndex := 0
+	for _, host := range orderedHostNames {
+		allocations := allocationByHost[host]
 		osts := make(map[string]int)
 		for _, allocation := range allocations {
 			osts[allocation.Brick.Device] = int(allocation.AllocatedIndex)
 		}
 
 		mdts := make(map[string]int)
-		if oneMdtPerHost {
-			allocation := allocations[0]
-			mdts[allocation.Brick.Device] = int(allocation.AllocatedIndex)
-		} else {
-			for _, allocation := range allocations {
-				mdts[allocation.Brick.Device] = int(allocation.AllocatedIndex)
+		for i, allocation := range allocations {
+			// don't go over maxMdtsPerHost
+			if i >= maxMdtsPerHost {
+				break
 			}
+			mdts[allocation.Brick.Device] = mdtIndex
+			mdtIndex++
 		}
 
-		hostInfo := HostInfo{MDTS: mdts, OSTS: osts}
+		hostInfo := HostInfo{hostName: string(host), OSTS: osts, MDTS: mdts}
 
-		if allocations[0].AllocatedIndex == 0 {
+		isPrimaryBrick := allocations[0].AllocatedIndex == 0
+		if isPrimaryBrick {
 			if fsType == Lustre {
 				hostInfo.MGS = conf.MGSDevice
 			} else {
@@ -92,9 +111,7 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 		}
 		hosts[string(host)] = hostInfo
 	}
-
 	// TODO: add attachments?
-
 	fsinfo := FSInfo{
 		Vars: map[string]string{
 			"mgsnode": mgsnode,
@@ -105,6 +122,11 @@ func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) str
 		},
 		Hosts: hosts,
 	}
+	return fsinfo
+}
+
+func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) string {
+	fsinfo := getFSInfo(fsType, fsUuid, allBricks)
 	fsname := fmt.Sprintf("%s", fsUuid)
 	data := Wrapper{Dacs: FileSystems{Children: map[string]FSInfo{fsname: fsinfo}}}
 
