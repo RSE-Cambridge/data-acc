@@ -17,7 +17,7 @@ all: buildlocal format buildmocks test
 
 buildlocal:
 	mkdir -p `pwd`/bin
-	GOBIN=`pwd`/bin go install -ldflags "-X github.com/RSE-Cambridge/data-acc/pkg/version.VERSION=${VERSION}" -v ./...
+	GOBIN=`pwd`/bin go install -mod=vendor -ldflags "-X github.com/RSE-Cambridge/data-acc/pkg/version.VERSION=${VERSION}" -v ./...
 	ls -l `pwd`/bin
 
 format:
@@ -29,7 +29,7 @@ buildmocks:
 test: 
 	mkdir -p `pwd`/bin
 	go vet ./...
-	go test -cover -race -coverprofile=./bin/coverage.txt ./...
+	go test -mod=vendor -cover -race -coverprofile=./bin/coverage.txt ./...
 
 test-func:
 	./build/func_test.sh
@@ -43,11 +43,3 @@ tar: clean buildlocal
 	tar -cvzf ./bin/data-acc-`git describe --tag --dirty`.tgz ./bin/dacd ./bin/dacctl ./fs-ansible ./tools/*.sh
 	sha256sum ./bin/data-acc-`git describe --tag --dirty`.tgz > ./bin/data-acc-`git describe --tag`.tgz.sha256
 	go version > ./bin/data-acc-`git describe --tag`.go-version
-
-dockercmd=docker run --rm -it -v ~/go:/go -w /go/src/github.com/RSE-Cambridge/data-acc golang:1.11
-
-docker:
-	$(dockercmd) go install -v ./...
-
-installdep:
-	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
