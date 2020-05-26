@@ -7,4 +7,3 @@
 /docker-slurm/bin/*
 /docker-slurm/fs-ansible/*
 /dac-ansible/.venv/*
-/vendor
