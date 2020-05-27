@@ -109,7 +109,7 @@ func runCli(args []string) error {
 			Flags: []cli.Flag{token, job,
 				cli.StringFlag{
 					Name:  "pathfile",
-					Usage: "Path of where to write the enviroment variables file.",
+					Usage: "Path of where to write the environment variables file.",
 				},
 			},
 			Action: paths,

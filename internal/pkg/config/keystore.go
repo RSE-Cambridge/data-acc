@@ -23,7 +23,7 @@ func GetKeystoreConfig(env ReadEnvironemnt) KeystoreConfig {
 		endpointsStr = getString(env, "ETCD_ENDPOINTS", "")
 	}
 	if endpointsStr == "" {
-		log.Fatalf("Must set ETCDCTL_ENDPOINTS environemnt variable, e.g. export ETCDCTL_ENDPOINTS=127.0.0.1:2379")
+		log.Fatalf("Must set ETCDCTL_ENDPOINTS environment variable, e.g. export ETCDCTL_ENDPOINTS=127.0.0.1:2379")
 	}
 	config.Endpoints = strings.Split(endpointsStr, ",")
 	return config

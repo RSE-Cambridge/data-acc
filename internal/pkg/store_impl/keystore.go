@@ -202,6 +202,9 @@ func (client *etcKeystore) Get(key string) (store.KeyValueVersion, error) {
 func (client *etcKeystore) KeepAliveKey(ctxt context.Context, key string) error {
 
 	getResponse, err := client.Client.Get(context.Background(), key)
+	if err != nil {
+		log.Fatal(err)
+	}
 	if getResponse.Count == 1 {
 		// if another host seems to exist, back off for 10 seconds incase we just did a quick restart
 		time.Sleep(time.Second * 10)

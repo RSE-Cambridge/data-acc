@@ -35,7 +35,7 @@ type sessionFacade struct {
 
 func (s sessionFacade) submitJob(sessionName datamodel.SessionName, actionType datamodel.SessionActionType,
 	getSession func() (datamodel.Session, error)) error {
-	// 30 min timeout to aquire lock and send action
+	// 30 min timeout to acquire lock and send action
 	ctxt, cancelFunc := context.WithTimeout(context.Background(), time.Minute*30)
 	defer func() {
 		cancelFunc()
@@ -83,12 +83,12 @@ func (s sessionFacade) submitJob(sessionName datamodel.SessionName, actionType d
 	var finalResult *datamodel.SessionAction
 	for action := range sessionActions {
 		if finalResult != nil {
-			log.Panicf("unexpected mulitple actions")
+			log.Panicf("unexpected multiple actions")
 		}
 		finalResult = &action
 	}
 	if finalResult == nil {
-		log.Panicf("failed to get reponse")
+		log.Panicf("failed to get response")
 	}
 
 	// report and errors in the server response
