@@ -23,15 +23,43 @@ Etcd is a key value store, for more details see: https://etcd.io/
 
 ## DACD and DACCTL
 
-Both software components are built statically.
+Both software components are built statically, as is the norm for golang.
 There is a tagged release with a binary built using the CI system that is
 ready to download from github:
 [https://github.com/RSE-Cambridge/data-acc/releases](https://github.com/RSE-Cambridge/data-acc/releases)
 
+The dacd and dacctl binaries are typically copied from the above release tarball into:
+`/usr/local/bin` on both the slurm master and the dacd server
 
-The programs are statically compiled and can be copied around as per required.
+All their configuration comes from environement variables.
+Typically these are set using an EnvironmentFile inside the appropriate systemd unit file.
+For example, for dacctl, it is run by slurmctld, so you need to set the environment variables
+for the slurmctld process, such that they are passed to dacctl.
 
-The files are currently installed to `/usr/local/bin` on each DAC node.
+Example configration will follow in this guide, but for more details on what
+configuration options are supported, please see the code:
+https://github.com/RSE-Cambridge/data-acc/tree/v2.4/internal/pkg/config
+
+## etcd and TLS config
+
+You need to install an etcd cluster.
+It can be installed as required via EPEL or from
+[the repository](https://www.github.com/coreos/etcd)
+But really we 
+
+To secure the communication with etcd, TLS certificates should be used.
+
+For more details please see the etcd docs, such as this page:
+https://etcd.io/docs/v3.3.12/op-guide/maintenance/
+
+## Example configuration
+
+On each DAC node this environment file is used in the dacd unit file
+to inform the dacd code the details of the environment, and in particular
+have the correct certs needed to communicate with etcd:
+
+**dacd**
+
 The following systemd unit file is used to control the dacd program:
 
 ```
@@ -62,32 +90,6 @@ WantedBy=multi-user.target
 ```
 
 The configuration in `/etc/dacd/dacd.conf` is covered in more detail below.
-
-On the Slurm master node, the `dacctl` binary needs to be accessible and
-/var/log/dacctl.log needs to be writable by the slurm user.
-
-Below you can see the Slurm configuration options GetSysState and GetSysStatus,
-both of which need to be modified to point to the location of the dacctl binary.
-
-## etcd and TLS config
-
-You need to install an etcd cluster.
-It can be installed as required via EPEL or from
-[the repository](https://www.github.com/coreos/etcd)
-But really we 
-
-To secure the communication with etcd, TLS certificates should be used.
-
-For more details please see the etcd docs, such as this page:
-https://etcd.io/docs/v3.3.12/op-guide/maintenance/
-
-## Example configuration
-
-On each DAC node this environment file is used in the dacd unit file
-to inform the dacd code the details of the environment, and in particular
-have the correct certs needed to communicate with etcd:
-
-**dacd**
 
 ```
 ETCDCTL_API=3
@@ -124,10 +126,14 @@ pip install -U ansible
 Note failed ansible runs are current left in /tmp.
 This aids debugging, but left unchecked will consume all disk space.
 
+**slurmctld**
+
+On the Slurm master node, the `dacctl` binary needs to be accessible and
+/var/log/dacctl.log needs to be writable by the slurm user.
+
+dacctl needs configuration so it knows how to contact the dacctl binary.
 The Slurm master unit file is updated to have this environment file
 such that the dacctl command line can communicate with etcd:
-
-**slurmctld**
 
 ```
 ETCDCTL_API=3
@@ -136,6 +142,9 @@ ETCDCTL_CERT_FILE=/dac/dacd/cert/slurm-master.data.cluster.pem
 ETCDCTL_KEY_FILE=/dac/dacd/cert/slurm-master.data.cluster-key.pem
 ETCDCTL_CA_FILE=/dac/dacd/cert/ca.pem
 ```
+
+Below you can see the Slurm configuration options GetSysState and GetSysStatus,
+both of which need to be modified to point to the location of the dacctl binary.
 
 ## Slurm Configuration
 
