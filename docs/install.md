@@ -5,6 +5,14 @@ While there is an work in progress
 this document looks at the manual setup of the data-acc
 components.
 
+End users request burst buffers from Slurm using the interface defined here:
+https://slurm.schedmd.com/burst_buffer.html
+
+Every node providing storage runs a dacd process. The slurm master makes use of
+dacctl command line tool, that works with the Slurm burst buffer plugin.
+They communicate via writing and reading key value pairs in etcd.
+Etcd is a key value store, for more details see: https://etcd.io/
+
 ## Requirements
 
 * Slurm 18.08.x or newer. 19.05.x is currently being tested
@@ -66,6 +74,7 @@ both of which need to be modified to point to the location of the dacctl binary.
 You need to install an etcd cluster.
 It can be installed as required via EPEL or from
 [the repository](https://www.github.com/coreos/etcd)
+But really we 
 
 To secure the communication with etcd, TLS certificates should be used.
 
