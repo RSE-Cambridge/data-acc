@@ -15,7 +15,7 @@ Etcd is a key value store, for more details see: https://etcd.io/
 
 ## Requirements
 
-* Slurm 18.08.x or newer. 19.05.x is currently being tested
+* Slurm 19.05.x (18.08 possibly works)
 * Lustre 2.12.x or newer with LNET configured
 * etcd 3.3.x or newer
 * Python 2 (Python 3 is not supported)
