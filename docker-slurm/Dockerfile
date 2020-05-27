@@ -8,8 +8,8 @@ LABEL org.label-schema.docker.cmd="docker-compose up -d" \
       org.label-schema.description="Slurm Docker cluster on CentOS 7" \
       maintainer="John Garbutt"
 
-ARG SLURM_TAG=slurm-19-05-2-1
-ARG GOSU_VERSION=1.11
+ARG SLURM_TAG=slurm-19-05-7-1
+ARG GOSU_VERSION=1.12
 
 RUN set -ex \
     && yum makecache fast \
