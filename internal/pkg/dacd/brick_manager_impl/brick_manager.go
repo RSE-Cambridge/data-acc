@@ -44,6 +44,9 @@ func (bm *brickManager) Startup() {
 
 	// If we are are enabled, this includes new create session requests
 	events, err := bm.sessionActions.GetSessionActionRequests(context.TODO(), bm.config.BrickHostName)
+	if err != nil {
+		log.Panicf("ERROR: failed to event stream for future session actions: %s", err)
+	}
 
 	// Assume we got restarted, first try to finish all pending actions
 	bm.completePendingActions()

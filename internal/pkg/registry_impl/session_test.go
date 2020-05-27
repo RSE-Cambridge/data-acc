@@ -103,6 +103,7 @@ func TestSessionRegistry_GetSession(t *testing.T) {
 	session, err = registry.GetSession("foo")
 	assert.NotNil(t, err)
 	assert.Equal(t, "unable to get session due to: fake", err.Error())
+	assert.NotNil(t, session)
 
 	keystore.EXPECT().Get("/session/foo").Return(store.KeyValueVersion{}, nil)
 	assert.PanicsWithValue(t,
