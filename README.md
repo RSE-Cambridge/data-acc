@@ -148,7 +148,7 @@ The following tests are currently a work in progress:
 
 ## Golang Build and Test (using make)
 
-Built with golang 1.12, using go modules for dependency management.
+Built with golang 1.14.x, using go modules for dependency management.
 
 gomock v1.1.1 is used to generate mocks. The version is fixed to stop
 conflicts with etcd 3.3.x.
@@ -180,4 +180,4 @@ Please see LICENSE file for more information.
 
 Copyright © 2018-2019 Alasdair James King, University of Cambridge
 
-Copyright © 2018-2019 John Garbutt, StackHPC Ltd
+Copyright © 2018-2020 John Garbutt, StackHPC Ltd
