@@ -46,9 +46,7 @@ func (*ansibleImpl) CreateEnvironment(session datamodel.Session) (string, error)
 	return setupAnsible(Lustre, session.FilesystemStatus.InternalName, session.AllocatedBricks)
 }
 
-var conf = config.GetFilesystemConfig()
-
-func getFSInfo(fsType FSType, fsUuid string, allBricks []datamodel.Brick) FSInfo {
+func getFSInfo(fsType FSType, fsUuid string, allBricks []datamodel.Brick, conf config.FilesystemConfig) FSInfo {
 	// give all bricks an index, using the random ordering of allBricks
 	var allAllocations []datamodel.BrickAllocation
 	for i, brick := range allBricks {
@@ -101,7 +99,7 @@ func getFSInfo(fsType FSType, fsUuid string, allBricks []datamodel.Brick) FSInfo
 		hostInfo := HostInfo{hostName: string(host), OSTS: osts, MDTS: mdts}
 
 		isPrimaryBrick := allocations[0].AllocatedIndex == 0
-		if isPrimaryBrick {
+		if isPrimaryBrick && conf.MGSHost == "localhost" {
 			if fsType == Lustre {
 				hostInfo.MGS = conf.MGSDevice
 			} else {
@@ -111,6 +109,18 @@ func getFSInfo(fsType FSType, fsUuid string, allBricks []datamodel.Brick) FSInfo
 		}
 		hosts[string(host)] = hostInfo
 	}
+
+	// Add MGSHost override, which may or may not be an existing host
+	if conf.MGSHost != "localhost" && fsType == Lustre {
+		hostInfo, ok := hosts[conf.MGSHost]
+		if !ok {
+			hostInfo = HostInfo{hostName: conf.MGSHost}
+		}
+		hostInfo.MGS = conf.MGSDevice
+		hosts[conf.MGSHost] = hostInfo
+		mgsnode = hostInfo.MGS
+	}
+
 	// TODO: add attachments?
 	fsinfo := FSInfo{
 		Vars: map[string]string{
@@ -126,7 +136,8 @@ func getFSInfo(fsType FSType, fsUuid string, allBricks []datamodel.Brick) FSInfo
 }
 
 func getInventory(fsType FSType, fsUuid string, allBricks []datamodel.Brick) string {
-	fsinfo := getFSInfo(fsType, fsUuid, allBricks)
+	conf := config.GetFilesystemConfig()
+	fsinfo := getFSInfo(fsType, fsUuid, allBricks, conf)
 	fsname := fmt.Sprintf("%s", fsUuid)
 	data := Wrapper{Dacs: FileSystems{Children: map[string]FSInfo{fsname: fsinfo}}}
 
@@ -155,6 +166,7 @@ func getPlaybook(fsType FSType, fsUuid string) string {
 }
 
 func getAnsibleDir(suffix string) string {
+	conf := config.GetFilesystemConfig()
 	return path.Join(conf.AnsibleDir, suffix)
 }
 
@@ -251,6 +263,7 @@ func executeAnsiblePlaybook(dir string, args string) error {
 	cmdStr := fmt.Sprintf(`cd %s; . .venv/bin/activate; ansible-playbook %s;`, dir, args)
 	log.Println("Requested ansible:", cmdStr)
 
+	conf := config.GetFilesystemConfig()
 	if conf.SkipAnsible {
 		log.Println("Skip as DAC_SKIP_ANSIBLE=True")
 		time.Sleep(time.Millisecond * 200)
