@@ -2,6 +2,7 @@ package filesystem_impl
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"log"
 	"os/exec"
@@ -34,6 +35,7 @@ func mount(fsType FSType, sessionName datamodel.SessionName, isMultiJob bool, in
 		// TODO: Move Lustre mount here that is done below
 		//executeAnsibleMount(fsType, volume, brickAllocations)
 	}
+	conf := config.GetFilesystemConfig()
 	var mountDir = getMountDir(sessionName, isMultiJob, attachment.SessionName)
 
 	for _, attachHost := range attachment.Hosts {
@@ -224,6 +226,7 @@ func mountRemoteFilesystem(fsType FSType, hostname string, lnetSuffix string, mg
 func mountLustre(hostname string, lnetSuffix string, mgtHost string, fsname string, directory string) error {
 	// We assume modprobe -v lustre is already done
 	// First check if we are mounted already
+	conf := config.GetFilesystemConfig()
 	if err := runner.Execute(hostname, true, fmt.Sprintf("grep %s /etc/mtab", directory)); err != nil || conf.SkipAnsible {
 		if err := runner.Execute(hostname, true, fmt.Sprintf(
 			"mount -t lustre -o flock,nodev,nosuid %s%s:/%s %s",
@@ -258,6 +261,7 @@ type run struct {
 func (*run) Execute(hostname string, asRoot bool, cmdStr string) error {
 	log.Println("SSH to:", hostname, "with command:", cmdStr)
 
+	conf := config.GetFilesystemConfig()
 	if conf.SkipAnsible {
 		log.Println("Skip as DAC_SKIP_ANSIBLE=True")
 		time.Sleep(time.Millisecond * 200)

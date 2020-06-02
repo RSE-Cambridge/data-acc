@@ -2,6 +2,7 @@ package config
 
 type FilesystemConfig struct {
 	MGSDevice   string
+	MGSHost     string
 	MaxMDTs     uint
 	HostGroup   string
 	AnsibleDir  string
@@ -14,6 +15,7 @@ func GetFilesystemConfig() FilesystemConfig {
 	env := DefaultEnv
 	conf := FilesystemConfig{
 		MGSDevice:   getString(env, "DAC_MGS_DEV", "sdb"),
+		MGSHost:     getString(env, "DAC_MGS_HOST", "localhost"),
 		MaxMDTs:     getUint(env, "DAC_MAX_MDT_COUNT", 24),
 		HostGroup:   getString(env, "DAC_HOST_GROUP", "dac-prod"),
 		AnsibleDir:  getString(env, "DAC_ANSIBLE_DIR", "/var/lib/data-acc/fs-ansible/"),

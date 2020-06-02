@@ -2,6 +2,7 @@ package filesystem_impl
 
 import (
 	"fmt"
+	"github.com/RSE-Cambridge/data-acc/internal/pkg/config"
 	"github.com/RSE-Cambridge/data-acc/internal/pkg/datamodel"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -185,10 +186,29 @@ func TestPlugin_GetFSInfo_MaxMDT_lessHosts(t *testing.T) {
 	}
 
 	fsUuid := "abcdefgh"
-	result := getFSInfo(Lustre, fsUuid, brickAllocations)
+	conf := config.GetFilesystemConfig()
+	conf.MGSHost = "dac5"
+	conf.MGSDevice = "loop0"
+	result := getFSInfo(Lustre, fsUuid, brickAllocations, conf)
 	resultStr := fmt.Sprintf("%+v", result.Hosts)
 	expected := `map[` +
-		`dac1:{hostName:dac1 MGS:sdb MDTS:map[nvme1n1:0 nvme2n1:1 nvme3n1:2 nvme4n1:3] ` +
+		`dac1:{hostName:dac1 MGS: MDTS:map[nvme1n1:0 nvme2n1:1 nvme3n1:2 nvme4n1:3] ` +
+		`OSTS:map[nvme11n1:30 nvme1n1:0 nvme2n1:1 nvme3n1:2 nvme4n1:3 nvme5n1:4 nvme6n1:5]} ` +
+		`dac2:{hostName:dac2 MGS: MDTS:map[nvme1n1:4 nvme2n1:5 nvme3n1:6 nvme4n1:7] ` +
+		`OSTS:map[nvme11n1:31 nvme1n1:6 nvme2n1:7 nvme3n1:8 nvme4n1:9 nvme5n1:10 nvme6n1:11]} ` +
+		`dac3:{hostName:dac3 MGS: MDTS:map[nvme1n1:8 nvme2n1:9 nvme3n1:10 nvme4n1:11] ` +
+		`OSTS:map[nvme1n1:12 nvme2n1:13 nvme3n1:14 nvme4n1:15 nvme5n1:16 nvme6n1:17]} ` +
+		`dac4:{hostName:dac4 MGS: MDTS:map[nvme1n1:12 nvme2n1:13 nvme3n1:14 nvme4n1:15] ` +
+		`OSTS:map[nvme1n1:18 nvme2n1:19 nvme3n1:20 nvme4n1:21 nvme5n1:22 nvme6n1:23]} ` +
+		`dac5:{hostName:dac5 MGS:loop0 MDTS:map[nvme1n1:16 nvme2n1:17 nvme3n1:18 nvme4n1:19] ` +
+		`OSTS:map[nvme1n1:24 nvme2n1:25 nvme3n1:26 nvme4n1:27 nvme5n1:28 nvme6n1:29]}]`
+	assert.Equal(t, expected, resultStr)
+
+	conf.MGSHost = "slurmmaster1"
+	result2 := getFSInfo(Lustre, fsUuid, brickAllocations, conf)
+	resultStr2 := fmt.Sprintf("%+v", result2.Hosts)
+	expected2 := `map[` +
+		`dac1:{hostName:dac1 MGS: MDTS:map[nvme1n1:0 nvme2n1:1 nvme3n1:2 nvme4n1:3] ` +
 		`OSTS:map[nvme11n1:30 nvme1n1:0 nvme2n1:1 nvme3n1:2 nvme4n1:3 nvme5n1:4 nvme6n1:5]} ` +
 		`dac2:{hostName:dac2 MGS: MDTS:map[nvme1n1:4 nvme2n1:5 nvme3n1:6 nvme4n1:7] ` +
 		`OSTS:map[nvme11n1:31 nvme1n1:6 nvme2n1:7 nvme3n1:8 nvme4n1:9 nvme5n1:10 nvme6n1:11]} ` +
@@ -197,6 +217,7 @@ func TestPlugin_GetFSInfo_MaxMDT_lessHosts(t *testing.T) {
 		`dac4:{hostName:dac4 MGS: MDTS:map[nvme1n1:12 nvme2n1:13 nvme3n1:14 nvme4n1:15] ` +
 		`OSTS:map[nvme1n1:18 nvme2n1:19 nvme3n1:20 nvme4n1:21 nvme5n1:22 nvme6n1:23]} ` +
 		`dac5:{hostName:dac5 MGS: MDTS:map[nvme1n1:16 nvme2n1:17 nvme3n1:18 nvme4n1:19] ` +
-		`OSTS:map[nvme1n1:24 nvme2n1:25 nvme3n1:26 nvme4n1:27 nvme5n1:28 nvme6n1:29]}]`
-	assert.Equal(t, expected, resultStr)
+		`OSTS:map[nvme1n1:24 nvme2n1:25 nvme3n1:26 nvme4n1:27 nvme5n1:28 nvme6n1:29]} `+
+		`slurmmaster1:{hostName:slurmmaster1 MGS:loop0 MDTS:map[] OSTS:map[]}]`
+	assert.Equal(t, expected2, resultStr2)
 }
