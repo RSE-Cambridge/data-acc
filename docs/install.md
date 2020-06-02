@@ -18,7 +18,7 @@ Etcd is a key value store, for more details see: https://etcd.io/
 * Slurm 19.05.x (18.08 possibly works)
 * Lustre 2.12.x or newer with LNET configured
 * etcd 3.3.x or newer
-* Python 2 (Python 3 is not supported)
+* Python (used to run Ansible)
 * Shared home directory between DAC, compute and login nodes
 
 ## DACD and DACCTL
