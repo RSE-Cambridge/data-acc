@@ -17,7 +17,7 @@
         part_end: "{{ mdt_size_mb }}MB"
         label: gpt
         state: present
-      loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
+      loop: "{{ (list(mdts.keys()) + list(osts.keys())) | unique }}"
     - name: Add OST Partition
       parted:
         device: "/dev/{{ item }}"
@@ -26,7 +26,7 @@
         part_end: "100%"
         label: gpt
         state: present
-      loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
+      loop: "{{ (list(mdts.keys()) + list(osts.keys())) | unique }}"
 
 - name: Format MDTs
   block:

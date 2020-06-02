@@ -10,14 +10,14 @@
     device: "/dev/{{ item }}"
     number: 1
     state: absent
-  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
+  loop: "{{ (list(mdts.keys()) + list(osts.keys())) | unique }}"
 
 - name: Remove old OST Partition
   parted:
     device: "/dev/{{ item }}"
     number: 2
     state: absent
-  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
+  loop: "{{ (list(mdts.keys()) + list(osts.keys())) | unique }}"
 
 - name: Wait for MDT partition to disappear from /dev
   wait_for:
@@ -25,7 +25,7 @@
     state: absent
     timeout: 120
     sleep: 5
-  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
+  loop: "{{ (list(mdts.keys()) + list(osts.keys())) | unique }}"
 
 - name: Wait for OST partition to disappear from /dev
   wait_for:
@@ -33,4 +33,4 @@
     state: absent
     timeout: 120
     sleep: 5
-  loop: "{{ (mdts.keys() + osts.keys()) | unique }}"
+  loop: "{{ (list(mdts.keys()) + list(osts.keys())) | unique }}"
