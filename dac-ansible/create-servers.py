@@ -89,14 +89,14 @@ slurm-cpu2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 slurm_master
 slurm_workers"""
 
-    print inventory_template % (
+    print(inventory_template % (
             servers['dac1'],
             servers['dac2'],
             servers['dac3'],
             servers['dac-etcd'],
             servers['dac-slurm-master'],
             servers['slurm-cpu1'],
-            servers['slurm-cpu2'])
+            servers['slurm-cpu2']))
 
 
 if __name__ == '__main__':
