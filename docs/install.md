@@ -45,7 +45,6 @@ https://github.com/RSE-Cambridge/data-acc/tree/v2.4/internal/pkg/config
 You need to install an etcd cluster.
 It can be installed as required via EPEL or from
 [the repository](https://www.github.com/coreos/etcd)
-But really we 
 
 To secure the communication with etcd, TLS certificates should be used.
 
@@ -118,7 +117,6 @@ You can can create this on each dacd node as follows:
 ```
 virtualenv /var/lib/data-acc/fs-ansible/.venv
 . /var/lib/data-acc/fs-ansible/.venv/bin/activate
-python --version # Ensure this is python 2
 pip install -U pip
 pip install -U ansible
 ```
