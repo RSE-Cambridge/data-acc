@@ -59,7 +59,12 @@ def main():
     servers['slurm-cpu2'] = create_server(
             conn, 'slurm-cpu2', image, flavor, network)
 
-    inventory_template = """[dac_workers]
+    inventory_template = """[all:vars]
+ansible_user=centos
+# update if you have a jump host with a floating ip
+#ansible_ssh_common_args='-C -o ControlMaster=auto -o ControlPersist=60s -o ProxyCommand="%s"'
+
+[dac_workers]
 dac1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 dac2.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
 dac3.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
@@ -90,13 +95,14 @@ slurm_master
 slurm_workers"""
 
     print(inventory_template % (
-            servers['dac1'],
-            servers['dac2'],
-            servers['dac3'],
-            servers['dac-etcd'],
-            servers['dac-slurm-master'],
-            servers['slurm-cpu1'],
-            servers['slurm-cpu2']))
+          "ssh centos@jumphostip -W %h:%p",
+          servers['dac1'],
+          servers['dac2'],
+          servers['dac3'],
+          servers['dac-etcd'],
+          servers['dac-slurm-master'],
+          servers['slurm-cpu1'],
+          servers['slurm-cpu2']))
 
 
 if __name__ == '__main__':
