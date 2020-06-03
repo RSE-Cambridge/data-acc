@@ -62,7 +62,7 @@ def main():
     inventory_template = """[all:vars]
 ansible_user=centos
 # update if you have a jump host with a floating ip
-#ansible_ssh_common_args='-C -o ControlMaster=auto -o ControlPersist=60s -o ProxyCommand="%s"'
+#ansible_ssh_common_args='-C -o ControlMaster=auto -o ControlPersist=240s -o ProxyCommand="%s"'
 
 [dac_workers]
 dac1.dac.hpc.cam.ac.uk ansible_host=%s ansible_user=centos
