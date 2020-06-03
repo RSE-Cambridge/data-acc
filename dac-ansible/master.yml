@@ -150,7 +150,7 @@
 - hosts: dac_workers:slurm_workers
   become: True
   vars:
-      lustre_release: "2.12.2"
+      lustre_release: "2.12.4"
   tasks:
     - name: enable lustre server repo
       yum_repository:
@@ -177,7 +177,7 @@
 - hosts: dac_workers:slurm_workers
   become: True
   vars:
-      lustre_release: "2.12.2"
+      lustre_release: "2.12.4"
   tasks:
     - name: Install Lustre Server
       yum:
@@ -191,7 +191,7 @@
 - hosts: dac_workers:slurm_workers
   become: True
   vars:
-      lustre_release: "2.12.2"
+      lustre_release: "2.12.4"
   tasks:
     - name: Install Lustre Client
       yum:
