@@ -2,14 +2,28 @@
 
 [![CircleCI](https://circleci.com/gh/RSE-Cambridge/data-acc.svg?style=svg&circle-token=4042ee71fb486efc320ce64b7b568afd4f9e0b38)](https://circleci.com/gh/RSE-Cambridge/data-acc)
 
-The Data Accelerator project is working to orchestrate the creation of a burst
-buffers built using commodity hardware and existing parallel file systems.
+The Data Accelerator (DAC) orchestrates the creation of burst buffers using
+commodity hardware and existing parallel file systems.
+Current focus is on creating NVMe backed Lustre file systems via
+Slurm's Burst Buffer support.
 
-The initial focus is around exposing 0.5PB of NVMe storage via the Cambridge
-University CSD3 cluster's Slurm. Currently evaluating using either Lustre 2.11
-or BeeGFS 7.
+https://rse-cambridge.github.io/data-acc/
 
-> **NOTE:** This is a work in progress!!
+The initial development focus has been on Cambridge University's Data
+Accelerator. More information on the DAC can be found here:
+
+* In June 2019 it reached #1 in the io500: https://www.vi4io.org/io500/start
+* https://www.hpc.cam.ac.uk/research/data-acc
+* The Cumulus supercomputer systems: https://www.top500.org/system/179577
+
+Currently this makes use of 24 Dell EMC R740xd nodes.
+Each contains two Intel OmniPath network adapters and 12 Intel P4600 SSDs.
+Plans are in progress to support Mellanox HDR as well as other parallel file systems.
+
+A whitepaper discussing the co-design between Cambridge, Intel, DellEMC and
+StackHPC is available here:
+https://www.dellemc.com/resources/en-us/asset/white-papers/products/ready-solutions/dell-data-accelerator-cambridge.pdf
+This provides results and configuration information.
 
 ## CSD3 Data Accelerator Deployment
 
