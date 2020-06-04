@@ -8,11 +8,12 @@ preferred.
 
 Install Ansible and the OpenStack SDK, eg in a Python virtual environment:
 
-    yum install python3-virtualenv
-    virtualenv-3 .venv
+    sudo yum install python3-pip
+    sudo pip3 install virtualenv
+    virtualenv .venv
     . .venv/bin/activate
     pip install -U pip
-    pip install -U ansible openstacksdk
+    pip install -U ansible openstacksdk openstackclient
 
 Pull in Ansible role dependencies:
 
