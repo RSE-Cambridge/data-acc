@@ -36,7 +36,7 @@ Once the Ansible has finished, you can login and try a Slurm test:
     ssh centos@<ip-of-slurm-master>
     sudo -i
     scontrol show burstbuffer
-    /usr/local/bin/data-acc/tools/slurm-test.sh
+    /usr/local/bin/data-acc-v<version>/tools/slurm-test.sh
     squeue
     scontrol show burstbuffer
 
