@@ -31,6 +31,8 @@ Plans are in progress to support Mellanox HDR as well as other parallel file sys
 A whitepaper discussing the co-design between Cambridge, Intel, DellEMC and StackHPC is available here: https://www.dellemc.com/resources/en-us/asset/white-papers/products/ready-solutions/dell-data-accelerator-cambridge.pdf
 This provides results and configuration information.
 
+For more information, please contact: dac@hpc.cam.ac.uk
+
 ## Try me in docker-compose
 
 We have a Docker Compose based Integration Test so you can try out how
