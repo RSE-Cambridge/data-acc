@@ -1,5 +1,5 @@
 ---
-- name: Create Lustre filesystem (format)
+- name: Delete Lustre filesystem
   hosts: all
   any_errors_fatal: true
   become: yes
