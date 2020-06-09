@@ -8,10 +8,12 @@ preferred.
 
 Install Ansible and the OpenStack SDK, eg in a Python virtual environment:
 
+    sudo yum install python3-pip
+    sudo pip3 install virtualenv
     virtualenv .venv
     . .venv/bin/activate
     pip install -U pip
-    pip install -U ansible openstacksdk
+    pip install -U ansible openstacksdk openstackclient
 
 Pull in Ansible role dependencies:
 
@@ -34,7 +36,7 @@ Once the Ansible has finished, you can login and try a Slurm test:
     ssh centos@<ip-of-slurm-master>
     sudo -i
     scontrol show burstbuffer
-    /usr/local/bin/data-acc/tools/slurm-test.sh
+    /usr/local/bin/data-acc-v<version>/tools/slurm-test.sh
     squeue
     scontrol show burstbuffer
 

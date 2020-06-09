@@ -56,36 +56,45 @@
       pki_dir: /home/centos/pki-dir
       pki_self_sign: True
       pki_ca:
+        expiry: '87600h'
+        pathlen: 0
         cname: ca.dac.hpc.cam.ac.uk
       pki_servers:
         - cname: dac-etcd.dac.hpc.cam.ac.uk
           include_localhost: True
+          profile: client-server
           sans:
             - dac-etcd.dac.hpc.cam.ac.uk
           altips:
             - "{{ hostvars[groups['etcd_master'][0]].ansible_host }}"
         - cname: dac1.dac.hpc.cam.ac.uk
           include_localhost: True
+          profile: client-server
           sans:
             - dac1.dac.hpc.cam.ac.uk
         - cname: dac2.dac.hpc.cam.ac.uk
           include_localhost: True
+          profile: client-server
           sans:
             - dac2.dac.hpc.cam.ac.uk
         - cname: dac3.dac.hpc.cam.ac.uk
-          include_localhost: True
+          include_localhos: True
+          profile: client-server
           sans:
             - dac3.dac.hpc.cam.ac.uk
         - cname: dac-slurm-master.dac.hpc.cam.ac.uk
           include_localhost: True
+          profile: client-server
           sans:
             - dac-slurm-master.dac.hpc.cam.ac.uk
         - cname: slurm-cpu1.dac.hpc.cam.ac.uk
           include_localhost: True
+          profile: client-server
           sans:
             - slurm-cpu1.dac.hpc.cam.ac.uk
         - cname: slurm-cpu2.dac.hpc.cam.ac.uk
           include_localhost: True
+          profile: client-server
           sans:
             - slurm-cpu2.dac.hpc.cam.ac.uk
 
@@ -141,7 +150,7 @@
 - hosts: dac_workers:slurm_workers
   become: True
   vars:
-      lustre_release: "2.12.2"
+      lustre_release: "2.12.5"
   tasks:
     - name: enable lustre server repo
       yum_repository:
@@ -168,7 +177,7 @@
 - hosts: dac_workers:slurm_workers
   become: True
   vars:
-      lustre_release: "2.12.2"
+      lustre_release: "2.12.5"
   tasks:
     - name: Install Lustre Server
       yum:
@@ -182,7 +191,7 @@
 - hosts: dac_workers:slurm_workers
   become: True
   vars:
-      lustre_release: "2.12.2"
+      lustre_release: "2.12.5"
   tasks:
     - name: Install Lustre Client
       yum:

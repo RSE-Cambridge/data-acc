@@ -26,9 +26,9 @@
     - dacd
     - dacctl
 
-- name: Install python-virtualenv
+- name: Install python3-virtualenv
   package:
-    name: python-virtualenv
+    name: python3-virtualenv
     state: present
   when: "'slurm' not in group_names"
 
@@ -36,6 +36,7 @@
   pip:
     name: ansible
     virtualenv:  "{{data_acc_install_dir}}/{{data_acc_name}}/fs-ansible/.venv"
+    virtualenv_command: "virtualenv-3"
   when: "'slurm' not in group_names"
 
 - include_tasks: systemd.yml
