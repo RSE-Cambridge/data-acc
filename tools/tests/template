@@ -1,0 +1,25 @@
+trap cleanup EXIT
+
+create_files
+submit_jobs
+wait_for_jobs
+
+# Ignore slurmstepd errors
+if [ -f $output ]; then
+  sed '/rmdir(\/sys\/fs\/cgroup/d' -i $output
+  sed '/Cannot open \/proc\/fs\/lustre/d' -i $output
+fi
+
+# Any output means error
+if [ -s $output ]; then
+  cat $output
+  exit 1
+fi
+
+if [ ! -f $scratch/$outfile ]; then
+  echo Stage out file does not exist
+  exit 1
+elif [ -s $scratch/$outfile ]; then
+  echo Stage out file is empty
+  exit 1
+fi

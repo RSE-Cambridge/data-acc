@@ -1,0 +1,6 @@
+file=bufferfile.txt
+outfile=bufferout.txt
+timeout=1h
+jobtimeout=30m
+size=2TB
+nodes=2
