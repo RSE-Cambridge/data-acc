@@ -1,3 +1,7 @@
+# Deprecated Repository
+
+**This repository is no longer maintained and it's dependancies may contain seurity bugs - you at your own risk.**
+
 # Data Accelerator
 
 [![CircleCI](https://circleci.com/gh/RSE-Cambridge/data-acc.svg?style=svg&circle-token=4042ee71fb486efc320ce64b7b568afd4f9e0b38)](https://circleci.com/gh/RSE-Cambridge/data-acc)
