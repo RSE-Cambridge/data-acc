@@ -1,6 +1,6 @@
 # Deprecated Repository
 
-**This repository is no longer maintained and it's dependancies may contain seurity bugs - you at your own risk.**
+**This repository is no longer maintained and it's dependancies may contain security bugs - you at your own risk.**
 
 # Data Accelerator
 
